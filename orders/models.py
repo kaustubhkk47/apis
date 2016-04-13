@@ -48,5 +48,18 @@ class OrderShipment(models.Model):
 
     invoice_number = models.CharField(max_length=50, blank=True)
     invoice_date = models.DateTimeField(blank=True, null=True)
-    
+
     logistics_partner = models.CharField(max_length=50, blank=True)
+
+    packaged_weight = models.DecimalField(max_digits=10, decimal_places=2)
+    packaged_length = models.DecimalField(max_digits=10, decimal_places=2)
+    packaged_breadth = models.DecimalField(max_digits=10, decimal_places=2)
+    packaged_height = models.DecimalField(max_digits=10, decimal_places=2)
+
+    remarks = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return ""
