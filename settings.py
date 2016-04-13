@@ -40,7 +40,10 @@ INSTALLED_APPS = [
 ]
 
 INSTALLED_APPS += [
-    'users'
+    'users',
+    'catalog',
+    'orders',
+    'payments'
 ]
 
 MIDDLEWARE_CLASSES = [
