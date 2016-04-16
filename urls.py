@@ -15,7 +15,12 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from urlHandlers.catalog import *
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+]
+
+urlpatterns += [
+    url(r'^categories/$', categories_details)
 ]

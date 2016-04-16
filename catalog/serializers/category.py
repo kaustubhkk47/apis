@@ -1,0 +1,18 @@
+def serialize_categories(categoriesItem):
+    category = {
+        "name": categoriesItem.name,
+        "display_name": categoriesItem.display_name,
+        "slug": categoriesItem.slug,
+        "created_at": categoriesItem.created_at,
+        "updated_at": categoriesItem.updated_at
+    }
+    return category
+
+
+def categories_parser(categoryQuerySet):
+    categories = []
+
+    for i in range(len(categoryQuerySet)):
+        categories.append(serialize_categories(categoryQuerySet[i]))
+
+    return categories
