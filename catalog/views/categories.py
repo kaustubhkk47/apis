@@ -12,7 +12,6 @@ def get_categories_details():
         categories = Category.objects.all()
         closeDBConnection()
     except Exception as e:
-    	print e
         return customResponse("4XX", {"error": "Invalid category"})
 
     return customResponse("2XX", {"categories": categories_parser(categories)})
