@@ -1,19 +1,7 @@
-from __future__ import unicode_literals
-
 from django.db import models
 
 from users.models import Seller
-
-class Category(models.Model):
-    name = models.CharField(max_length=50, blank=False)
-    display_name = models.CharField(max_length=50, blank=False)
-    slug = models.CharField(max_length=100, blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __unicode__(self):
-        return self.display_name
+from .category import Category
 
 class Product(models.Model):
     seller = models.ForeignKey(Seller)
@@ -37,7 +25,7 @@ class Product(models.Model):
 
     remarks = models.TextField()
     images = models.CommaSeparatedIntegerField(max_length=255, blank=True)
-    
+
     verification = models.BooleanField(default=False)
     show_online = models.BooleanField(default=True)
 
@@ -46,17 +34,3 @@ class Product(models.Model):
 
     def __unicode__(self):
         return self.name
-
-class ProductLot(models.Model):
-    product = models.ForeignKey(Product)
-
-    lot_size_from = models.IntegerField()
-    lot_size_to = models.IntegerField()
-
-    lot_discount = models.DecimalField(max_digits=5, decimal_places=2)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __unicode__(self):
-        return ""
