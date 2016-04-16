@@ -4,7 +4,8 @@ def serialize_categories(categoriesItem):
         "display_name": categoriesItem.display_name,
         "slug": categoriesItem.slug,
         "created_at": categoriesItem.created_at,
-        "updated_at": categoriesItem.updated_at
+        "updated_at": categoriesItem.updated_at,
+        "id": categoriesItem.id
     }
     return category
 
