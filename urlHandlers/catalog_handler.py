@@ -4,22 +4,28 @@ from catalog.views.categories import *
 from catalog.views.product import *
 
 @csrf_exempt
-def categories_details(request, categoryIds = ""):
+def categories_details(request, categoryID = ""):
 
-    
-    if request.method == "GET":
-    	categoryIds = request.GET.get("categoryIds", "")
-        return get_categories_details(categoryIds)
-    
-    return customResponse("4XX", {"error": "Invalid request"})
+	
+	if request.method == "GET":
+		categoryID = request.GET.get("categoryID", "")
+		categoriesArr = [int(e) if e.isdigit() else e for e in categoryID.split(",")]
+		if categoriesArr == ['']:
+			categoriesArr = []
+			pass
+		print categoriesArr
+		return get_categories_details(categoriesArr)
+	
+	return customResponse("4XX", {"error": "Invalid request"})
 
 
 @csrf_exempt
-def product_details(request, productIds = ""):
+def product_details(request, productID = ""):
 
-    
-    if request.method == "GET":
-    	productIds = request.GET.get("productIds", "")
-        return get_product_details(productIds)
-    
-    return customResponse("4XX", {"error": "Invalid request"})
+	
+	if request.method == "GET":
+		productID = request.GET.get("productID", "")
+		productsArr = [int(e) if e.isdigit() else e for e in productID.split(",")]
+		return get_product_details(productsArr)
+	
+	return customResponse("4XX", {"error": "Invalid request"})

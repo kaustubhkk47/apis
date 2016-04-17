@@ -14,7 +14,7 @@ def multiple_products_parser(productQuerySet):
                 "lot_id":productsItem.id
             }
 
-            products[products_hash[productsItem.product.id]]["product_lot"][productsItem.id] = productLot
+            products[products_hash[productsItem.product.id]]["product_lot"].append(productLot)
         else :
             product = {}
             product["product_id"] = productsItem.product.id
@@ -38,18 +38,12 @@ def multiple_products_parser(productQuerySet):
             product["created_at"] = productsItem.product.created_at
             product["updated_at"] = productsItem.product.updated_at
 
-            productLot = {
+            product["product_lot"] = [{
                 "lot_size_from":productsItem.lot_size_from,
                 "lot_size_to":productsItem.lot_size_to,
                 "lot_discount":productsItem.lot_discount,
                 "lot_id":productsItem.id
-            }
-
-            product["product_lot"] = {}
-
-            product["product_lot"][productsItem.id] = productLot
-
-
+            }]
 
             products.append(product)
             products_hash[productsItem.product.id] = len(products_hash)
