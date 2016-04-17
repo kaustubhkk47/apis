@@ -22,5 +22,8 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    url(r'^categories/$', categories_details)
+    url(r'^categories/$', categories_details),
+    url(r'^product/$', product_details)
 ]
+
+
