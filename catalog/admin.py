@@ -7,3 +7,4 @@ from .models.category import *
 admin.site.register(Category)
 admin.site.register(Product)
 admin.site.register(ProductLot)
+admin.site.register(ProductDetails)
