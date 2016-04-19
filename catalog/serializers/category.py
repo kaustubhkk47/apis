@@ -1,3 +1,5 @@
+import settings
+
 def serialize_categories(categoriesItem):
     category = {
         "name": categoriesItem.name,
@@ -5,7 +7,8 @@ def serialize_categories(categoriesItem):
         "slug": categoriesItem.slug,
         "created_at": categoriesItem.created_at,
         "updated_at": categoriesItem.updated_at,
-        "id": categoriesItem.id
+        "id": categoriesItem.id,
+        "url": settings.BASE_WEBAPP_URL + categoriesItem.slug + "-" + str(categoriesItem.id)
     }
     return category
 

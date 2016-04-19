@@ -12,6 +12,7 @@ class Product(models.Model):
     price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, blank=False)
     unit = models.CharField(max_length=15, blank=False)
     tax = models.DecimalField(max_digits=5, decimal_places=2)
+    max_discount = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
 
     lot_size = models.PositiveIntegerField(default=1)
     price_per_lot = models.DecimalField(max_digits=10, decimal_places=2, blank=False)

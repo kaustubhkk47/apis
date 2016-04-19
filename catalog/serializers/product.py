@@ -1,3 +1,5 @@
+from decimal import Decimal
+import settings
 
 def category_products_parser(productQuerySet):
     products = []
@@ -26,6 +28,10 @@ def category_products_parser(productQuerySet):
             product["verification"] = productsItem.product.verification
             product["show_online"] = productsItem.product.show_online
             product["slug"] = productsItem.product.slug
+            product["max_discount"] = productsItem.product.max_discount
+            discounted_price = Decimal(productsItem.product.price_per_unit)*(1-
+                productsItem.product.max_discount/100)
+            product["discounted_price_per_unit"] = '%.2f' % discounted_price
 
             product["seller_name"] = productsItem.product.seller.name
             product["seller_id"] = productsItem.product.seller.id
@@ -41,6 +47,9 @@ def category_products_parser(productQuerySet):
                 "lot_discount":productsItem.lot_discount,
                 "lot_id":productsItem.id
             }]
+            
+            product["url"] = settings.BASE_WEBAPP_URL + productsItem.product.category.slug + "-" + str(productsItem.product.category.id) + "/" + productsItem.product.slug+ "-" + str(productsItem.product.id)
+            
 
             products.append(product)
             products_hash[productsItem.product.id] = len(products_hash)
@@ -78,6 +87,10 @@ def multiple_products_parser(productQuerySet):
             product["created_at"] = productsItem.product.created_at
             product["updated_at"] = productsItem.product.updated_at
             product["slug"] = productsItem.product.slug
+            product["max_discount"] = productsItem.product.max_discount
+            discounted_price = Decimal(productsItem.product.price_per_unit)*(1-
+                productsItem.product.max_discount/100)
+            product["discounted_price_per_unit"] = '%.2f' % discounted_price
 
             product["seller_catalog_number"] = productsItem.product.productdetails.seller_catalog_number
             product["description"] = productsItem.product.productdetails.description
