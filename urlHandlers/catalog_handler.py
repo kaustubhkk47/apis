@@ -13,7 +13,7 @@ def categories_details(request, categoryID = ""):
 			categoriesArr = []
 		else:
 			categoriesArr = [int(e) if e.isdigit() else e for e in categoryID.split(",")]
-		return get_categories_details(categoriesArr)
+		return get_categories_details(request, categoriesArr)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -25,6 +25,6 @@ def product_details(request, productID = ""):
 	if request.method == "GET":
 		productID = request.GET.get("productID", "")
 		productsArr = [int(e) if e.isdigit() else e for e in productID.split(",")]
-		return get_product_details(productsArr)
+		return get_product_details(request,productsArr)
 
 	return customResponse("4XX", {"error": "Invalid request"})

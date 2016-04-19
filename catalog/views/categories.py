@@ -6,7 +6,7 @@ from ..models.productLot import ProductLot
 from ..serializers.category import categories_parser
 from ..serializers.product import category_products_parser
 
-def get_categories_details(categoriesArr = []):
+def get_categories_details(request, categoriesArr = []):
 	try:
 		if len(categoriesArr) == 0:
 			categories = Category.objects.all()

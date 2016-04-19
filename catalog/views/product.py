@@ -5,7 +5,7 @@ from ..models.product import Product
 from ..models.productLot import ProductLot
 from ..serializers.product import multiple_products_parser
 
-def get_product_details(productsArr = []):
+def get_product_details(request,productsArr = []):
 
 	try:
 		if len(productsArr) == 0:
