@@ -23,6 +23,7 @@ class Product(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    slug = models.CharField(max_length=100, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -47,11 +48,10 @@ class ProductDetails(models.Model):
     sizes = models.CharField(max_length=100, blank=True)
     special_feature = models.TextField(blank=True)
 
-    slug = models.CharField(max_length=100, blank=True)
     manufactured_country = models.CharField(max_length=50, blank=True, default="India")
     warranty = models.CharField(max_length=100, blank=True)
 
     remarks = models.TextField()
 
     def __unicode__(self):
-        return self.product
+        return self.product.name

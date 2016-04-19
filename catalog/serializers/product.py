@@ -25,12 +25,15 @@ def category_products_parser(productQuerySet):
             product["price_per_lot"] = productsItem.product.price_per_lot
             product["verification"] = productsItem.product.verification
             product["show_online"] = productsItem.product.show_online
+            product["slug"] = productsItem.product.slug
 
             product["seller_name"] = productsItem.product.seller.name
             product["seller_id"] = productsItem.product.seller.id
 
             product["category_name"] = productsItem.product.category.name
             product["category_id"] = productsItem.product.category.id
+            product["category_slug"] = productsItem.product.category.slug
+
 
             product["product_lot"] = [{
                 "lot_size_from":productsItem.lot_size_from,
@@ -74,6 +77,7 @@ def multiple_products_parser(productQuerySet):
             product["show_online"] = productsItem.product.show_online
             product["created_at"] = productsItem.product.created_at
             product["updated_at"] = productsItem.product.updated_at
+            product["slug"] = productsItem.product.slug
 
             product["seller_catalog_number"] = productsItem.product.productdetails.seller_catalog_number
             product["description"] = productsItem.product.productdetails.description
@@ -89,8 +93,6 @@ def multiple_products_parser(productQuerySet):
             product["sizes"] = productsItem.product.productdetails.sizes
             product["special_feature"] = productsItem.product.productdetails.special_feature
 
-
-            product["slug"] = productsItem.product.productdetails.slug
             product["manufactured_country"] = productsItem.product.productdetails.manufactured_country
             product["warranty"] = productsItem.product.productdetails.warranty
             product["remarks"] = productsItem.product.productdetails.remarks
@@ -100,6 +102,7 @@ def multiple_products_parser(productQuerySet):
 
             product["category_name"] = productsItem.product.category.name
             product["category_id"] = productsItem.product.category.id
+            product["category_slug"] = productsItem.product.category.slug
 
             product["product_lot"] = [{
                 "lot_size_from":productsItem.lot_size_from,
