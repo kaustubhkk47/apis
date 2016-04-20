@@ -2,8 +2,6 @@ from django.db import models
 
 from users.models.buyer import *
 from users.models.seller import *
-from users.models.buyerAddress import *
-from users.models.sellerAddress import *
 
 from .order import *
 
