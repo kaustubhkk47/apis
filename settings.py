@@ -84,9 +84,9 @@ WSGI_APPLICATION = 'wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'probzipDB',
+        'NAME': 'probzip_db',
         'USER': 'aditya',
-        'PASSWORD': 'devil_coder'
+        'PASSWORD': 'devil_coder77'
     }
 }
 
@@ -128,5 +128,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
 
-BASE_WEBAPP_URL = "http://localhost:8001/"
+STATIC_ROOT = '/home/probzip/webapps/probzip_api_static/'
+MEDIA_ROOT = '/home/probzip/webapps/probzip_api_static/media/'
+
+STATICFILES_DIRS = ('/home/probzip/webapps/probzip_api_static/static/',)
+
+BASE_WEBAPP_URL = "http://api.probzip.com/"
