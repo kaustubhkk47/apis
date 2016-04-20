@@ -11,13 +11,6 @@ class Buyer(models.Model):
     email_verification = models.BooleanField(default=False)
     gender = models.CharField(max_length=10, blank=True)
 
-    vat_number = models.CharField(max_length=20, blank=True)
-    tin_number = models.CharField(max_length=20, blank=True)
-
-    buyer_interest = models.TextField(blank = True)
-    customer_type = models.CharField(max_length=20, blank=True)
-    buying_capacity = models.CharField(max_length=20, blank=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -36,3 +29,17 @@ class BuyerAddress(models.Model):
 
     def __unicode__(self):
         return ""
+
+class BuyerDetails(models.Model):
+
+    buyer = models.OneToOneField(Buyer)
+
+    vat_number = models.CharField(max_length=20, blank=True)
+    tin_number = models.CharField(max_length=20, blank=True)
+
+    buyer_interest = models.TextField(blank = True)
+    customer_type = models.CharField(max_length=20, blank=True)
+    buying_capacity = models.CharField(max_length=20, blank=True)
+
+    def __unicode__(self):
+        return self.buyer.name

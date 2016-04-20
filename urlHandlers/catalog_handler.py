@@ -24,7 +24,10 @@ def product_details(request, productID = ""):
 
 	if request.method == "GET":
 		productID = request.GET.get("productID", "")
-		productsArr = [int(e) if e.isdigit() else e for e in productID.split(",")]
+		if productID == "":
+			productsArr = []
+		else:
+			productsArr = [int(e) if e.isdigit() else e for e in productID.split(",")]
 		return product.get_product_details(request,productsArr)
 
 	return customResponse("4XX", {"error": "Invalid request"})

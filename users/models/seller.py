@@ -28,3 +28,24 @@ class SellerAddress(models.Model):
 
     def __unicode__(self):
         return ""
+
+class SellerDetails(models.Model):
+
+    seller = models.OneToOneField(Seller)
+
+    vat_number = models.CharField(max_length=20, blank=True)
+    tin_number = models.CharField(max_length=20, blank=True)
+
+    account_holders_name = models.CharField(max_length=100)
+    account_number = models.CharField(max_length=18)
+    ifsc = models.CharField(max_length=11)
+
+    pan = models.CharField(max_length=10, blank=True, null=False)
+    name_on_pan = models.CharField(max_length=100, blank=True, null=False)
+    dob_on_pan = models.DateField(auto_now=False, auto_now_add=False, blank=True, null=True)
+
+    pan_verification = models.BooleanField(default=0, blank=False, null=False)
+    tin_verification = models.BooleanField(default=0, blank=False, null=False)
+
+    def __unicode__(self):
+        return self.seller.name

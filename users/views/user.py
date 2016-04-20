@@ -2,23 +2,21 @@ from scripts.utils import customResponse, closeDBConnection
 
 from ..models.buyer import Buyer, BuyerAddress
 from ..models.seller import Seller, SellerAddress
-from ..serializers.buyer import get_buyer_details
-from ..serializers.seller import get_seller_details
+from ..serializers.buyer import parse_buyer
+from ..serializers.seller import parse_seller
 
 def get_user_details(request):
 	try:
-		buyers = Buyer.objects.all()
-		
-		sellers = Seller.objects.all()
+		buyers = Buyer.objects.all().select_related('buyerdetails')
+		sellers = Seller.objects.all().select_related('sellerdetails')
 
-		buyer_details = get_buyer_details(buyers)
-		seller_details = get_seller_details(sellers)
+		closeDBConnection()
 
-		all_users = {
-			"buyers" : buyer_details,
-			"sellers" : seller_details
+		response = {
+			"buyers" : parse_buyer(buyers),
+			"sellers" : parse_seller(sellers)
 		}
 
-		return customResponse("2XX", {"users": all_users})
+		return customResponse("2XX", {"users": response})
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid request"})

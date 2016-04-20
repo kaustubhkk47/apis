@@ -1,62 +1,77 @@
 from decimal import Decimal
 import settings
 
-def serialize_product_lots(productsItem):
-    productLot = {
-        "lot_size_from":productsItem.lot_size_from,
-        "lot_size_to":productsItem.lot_size_to,
-        "lot_discount":productsItem.lot_discount,
-        "lot_id":productsItem.id
-    }
-    return productLot
+from ..models.productLot import ProductLot
 
-def serialize_product(productsItem, product = {}):
-    product["product_id"] = productsItem.product.id
-    product["name"] = productsItem.product.name
-    product["price_per_unit"] = productsItem.product.price_per_unit
-    product["tax"] = productsItem.product.tax
-    product["lot_size"] = productsItem.product.lot_size
-    product["price_per_lot"] = productsItem.product.price_per_lot
-    product["verification"] = productsItem.product.verification
-    product["show_online"] = productsItem.product.show_online
-    product["created_at"] = productsItem.product.created_at
-    product["updated_at"] = productsItem.product.updated_at
-    product["slug"] = productsItem.product.slug
-    product["max_discount"] = productsItem.product.max_discount
-    discounted_price = Decimal(productsItem.product.price_per_unit)*(1-
-        productsItem.product.max_discount/100)
+def serialize_product_lots(productsItem):
+
+    productLotsQuerySet = ProductLot.objects.filter(product__id = productsItem.id)
+
+    productLots = []
+
+    for productLot in productLotsQuerySet:
+
+        productLotEntry = {
+            "lot_size_from":productLot.lot_size_from,
+            "lot_size_to":productLot.lot_size_to,
+            "lot_discount":productLot.lot_discount,
+            "lot_id":productLot.id
+        }
+
+        productLots.append(productLotEntry)
+
+    return productLots
+
+def serialize_product(productsItem):
+
+    product = {}
+
+    product["product_id"] = productsItem.id
+    product["name"] = productsItem.name
+    product["price_per_unit"] = productsItem.price_per_unit
+    product["tax"] = productsItem.tax
+    product["lot_size"] = productsItem.lot_size
+    product["price_per_lot"] = productsItem.price_per_lot
+    product["verification"] = productsItem.verification
+    product["show_online"] = productsItem.show_online
+    product["created_at"] = productsItem.created_at
+    product["updated_at"] = productsItem.updated_at
+    product["slug"] = productsItem.slug
+    product["max_discount"] = productsItem.max_discount
+    discounted_price = Decimal(productsItem.price_per_unit)*(1-
+        productsItem.max_discount/100)
     product["discounted_price_per_unit"] = '%.2f' % discounted_price
 
-    product["seller_name"] = productsItem.product.seller.name
-    product["seller_id"] = productsItem.product.seller.id
+    product["seller_name"] = productsItem.seller.name
+    product["seller_id"] = productsItem.seller.id
 
-    product["category_name"] = productsItem.product.category.name
-    product["category_id"] = productsItem.product.category.id
-    product["category_slug"] = productsItem.product.category.slug
+    product["category_name"] = productsItem.category.name
+    product["category_id"] = productsItem.category.id
+    product["category_slug"] = productsItem.category.slug
 
-    product["product_lot"] = [serialize_product_lots(productsItem)]
+    product["product_lot"] = serialize_product_lots(productsItem)
             
     return product
 
 def serialize_product_details(productsItem, product):
 
-    product["seller_catalog_number"] = productsItem.product.productdetails.seller_catalog_number
-    product["description"] = productsItem.product.productdetails.description
-    product["brand"] = productsItem.product.productdetails.brand
-    product["pattern"] = productsItem.product.productdetails.pattern
-    product["style"] = productsItem.product.productdetails.style
-    product["gsm"] = productsItem.product.productdetails.gsm
-    product["sleeve"] = productsItem.product.productdetails.sleeve
-    product["neck_collar_type"] = productsItem.product.productdetails.neck_collar_type
-    product["length"] = productsItem.product.productdetails.length
-    product["work_decoration_type"] = productsItem.product.productdetails.work_decoration_type
-    product["colours"] = productsItem.product.productdetails.colours
-    product["sizes"] = productsItem.product.productdetails.sizes
-    product["special_feature"] = productsItem.product.productdetails.special_feature
+    product["seller_catalog_number"] = productsItem.productdetails.seller_catalog_number
+    product["description"] = productsItem.productdetails.description
+    product["brand"] = productsItem.productdetails.brand
+    product["pattern"] = productsItem.productdetails.pattern
+    product["style"] = productsItem.productdetails.style
+    product["gsm"] = productsItem.productdetails.gsm
+    product["sleeve"] = productsItem.productdetails.sleeve
+    product["neck_collar_type"] = productsItem.productdetails.neck_collar_type
+    product["length"] = productsItem.productdetails.length
+    product["work_decoration_type"] = productsItem.productdetails.work_decoration_type
+    product["colours"] = productsItem.productdetails.colours
+    product["sizes"] = productsItem.productdetails.sizes
+    product["special_feature"] = productsItem.productdetails.special_feature
 
-    product["manufactured_country"] = productsItem.product.productdetails.manufactured_country
-    product["warranty"] = productsItem.product.productdetails.warranty
-    product["remarks"] = productsItem.product.productdetails.remarks
+    product["manufactured_country"] = productsItem.productdetails.manufactured_country
+    product["warranty"] = productsItem.productdetails.warranty
+    product["remarks"] = productsItem.productdetails.remarks
 
     return product
             
@@ -65,42 +80,21 @@ def category_products_parser(productQuerySet):
     products = []
     products_hash = {}
 
-    for i in range(len(productQuerySet)):
-        productsItem = productQuerySet[i]
+    for productsItem in productQuerySet:
 
-        if productsItem.product.id in products_hash:
-            productLot = serialize_product_lots(productsItem)
-
-            products[products_hash[productsItem.product.id]]["product_lot"].append(productLot)
-        else :
-            product = serialize_product(productsItem = productsItem)
-
-            product["url"] = settings.BASE_WEBAPP_URL + productsItem.product.category.slug + "-" + str(productsItem.product.category.id) + "/" + productsItem.product.slug+ "-" + str(productsItem.product.id)
-
-            products.append(product)
-            products_hash[productsItem.product.id] = len(products_hash)
+        product = serialize_product(productsItem)
+        product["url"] = settings.BASE_WEBAPP_URL + productsItem.category.slug + "-" + str(productsItem.category.id) + "/" + productsItem.slug+ "-" + str(productsItem.id)
+        products.append(product)
 
     return products
 
 
 def multiple_products_parser(productQuerySet):
     products = []
-    products_hash = {}
-
-    for i in range(len(productQuerySet)):
-        productsItem = productQuerySet[i]
-
-        if productsItem.product.id in products_hash:
-
-            productLot = serialize_product_lots(productsItem)
-
-            products[products_hash[productsItem.product.id]]["product_lot"].append(productLot)
-        else :
-            product = serialize_product(productsItem = productsItem)
-
-            product = serialize_product_details(productsItem, product)
-
-            products.append(product)
-            products_hash[productsItem.product.id] = len(products_hash)
+    for productsItem in productQuerySet:
+        
+        product = serialize_product(productsItem)
+        product = serialize_product_details(productsItem, product)
+        products.append(product)
 
     return products

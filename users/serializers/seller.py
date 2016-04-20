@@ -2,10 +2,9 @@ from ..models.seller import SellerAddress
 
 def serialize_seller(seller_entry):
 
-    seller_addresses_set = SellerAddress.objects.filter(seller_id = seller_entry.id)
+    seller_addresses_queryset = SellerAddress.objects.filter(seller__id = seller_entry.id)
 
-    seller_addresses = serialize_seller_addresses(seller_addresses_set)
-
+    seller_addresses = serialize_seller_addresses(seller_addresses_queryset)
 
     seller = {
         "name" : seller_entry.name,
@@ -18,17 +17,28 @@ def serialize_seller(seller_entry):
         "email_verification" : seller_entry.email_verification,
         "created_at" : seller_entry.created_at,
         "updated_at" : seller_entry.updated_at,
-        "addresses" : seller_addresses
+        "address" : seller_addresses,
+
+        "vat_number" : seller_entry.sellerdetails.vat_number,
+        "tin_number" : seller_entry.sellerdetails.tin_number,
+        "account_holders_name" : seller_entry.sellerdetails.account_holders_name,
+        "account_number" : seller_entry.sellerdetails.account_number,
+        "ifsc" : seller_entry.sellerdetails.ifsc,
+        "pan" : seller_entry.sellerdetails.pan,
+        "name_on_pan" : seller_entry.sellerdetails.name_on_pan,
+        "dob_on_pan" : seller_entry.sellerdetails.dob_on_pan,
+        "pan_verification" : seller_entry.sellerdetails.pan_verification,
+        "tin_verification" : seller_entry.sellerdetails.tin_verification
     }
 
     return seller
 
 
-def serialize_seller_addresses(seller_addresses_set):
+def serialize_seller_addresses(seller_addresses_queryset):
 
     seller_addresses =[]
 
-    for seller_address in seller_addresses_set:
+    for seller_address in seller_addresses_queryset:
 
         seller_address_entry = {
             "address" : seller_address.address,
@@ -43,12 +53,11 @@ def serialize_seller_addresses(seller_addresses_set):
 
     return seller_addresses
 
-def get_seller_details(seller_set):
+def parse_seller(seller_queryset):
 
     sellers = []
 
-    for seller in seller_set:
-
+    for seller in seller_queryset:
         seller_entry = serialize_seller(seller)
         sellers.append(seller_entry)
 

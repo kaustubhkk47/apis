@@ -1,11 +1,15 @@
 from django.contrib import admin
 
-from .models import buyer
-from .models import seller
-from .models import internalUser
+from .models.buyer import *
+from .models.seller import *
+from .models.internalUser import *
 
-admin.site.register(buyer.Buyer)
-admin.site.register(seller.Seller)
-admin.site.register(internalUser.InternalUser)
-admin.site.register(buyer.BuyerAddress)
-admin.site.register(seller.SellerAddress)
+admin.site.register(Buyer)
+admin.site.register(BuyerAddress)
+admin.site.register(BuyerDetails)
+
+admin.site.register(Seller)
+admin.site.register(SellerAddress)
+admin.site.register(SellerDetails)
+
+admin.site.register(InternalUser)
