@@ -6,7 +6,6 @@ from catalog.views.product import *
 @csrf_exempt
 def categories_details(request, categoryID = ""):
 
-
 	if request.method == "GET":
 		categoryID = request.GET.get("categoryID", "")
 		if categoryID == "":
@@ -20,7 +19,6 @@ def categories_details(request, categoryID = ""):
 
 @csrf_exempt
 def product_details(request, productID = ""):
-
 
 	if request.method == "GET":
 		productID = request.GET.get("productID", "")
