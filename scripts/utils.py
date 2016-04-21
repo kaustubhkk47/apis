@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.db import connection
+import datetime
 
 def closeDBConnection():
     connection.close()
@@ -17,3 +18,11 @@ def convert_keys_to_string(dictionary):
         return dictionary
     return dict((str(k), convert_keys_to_string(v))
         for k, v in dictionary.items())
+
+def validate_date_time(date_text):
+    try:
+        datetime.datetime.strptime(date_text, '%Y-%m-%d')
+    except ValueError:
+        return False
+
+    return True
