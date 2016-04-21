@@ -9,15 +9,17 @@ def get_product_details(request,productsArr = []):
 
 	try:
 		if len(productsArr) == 0:
-			return customResponse("4XX", {"error": "Specify product id"})
-		elif len(productsArr) == 1:
-			products = ProductLot.objects.filter(product__id=productsArr[0]).select_related('product','product__category','product__seller','product__productdetails').order_by('product__id','lot_size_from')
+			products = Product.objects.all().select_related('seller','productdetails','category')
 			closeDBConnection()
-			return customResponse("2XX", {"products": multiple_products_parser(products)})
 		else:
-			products = ProductLot.objects.filter(product__id__in=productsArr).select_related('product','product__category','product__seller','product__productdetails').order_by('product__id','lot_size_from')
+			products = Product.objects.filter(id__in=productsArr).select_related('seller','productdetails','category')
 			closeDBConnection()
-			return customResponse("2XX", {"products": multiple_products_parser(products)})
 
+		response = multiple_products_parser(products)
+		statusCode = "2XX"
+		body = {"products": response}
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid product"})
+		statusCode = "4XX"
+		body = {"error": "Invalid product"}
+
+	return customResponse(statusCode, body)
