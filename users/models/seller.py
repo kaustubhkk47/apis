@@ -25,6 +25,7 @@ class SellerAddress(models.Model):
     state = models.CharField(max_length=50, blank=True)
     country = models.CharField(max_length=50, blank=True, default="India")
     contact_number = models.CharField(max_length=11, blank=True)
+    pincode = models.CharField(max_length=6, blank=True)
 
     def __unicode__(self):
         return ""
@@ -33,8 +34,8 @@ class SellerDetails(models.Model):
 
     seller = models.OneToOneField(Seller)
 
-    vat_number = models.CharField(max_length=20, blank=True)
-    tin_number = models.CharField(max_length=20, blank=True)
+    vat_tin = models.CharField(max_length=20, blank=True)
+    cst = models.CharField(max_length=20, blank=True)
 
     account_holders_name = models.CharField(max_length=100)
     account_number = models.CharField(max_length=18)
