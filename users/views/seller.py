@@ -5,6 +5,7 @@ from ..serializers.seller import parse_seller
 def get_seller_details(request,sellersArr=[]):
 	try:
 		if len(sellersArr)==0:
+
 			sellers = Seller.objects.filter(delete_status=False).select_related('sellerdetails')
 			closeDBConnection()
 		else:

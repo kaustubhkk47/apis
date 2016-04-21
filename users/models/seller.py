@@ -30,7 +30,7 @@ class SellerAddress(models.Model):
     pincode = models.CharField(max_length=6, blank=True)
 
     def __unicode__(self):
-        return ""
+        return self.seller.name
 
 class SellerDetails(models.Model):
 
@@ -39,16 +39,28 @@ class SellerDetails(models.Model):
     vat_tin = models.CharField(max_length=20, blank=True)
     cst = models.CharField(max_length=20, blank=True)
 
-    account_holders_name = models.CharField(max_length=100)
-    account_number = models.CharField(max_length=18)
-    ifsc = models.CharField(max_length=11)
-
     pan = models.CharField(max_length=10, blank=True, null=False)
     name_on_pan = models.CharField(max_length=100, blank=True, null=False)
     dob_on_pan = models.DateField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
     pan_verification = models.BooleanField(default=0, blank=False, null=False)
     tin_verification = models.BooleanField(default=0, blank=False, null=False)
+
+    def __unicode__(self):
+        return self.seller.name
+
+class SellerBankDetails(models.Model):
+
+    seller = models.ForeignKey(Seller)
+
+    account_holders_name = models.CharField(max_length=100, blank=True)
+    account_number = models.CharField(max_length=18, blank=True)
+    ifsc = models.CharField(max_length=11, blank=True)
+    bank_name = models.CharField(max_length=50, blank=True)
+
+    branch  = models.CharField(max_length=200, blank=True)
+    branch_city = models.CharField(max_length=50, blank=True)
+    branch_pincode = models.CharField(max_length=6, blank=True)
 
     def __unicode__(self):
         return self.seller.name
