@@ -23,7 +23,7 @@ def serialize_seller(seller_entry):
         "address" : seller_addresses,
         "bank_details" : seller_bankdetails
     }
-
+    
     if hasattr(seller_entry,'sellerdetails'):
         seller_details = {}
         seller_details["detailsID"] = seller_entry.sellerdetails.id
@@ -74,9 +74,9 @@ def serialize_seller_addresses(seller_addresses_queryset):
     return seller_addresses
 
 def serialize_seller_bankdetails(seller_bankdetails_queryset):
-
+    
     seller_bankdetails =[]
-
+    
     if len(seller_bankdetails_queryset) == 0:
         seller_bankdetails_entry = {
             "bankdetailsID" : None,
@@ -89,9 +89,9 @@ def serialize_seller_bankdetails(seller_bankdetails_queryset):
             "branch_pincode" : None
         }
         seller_bankdetails.append(seller_bankdetails_entry)
-
+    
     for seller_bankdetail in seller_bankdetails_queryset:
-
+        
         seller_bankdetails_entry = {
             "bankdetailsID" : seller_bankdetail.id,
             "account_holders_name" : seller_bankdetail.account_holders_name,
@@ -103,7 +103,7 @@ def serialize_seller_bankdetails(seller_bankdetails_queryset):
             "branch_pincode" : seller_bankdetail.branch_pincode
         }
 
-        seller_bankdetails.append(seller_address_entry)
+        seller_bankdetails.append(seller_bankdetails_entry)
 
     return seller_bankdetails
 
