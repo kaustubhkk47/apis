@@ -2,6 +2,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from catalog.views import categories
 from catalog.views import product
+from scripts.utils import customResponse
 
 @csrf_exempt
 def categories_details(request, categoryID = ""):
