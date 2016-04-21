@@ -15,15 +15,17 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from urlHandlers.catalog_handler import *
+from urlHandlers import catalog_handler, user_handler
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
 ]
 
 urlpatterns += [
-    url(r'^category/$', categories_details),
-    url(r'^product/$', product_details)
+    url(r'^category/$', catalog_handler.categories_details),
+    url(r'^products/$', catalog_handler.product_details)
 ]
 
-
+urlpatterns += [
+    url(r'^users/$', user_handler.user_details)
+]
