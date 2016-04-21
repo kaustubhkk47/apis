@@ -24,6 +24,7 @@ def serialize_seller(seller_entry):
 
     if hasattr(seller_entry,'sellerdetails'):
         seller_details = {}
+        seller_details["detailsID"] = seller_entry.sellerdetails.id
         seller_details["vat_tin"] = seller_entry.sellerdetails.vat_tin
         seller_details["cst"] = seller_entry.sellerdetails.cst
         seller_details["account_holders_name"] = seller_entry.sellerdetails.account_holders_name
@@ -60,6 +61,7 @@ def serialize_seller_addresses(seller_addresses_queryset):
     for seller_address in seller_addresses_queryset:
 
         seller_address_entry = {
+            "addressID" : seller_address.id,
             "address" : seller_address.address,
             "landmark" : seller_address.landmark,
             "city" : seller_address.city,
