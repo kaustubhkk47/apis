@@ -17,19 +17,22 @@ def serialize_seller(seller_entry):
         "email_verification" : seller_entry.email_verification,
         "created_at" : seller_entry.created_at,
         "updated_at" : seller_entry.updated_at,
-        "address" : seller_addresses,
-
-        "vat_number" : seller_entry.sellerdetails.vat_number,
-        "tin_number" : seller_entry.sellerdetails.tin_number,
-        "account_holders_name" : seller_entry.sellerdetails.account_holders_name,
-        "account_number" : seller_entry.sellerdetails.account_number,
-        "ifsc" : seller_entry.sellerdetails.ifsc,
-        "pan" : seller_entry.sellerdetails.pan,
-        "name_on_pan" : seller_entry.sellerdetails.name_on_pan,
-        "dob_on_pan" : seller_entry.sellerdetails.dob_on_pan,
-        "pan_verification" : seller_entry.sellerdetails.pan_verification,
-        "tin_verification" : seller_entry.sellerdetails.tin_verification
+        "address" : seller_addresses
     }
+
+
+    if hasattr(seller_entry,'sellerdetails'):
+        seller["vat_tin"] = seller_entry.sellerdetails.vat_tin
+        seller["cst"] = seller_entry.sellerdetails.cst
+        seller["account_holders_name"] = seller_entry.sellerdetails.account_holders_name
+        seller["account_number"] = seller_entry.sellerdetails.account_number
+        seller["ifsc"] = seller_entry.sellerdetails.ifsc
+        seller["pan"] = seller_entry.sellerdetails.pan
+        seller["name_on_pan"] = seller_entry.sellerdetails.name_on_pan
+        seller["dob_on_pan"] = seller_entry.sellerdetails.dob_on_pan
+        seller["pan_verification"] = seller_entry.sellerdetails.pan_verification
+        seller["tin_verification"] = seller_entry.sellerdetails.tin_verification
+
 
     return seller
 
@@ -37,6 +40,18 @@ def serialize_seller(seller_entry):
 def serialize_seller_addresses(seller_addresses_queryset):
 
     seller_addresses =[]
+
+    if len(seller_addresses_queryset) == 0:
+        seller_address_entry = {
+            "address" : None,
+            "landmark" : None,
+            "city" : None,
+            "state" : None,
+            "country" : None,
+            "contact_number" : None,
+            "pincode" : None
+        }
+        seller_addresses.append(seller_address_entry)
 
     for seller_address in seller_addresses_queryset:
 
@@ -46,7 +61,8 @@ def serialize_seller_addresses(seller_addresses_queryset):
             "city" : seller_address.city,
             "state" : seller_address.state,
             "country" : seller_address.country,
-            "contact_number" : seller_address.contact_number
+            "contact_number" : seller_address.contact_number,
+            "pincode" : seller_address.pincode
         }
 
         seller_addresses.append(seller_address_entry)

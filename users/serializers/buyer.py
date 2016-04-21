@@ -1,4 +1,4 @@
-from ..models.buyer import BuyerAddress
+from ..models.buyer import BuyerAddress, BuyerDetails
 
 def serialize_buyer(buyer_entry):
 
@@ -18,14 +18,17 @@ def serialize_buyer(buyer_entry):
         "gender" : buyer_entry.gender,
         "created_at" : buyer_entry.created_at,
         "updated_at" : buyer_entry.updated_at,
-        "address" : buyer_addresses,
-
-        "vat_number" : buyer_entry.buyerdetails.vat_number,
-        "tin_number" : buyer_entry.buyerdetails.tin_number,
-        "buyer_interest" : buyer_entry.buyerdetails.buyer_interest,
-        "customer_type" : buyer_entry.buyerdetails.customer_type,
-        "buying_capacity" : buyer_entry.buyerdetails.buying_capacity
+        "address" : buyer_addresses
     }
+    
+    
+    if hasattr(buyer_entry,'buyerdetails'):
+        buyer["vat_tin"] = buyer_entry.buyerdetails.vat_tin
+        buyer["cst"] = buyer_entry.buyerdetails.cst
+        buyer["buyer_interest"] = buyer_entry.buyerdetails.buyer_interest
+        buyer["customer_type"] = buyer_entry.buyerdetails.customer_type
+        buyer["buying_capacity"] = buyer_entry.buyerdetails.buying_capacity
+    
 
     return buyer
 
@@ -33,6 +36,19 @@ def serialize_buyer(buyer_entry):
 def serialize_buyer_addresses(buyer_addresses_queryset):
 
     buyer_addresses =[]
+    
+
+    if len(buyer_addresses_queryset) == 0:
+        buyer_address_entry = {
+            "address" : None,
+            "landmark" : None,
+            "city" : None,
+            "state" : None,
+            "country" : None,
+            "contact_number" : None,
+            "pincode" : None
+        }
+        buyer_addresses.append(buyer_address_entry)
 
     for buyer_address in buyer_addresses_queryset:
 
@@ -42,7 +58,8 @@ def serialize_buyer_addresses(buyer_addresses_queryset):
             "city" : buyer_address.city,
             "state" : buyer_address.state,
             "country" : buyer_address.country,
-            "contact_number" : buyer_address.contact_number
+            "contact_number" : buyer_address.contact_number,
+            "pincode" : buyer_address.pincode
         }
 
         buyer_addresses.append(buyer_address_entry)

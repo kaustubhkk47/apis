@@ -26,6 +26,7 @@ class BuyerAddress(models.Model):
     state = models.CharField(max_length=50, blank=True)
     country = models.CharField(max_length=50, blank=True, default="India")
     contact_number = models.CharField(max_length=11, blank=True)
+    pincode = models.CharField(max_length=6, blank=True)
 
     def __unicode__(self):
         return ""
@@ -34,8 +35,8 @@ class BuyerDetails(models.Model):
 
     buyer = models.OneToOneField(Buyer)
 
-    vat_number = models.CharField(max_length=20, blank=True)
-    tin_number = models.CharField(max_length=20, blank=True)
+    vat_tin = models.CharField(max_length=20, blank=True)
+    cst = models.CharField(max_length=20, blank=True)
 
     buyer_interest = models.TextField(blank = True)
     customer_type = models.CharField(max_length=20, blank=True)
