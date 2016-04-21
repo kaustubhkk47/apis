@@ -27,5 +27,7 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-    url(r'^users/$', user_handler.user_details)
+    url(r'^users/$', user_handler.user_details),
+    url(r'^users/buyer/$', user_handler.buyer_details),
+    url(r'^users/seller/$', user_handler.seller_details)
 ]
