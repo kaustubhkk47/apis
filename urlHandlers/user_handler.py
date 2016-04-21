@@ -1,6 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 
 from users.views import user, buyer, seller
+from scripts.utils import customResponse
 
 @csrf_exempt
 def user_details(request):
@@ -22,6 +23,8 @@ def buyer_details(request, buyerID = ""):
 		return buyer.get_buyer_details(request,buyersArr)
 	elif request.method == "POST":
 		return buyer.post_new_buyer(request)
+	elif request.method == "PUT":
+		return buyer.update_buyer(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})	
 
