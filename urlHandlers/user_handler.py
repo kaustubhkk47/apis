@@ -20,6 +20,8 @@ def buyer_details(request, buyerID = ""):
 		else:
 			buyersArr = [int(e) if e.isdigit() else e for e in buyerID.split(",")]
 		return buyer.get_buyer_details(request,buyersArr)
+	elif request.method == "POST":
+		return buyer.post_new_buyer(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})	
 

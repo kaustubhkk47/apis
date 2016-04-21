@@ -7,6 +7,7 @@ def serialize_seller(seller_entry):
     seller_addresses = serialize_seller_addresses(seller_addresses_queryset)
 
     seller = {
+        "id" : seller_entry.id,
         "name" : seller_entry.name,
         "company_name" : seller_entry.company_name,
         "mobile_number" : seller_entry.mobile_number,
@@ -22,16 +23,19 @@ def serialize_seller(seller_entry):
 
 
     if hasattr(seller_entry,'sellerdetails'):
-        seller["vat_tin"] = seller_entry.sellerdetails.vat_tin
-        seller["cst"] = seller_entry.sellerdetails.cst
-        seller["account_holders_name"] = seller_entry.sellerdetails.account_holders_name
-        seller["account_number"] = seller_entry.sellerdetails.account_number
-        seller["ifsc"] = seller_entry.sellerdetails.ifsc
-        seller["pan"] = seller_entry.sellerdetails.pan
-        seller["name_on_pan"] = seller_entry.sellerdetails.name_on_pan
-        seller["dob_on_pan"] = seller_entry.sellerdetails.dob_on_pan
-        seller["pan_verification"] = seller_entry.sellerdetails.pan_verification
-        seller["tin_verification"] = seller_entry.sellerdetails.tin_verification
+        seller_details = {}
+        seller_details["vat_tin"] = seller_entry.sellerdetails.vat_tin
+        seller_details["cst"] = seller_entry.sellerdetails.cst
+        seller_details["account_holders_name"] = seller_entry.sellerdetails.account_holders_name
+        seller_details["account_number"] = seller_entry.sellerdetails.account_number
+        seller_details["ifsc"] = seller_entry.sellerdetails.ifsc
+        seller_details["pan"] = seller_entry.sellerdetails.pan
+        seller_details["name_on_pan"] = seller_entry.sellerdetails.name_on_pan
+        seller_details["dob_on_pan"] = seller_entry.sellerdetails.dob_on_pan
+        seller_details["pan_verification"] = seller_entry.sellerdetails.pan_verification
+        seller_details["tin_verification"] = seller_entry.sellerdetails.tin_verification
+
+        seller["details"] = seller_details
 
 
     return seller

@@ -1,5 +1,8 @@
 from django.db import models
 
+
+## Whenever making any changes, add fields to models, serializers and validation
+
 class Buyer(models.Model):
     name = models.CharField(max_length=200, blank=True)
     company_name = models.CharField(max_length=200, blank=True)
@@ -41,6 +44,8 @@ class BuyerDetails(models.Model):
     buyer_interest = models.TextField(blank = True)
     customer_type = models.CharField(max_length=20, blank=True)
     buying_capacity = models.CharField(max_length=20, blank=True)
+    buys_from = models.CharField(max_length=20, blank=True)
+    purchasing_states = models.TextField(blank = True)
 
     def __unicode__(self):
         return self.buyer.name

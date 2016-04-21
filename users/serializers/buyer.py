@@ -7,6 +7,7 @@ def serialize_buyer(buyer_entry):
     buyer_addresses = serialize_buyer_addresses(buyer_addresses_queryset)
 
     buyer = {
+        "id" : buyer_entry.id,
         "name" : buyer_entry.name,
         "company_name" : buyer_entry.company_name,
         "mobile_number" : buyer_entry.mobile_number,
@@ -23,12 +24,16 @@ def serialize_buyer(buyer_entry):
     
     
     if hasattr(buyer_entry,'buyerdetails'):
-        buyer["vat_tin"] = buyer_entry.buyerdetails.vat_tin
-        buyer["cst"] = buyer_entry.buyerdetails.cst
-        buyer["buyer_interest"] = buyer_entry.buyerdetails.buyer_interest
-        buyer["customer_type"] = buyer_entry.buyerdetails.customer_type
-        buyer["buying_capacity"] = buyer_entry.buyerdetails.buying_capacity
-    
+        buyer_details = {}
+        buyer_details["vat_tin"] = buyer_entry.buyerdetails.vat_tin
+        buyer_details["cst"] = buyer_entry.buyerdetails.cst
+        buyer_details["buyer_interest"] = buyer_entry.buyerdetails.buyer_interest
+        buyer_details["customer_type"] = buyer_entry.buyerdetails.customer_type
+        buyer_details["buying_capacity"] = buyer_entry.buyerdetails.buying_capacity
+        buyer_details["buys_from"] = buyer_entry.buyerdetails.buys_from
+        buyer_details["purchasing_states"] = buyer_entry.buyerdetails.purchasing_states
+
+        buyer["details"] = buyer_details
 
     return buyer
 
@@ -36,7 +41,6 @@ def serialize_buyer(buyer_entry):
 def serialize_buyer_addresses(buyer_addresses_queryset):
 
     buyer_addresses =[]
-    
 
     if len(buyer_addresses_queryset) == 0:
         buyer_address_entry = {
