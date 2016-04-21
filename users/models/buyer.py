@@ -1,6 +1,5 @@
 from django.db import models
 
-
 ## Whenever making any changes, add fields to models, serializers and validation
 
 class Buyer(models.Model):
@@ -32,10 +31,9 @@ class BuyerAddress(models.Model):
     pincode = models.CharField(max_length=6, blank=True)
 
     def __unicode__(self):
-        return ""
+        return self.address
 
 class BuyerDetails(models.Model):
-
     buyer = models.OneToOneField(Buyer)
 
     vat_tin = models.CharField(max_length=20, blank=True)
