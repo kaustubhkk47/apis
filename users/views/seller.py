@@ -5,10 +5,10 @@ from ..serializers.seller import parse_seller
 def get_seller_details(request,sellersArr=[]):
 	try:
 		if len(sellersArr)==0:
-			sellers = Seller.objects.all().select_related('sellerdetails')
+			sellers = Seller.objects.filter(delete_status=False).select_related('sellerdetails')
 			closeDBConnection()
 		else:
-			sellers = Seller.objects.filter(id__in=sellersArr).select_related('sellerdetails')
+			sellers = Seller.objects.filter(delete_status=False,id__in=sellersArr).select_related('sellerdetails')
 			closeDBConnection()
 
 		response = {

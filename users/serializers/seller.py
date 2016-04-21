@@ -7,7 +7,7 @@ def serialize_seller(seller_entry):
     seller_addresses = serialize_seller_addresses(seller_addresses_queryset)
 
     seller = {
-        "id" : seller_entry.id,
+        "sellerID" : seller_entry.id,
         "name" : seller_entry.name,
         "company_name" : seller_entry.company_name,
         "mobile_number" : seller_entry.mobile_number,

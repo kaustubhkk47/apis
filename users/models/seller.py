@@ -13,6 +13,8 @@ class Seller(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    delete_status = models.BooleanField(default=False)
+
     def __unicode__(self):
         return self.company_name
 

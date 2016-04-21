@@ -2,16 +2,16 @@ from scripts.utils import customResponse, closeDBConnection, convert_keys_to_str
 import json
 
 from ..models.buyer import Buyer, BuyerAddress, BuyerDetails
-from ..serializers.buyer import serialize_buyer
+from ..serializers.buyer import serialize_buyer, parse_buyer
 
 
 def get_buyer_details(request,buyersArr=[]):
 	try:
 		if len(buyersArr)==0:
-			buyers = Buyer.objects.all().select_related('buyerdetails')
+			buyers = Buyer.objects.filter(delete_status=False).select_related('buyerdetails')
 			closeDBConnection()
 		else:
-			buyers = Buyer.objects.filter(id__in=buyersArr).select_related('buyerdetails')
+			buyers = Buyer.objects.filter(delete_status=False,id__in=buyersArr).select_related('buyerdetails')
 			closeDBConnection()
 
 
@@ -155,6 +155,32 @@ def update_buyer(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer": serialize_buyer(buyerPtr)})
 
+def delete_buyer(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer) or not "buyerID" in buyer or not buyer["buyerID"]:
+		return customResponse("4XX", {"error": "Id for buyer not sent"})
+
+	buyerPtr = Buyer.objects.filter(id=int(buyer["buyerID"]))
+
+	if len(buyerPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
+
+	buyerPtr = buyerPtr[0]
+
+	try:
+		buyerPtr.delete_status = True
+		buyerPtr.save()
+	except Exception as e:
+		closeDBConnection()
+		return customResponse("4XX", {"error": "could not delete"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer": "buyer deleted"})
 
 def validateBuyerData(buyer, oldbuyer):
 
