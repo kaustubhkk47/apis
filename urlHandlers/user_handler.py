@@ -25,6 +25,8 @@ def buyer_details(request, buyerID = ""):
 		return buyer.post_new_buyer(request)
 	elif request.method == "PUT":
 		return buyer.update_buyer(request)
+	elif request.method == "DELETE":
+		return buyer.delete_buyer(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})	
 
