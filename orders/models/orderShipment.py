@@ -7,8 +7,6 @@ from .order import *
 
 class OrderShipment(models.Model):
     order = models.ForeignKey(Order)
-    seller = models.ForeignKey(Seller)
-    buyer = models.ForeignKey(Buyer)
 
     pickup = models.ForeignKey(SellerAddress)
     drop = models.ForeignKey(BuyerAddress)

@@ -9,11 +9,11 @@ from ..serializers.product import category_products_parser
 def get_categories_details(request, categoriesArr = []):
 	try:
 		if len(categoriesArr) == 0:
-			categories = Category.objects.all()
+			categories = Category.objects.filter(delete_status=False)
 			closeDBConnection()
 			return customResponse("2XX", {"categories": categories_parser(categories)})
 		else:
-			categoriesWithProducts = Product.objects.filter(category__id__in=categoriesArr).select_related('category','seller')
+			categoriesWithProducts = Product.objects.filter(category__id__in=categoriesArr,delete_status=False,seller__delete_staus=False,category__delete_status=False).select_related('category','seller')
 			closeDBConnection()
 			return customResponse("2XX", {"products": category_products_parser(categoriesWithProducts)})
 
