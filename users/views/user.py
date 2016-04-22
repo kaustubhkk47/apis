@@ -7,8 +7,8 @@ from ..serializers.seller import parse_seller
 
 def get_user_details(request):
 	try:
-		buyers = Buyer.objects.all().select_related('buyerdetails')
-		sellers = Seller.objects.all().select_related('sellerdetails')
+		buyers = Buyer.objects.filter(delete_status=False).select_related('buyerdetails')
+		sellers = Seller.objects.filter(delete_status=False).select_related('sellerdetails')
 
 		closeDBConnection()
 

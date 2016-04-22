@@ -1,13 +1,15 @@
-from ..models.seller import SellerAddress
+from ..models.seller import SellerAddress, SellerBankDetails
 
 def serialize_seller(seller_entry):
-
+    
     seller_addresses_queryset = SellerAddress.objects.filter(seller__id = seller_entry.id)
-
     seller_addresses = serialize_seller_addresses(seller_addresses_queryset)
-
+    
+    seller_bankdetails_queryset = SellerBankDetails.objects.filter(seller__id = seller_entry.id)
+    seller_bankdetails = serialize_seller_bankdetails(seller_bankdetails_queryset)
+    
     seller = {
-        "id" : seller_entry.id,
+        "sellerID" : seller_entry.id,
         "name" : seller_entry.name,
         "company_name" : seller_entry.company_name,
         "mobile_number" : seller_entry.mobile_number,
@@ -18,18 +20,15 @@ def serialize_seller(seller_entry):
         "email_verification" : seller_entry.email_verification,
         "created_at" : seller_entry.created_at,
         "updated_at" : seller_entry.updated_at,
-        "address" : seller_addresses
+        "address" : seller_addresses,
+        "bank_details" : seller_bankdetails
     }
-
-
+    
     if hasattr(seller_entry,'sellerdetails'):
         seller_details = {}
         seller_details["detailsID"] = seller_entry.sellerdetails.id
         seller_details["vat_tin"] = seller_entry.sellerdetails.vat_tin
         seller_details["cst"] = seller_entry.sellerdetails.cst
-        seller_details["account_holders_name"] = seller_entry.sellerdetails.account_holders_name
-        seller_details["account_number"] = seller_entry.sellerdetails.account_number
-        seller_details["ifsc"] = seller_entry.sellerdetails.ifsc
         seller_details["pan"] = seller_entry.sellerdetails.pan
         seller_details["name_on_pan"] = seller_entry.sellerdetails.name_on_pan
         seller_details["dob_on_pan"] = seller_entry.sellerdetails.dob_on_pan
@@ -37,7 +36,6 @@ def serialize_seller(seller_entry):
         seller_details["tin_verification"] = seller_entry.sellerdetails.tin_verification
 
         seller["details"] = seller_details
-
 
     return seller
 
@@ -74,6 +72,40 @@ def serialize_seller_addresses(seller_addresses_queryset):
         seller_addresses.append(seller_address_entry)
 
     return seller_addresses
+
+def serialize_seller_bankdetails(seller_bankdetails_queryset):
+    
+    seller_bankdetails =[]
+    
+    if len(seller_bankdetails_queryset) == 0:
+        seller_bankdetails_entry = {
+            "bankdetailsID" : None,
+            "account_holders_name" : None,
+            "account_number" : None,
+            "ifsc" : None,
+            "bank_name" : None,
+            "branch" : None,
+            "branch_city" : None,
+            "branch_pincode" : None
+        }
+        seller_bankdetails.append(seller_bankdetails_entry)
+    
+    for seller_bankdetail in seller_bankdetails_queryset:
+        
+        seller_bankdetails_entry = {
+            "bankdetailsID" : seller_bankdetail.id,
+            "account_holders_name" : seller_bankdetail.account_holders_name,
+            "account_number" : seller_bankdetail.account_number,
+            "ifsc" : seller_bankdetail.ifsc,
+            "bank_name" : seller_bankdetail.bank_name,
+            "branch" : seller_bankdetail.branch,
+            "branch_city" : seller_bankdetail.branch_city,
+            "branch_pincode" : seller_bankdetail.branch_pincode
+        }
+
+        seller_bankdetails.append(seller_bankdetails_entry)
+
+    return seller_bankdetails
 
 def parse_seller(seller_queryset):
 

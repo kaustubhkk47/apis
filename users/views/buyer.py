@@ -2,16 +2,16 @@ from scripts.utils import customResponse, closeDBConnection, convert_keys_to_str
 import json
 
 from ..models.buyer import Buyer, BuyerAddress, BuyerDetails
-from ..serializers.buyer import serialize_buyer
+from ..serializers.buyer import serialize_buyer, parse_buyer
 
 
 def get_buyer_details(request,buyersArr=[]):
 	try:
 		if len(buyersArr)==0:
-			buyers = Buyer.objects.all().select_related('buyerdetails')
+			buyers = Buyer.objects.filter(delete_status=False).select_related('buyerdetails')
 			closeDBConnection()
 		else:
-			buyers = Buyer.objects.filter(id__in=buyersArr).select_related('buyerdetails')
+			buyers = Buyer.objects.filter(delete_status=False,id__in=buyersArr).select_related('buyerdetails')
 			closeDBConnection()
 
 
@@ -33,16 +33,21 @@ def post_new_buyer(request):
 	if not len(buyer) or not validateBuyerData(buyer, Buyer()):
 		return customResponse("4XX", {"error": "Invalid data for buyer sent"})
 
+	addressSent = 0
+
 	try:
-		newBuyer = Buyer.objects.create(name = buyer["name"], company_name = buyer["company_name"],
+		newBuyer = Buyer(name = buyer["name"], company_name = buyer["company_name"],
 			mobile_number = buyer["mobile_number"], email = buyer["email"], password = buyer["password"],
 			alternate_phone_number = buyer["alternate_phone_number"], mobile_verification = bool(buyer["mobile_verification"]),
 			email_verification=bool(buyer["email_verification"]),gender = buyer["gender"])
 
+		newBuyer.save()
+
 		if "address" in buyer and buyer["address"]:
+			addressSent = 1
 			validateBuyerAddressData(buyer["address"], BuyerAddress())
 			buyeraddress = buyer["address"]
-			newAddress = BuyerAddress.objects.create(buyer=newBuyer, address = buyeraddress["address"],
+			newAddress = BuyerAddress(buyer=newBuyer, address = buyeraddress["address"],
 				landmark = buyeraddress["landmark"], city = buyeraddress["city"], state = buyeraddress["state"],
 				country = buyeraddress["country"], contact_number = buyeraddress["contact_number"],
 				pincode = buyeraddress["pincode"])
@@ -54,11 +59,15 @@ def post_new_buyer(request):
 		validateBuyerDetailsData(buyer["details"], BuyerDetails())
 
 		buyerdetails = buyer["details"]
-		newBuyerDetails = BuyerDetails.objects.create(buyer = newBuyer, vat_tin = buyerdetails["vat_tin"],
+		newBuyerDetails = BuyerDetails(buyer = newBuyer, vat_tin = buyerdetails["vat_tin"],
 			cst = buyerdetails["cst"], buyer_interest = buyerdetails["buyer_interest"],
 			customer_type = buyerdetails["customer_type"], buying_capacity = buyerdetails["buying_capacity"],
 			buys_from = buyerdetails["buys_from"], purchasing_states = buyerdetails["purchasing_states"])
-
+		
+		newBuyerDetails.save()
+		if addressSent == 1:
+			newAddress.save()
+		 
 	except Exception as e:
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
@@ -84,6 +93,7 @@ def update_buyer(request):
 	buyerPtr = buyerPtr[0]
 
 	detailsPresent = 1
+	detailsSent = 0
 	addressSent = 0
 
 	if not validateBuyerData(buyer, buyerPtr):
@@ -101,6 +111,7 @@ def update_buyer(request):
 		buyerPtr.gender = buyer["gender"]
 
 		if "details" in buyer and buyer["details"]:
+			detailsSent = 1
 			buyerdetails = buyer["details"]
 			if hasattr(buyerPtr, "buyerdetails"):
 				validateBuyerDetailsData(buyerdetails, buyerPtr.buyerdetails)
@@ -143,6 +154,8 @@ def update_buyer(request):
 			buyerAddressPtr.pincode = buyeraddress["pincode"]
 
 		buyerPtr.save()
+		if detailsSent == 1 and detailsPresent == 1:
+			buyerPtr.buyerdetails.save()
 		if detailsPresent == 0:
 			newBuyerDetails.save()
 		if addressSent == 1:
@@ -155,6 +168,32 @@ def update_buyer(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer": serialize_buyer(buyerPtr)})
 
+def delete_buyer(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer) or not "buyerID" in buyer or not buyer["buyerID"]:
+		return customResponse("4XX", {"error": "Id for buyer not sent"})
+
+	buyerPtr = Buyer.objects.filter(id=int(buyer["buyerID"]))
+
+	if len(buyerPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
+
+	buyerPtr = buyerPtr[0]
+
+	try:
+		buyerPtr.delete_status = True
+		buyerPtr.save()
+	except Exception as e:
+		closeDBConnection()
+		return customResponse("4XX", {"error": "could not delete"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer": "buyer deleted"})
 
 def validateBuyerData(buyer, oldbuyer):
 

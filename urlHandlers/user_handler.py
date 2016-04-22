@@ -25,6 +25,8 @@ def buyer_details(request, buyerID = ""):
 		return buyer.post_new_buyer(request)
 	elif request.method == "PUT":
 		return buyer.update_buyer(request)
+	elif request.method == "DELETE":
+		return buyer.delete_buyer(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})	
 
@@ -38,5 +40,11 @@ def seller_details(request, sellerID = ""):
 		else:
 			sellersArr = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
 		return seller.get_seller_details(request,sellersArr)
+	elif request.method == "POST":
+		return seller.post_new_seller(request)
+	elif request.method == "PUT":
+		return seller.update_seller(request)
+	elif request.method == "DELETE":
+		return seller.delete_seller(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})	

@@ -7,7 +7,7 @@ def serialize_buyer(buyer_entry):
     buyer_addresses = serialize_buyer_addresses(buyer_addresses_queryset)
 
     buyer = {
-        "id" : buyer_entry.id,
+        "buyerID" : buyer_entry.id,
         "name" : buyer_entry.name,
         "company_name" : buyer_entry.company_name,
         "mobile_number" : buyer_entry.mobile_number,
@@ -20,8 +20,7 @@ def serialize_buyer(buyer_entry):
         "created_at" : buyer_entry.created_at,
         "updated_at" : buyer_entry.updated_at,
         "address" : buyer_addresses
-    }
-    
+    }    
     
     if hasattr(buyer_entry,'buyerdetails'):
         buyer_details = {}

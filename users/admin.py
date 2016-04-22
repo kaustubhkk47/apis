@@ -11,5 +11,6 @@ admin.site.register(BuyerDetails)
 admin.site.register(Seller)
 admin.site.register(SellerAddress)
 admin.site.register(SellerDetails)
+admin.site.register(SellerBankDetails)
 
 admin.site.register(InternalUser)
