@@ -12,10 +12,10 @@ def serialize_product_lots(productsItem):
     for productLot in productLotsQuerySet:
 
         productLotEntry = {
+            "productlotID" : productLot.id,
             "lot_size_from":productLot.lot_size_from,
             "lot_size_to":productLot.lot_size_to,
-            "lot_discount":productLot.lot_discount,
-            "lot_id":productLot.id
+            "lot_discount":productLot.lot_discount
         }
 
         productLots.append(productLotEntry)
@@ -26,7 +26,7 @@ def serialize_product(productsItem):
 
     product = {}
 
-    product["product_id"] = productsItem.id
+    product["productID"] = productsItem.id
     product["name"] = productsItem.name
     product["price_per_unit"] = productsItem.price_per_unit
     product["tax"] = productsItem.tax
@@ -38,16 +38,19 @@ def serialize_product(productsItem):
     product["updated_at"] = productsItem.updated_at
     product["slug"] = productsItem.slug
     product["max_discount"] = productsItem.max_discount
-    discounted_price = Decimal(productsItem.price_per_unit)*(1-
-        productsItem.max_discount/100)
+    discounted_price = Decimal(productsItem.price_per_unit)*(1- productsItem.max_discount/100)
     product["discounted_price_per_unit"] = '%.2f' % discounted_price
 
-    product["seller_name"] = productsItem.seller.name
-    product["seller_id"] = productsItem.seller.id
+    product["seller"] = {
+        "seller_name" : productsItem.seller.name,
+        "sellerID" : productsItem.seller.id
+    }
 
-    product["category_name"] = productsItem.category.name
-    product["category_id"] = productsItem.category.id
-    product["category_slug"] = productsItem.category.slug
+    product["category"] = {
+        "category_name" : productsItem.category.name,
+        "categoryID" : productsItem.category.id,
+        "category_slug" : productsItem.category.slug
+    }
 
     product["product_lot"] = serialize_product_lots(productsItem)
             
@@ -55,23 +58,28 @@ def serialize_product(productsItem):
 
 def serialize_product_details(productsItem, product):
 
-    product["seller_catalog_number"] = productsItem.productdetails.seller_catalog_number
-    product["description"] = productsItem.productdetails.description
-    product["brand"] = productsItem.productdetails.brand
-    product["pattern"] = productsItem.productdetails.pattern
-    product["style"] = productsItem.productdetails.style
-    product["gsm"] = productsItem.productdetails.gsm
-    product["sleeve"] = productsItem.productdetails.sleeve
-    product["neck_collar_type"] = productsItem.productdetails.neck_collar_type
-    product["length"] = productsItem.productdetails.length
-    product["work_decoration_type"] = productsItem.productdetails.work_decoration_type
-    product["colours"] = productsItem.productdetails.colours
-    product["sizes"] = productsItem.productdetails.sizes
-    product["special_feature"] = productsItem.productdetails.special_feature
+    details ={}
 
-    product["manufactured_country"] = productsItem.productdetails.manufactured_country
-    product["warranty"] = productsItem.productdetails.warranty
-    product["remarks"] = productsItem.productdetails.remarks
+    details["detailsID"] = productsItem.productdetails.id
+    details["seller_catalog_number"] = productsItem.productdetails.seller_catalog_number
+    details["description"] = productsItem.productdetails.description
+    details["brand"] = productsItem.productdetails.brand
+    details["pattern"] = productsItem.productdetails.pattern
+    details["style"] = productsItem.productdetails.style
+    details["gsm"] = productsItem.productdetails.gsm
+    details["sleeve"] = productsItem.productdetails.sleeve
+    details["neck_collar_type"] = productsItem.productdetails.neck_collar_type
+    details["length"] = productsItem.productdetails.length
+    details["work_decoration_type"] = productsItem.productdetails.work_decoration_type
+    details["colours"] = productsItem.productdetails.colours
+    details["sizes"] = productsItem.productdetails.sizes
+    details["special_feature"] = productsItem.productdetails.special_feature
+
+    details["manufactured_country"] = productsItem.productdetails.manufactured_country
+    details["warranty"] = productsItem.productdetails.warranty
+    details["remarks"] = productsItem.productdetails.remarks
+
+    product["details"] = details
 
     return product
             
@@ -94,7 +102,10 @@ def multiple_products_parser(productQuerySet):
     for productsItem in productQuerySet:
         
         product = serialize_product(productsItem)
-        product = serialize_product_details(productsItem, product)
+
+        if hasattr(productsItem, 'productdetails'):
+            product = serialize_product_details(productsItem, product)
+
         products.append(product)
 
     return products

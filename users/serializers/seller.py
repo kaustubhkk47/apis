@@ -44,18 +44,6 @@ def serialize_seller_addresses(seller_addresses_queryset):
 
     seller_addresses =[]
 
-    if len(seller_addresses_queryset) == 0:
-        seller_address_entry = {
-            "address" : None,
-            "landmark" : None,
-            "city" : None,
-            "state" : None,
-            "country" : None,
-            "contact_number" : None,
-            "pincode" : None
-        }
-        seller_addresses.append(seller_address_entry)
-
     for seller_address in seller_addresses_queryset:
 
         seller_address_entry = {
@@ -76,19 +64,6 @@ def serialize_seller_addresses(seller_addresses_queryset):
 def serialize_seller_bankdetails(seller_bankdetails_queryset):
     
     seller_bankdetails =[]
-    
-    if len(seller_bankdetails_queryset) == 0:
-        seller_bankdetails_entry = {
-            "bankdetailsID" : None,
-            "account_holders_name" : None,
-            "account_number" : None,
-            "ifsc" : None,
-            "bank_name" : None,
-            "branch" : None,
-            "branch_city" : None,
-            "branch_pincode" : None
-        }
-        seller_bankdetails.append(seller_bankdetails_entry)
     
     for seller_bankdetail in seller_bankdetails_queryset:
         

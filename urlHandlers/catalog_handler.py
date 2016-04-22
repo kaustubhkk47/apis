@@ -14,6 +14,12 @@ def categories_details(request, categoryID = ""):
 		else:
 			categoriesArr = [int(e) if e.isdigit() else e for e in categoryID.split(",")]
 		return categories.get_categories_details(request, categoriesArr)
+	elif request.method == "POST":
+		return categories.post_new_category(request)
+	elif request.method == "PUT":
+		return categories.update_category(request)
+	elif request.method == "DELETE":
+		return categories.delete_category(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -28,5 +34,11 @@ def product_details(request, productID = ""):
 		else:
 			productsArr = [int(e) if e.isdigit() else e for e in productID.split(",")]
 		return product.get_product_details(request,productsArr)
+	elif request.method == "POST":
+		return product.post_new_product(request)
+	elif request.method == "PUT":
+		return product.update_product(request)
+	elif request.method == "DELETE":
+		return product.delete_product(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
