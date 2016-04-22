@@ -42,18 +42,6 @@ def serialize_buyer_addresses(buyer_addresses_queryset):
 
     buyer_addresses =[]
 
-    if len(buyer_addresses_queryset) == 0:
-        buyer_address_entry = {
-            "address" : None,
-            "landmark" : None,
-            "city" : None,
-            "state" : None,
-            "country" : None,
-            "contact_number" : None,
-            "pincode" : None
-        }
-        buyer_addresses.append(buyer_address_entry)
-
     for buyer_address in buyer_addresses_queryset:
 
         buyer_address_entry = {

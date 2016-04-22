@@ -1,6 +1,6 @@
 from django.db import models
 
-from .product import Product
+from catalog.models.product import Product
 
 class ProductLot(models.Model):
     product = models.ForeignKey(Product)
@@ -15,3 +15,19 @@ class ProductLot(models.Model):
 
     def __unicode__(self):
         return ""
+
+def validateProductLotData(product_lots):
+	flag = 1
+	for i in range(len(product_lots)):
+		product_lot = product_lots[i]
+		if not "lot_size_from" in product_lot or not product_lot["lot_size_from"]:
+			flag = 0
+		if not "lot_size_to" in product_lot or not product_lot["lot_size_to"]:
+			flag = 0
+		if not "lot_discount" in product_lot or not product_lot["lot_discount"]:
+			flag = 0
+
+	return flag
+
+def parseMaxDiscount(product_lots):
+	return product_lots[len(product_lots)-1]["lot_discount"]

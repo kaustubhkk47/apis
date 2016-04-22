@@ -1,4 +1,5 @@
 from django.db import models
+from scripts.utils import validate_date_time
 
 class Seller(models.Model):
     name = models.CharField(max_length=200, blank=True)
@@ -64,3 +65,81 @@ class SellerBankDetails(models.Model):
 
     def __unicode__(self):
         return self.seller.name
+
+def validateSellerData(seller, oldseller, isnew):
+
+    flag = 0
+
+    if not "name" in seller or not seller["name"]:
+        flag = 1
+        seller["name"] = oldseller.name
+    if not "company_name" in seller or not seller["company_name"]:
+        seller["company_name"] = oldseller.company_name
+    if not "mobile_number" in seller or not seller["mobile_number"]:
+        flag = 1
+        seller["mobile_number"] = oldseller.mobile_number
+    if not "email" in seller or not seller["email"]:
+        seller["email"] = oldseller.email
+    if not "password" in seller or not seller["password"]:
+        seller["password"] = oldseller.password
+    if not "alternate_phone_number" in seller or not seller["alternate_phone_number"]:
+        seller["alternate_phone_number"] = oldseller.alternate_phone_number
+    if not "mobile_verification" in seller or not seller["mobile_verification"]:
+        seller["mobile_verification"] = oldseller.mobile_verification
+    if not "email_verification" in seller or not seller["email_verification"]:
+        seller["email_verification"] = oldseller.email_verification
+
+    if isnew == 1 and flag == 1:
+        return False
+
+    return True
+
+def validateSellerAddressData(selleraddress, oldselleraddress):
+
+    if not "address" in selleraddress or not selleraddress["address"]:
+        selleraddress["address"] = oldselleraddress.address
+    if not "landmark" in selleraddress or not selleraddress["landmark"]:
+        selleraddress["landmark"] = oldselleraddress.landmark
+    if not "city" in selleraddress or not selleraddress["city"]:
+        selleraddress["city"] = oldselleraddress.city
+    if not "state" in selleraddress or not selleraddress["state"]:
+        selleraddress["state"] = oldselleraddress.state
+    if not "country" in selleraddress or not selleraddress["country"]:
+        selleraddress["country"] = oldselleraddress.country
+    if not "contact_number" in selleraddress or not selleraddress["contact_number"]:
+        selleraddress["contact_number"] = oldselleraddress.contact_number
+    if not "pincode" in selleraddress or not selleraddress["pincode"]:
+        selleraddress["pincode"] = oldselleraddress.pincode
+
+def validateSellerDetailsData(sellerdetails, oldsellerdetails):
+    if not "vat_tin" in sellerdetails or not sellerdetails["vat_tin"]:
+        sellerdetails["vat_tin"] = oldsellerdetails.vat_tin
+    if not "cst" in sellerdetails or not sellerdetails["cst"]:
+        sellerdetails["cst"] = oldsellerdetails.cst
+    if not "pan" in sellerdetails or not sellerdetails["pan"]:
+        sellerdetails["pan"] = oldsellerdetails.pan
+    if not "name_on_pan" in sellerdetails or not sellerdetails["name_on_pan"]:
+        sellerdetails["name_on_pan"] = oldsellerdetails.name_on_pan
+    if not "dob_on_pan" in sellerdetails or not sellerdetails["dob_on_pan"] or not validate_date_time(sellerdetails["dob_on_pan"]):
+        sellerdetails["dob_on_pan"] = oldsellerdetails.dob_on_pan
+    if not "pan_verification" in sellerdetails or not sellerdetails["pan_verification"]:
+        sellerdetails["pan_verification"] = oldsellerdetails.pan_verification
+    if not "tin_verification" in sellerdetails or not sellerdetails["tin_verification"]:
+        sellerdetails["tin_verification"] = oldsellerdetails.tin_verification
+
+def validateSellerBankdetailsData(sellerbankdetails, oldsellerbankdetails):
+
+    if not "account_holders_name" in sellerbankdetails or not sellerbankdetails["account_holders_name"]:
+        sellerbankdetails["account_holders_name"] = oldsellerbankdetails.account_holders_name
+    if not "account_number" in sellerbankdetails or not sellerbankdetails["account_number"]:
+        sellerbankdetails["account_number"] = oldsellerbankdetails.account_number
+    if not "ifsc" in sellerbankdetails or not sellerbankdetails["ifsc"]:
+        sellerbankdetails["ifsc"] = oldsellerbankdetails.ifsc
+    if not "bank_name" in sellerbankdetails or not sellerbankdetails["bank_name"]:
+        sellerbankdetails["bank_name"] = oldsellerbankdetails.bank_name
+    if not "branch" in sellerbankdetails or not sellerbankdetails["branch"]:
+        sellerbankdetails["branch"] = oldsellerbankdetails.branch
+    if not "branch_city" in sellerbankdetails or not sellerbankdetails["branch_city"]:
+        sellerbankdetails["branch_city"] = oldsellerbankdetails.branch_city
+    if not "branch_pincode" in sellerbankdetails or not sellerbankdetails["branch_pincode"]:
+        sellerbankdetails["branch_pincode"] = oldsellerbankdetails.branch_pincode 
