@@ -135,7 +135,7 @@ def update_buyer(request):
 			buyeraddress = buyer["address"]
 			if not "addressID" in buyeraddress or not buyeraddress["addressID"]:
 				return customResponse("4XX", {"error": "Address id not sent"})
-			buyerAddressPtr = BuyerAddress.objects.filter(id = buyeraddress["addressID"])
+			buyerAddressPtr = BuyerAddress.objects.filter(id = int(buyeraddress["addressID"]))
 
 			if len(buyerAddressPtr) == 0:
 				return customResponse("4XX", {"error": "Invalid address id sent"})

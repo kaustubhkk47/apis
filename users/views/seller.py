@@ -145,7 +145,7 @@ def update_seller(request):
 			selleraddress = seller["address"]
 			if not "addressID" in selleraddress or not selleraddress["addressID"]:
 				return customResponse("4XX", {"error": "Address id not sent"})
-			sellerAddressPtr = SellerAddress.objects.filter(id = selleraddress["addressID"])
+			sellerAddressPtr = SellerAddress.objects.filter(id = int(selleraddress["addressID"]))
 
 			if len(sellerAddressPtr) == 0:
 				return customResponse("4XX", {"error": "Invalid address id sent"})
@@ -167,7 +167,7 @@ def update_seller(request):
 			sellerbankdetails = seller["bankdetails"]
 			if not "bankdetailsID" in sellerbankdetails or not sellerbankdetails["bankdetailsID"]:
 				return customResponse("4XX", {"error": "Bank details id not sent"})
-			sellerBankDetailsPtr = SellerBankDetails.objects.filter(id = sellerbankdetails["bankdetailsID"])
+			sellerBankDetailsPtr = SellerBankDetails.objects.filter(id = int(sellerbankdetails["bankdetailsID"]))
 
 			if len(sellerBankDetailsPtr) == 0:
 				return customResponse("4XX", {"error": "Invalid bankdetails id sent"})
