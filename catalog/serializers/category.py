@@ -7,6 +7,7 @@ def serialize_categories(categoriesItem):
         "slug": categoriesItem.slug,
         "created_at": categoriesItem.created_at,
         "updated_at": categoriesItem.updated_at,
+        "categoryID": categoriesItem.id,
         "id": categoriesItem.id,
         "url": categoriesItem.slug + "-" + str(categoriesItem.id)
     }

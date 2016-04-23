@@ -116,3 +116,32 @@ def validateBuyerAddressData(buyeraddress, oldbuyeraddress):
         buyeraddress["contact_number"] = oldbuyeraddress.contact_number
     if not "pincode" in buyeraddress or not buyeraddress["pincode"]:
         buyeraddress["pincode"] = oldbuyeraddress.pincode
+
+def populateBuyer(buyerPtr, buyer):
+    buyerPtr.name = buyer["name"]
+    buyerPtr.company_name = buyer["company_name"]
+    buyerPtr.mobile_number = buyer["mobile_number"]
+    buyerPtr.email = buyer["email"]
+    buyerPtr.password = buyer["password"]
+    buyerPtr.alternate_phone_number = buyer["alternate_phone_number"]
+    buyerPtr.mobile_verification = bool(buyer["mobile_verification"])
+    buyerPtr.email_verification = bool(buyer["email_verification"])
+    buyerPtr.gender = buyer["gender"]
+    
+def populateBuyerDetails(buyerDetailsPtr, buyerdetails):
+    buyerDetailsPtr.cst = buyerdetails["cst"]
+    buyerDetailsPtr.buyer_interest = buyerdetails["buyer_interest"]
+    buyerDetailsPtr.customer_type = buyerdetails["customer_type"]
+    buyerDetailsPtr.buying_capacity = buyerdetails["buying_capacity"]
+    buyerDetailsPtr.buys_from = buyerdetails["buys_from"]
+    buyerDetailsPtr.purchasing_states = buyerdetails["purchasing_states"]
+    buyerDetailsPtr.vat_tin = buyerdetails["vat_tin"]
+
+def populateBuyerAddress(buyerAddressPtr, buyeraddress):
+    buyerAddressPtr.address = buyeraddress["address"]
+    buyerAddressPtr.landmark = buyeraddress["landmark"]
+    buyerAddressPtr.city = buyeraddress["city"]
+    buyerAddressPtr.state = buyeraddress["state"]
+    buyerAddressPtr.country = buyeraddress["country"]
+    buyerAddressPtr.contact_number = buyeraddress["contact_number"]
+    buyerAddressPtr.pincode = buyeraddress["pincode"]
