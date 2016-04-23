@@ -87,6 +87,8 @@ def validateProductData(product, oldproduct, is_new):
         product["verification"] = oldproduct.verification
     if not "show_online" in product or not product["show_online"]:
         product["show_online"] = oldproduct.show_online
+    if not "slug" in product or not product["slug"]:
+        product["slug"] = oldproduct.slug
         
     if is_new == 1 and flag == 1:
         return False

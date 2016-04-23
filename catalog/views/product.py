@@ -118,6 +118,8 @@ def update_product(request):
     if not validateProductData(product, productPtr, 0):
         return customResponse("4XX", {"error": "Invalid data for product sent"})
 
+    product["slug"] = slugify(product["name"])
+
     try:
         populateProductData(productPtr, product)
         

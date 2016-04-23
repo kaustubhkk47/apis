@@ -7,8 +7,8 @@ def serialize_categories(categoriesItem):
         "slug": categoriesItem.slug,
         "created_at": categoriesItem.created_at,
         "updated_at": categoriesItem.updated_at,
-        "id": categoriesItem.id,
-        "url": settings.BASE_WEBAPP_URL + categoriesItem.slug + "-" + str(categoriesItem.id)
+        "categoryID": categoriesItem.id,
+        "url": categoriesItem.slug + "-" + str(categoriesItem.id)
     }
     return category
 

@@ -91,7 +91,7 @@ def category_products_parser(productQuerySet):
     for productsItem in productQuerySet:
 
         product = serialize_product(productsItem)
-        product["url"] = settings.BASE_WEBAPP_URL + productsItem.category.slug + "-" + str(productsItem.category.id) + "/" + productsItem.slug+ "-" + str(productsItem.id)
+        product["url"] = productsItem.category.slug + "-" + str(productsItem.category.id) + "/" + productsItem.slug+ "-" + str(productsItem.id)
         products.append(product)
 
     return products
