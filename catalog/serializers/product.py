@@ -6,18 +6,15 @@ from ..models.productLot import ProductLot
 def serialize_product_lots(productsItem):
 
     productLotsQuerySet = ProductLot.objects.filter(product__id = productsItem.id)
-
     productLots = []
 
     for productLot in productLotsQuerySet:
-
         productLotEntry = {
             "productlotID" : productLot.id,
             "lot_size_from":productLot.lot_size_from,
             "lot_size_to":productLot.lot_size_to,
             "lot_discount":productLot.lot_discount
         }
-
         productLots.append(productLotEntry)
 
     return productLots
@@ -53,7 +50,7 @@ def serialize_product(productsItem):
     }
 
     product["product_lot"] = serialize_product_lots(productsItem)
-            
+
     return product
 
 def serialize_product_details(productsItem, product):
@@ -82,30 +79,25 @@ def serialize_product_details(productsItem, product):
     product["details"] = details
 
     return product
-            
 
 def category_products_parser(productQuerySet):
     products = []
     products_hash = {}
 
     for productsItem in productQuerySet:
-
         product = serialize_product(productsItem)
         product["url"] = productsItem.category.slug + "-" + str(productsItem.category.id) + "/" + productsItem.slug+ "-" + str(productsItem.id)
         products.append(product)
 
     return products
 
-
 def multiple_products_parser(productQuerySet):
     products = []
     for productsItem in productQuerySet:
-        
         product = serialize_product(productsItem)
 
         if hasattr(productsItem, 'productdetails'):
             product = serialize_product_details(productsItem, product)
 
         products.append(product)
-
     return products
