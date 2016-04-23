@@ -143,3 +143,40 @@ def validateSellerBankdetailsData(sellerbankdetails, oldsellerbankdetails):
         sellerbankdetails["branch_city"] = oldsellerbankdetails.branch_city
     if not "branch_pincode" in sellerbankdetails or not sellerbankdetails["branch_pincode"]:
         sellerbankdetails["branch_pincode"] = oldsellerbankdetails.branch_pincode 
+
+def populateSellerData(sellerPtr, seller):
+    sellerPtr.name = seller["name"]
+    sellerPtr.company_name = seller["company_name"]
+    sellerPtr.mobile_number = seller["mobile_number"]
+    sellerPtr.email = seller["email"]
+    sellerPtr.password = seller["password"]
+    sellerPtr.alternate_phone_number = seller["alternate_phone_number"]
+    sellerPtr.mobile_verification = bool(seller["mobile_verification"])
+    sellerPtr.email_verification = bool(seller["email_verification"])
+
+def populateSellerDetailsData(sellerDetailsPtr,sellerdetails):
+    sellerDetailsPtr.cst = sellerdetails["cst"]
+    sellerDetailsPtr.pan = sellerdetails["pan"]
+    sellerDetailsPtr.name_on_pan = sellerdetails["name_on_pan"]
+    sellerDetailsPtr.dob_on_pan = sellerdetails["dob_on_pan"]
+    sellerDetailsPtr.pan_verification = bool(sellerdetails["pan_verification"])
+    sellerDetailsPtr.tin_verification = bool(sellerdetails["tin_verification"])
+    sellerDetailsPtr.vat_tin = sellerdetails["vat_tin"]
+
+def populateSellerAddressData(sellerAddressPtr, selleraddress):
+    sellerAddressPtr.address = selleraddress["address"]
+    sellerAddressPtr.landmark = selleraddress["landmark"]
+    sellerAddressPtr.city = selleraddress["city"]
+    sellerAddressPtr.state = selleraddress["state"]
+    sellerAddressPtr.country = selleraddress["country"]
+    sellerAddressPtr.contact_number = selleraddress["contact_number"]
+    sellerAddressPtr.pincode = selleraddress["pincode"]
+
+def populateSellerBankDetailsData(sellerBankDetailsPtr,sellerbankdetails):
+    sellerBankDetailsPtr.account_holders_name = sellerbankdetails["account_holders_name"]
+    sellerBankDetailsPtr.account_number = sellerbankdetails["account_number"]
+    sellerBankDetailsPtr.ifsc = sellerbankdetails["ifsc"]
+    sellerBankDetailsPtr.bank_name = sellerbankdetails["bank_name"]
+    sellerBankDetailsPtr.branch = sellerbankdetails["branch"]
+    sellerBankDetailsPtr.branch_city = sellerbankdetails["branch_city"]
+    sellerBankDetailsPtr.branch_pincode = sellerbankdetails["branch_pincode"]

@@ -38,7 +38,7 @@ def serialize_product(productsItem):
     product["updated_at"] = productsItem.updated_at
     product["slug"] = productsItem.slug
     product["max_discount"] = productsItem.max_discount
-    discounted_price = Decimal(productsItem.price_per_unit)*(1- productsItem.max_discount/100)
+    discounted_price = Decimal(productsItem.price_per_unit)*(1- Decimal(productsItem.max_discount)/100)
     product["discounted_price_per_unit"] = '%.2f' % discounted_price
 
     product["seller"] = {

@@ -1,7 +1,7 @@
 from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string
 import json
 
-from ..models.buyer import Buyer, BuyerAddress, BuyerDetails, validateBuyerData, validateBuyerDetailsData, validateBuyerAddressData
+from ..models.buyer import Buyer, BuyerAddress, BuyerDetails, validateBuyerData,validateBuyerDetailsData, validateBuyerAddressData, populateBuyer, populateBuyerDetails, populateBuyerAddress
 from ..serializers.buyer import serialize_buyer, parse_buyer
 
 
@@ -45,24 +45,19 @@ def post_new_buyer(request):
 
 		validateBuyerDetailsData(buyer["details"], BuyerDetails())
 
-		newBuyer = Buyer(name = buyer["name"], company_name = buyer["company_name"],
-			mobile_number = buyer["mobile_number"], email = buyer["email"], password = buyer["password"],
-			alternate_phone_number = buyer["alternate_phone_number"], mobile_verification = bool(buyer["mobile_verification"]),
-			email_verification=bool(buyer["email_verification"]),gender = buyer["gender"])
+		newBuyer = Buyer()
+
+		populateBuyer(newBuyer, buyer)
 
 		newBuyer.save()
 
 		buyeraddress = buyer["address"]
-		newAddress = BuyerAddress(buyer=newBuyer, address = buyeraddress["address"],
-				landmark = buyeraddress["landmark"], city = buyeraddress["city"], state = buyeraddress["state"],
-				country = buyeraddress["country"], contact_number = buyeraddress["contact_number"],
-				pincode = buyeraddress["pincode"])
+		newAddress = BuyerAddress(buyer=newBuyer)
+		populateBuyerAddress(newAddress, buyeraddress)
 
 		buyerdetails = buyer["details"]
-		newBuyerDetails = BuyerDetails(buyer = newBuyer, vat_tin = buyerdetails["vat_tin"],
-			cst = buyerdetails["cst"], buyer_interest = buyerdetails["buyer_interest"],
-			customer_type = buyerdetails["customer_type"], buying_capacity = buyerdetails["buying_capacity"],
-			buys_from = buyerdetails["buys_from"], purchasing_states = buyerdetails["purchasing_states"])
+		newBuyerDetails = BuyerDetails(buyer = newBuyer)
+		populateBuyerDetails(newBuyerDetails, buyerdetails)
 		
 		newBuyerDetails.save()
 		newAddress.save()
@@ -99,36 +94,19 @@ def update_buyer(request):
 		return customResponse("4XX", {"error": "Invalid data for buyer sent"})
 
 	try:
-		buyerPtr.name = buyer["name"]
-		buyerPtr.company_name = buyer["company_name"]
-		buyerPtr.mobile_number = buyer["mobile_number"]
-		buyerPtr.email = buyer["email"]
-		buyerPtr.password = buyer["password"]
-		buyerPtr.alternate_phone_number = buyer["alternate_phone_number"]
-		buyerPtr.mobile_verification = bool(buyer["mobile_verification"])
-		buyerPtr.email_verification = bool(buyer["email_verification"])
-		buyerPtr.gender = buyer["gender"]
+		populateBuyer(buyerPtr, buyer)
 
 		if "details" in buyer and buyer["details"]:
 			detailsSent = 1
 			buyerdetails = buyer["details"]
 			if hasattr(buyerPtr, "buyerdetails"):
 				validateBuyerDetailsData(buyerdetails, buyerPtr.buyerdetails)
-				buyerPtr.buyerdetails.cst = buyerdetails["cst"]
-				buyerPtr.buyerdetails.buyer_interest = buyerdetails["buyer_interest"]
-				buyerPtr.buyerdetails.customer_type = buyerdetails["customer_type"]
-				buyerPtr.buyerdetails.buying_capacity = buyerdetails["buying_capacity"]
-				buyerPtr.buyerdetails.buys_from = buyerdetails["buys_from"]
-				buyerPtr.buyerdetails.purchasing_states = buyerdetails["purchasing_states"]
-				buyerPtr.buyerdetails.vat_tin = buyerdetails["vat_tin"]
-
+				populateBuyerDetails(buyerPtr.buyerdetails, buyerdetails)	
 			else:
 				detailsPresent = 0
 				validateBuyerDetailsData(buyerdetails, BuyerDetails())
-				newBuyerDetails = BuyerDetails(buyer = buyerPtr, vat_tin = buyerdetails["vat_tin"],
-					cst = buyerdetails["cst"], buyer_interest = buyerdetails["buyer_interest"],
-					customer_type = buyerdetails["customer_type"], buying_capacity = buyerdetails["buying_capacity"],
-					buys_from = buyerdetails["buys_from"], purchasing_states = buyerdetails["purchasing_states"])
+				newBuyerDetails = BuyerDetails(buyer = buyerPtr)
+				populateBuyerDetails(newBuyerDetails,buyerdetails)
 
 		if "address" in buyer and buyer["address"]:
 			addressSent = 1
@@ -141,16 +119,9 @@ def update_buyer(request):
 				return customResponse("4XX", {"error": "Invalid address id sent"})
 
 			buyerAddressPtr = buyerAddressPtr[0]
-
 			validateBuyerAddressData(buyeraddress, buyerAddressPtr)
+			populateBuyerAddress(buyerAddressPtr, buyeraddress)
 
-			buyerAddressPtr.address = buyeraddress["address"]
-			buyerAddressPtr.landmark = buyeraddress["landmark"]
-			buyerAddressPtr.city = buyeraddress["city"]
-			buyerAddressPtr.state = buyeraddress["state"]
-			buyerAddressPtr.country = buyeraddress["country"]
-			buyerAddressPtr.contact_number = buyeraddress["contact_number"]
-			buyerAddressPtr.pincode = buyeraddress["pincode"]
 
 		buyerPtr.save()
 		if detailsSent == 1 and detailsPresent == 1:
