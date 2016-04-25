@@ -17,13 +17,13 @@ class Category(models.Model):
 
 def validateCategoryData(category, oldcategory, is_new):
     flag = 0
-    if not "name" in category or not category["name"]:
+    if not "name" in category or not category["name"]!=None:
         flag = 1
         category["name"] = oldcategory.name
-    if not "display_name" in category or not category["display_name"]:
+    if not "display_name" in category or not category["display_name"]!=None:
         flag = 1
         category["display_name"] = oldcategory.display_name
-    if not "slug" in category or not category["slug"]:
+    if not "slug" in category or not category["slug"]!=None:
         category["slug"] = oldcategory.slug
 
     if is_new == 1 and flag == 1:

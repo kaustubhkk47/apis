@@ -45,21 +45,23 @@ def serialize_seller_addresses(seller_addresses_queryset):
     seller_addresses =[]
 
     for seller_address in seller_addresses_queryset:
-
-        seller_address_entry = {
-            "addressID" : seller_address.id,
-            "address" : seller_address.address,
-            "landmark" : seller_address.landmark,
-            "city" : seller_address.city,
-            "state" : seller_address.state,
-            "country" : seller_address.country,
-            "contact_number" : seller_address.contact_number,
-            "pincode" : seller_address.pincode
-        }
-
+        seller_address_entry = serialize_seller_address(seller_address)
         seller_addresses.append(seller_address_entry)
 
     return seller_addresses
+
+def serialize_seller_address(seller_address):
+    seller_address_entry = {
+        "addressID" : seller_address.id,
+        "address" : seller_address.address,
+        "landmark" : seller_address.landmark,
+        "city" : seller_address.city,
+        "state" : seller_address.state,
+        "country" : seller_address.country,
+        "contact_number" : seller_address.contact_number,
+        "pincode" : seller_address.pincode
+    }
+    return seller_address_entry
 
 def serialize_seller_bankdetails(seller_bankdetails_queryset):
     

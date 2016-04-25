@@ -14,7 +14,7 @@ class Product(models.Model):
     price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, blank=False)
     unit = models.CharField(max_length=15, blank=False)
     tax = models.DecimalField(max_digits=5, decimal_places=2)
-    max_discount = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+    min_price_per_unit = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
 
     lot_size = models.PositiveIntegerField(default=1)
     price_per_lot = models.DecimalField(max_digits=10, decimal_places=2, blank=False)
@@ -51,6 +51,7 @@ class ProductDetails(models.Model):
     work_decoration_type = models.CharField(max_length=40, blank=True)
     colours = models.CharField(max_length=100, blank=True)
     sizes = models.CharField(max_length=100, blank=True)
+    fabric = models.CharField(max_length=100, blank=True)
     special_feature = models.TextField(blank=True)
 
     manufactured_country = models.CharField(max_length=50, blank=True, default="India")
@@ -65,30 +66,32 @@ def validateProductData(product, oldproduct, is_new):
 
     flag = 0
 
-    if not "name" in product or not product["name"]:
+    if not "name" in product or not product["name"]!=None:
         flag = 1
         product["name"] = oldproduct.name
-    if not "price_per_unit" in product or not product["price_per_unit"]:
+    if not "price_per_unit" in product or not product["price_per_unit"]!=None:
         flag = 1
         product["price_per_unit"] = oldproduct.price_per_unit
-    if not "unit" in product or not product["unit"]:
+    if not "unit" in product or not product["unit"]!=None:
         product["unit"] = oldproduct.unit
-    if not "tax" in product or not product["tax"]:
+    if not "tax" in product or not product["tax"]!=None:
         product["tax"] = oldproduct.tax
-    if not "max_discount" in product or not product["max_discount"]:
-        product["max_discount"] = oldproduct.max_discount
-    if not "lot_size" in product or not product["lot_size"]:
+    if not "min_price_per_unit" in product or not product["min_price_per_unit"]!=None:
+        product["min_price_per_unit"] = oldproduct.min_price_per_unit
+    if not "lot_size" in product or not product["lot_size"]!=None:
         flag = 1
         product["lot_size"] = oldproduct.lot_size
-    if not "price_per_lot" in product or not product["price_per_lot"]:
+    if not "price_per_lot" in product or not product["price_per_lot"]!=None:
         flag = 1
         product["price_per_lot"] = oldproduct.price_per_lot
-    if not "verification" in product or not product["verification"]:
+    if not "verification" in product or not product["verification"]!=None:
         product["verification"] = oldproduct.verification
-    if not "show_online" in product or not product["show_online"]:
+    if not "show_online" in product or not product["show_online"]!=None:
         product["show_online"] = oldproduct.show_online
-    if not "slug" in product or not product["slug"]:
+    if not "slug" in product or not product["slug"]!=None:
         product["slug"] = oldproduct.slug
+
+    print product["show_online"]
         
     if is_new == 1 and flag == 1:
         return False
@@ -96,39 +99,41 @@ def validateProductData(product, oldproduct, is_new):
     return True
 
 def validateProductDetailsData(productdetails, oldproductdetails):
-    if not "seller_catalog_number" in productdetails or not productdetails["seller_catalog_number"]:
+    if not "seller_catalog_number" in productdetails or not productdetails["seller_catalog_number"]!=None:
         productdetails["seller_catalog_number"] = oldproductdetails.seller_catalog_number
-    if not "brand" in productdetails or not productdetails["brand"]:
+    if not "brand" in productdetails or not productdetails["brand"]!=None:
         productdetails["brand"] = oldproductdetails.brand
-    if not "description" in productdetails or not productdetails["description"]:
+    if not "description" in productdetails or not productdetails["description"]!=None:
         productdetails["description"] = oldproductdetails.description
-    if not "gender" in productdetails or not productdetails["gender"]:
+    if not "gender" in productdetails or not productdetails["gender"]!=None:
         productdetails["gender"] = oldproductdetails.gender
-    if not "pattern" in productdetails or not productdetails["pattern"]:
+    if not "pattern" in productdetails or not productdetails["pattern"]!=None:
         productdetails["pattern"] = oldproductdetails.pattern
-    if not "style" in productdetails or not productdetails["style"]:
+    if not "style" in productdetails or not productdetails["style"]!=None:
         productdetails["style"] = oldproductdetails.style
-    if not "sleeve" in productdetails or not productdetails["sleeve"]:
+    if not "sleeve" in productdetails or not productdetails["sleeve"]!=None:
         productdetails["sleeve"] = oldproductdetails.sleeve
-    if not "gsm" in productdetails or not productdetails["gsm"]:
+    if not "gsm" in productdetails or not productdetails["gsm"]!=None:
         productdetails["gsm"] = oldproductdetails.gsm
-    if not "neck_collar_type" in productdetails or not productdetails["neck_collar_type"]:
+    if not "neck_collar_type" in productdetails or not productdetails["neck_collar_type"]!=None:
         productdetails["neck_collar_type"] = oldproductdetails.neck_collar_type
-    if not "length" in productdetails or not productdetails["length"]:
+    if not "length" in productdetails or not productdetails["length"]!=None:
         productdetails["length"] = oldproductdetails.length
-    if not "work_decoration_type" in productdetails or not productdetails["work_decoration_type"]:
+    if not "work_decoration_type" in productdetails or not productdetails["work_decoration_type"]!=None:
         productdetails["work_decoration_type"] = oldproductdetails.work_decoration_type
-    if not "colours" in productdetails or not productdetails["colours"]:
+    if not "colours" in productdetails or not productdetails["colours"]!=None:
         productdetails["colours"] = oldproductdetails.colours
-    if not "sizes" in productdetails or not productdetails["sizes"]:
+    if not "sizes" in productdetails or not productdetails["sizes"]!=None:
         productdetails["sizes"] = oldproductdetails.sizes
-    if not "special_feature" in productdetails or not productdetails["special_feature"]:
+    if not "special_feature" in productdetails or not productdetails["special_feature"]!=None:
         productdetails["special_feature"] = oldproductdetails.special_feature
-    if not "manufactured_country" in productdetails or not productdetails["manufactured_country"]:
+    if not "manufactured_country" in productdetails or not productdetails["manufactured_country"]!=None:
         productdetails["manufactured_country"] = oldproductdetails.manufactured_country
-    if not "warranty" in productdetails or not productdetails["warranty"]:
+    if not "warranty" in productdetails or not productdetails["warranty"]!=None:
         productdetails["warranty"] = oldproductdetails.warranty
-    if not "remarks" in productdetails or not productdetails["remarks"]:
+    if not "fabric" in productdetails or not productdetails["fabric"]!=None:
+        productdetails["fabric"] = oldproductdetails.fabric
+    if not "remarks" in productdetails or not productdetails["remarks"]!=None:
         productdetails["remarks"] = oldproductdetails.remarks
 
 def populateProductData(productPtr, product):
@@ -141,7 +146,7 @@ def populateProductData(productPtr, product):
     productPtr.verification = bool(product["verification"])
     productPtr.show_online = bool(product["show_online"])
     productPtr.slug = slugify(product["name"])
-    productPtr.max_discount = Decimal(product["max_discount"])
+    productPtr.min_price_per_unit = Decimal(product["min_price_per_unit"])
 
 def populateProductDetailsData(productDetailsPtr, productdetails):
     productDetailsPtr.seller_catalog_number = productdetails["seller_catalog_number"]
@@ -161,3 +166,4 @@ def populateProductDetailsData(productDetailsPtr, productdetails):
     productDetailsPtr.manufactured_country = productdetails["manufactured_country"]
     productDetailsPtr.warranty = productdetails["warranty"]
     productDetailsPtr.remarks = productdetails["remarks"]
+    productDetailsPtr.fabric = productdetails["fabric"]

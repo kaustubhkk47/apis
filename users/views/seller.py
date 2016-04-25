@@ -31,17 +31,17 @@ def post_new_seller(request):
 	if not len(seller) or not validateSellerData(seller, Seller(), 1):
 		return customResponse("4XX", {"error": "Invalid data for seller sent"})
 
-	if not "address" in seller or not seller["address"]:
+	if not "address" in seller or not seller["address"]!=None:
 		seller["address"] = {}
 
 	validateSellerAddressData(seller["address"], SellerAddress())
 
-	if not "bankdetails" in seller or not seller["bankdetails"]:
+	if not "bankdetails" in seller or not seller["bankdetails"]!=None:
 		seller["bankdetails"] = {}
 
 	validateSellerBankdetailsData(seller["bankdetails"], SellerBankDetails())
 
-	if not "details" in seller or not seller["details"]:
+	if not "details" in seller or not seller["details"]!=None:
 			seller["details"] = {}
 
 	validateSellerDetailsData(seller["details"], SellerDetails())
@@ -83,7 +83,7 @@ def update_seller(request):
 		print e
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(seller) or not "sellerID" in seller or not seller["sellerID"]:
+	if not len(seller) or not "sellerID" in seller or not seller["sellerID"]!=None:
 		return customResponse("4XX", {"error": "Id for seller not sent"})
 
 	sellerPtr = Seller.objects.filter(id=int(seller["sellerID"])).select_related('sellerdetails')
@@ -104,7 +104,7 @@ def update_seller(request):
 	try:
 		populateSellerData(sellerPtr, seller)
 		
-		if "details" in seller and seller["details"]:
+		if "details" in seller and seller["details"]!=None:
 			detailsSent = 1
 			sellerdetails = seller["details"]
 			if hasattr(sellerPtr, "sellerdetails"):
@@ -116,7 +116,7 @@ def update_seller(request):
 				newSellerDetails = SellerDetails(seller = sellerPtr)
 				populateSellerDetailsData(newSellerDetails, sellerdetails)
 
-		if "address" in seller and seller["address"]:
+		if "address" in seller and seller["address"]!=None:
 			addressSent = 1
 			selleraddress = seller["address"]
 			if not "addressID" in selleraddress or not selleraddress["addressID"]:
@@ -131,7 +131,7 @@ def update_seller(request):
 			populateSellerAddressData(sellerAddressPtr, selleraddress)
 			
 
-		if "bankdetails" in seller and seller["bankdetails"]:
+		if "bankdetails" in seller and seller["bankdetails"]!=None:
 			bankdetailsSent = 1
 			sellerbankdetails = seller["bankdetails"]
 			if not "bankdetailsID" in sellerbankdetails or not sellerbankdetails["bankdetailsID"]:

@@ -12,7 +12,7 @@ def user_details(request):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
-def buyer_details(request, buyerID = ""):
+def buyer_details(request):
 
 	if request.method == "GET":
 		buyerID = request.GET.get("buyerID", "")
@@ -28,10 +28,23 @@ def buyer_details(request, buyerID = ""):
 	elif request.method == "DELETE":
 		return buyer.delete_buyer(request)
 
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
+def buyer_address_details(request):
+
+	
+	if request.method == "POST":
+		return buyer.post_new_buyer(request)
+	elif request.method == "PUT":
+		return buyer.update_buyer(request)
+	elif request.method == "DELETE":
+		return buyer.delete_buyer(request)
+
 	return customResponse("4XX", {"error": "Invalid request"})	
 
 @csrf_exempt
-def seller_details(request, sellerID = ""):
+def seller_details(request):
 
 	if request.method == "GET":
 		sellerID = request.GET.get("sellerID", "")

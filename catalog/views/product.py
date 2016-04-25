@@ -2,7 +2,7 @@ from scripts.utils import customResponse, closeDBConnection, convert_keys_to_str
 
 from ..models.category import Category
 from ..models.product import Product, validateProductData, ProductDetails, validateProductDetailsData, populateProductData, populateProductDetailsData
-from ..models.productLot import ProductLot, validateProductLotData, parseMaxDiscount, populateProductLotData
+from ..models.productLot import ProductLot, validateProductLotData, parseMinPricePerUnit, populateProductLotData
 from ..serializers.product import multiple_products_parser, serialize_product
 from users.models.seller import Seller
 import json
@@ -10,18 +10,22 @@ from django.template.defaultfilters import slugify
 from decimal import Decimal
 
 
-def get_product_details(request, productsArr=[]):
+def get_product_details(request, productsArr=[], categoriesArr = [],sellerArr =[]):
 
     try:
         if len(productsArr) == 0:
-            products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related(
-                'seller', 'productdetails', 'category')
-            closeDBConnection()
+            if len(categoriesArr) == 0 and len(sellerArr) == 0:
+                products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related('seller', 'productdetails', 'category')
+            elif len(categoriesArr) == 1 and len(sellerArr) == 0:
+                products = Product.objects.filter(category__id__in=categoriesArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails')
+            elif len(categoriesArr) == 0 and len(sellerArr) == 1:
+                products = Product.objects.filter(seller__id__in=sellerArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails')
+            else:
+                products = Product.objects.filter(category__id__in=categoriesArr,seller__id__in=sellerArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails')
         else:
-            products = Product.objects.filter(id__in=productsArr, delete_status=False, seller__delete_status=False,
-                category__delete_status=False).select_related('seller', 'productdetails', 'category')
-            closeDBConnection()
-
+            products = Product.objects.filter(id__in=productsArr, delete_status=False, seller__delete_status=False,category__delete_status=False).select_related('seller', 'productdetails', 'category')
+            
+        closeDBConnection()
         response = multiple_products_parser(products)
         statusCode = "2XX"
         body = {"products": response}
@@ -42,7 +46,7 @@ def post_new_product(request):
     if not len(product) or not validateProductData(product, Product(), 1):
         return customResponse("4XX", {"error": "Invalid data for product sent"})
 
-    if not "sellerID" in product or not product["sellerID"]:
+    if not "sellerID" in product or not product["sellerID"]!=None:
         return customResponse("4XX", {"error": "Seller id for product not sent"})
 
     sellerPtr = Seller.objects.filter(id=int(product["sellerID"]))
@@ -50,7 +54,7 @@ def post_new_product(request):
         return customResponse("4XX", {"error": "Invalid id for seller sent"})
     sellerPtr = sellerPtr[0]
 
-    if not "categoryID" in product or not product["categoryID"]:
+    if not "categoryID" in product or not product["categoryID"]!=None:
         return customResponse("4XX", {"error": "Category id for product not sent"})
 
     categoryPtr = Category.objects.filter(id=int(product["categoryID"]))
@@ -67,7 +71,7 @@ def post_new_product(request):
     validateProductDetailsData(product["details"], ProductDetails())
 
     product["slug"] = slugify(product["name"])
-    product["max_discount"] = parseMaxDiscount(product["product_lot"])
+    product["min_price_per_unit"] = parseMinPricePerUnit(product["product_lot"])
 
     try:
 
@@ -101,7 +105,7 @@ def update_product(request):
     except Exception as e:
         return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-    if not len(product) or not "productID" in product or not product["productID"]:
+    if not len(product) or not "productID" in product or not product["productID"]!=None:
         return customResponse("4XX", {"error": "Id for product not sent"})
 
     productPtr = Product.objects.filter(id=int(product["productID"])).select_related('productdetails')
@@ -143,7 +147,7 @@ def update_product(request):
             productLots = product["product_lot"]
 
             ProductLot.objects.filter(product_id=int(product["productID"])).delete()
-            productPtr.max_discount = Decimal(parseMaxDiscount(productLots))    
+            productPtr.min_price_per_unit = Decimal(parseMinPricePerUnit(productLots))    
 
             for productLot in productLots:
                 newProductLot = ProductLot(product=productPtr)
@@ -172,7 +176,7 @@ def delete_product(request):
     except Exception as e:
         return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-    if not len(product) or not "productID" in product or not product["productID"]:
+    if not len(product) or not "productID" in product or not product["productID"]!=None:
         return customResponse("4XX", {"error": "Id for product not sent"})
 
     productPtr = Product.objects.filter(id=int(product["productID"]))
