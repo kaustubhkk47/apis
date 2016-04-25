@@ -14,7 +14,7 @@ class SellerPayment(models.Model):
 
     payment_method = models.IntegerField(default=0)
     #reference_number = models.CharField(max_length=255, blank=True)
-    payment_date = models.DateTimeField(blank=True, null=True)
+    payment_time = models.DateTimeField(blank=True, null=True)
 
     details = models.TextField(blank=True)
 
