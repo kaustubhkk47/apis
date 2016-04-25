@@ -2,6 +2,8 @@ from django.db import models
 
 from users.models import Seller
 from .category import Category
+from django.template.defaultfilters import slugify
+from decimal import Decimal
 
 class Product(models.Model):
     seller = models.ForeignKey(Seller)
@@ -85,6 +87,8 @@ def validateProductData(product, oldproduct, is_new):
         product["verification"] = oldproduct.verification
     if not "show_online" in product or not product["show_online"]:
         product["show_online"] = oldproduct.show_online
+    if not "slug" in product or not product["slug"]:
+        product["slug"] = oldproduct.slug
         
     if is_new == 1 and flag == 1:
         return False
@@ -126,3 +130,34 @@ def validateProductDetailsData(productdetails, oldproductdetails):
         productdetails["warranty"] = oldproductdetails.warranty
     if not "remarks" in productdetails or not productdetails["remarks"]:
         productdetails["remarks"] = oldproductdetails.remarks
+
+def populateProductData(productPtr, product):
+    productPtr.name = product["name"]
+    productPtr.price_per_unit = Decimal(product["price_per_unit"])
+    productPtr.unit = product["unit"]
+    productPtr.tax = Decimal(product["tax"])
+    productPtr.lot_size = int(product["lot_size"])
+    productPtr.price_per_lot = Decimal(product["price_per_lot"])
+    productPtr.verification = bool(product["verification"])
+    productPtr.show_online = bool(product["show_online"])
+    productPtr.slug = slugify(product["name"])
+    productPtr.max_discount = Decimal(product["max_discount"])
+
+def populateProductDetailsData(productDetailsPtr, productdetails):
+    productDetailsPtr.seller_catalog_number = productdetails["seller_catalog_number"]
+    productDetailsPtr.brand = productdetails["brand"]
+    productDetailsPtr.description = productdetails["description"]
+    productDetailsPtr.gender = productdetails["gender"]
+    productDetailsPtr.pattern = productdetails["pattern"]
+    productDetailsPtr.style = productdetails["style"]
+    productDetailsPtr.gsm = productdetails["gsm"]
+    productDetailsPtr.sleeve = productdetails["sleeve"]
+    productDetailsPtr.neck_collar_type = productdetails["neck_collar_type"]
+    productDetailsPtr.length = productdetails["length"]
+    productDetailsPtr.work_decoration_type = productdetails["work_decoration_type"]
+    productDetailsPtr.colours = productdetails["colours"]
+    productDetailsPtr.sizes = productdetails["sizes"]
+    productDetailsPtr.special_feature = productdetails["special_feature"]
+    productDetailsPtr.manufactured_country = productdetails["manufactured_country"]
+    productDetailsPtr.warranty = productdetails["warranty"]
+    productDetailsPtr.remarks = productdetails["remarks"]

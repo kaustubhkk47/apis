@@ -1,6 +1,7 @@
 from django.db import models
 
 from catalog.models.product import Product
+from decimal import Decimal
 
 class ProductLot(models.Model):
     product = models.ForeignKey(Product)
@@ -28,6 +29,11 @@ def validateProductLotData(product_lots):
 			flag = 0
 
 	return flag
+
+def populateProductLotData(ProductLotPtr, productLot):
+	ProductLotPtr.lot_size_from = int(productLot["lot_size_from"])
+	ProductLotPtr.lot_size_to = int(productLot["lot_size_to"])
+	ProductLotPtr.lot_discount = Decimal(productLot["lot_discount"])
 
 def parseMaxDiscount(product_lots):
 	return product_lots[len(product_lots)-1]["lot_discount"]

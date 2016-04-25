@@ -1,6 +1,6 @@
 from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_date_time
 import json
-from ..models.seller import Seller, SellerAddress, SellerBankDetails, SellerDetails, validateSellerData, validateSellerAddressData, validateSellerDetailsData, validateSellerBankdetailsData
+from ..models.seller import Seller, SellerAddress, SellerBankDetails, SellerDetails, validateSellerData, validateSellerAddressData, validateSellerDetailsData, validateSellerBankdetailsData, populateSellerData, populateSellerDetailsData,populateSellerAddressData, populateSellerBankDetailsData
 from ..serializers.seller import parse_seller, serialize_seller
 
 def get_seller_details(request,sellersArr=[]):
@@ -47,30 +47,22 @@ def post_new_seller(request):
 	validateSellerDetailsData(seller["details"], SellerDetails())
 
 	try:
-		newSeller = Seller(name = seller["name"], company_name = seller["company_name"],
-			mobile_number = seller["mobile_number"], email = seller["email"], password = seller["password"],
-			alternate_phone_number = seller["alternate_phone_number"], mobile_verification = bool(seller["mobile_verification"]),
-			email_verification=bool(seller["email_verification"]))
+		newSeller = Seller()
+		populateSellerData(newSeller, seller)
 
 		newSeller.save()
 
 		selleraddress = seller["address"]
-		newAddress = SellerAddress(seller=newSeller, address = selleraddress["address"],
-				landmark = selleraddress["landmark"], city = selleraddress["city"], state = selleraddress["state"],
-				country = selleraddress["country"], contact_number = selleraddress["contact_number"],
-				pincode = selleraddress["pincode"])
+		newAddress = SellerAddress(seller=newSeller)
+		populateSellerAddressData(newAddress, selleraddress)
 
 		sellerbankdetails = seller["bankdetails"]
-		newBankDetails = SellerBankDetails(seller=newSeller, account_holders_name = sellerbankdetails["account_holders_name"],
-				account_number = sellerbankdetails["account_number"], ifsc = sellerbankdetails["ifsc"], bank_name = sellerbankdetails["bank_name"],
-				branch = sellerbankdetails["branch"], branch_city = sellerbankdetails["branch_city"],
-				branch_pincode = sellerbankdetails["branch_pincode"])
+		newBankDetails = SellerBankDetails(seller=newSeller)
+		populateSellerBankDetailsData(newBankDetails, sellerbankdetails)
 		
 		sellerdetails = seller["details"]
-		newSellerDetails = SellerDetails(seller = newSeller, vat_tin = sellerdetails["vat_tin"],
-			cst = sellerdetails["cst"], pan = sellerdetails["pan"],
-			name_on_pan = sellerdetails["name_on_pan"], dob_on_pan = sellerdetails["dob_on_pan"],
-			pan_verification = sellerdetails["pan_verification"], tin_verification = sellerdetails["tin_verification"])
+		newSellerDetails = SellerDetails(seller = newSeller)
+		populateSellerDetailsData(newSellerDetails, sellerdetails)
 		
 		newSellerDetails.save()
 		newAddress.save()
@@ -110,79 +102,48 @@ def update_seller(request):
 		return customResponse("4XX", {"error": "Invalid data for seller sent"})
 
 	try:
-		sellerPtr.name = seller["name"]
-		sellerPtr.company_name = seller["company_name"]
-		sellerPtr.mobile_number = seller["mobile_number"]
-		sellerPtr.email = seller["email"]
-		sellerPtr.password = seller["password"]
-		sellerPtr.alternate_phone_number = seller["alternate_phone_number"]
-		sellerPtr.mobile_verification = bool(seller["mobile_verification"])
-		sellerPtr.email_verification = bool(seller["email_verification"])
-
+		populateSellerData(sellerPtr, seller)
+		
 		if "details" in seller and seller["details"]:
 			detailsSent = 1
 			sellerdetails = seller["details"]
 			if hasattr(sellerPtr, "sellerdetails"):
 				validateSellerDetailsData(sellerdetails, sellerPtr.sellerdetails)
-				sellerPtr.sellerdetails.cst = sellerdetails["cst"]
-				sellerPtr.sellerdetails.pan = sellerdetails["pan"]
-				sellerPtr.sellerdetails.name_on_pan = sellerdetails["name_on_pan"]
-				sellerPtr.sellerdetails.dob_on_pan = sellerdetails["dob_on_pan"]
-				sellerPtr.sellerdetails.pan_verification = bool(sellerdetails["pan_verification"])
-				sellerPtr.sellerdetails.tin_verification = bool(sellerdetails["tin_verification"])
-				sellerPtr.sellerdetails.vat_tin = sellerdetails["vat_tin"]
-
+				populateSellerDetailsData(sellerPtr.sellerdetails, sellerdetails)
 			else:
 				detailsPresent = 0
 				validateSellerDetailsData(sellerdetails, SellerDetails())
-				newSellerDetails = SellerDetails(seller = sellerPtr, vat_tin = sellerdetails["vat_tin"],
-					cst = sellerdetails["cst"], pan = sellerdetails["pan"],
-					name_on_pan = sellerdetails["name_on_pan"], dob_on_pan = sellerdetails["dob_on_pan"],
-					pan_verification = sellerdetails["pan_verification"], tin_verification = sellerdetails["tin_verification"])
+				newSellerDetails = SellerDetails(seller = sellerPtr)
+				populateSellerDetailsData(newSellerDetails, sellerdetails)
 
 		if "address" in seller and seller["address"]:
 			addressSent = 1
 			selleraddress = seller["address"]
 			if not "addressID" in selleraddress or not selleraddress["addressID"]:
 				return customResponse("4XX", {"error": "Address id not sent"})
-			sellerAddressPtr = SellerAddress.objects.filter(id = selleraddress["addressID"])
+			sellerAddressPtr = SellerAddress.objects.filter(id = int(selleraddress["addressID"]))
 
 			if len(sellerAddressPtr) == 0:
 				return customResponse("4XX", {"error": "Invalid address id sent"})
 
 			sellerAddressPtr = sellerAddressPtr[0]
-
 			validateSellerAddressData(selleraddress, sellerAddressPtr)
-
-			sellerAddressPtr.address = selleraddress["address"]
-			sellerAddressPtr.landmark = selleraddress["landmark"]
-			sellerAddressPtr.city = selleraddress["city"]
-			sellerAddressPtr.state = selleraddress["state"]
-			sellerAddressPtr.country = selleraddress["country"]
-			sellerAddressPtr.contact_number = selleraddress["contact_number"]
-			sellerAddressPtr.pincode = selleraddress["pincode"]
+			populateSellerAddressData(sellerAddressPtr, selleraddress)
+			
 
 		if "bankdetails" in seller and seller["bankdetails"]:
 			bankdetailsSent = 1
 			sellerbankdetails = seller["bankdetails"]
 			if not "bankdetailsID" in sellerbankdetails or not sellerbankdetails["bankdetailsID"]:
 				return customResponse("4XX", {"error": "Bank details id not sent"})
-			sellerBankDetailsPtr = SellerBankDetails.objects.filter(id = sellerbankdetails["bankdetailsID"])
+			sellerBankDetailsPtr = SellerBankDetails.objects.filter(id = int(sellerbankdetails["bankdetailsID"]))
 
 			if len(sellerBankDetailsPtr) == 0:
 				return customResponse("4XX", {"error": "Invalid bankdetails id sent"})
 
 			sellerBankDetailsPtr = sellerBankDetailsPtr[0]
-
 			validateSellerBankdetailsData(sellerbankdetails, sellerBankDetailsPtr)
-
-			sellerBankDetailsPtr.account_holders_name = sellerbankdetails["account_holders_name"]
-			sellerBankDetailsPtr.account_number = sellerbankdetails["account_number"]
-			sellerBankDetailsPtr.ifsc = sellerbankdetails["ifsc"]
-			sellerBankDetailsPtr.bank_name = sellerbankdetails["bank_name"]
-			sellerBankDetailsPtr.branch = sellerbankdetails["branch"]
-			sellerBankDetailsPtr.branch_city = sellerbankdetails["branch_city"]
-			sellerBankDetailsPtr.branch_pincode = sellerbankdetails["branch_pincode"]
+			populateSellerBankDetailsData(sellerBankDetailsPtr,sellerbankdetails)
 
 		sellerPtr.save()
 		if detailsSent == 1 and detailsPresent == 1:
