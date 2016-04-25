@@ -13,7 +13,7 @@ def serialize_product_lots(productsItem):
             "productlotID" : productLot.id,
             "lot_size_from":productLot.lot_size_from,
             "lot_size_to":productLot.lot_size_to,
-            "lot_discount":productLot.lot_discount
+            "price_per_unit":productLot.price_per_unit
         }
         productLots.append(productLotEntry)
 
@@ -34,8 +34,8 @@ def serialize_product(productsItem):
     product["created_at"] = productsItem.created_at
     product["updated_at"] = productsItem.updated_at
     product["slug"] = productsItem.slug
-    product["max_discount"] = productsItem.max_discount
-    discounted_price = Decimal(productsItem.price_per_unit)*(1- Decimal(productsItem.max_discount)/100)
+    product["min_price_per_unit"] = productsItem.min_price_per_unit
+    discounted_price = Decimal(productsItem.price_per_unit)*(1- Decimal(productsItem.min_price_per_unit)/100)
     product["discounted_price_per_unit"] = '%.2f' % discounted_price
 
     product["seller"] = {
@@ -50,6 +50,8 @@ def serialize_product(productsItem):
     }
 
     product["product_lot"] = serialize_product_lots(productsItem)
+    product["url"] = productsItem.category.slug + "-" + str(productsItem.category.id) + "/" + productsItem.slug+ "-" + str(productsItem.id)
+
 
     return product
 
@@ -59,11 +61,13 @@ def serialize_product_details(productsItem, product):
 
     details["detailsID"] = productsItem.productdetails.id
     details["seller_catalog_number"] = productsItem.productdetails.seller_catalog_number
-    details["description"] = productsItem.productdetails.description
+    details["lot_description"] = productsItem.productdetails.description
     details["brand"] = productsItem.productdetails.brand
     details["pattern"] = productsItem.productdetails.pattern
     details["style"] = productsItem.productdetails.style
     details["gsm"] = productsItem.productdetails.gsm
+    details["gender"] = productsItem.productdetails.gender
+    details["fabric"] = productsItem.productdetails.fabric
     details["sleeve"] = productsItem.productdetails.sleeve
     details["neck_collar_type"] = productsItem.productdetails.neck_collar_type
     details["length"] = productsItem.productdetails.length
@@ -79,17 +83,6 @@ def serialize_product_details(productsItem, product):
     product["details"] = details
 
     return product
-
-def category_products_parser(productQuerySet):
-    products = []
-    products_hash = {}
-
-    for productsItem in productQuerySet:
-        product = serialize_product(productsItem)
-        product["url"] = productsItem.category.slug + "-" + str(productsItem.category.id) + "/" + productsItem.slug+ "-" + str(productsItem.id)
-        products.append(product)
-
-    return products
 
 def multiple_products_parser(productQuerySet):
     products = []

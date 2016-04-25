@@ -33,12 +33,12 @@ def post_new_buyer(request):
 	if not len(buyer) or not validateBuyerData(buyer, Buyer(), 1):
 		return customResponse("4XX", {"error": "Invalid data for buyer sent"})
 
-	if not "address" in buyer or not buyer["address"]:
+	if not "address" in buyer or not buyer["address"]!=None:
 		buyer["address"] = {}
 		
 	validateBuyerAddressData(buyer["address"], BuyerAddress())
 
-	if not "details" in buyer or not buyer["details"]:
+	if not "details" in buyer or not buyer["details"]!=None:
 		buyer["details"] = {}
 
 	try:
@@ -76,7 +76,7 @@ def update_buyer(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer) or not "buyerID" in buyer or not buyer["buyerID"]:
+	if not len(buyer) or not "buyerID" in buyer or not buyer["buyerID"]!=None:
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
 	buyerPtr = Buyer.objects.filter(id=int(buyer["buyerID"])).select_related('buyerdetails')
@@ -96,7 +96,7 @@ def update_buyer(request):
 	try:
 		populateBuyer(buyerPtr, buyer)
 
-		if "details" in buyer and buyer["details"]:
+		if "details" in buyer and buyer["details"]!=None:
 			detailsSent = 1
 			buyerdetails = buyer["details"]
 			if hasattr(buyerPtr, "buyerdetails"):
@@ -108,7 +108,7 @@ def update_buyer(request):
 				newBuyerDetails = BuyerDetails(buyer = buyerPtr)
 				populateBuyerDetails(newBuyerDetails,buyerdetails)
 
-		if "address" in buyer and buyer["address"]:
+		if "address" in buyer and buyer["address"]!=None:
 			addressSent = 1
 			buyeraddress = buyer["address"]
 			if not "addressID" in buyeraddress or not buyeraddress["addressID"]:

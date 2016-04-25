@@ -31,9 +31,10 @@ class BuyerAddress(models.Model):
     country = models.CharField(max_length=50, blank=True, default="India")
     contact_number = models.CharField(max_length=11, blank=True)
     pincode = models.CharField(max_length=6, blank=True)
+    priority = models.IntegerField(default=1)
 
     def __unicode__(self):
-        return self.address
+        return self.buyer.name
 
 class BuyerDetails(models.Model):
     buyer = models.OneToOneField(Buyer)
@@ -54,23 +55,23 @@ def validateBuyerData(buyer, oldbuyer, is_new):
 
     flag = 0
 
-    if not "name" in buyer or not buyer["name"]:
+    if not "name" in buyer or not buyer["name"]!=None:
         flag = 1
         buyer["name"] = oldbuyer.name
-    if not "company_name" in buyer or not buyer["company_name"]:
+    if not "company_name" in buyer or not buyer["company_name"]!=None:
         buyer["company_name"] = oldbuyer.company_name
-    if not "mobile_number" in buyer or not buyer["mobile_number"]:
+    if not "mobile_number" in buyer or not buyer["mobile_number"]!=None:
         flag = 1
         buyer["mobile_number"] = oldbuyer.mobile_number
-    if not "email" in buyer or not buyer["email"]:
+    if not "email" in buyer or not buyer["email"]!=None:
         buyer["email"] = oldbuyer.email
-    if not "password" in buyer or not buyer["password"]:
+    if not "password" in buyer or not buyer["password"]!=None:
         buyer["password"] = oldbuyer.password
-    if not "alternate_phone_number" in buyer or not buyer["alternate_phone_number"]:
+    if not "alternate_phone_number" in buyer or not buyer["alternate_phone_number"]!=None:
         buyer["alternate_phone_number"] = oldbuyer.alternate_phone_number
-    if not "mobile_verification" in buyer or not buyer["mobile_verification"]:
+    if not "mobile_verification" in buyer or not buyer["mobile_verification"]!=None:
         buyer["mobile_verification"] = oldbuyer.mobile_verification
-    if not "email_verification" in buyer or not buyer["email_verification"]:
+    if not "email_verification" in buyer or not buyer["email_verification"]!=None:
         buyer["email_verification"] = oldbuyer.email_verification
     if not "gender" in buyer or not buyer["gender"]:
         buyer["gender"] = oldbuyer.gender
@@ -84,37 +85,37 @@ def validateBuyerData(buyer, oldbuyer, is_new):
     
 def validateBuyerDetailsData(buyerdetails, oldbuyerdetails):
 
-    if not "vat_tin" in buyerdetails or not buyerdetails["vat_tin"]:
+    if not "vat_tin" in buyerdetails or not buyerdetails["vat_tin"]!=None:
         buyerdetails["vat_tin"] = oldbuyerdetails.vat_tin
-    if not "cst" in buyerdetails or not buyerdetails["cst"]:
+    if not "cst" in buyerdetails or not buyerdetails["cst"]!=None:
         buyerdetails["cst"] = oldbuyerdetails.cst
-    if not "buyer_interest" in buyerdetails or not buyerdetails["buyer_interest"]:
+    if not "buyer_interest" in buyerdetails or not buyerdetails["buyer_interest"]!=None:
         buyerdetails["buyer_interest"] = oldbuyerdetails.buyer_interest
-    if not "customer_type" in buyerdetails or not buyerdetails["customer_type"]:
+    if not "customer_type" in buyerdetails or not buyerdetails["customer_type"]!=None:
         buyerdetails["customer_type"] = oldbuyerdetails.customer_type
-    if not "buying_capacity" in buyerdetails or not buyerdetails["buying_capacity"]:
+    if not "buying_capacity" in buyerdetails or not buyerdetails["buying_capacity"]!=None:
         buyerdetails["buying_capacity"] = oldbuyerdetails.buying_capacity
-    if not "buys_from" in buyerdetails or not buyerdetails["buys_from"]:
+    if not "buys_from" in buyerdetails or not buyerdetails["buys_from"]!=None:
         buyerdetails["buys_from"] = oldbuyerdetails.buys_from
-    if not "purchasing_states" in buyerdetails or not buyerdetails["purchasing_states"]:
+    if not "purchasing_states" in buyerdetails or not buyerdetails["purchasing_states"]!=None:
         buyerdetails["purchasing_states"] = oldbuyerdetails.purchasing_states 
 
 
 def validateBuyerAddressData(buyeraddress, oldbuyeraddress):
 
-    if not "address" in buyeraddress or not buyeraddress["address"]:
+    if not "address" in buyeraddress or not buyeraddress["address"]!=None:
         buyeraddress["address"] = oldbuyeraddress.address
-    if not "landmark" in buyeraddress or not buyeraddress["landmark"]:
+    if not "landmark" in buyeraddress or not buyeraddress["landmark"]!=None:
         buyeraddress["landmark"] = oldbuyeraddress.landmark
-    if not "city" in buyeraddress or not buyeraddress["city"]:
+    if not "city" in buyeraddress or not buyeraddress["city"]!=None:
         buyeraddress["city"] = oldbuyeraddress.city
-    if not "state" in buyeraddress or not buyeraddress["state"]:
+    if not "state" in buyeraddress or not buyeraddress["state"]!=None:
         buyeraddress["state"] = oldbuyeraddress.state
-    if not "country" in buyeraddress or not buyeraddress["country"]:
+    if not "country" in buyeraddress or not buyeraddress["country"]!=None:
         buyeraddress["country"] = oldbuyeraddress.country
-    if not "contact_number" in buyeraddress or not buyeraddress["contact_number"]:
+    if not "contact_number" in buyeraddress or not buyeraddress["contact_number"]!=None:
         buyeraddress["contact_number"] = oldbuyeraddress.contact_number
-    if not "pincode" in buyeraddress or not buyeraddress["pincode"]:
+    if not "pincode" in buyeraddress or not buyeraddress["pincode"]!=None:
         buyeraddress["pincode"] = oldbuyeraddress.pincode
 
 def populateBuyer(buyerPtr, buyer):

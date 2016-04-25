@@ -5,7 +5,7 @@ from catalog.views import product
 from scripts.utils import customResponse
 
 @csrf_exempt
-def categories_details(request, categoryID = ""):
+def categories_details(request):
 
 	if request.method == "GET":
 		categoryID = request.GET.get("categoryID", "")
@@ -13,7 +13,7 @@ def categories_details(request, categoryID = ""):
 			categoriesArr = []
 		else:
 			categoriesArr = [int(e) if e.isdigit() else e for e in categoryID.split(",")]
-		return categories.get_categories_details(request, categoriesArr)
+		return categories.get_categories_details(request,categoriesArr)
 	elif request.method == "POST":
 		return categories.post_new_category(request)
 	elif request.method == "PUT":
@@ -25,15 +25,25 @@ def categories_details(request, categoryID = ""):
 
 
 @csrf_exempt
-def product_details(request, productID = ""):
+def product_details(request):
 
 	if request.method == "GET":
 		productID = request.GET.get("productID", "")
+		categoryID = request.GET.get("categoryID", "")
+		sellerID = request.GET.get("sellerID", "")
 		if productID == "":
 			productsArr = []
 		else:
 			productsArr = [int(e) if e.isdigit() else e for e in productID.split(",")]
-		return product.get_product_details(request,productsArr)
+		if categoryID == "":
+			categoriesArr = []
+		else:
+			categoriesArr = [int(e) if e.isdigit() else e for e in categoryID.split(",")]
+		if sellerID == "":
+			sellerArr = []
+		else:
+			sellerArr = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
+		return product.get_product_details(request,productsArr,categoriesArr,sellerArr)
 	elif request.method == "POST":
 		return product.post_new_product(request)
 	elif request.method == "PUT":

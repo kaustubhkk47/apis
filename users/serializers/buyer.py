@@ -44,20 +44,23 @@ def serialize_buyer_addresses(buyer_addresses_queryset):
 
     for buyer_address in buyer_addresses_queryset:
 
-        buyer_address_entry = {
-            "addressID" : buyer_address.id,
-            "address" : buyer_address.address,
-            "landmark" : buyer_address.landmark,
-            "city" : buyer_address.city,
-            "state" : buyer_address.state,
-            "country" : buyer_address.country,
-            "contact_number" : buyer_address.contact_number,
-            "pincode" : buyer_address.pincode
-        }
-
+        buyer_address_entry = serialize_buyer_address(buyer_address)
         buyer_addresses.append(buyer_address_entry)
 
     return buyer_addresses
+
+def serialize_buyer_address(buyer_address):
+    buyer_address_entry = {
+        "addressID" : buyer_address.id,
+        "address" : buyer_address.address,
+        "landmark" : buyer_address.landmark,
+        "city" : buyer_address.city,
+        "state" : buyer_address.state,
+        "country" : buyer_address.country,
+        "contact_number" : buyer_address.contact_number,
+        "pincode" : buyer_address.pincode
+    }
+    return buyer_address_entry
 
 def parse_buyer(buyers_queryset):
 
