@@ -12,7 +12,6 @@ def serialize_buyer(buyer_entry):
         "company_name" : buyer_entry.company_name,
         "mobile_number" : buyer_entry.mobile_number,
         "email" : buyer_entry.email,
-        "password" : buyer_entry.password,
         "alternate_phone_number" : buyer_entry.alternate_phone_number,
         "mobile_verification" : buyer_entry.mobile_verification,
         "email_verification" : buyer_entry.email_verification,
@@ -58,7 +57,8 @@ def serialize_buyer_address(buyer_address):
         "state" : buyer_address.state,
         "country" : buyer_address.country,
         "contact_number" : buyer_address.contact_number,
-        "pincode" : buyer_address.pincode
+        "pincode" : buyer_address.pincode,
+        "priority" : buyer_address.priority
     }
     return buyer_address_entry
 

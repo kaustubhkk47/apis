@@ -42,7 +42,6 @@ def post_new_category(request):
 		 
 	except Exception as e:
 		closeDBConnection()
-		print e
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
 		closeDBConnection()

@@ -12,14 +12,20 @@ from decimal import Decimal
 import datetime
 
 
-def get_order_details(request, statusArr=[]):
+def get_order_details(request, statusArr=[], sellersArr=[]):
 	try:
-		if len(statusArr) == 0:
+		if len(statusArr) == 0 and len(sellersArr) == 0:
 			orderItems = OrderItem.objects.all().select_related('suborder', 'suborder__seller', 'suborder__order',
 													   'suborder__order__buyer', 'order_shipment', 'order_shipment__pickup', 'order_shipment__drop', 'seller_payment')
-		else:
+		elif len(sellersArr) == 0:
 			orderItems = OrderItem.objects.filter(current_status__in=statusArr).select_related(
-				'suborder', 'suborder__seller', 'suborder__order', 'suborder__order__buyer', 'ordershipment', 'ordershipment__pickup', 'ordershipment__drop', 'sellerpayment')
+				'suborder', 'suborder__seller', 'suborder__order', 'suborder__order__buyer', 'order_shipment', 'order_shipment__pickup', 'order_shipment__drop', 'seller_payment')
+		elif len(statusArr) == 0:
+			orderItems = OrderItem.objects.filter(suborder__seller__id__in=sellersArr).select_related(
+				'suborder', 'suborder__seller', 'suborder__order', 'suborder__order__buyer', 'order_shipment', 'order_shipment__pickup', 'order_shipment__drop', 'seller_payment')
+		else:
+			orderItems = OrderItem.objects.filter(current_status__in=statusArr,suborder__seller__id__in=sellersArr).select_related(
+				'suborder', 'suborder__seller', 'suborder__order', 'suborder__order__buyer', 'order_shipment', 'order_shipment__pickup', 'order_shipment__drop', 'seller_payment')
 		closeDBConnection()
 		body = parseOrderItem(orderItems)
 		statusCode = "2XX"
@@ -37,7 +43,6 @@ def post_new_order(request):
 		requestbody = request.body.decode("utf-8")
 		order = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		print e
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
 	if not len(order):
@@ -147,7 +152,6 @@ def post_new_order(request):
 				newOrderItem.save()
 	except Exception as e:
 		closeDBConnection()
-		print e
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
 		closeDBConnection()

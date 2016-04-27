@@ -90,8 +90,6 @@ def validateProductData(product, oldproduct, is_new):
         product["show_online"] = oldproduct.show_online
     if not "slug" in product or not product["slug"]!=None:
         product["slug"] = oldproduct.slug
-
-    print product["show_online"]
         
     if is_new == 1 and flag == 1:
         return False
@@ -141,12 +139,12 @@ def populateProductData(productPtr, product):
     productPtr.price_per_unit = Decimal(product["price_per_unit"])
     productPtr.unit = product["unit"]
     productPtr.tax = Decimal(product["tax"])
+    productPtr.min_price_per_unit = Decimal(product["min_price_per_unit"])
     productPtr.lot_size = int(product["lot_size"])
     productPtr.price_per_lot = Decimal(product["price_per_lot"])
     productPtr.verification = bool(product["verification"])
     productPtr.show_online = bool(product["show_online"])
     productPtr.slug = slugify(product["name"])
-    productPtr.min_price_per_unit = Decimal(product["min_price_per_unit"])
 
 def populateProductDetailsData(productDetailsPtr, productdetails):
     productDetailsPtr.seller_catalog_number = productdetails["seller_catalog_number"]

@@ -40,7 +40,7 @@ class OrderItem(models.Model):
     completed_time = models.DateTimeField(null=True, blank=True)
     closed_time = models.DateTimeField(null=True, blank=True)
 
-    treacking_url = models.URLField(null=True, blank=True)
+    tracking_url = models.URLField(null=True, blank=True)
 
 
     def __unicode__(self):
