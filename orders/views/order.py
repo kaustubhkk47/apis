@@ -168,7 +168,7 @@ def update_order(request):
 
 	status = int(order["status"])
 
-	orderItemPtr = OrderItem.objects.filter(id= int(order["orderitemID"])).select_related('order_shipment')
+	orderItemPtr = OrderItem.objects.filter(id= int(order["orderitemID"])).select_related('order_shipment','seller_payment')
 
 	if len(orderItemPtr) == 0:
 		return customResponse("4XX", {"error": "Invalid id for order item sent"})
@@ -202,11 +202,16 @@ def update_order(request):
 			orderItemPtr.cancellation_time = datetime.datetime.now()
 		elif status == 11:
 			orderItemPtr.completed_time = datetime.datetime.now()
+		elif status == 12:
+			orderItemPtr.seller_payment.payment_status = 1
+			orderItemPtr.seller_payment.payment_method = order["payment_method"]
+			orderItemPtr.seller_payment.payment_date = datetime.datetime.now()
+			orderItemPtr.seller_payment.details = order["details"]
+			orderItemPtr.closed_time = datetime.datetime.now()
 		
 		orderItemPtr.current_status = status
 		orderItemPtr.save()
 	except Exception as e:
-		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "could not update"})
 	else:
