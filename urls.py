@@ -35,6 +35,7 @@ urlpatterns += [
     url(r'^users/buyer/$', user_handler.buyer_details),
     url(r'^users/buyer/login/$', user_handler.buyer_login),
     url(r'^users/buyer/address/$', user_handler.buyer_address_details),
+    url(r'^users/seller/$', user_handler.seller_details),
     url(r'^users/seller/login/$', user_handler.seller_login),
     url(r'^users/internaluser/login/$', user_handler.internaluser_login)
 ]
