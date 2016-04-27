@@ -38,6 +38,9 @@ class OrderItem(models.Model):
     sent_for_pickup_time = models.DateTimeField(null=True, blank=True)
     lost_time = models.DateTimeField(null=True, blank=True)
     completed_time = models.DateTimeField(null=True, blank=True)
+    closed_time = models.DateTimeField(null=True, blank=True)
+
+    treacking_url = models.URLField(null=True, blank=True)
 
 
     def __unicode__(self):
@@ -82,21 +85,23 @@ def validateOrderItemStatus(status, current_status):
         return False
     elif current_status == 3 and not(status == 4 or status == 10):
         return False
-    elif current_status == 4 and (status == 8 or status == 11 or status < 4):
+    elif current_status == 4 and not(status == 5 or status == 6 or status == 7 or status == 9):
         return False
-    elif current_status == 5 and (status == 8 or status == 11 or status < 4):
+    elif current_status == 5 and not(status == 6 or status == 7 or status == 9):
         return False
-    elif current_status == 6 and (status == 8 or status == 11 or status <6):
+    elif current_status == 6 and not(status == 11 or status == 7):
         return False
-    elif current_status == 7 and (status == 11 or status < 7):
+    elif current_status == 7 and not(status == 8 or status == 9):
         return False
-    elif current_status == 8:
+    elif current_status == 8 and not(status == 12):
         return False
-    elif current_status == 9:
+    elif current_status == 9 and not(status == 12):
         return False
-    elif current_status == 10:
+    elif current_status == 10 and not(status == 12):
         return False
-    elif current_status == 11:
+    elif current_status == 11 and not(status == 12):
+        return False
+    elif current_status == 12:
         return False
     return True
 
@@ -104,7 +109,7 @@ def validateOrderItemStatus(status, current_status):
 OrderItemStatus = {
 	0:"Order Placed",
 	1:"Merchant notified",
-    2:"Sent for pickup",
+    2:"3PL notified",
     3:"3PL manifested",
     4:"3PL in transit",
     5:"3PL stuck in transit",
@@ -113,5 +118,6 @@ OrderItemStatus = {
     8:"RTO delivered",
     9:"Lost",
     10:"Cancelled",
-    11:"Completed"
+    11:"Completed",
+    12:"Order Closed"
 }
