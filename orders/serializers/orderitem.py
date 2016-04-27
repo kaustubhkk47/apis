@@ -20,19 +20,26 @@ def serializeOrderItem(orderItemEntry):
 		orderItem["order_shipment"] = serializeOrderShipment(orderItemEntry.order_shipment)
 	if hasattr(orderItemEntry,"seller_payment"):
 		orderItem["seller_payment"] = serializeSellerPayment(orderItemEntry.seller_payment)
+	orderItem["productID"] = orderItemEntry.product_id
 	orderItem["lots"] = orderItemEntry.lots
-	orderItem["undiscounted_price_per_lot"] = orderItemEntry.undiscounted_price_per_lot
-	orderItem["discount"] = orderItemEntry.discount
+	orderItem["undiscounted_price_per_piece"] = orderItemEntry.undiscounted_price_per_piece
+	orderItem["actual_price_per_piece"] = orderItemEntry.actual_price_per_piece
 	orderItem["total_price"] = orderItemEntry.total_price
 	orderItem["cod_charge"] = orderItemEntry.cod_charge
 	orderItem["shipping_charge"] = orderItemEntry.shipping_charge
 	orderItem["final_price"] = orderItemEntry.final_price
+	orderItem["lot_size"] = orderItemEntry.lot_size
 	orderItem["created_at"] = orderItemEntry.created_at
 	orderItem["updated_at"] = orderItemEntry.updated_at
 	orderItem["current_status"] = orderItemEntry.current_status
 	orderItem["current_status_display_value"] = OrderItemStatus[orderItemEntry.current_status]
 	orderItem["cancellation_remarks"] = orderItemEntry.cancellation_remarks
 	orderItem["cancellation_time"] = orderItemEntry.cancellation_time
+	orderItem["merchant_notified_time"] = orderItemEntry.merchant_notified_time
+	orderItem["sent_for_pickup_time"] = orderItemEntry.sent_for_pickup_time
+	orderItem["lost_time"] = orderItemEntry.lost_time
+	orderItem["completed_time"] = orderItemEntry.completed_time
+	orderItem["closed_time"] = orderItemEntry.closed_time
 	return orderItem
 
 def serializeSubOrder(subOrderEntry):
@@ -41,6 +48,7 @@ def serializeSubOrder(subOrderEntry):
 		"product_count":subOrderEntry.product_count,
 		"undiscounted_price":subOrderEntry.undiscounted_price,
 		"total_price":subOrderEntry.total_price,
+		"final_price":subOrderEntry.final_price,
 		"seller":serialize_seller(subOrderEntry.seller),
 		"order":serializeOrder(subOrderEntry.order)
 	}
@@ -75,6 +83,7 @@ def serializeOrderShipment(orderShipmentEntry):
 		"remarks": orderShipmentEntry.remarks,
 		"tpl_manifested_time": orderShipmentEntry.tpl_manifested_time,
 		"tpl_in_transit_time": orderShipmentEntry.tpl_in_transit_time,
+		"tpl_stuck_in_transit_time": orderShipmentEntry.tpl_stuck_in_transit_time,
 		"delivered_time": orderShipmentEntry.delivered_time,
 		"rto_in_transit_time": orderShipmentEntry.rto_in_transit_time,
 		"rto_delivered_time":		 orderShipmentEntry.rto_delivered_time,
@@ -89,7 +98,7 @@ def serializeSellerPayment(sellerPaymentEntry):
 		"sellerpaymentID":sellerPaymentEntry.id,
 		"payment_status":sellerPaymentEntry.payment_status,
 		"payment_method":sellerPaymentEntry.payment_method,
-		"payment_date":sellerPaymentEntry.payment_date,
+		"payment_time":sellerPaymentEntry.payment_time,
 		"details":sellerPaymentEntry.details
 	}
 	return sellerPayment

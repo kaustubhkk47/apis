@@ -2,7 +2,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from catalog.views import categories
 from catalog.views import product
-from scripts.utils import customResponse
+from scripts.utils import customResponse, get_token_payload
+import jwt as JsonWebToken
 
 @csrf_exempt
 def categories_details(request):
@@ -39,7 +40,11 @@ def product_details(request):
 			categoriesArr = []
 		else:
 			categoriesArr = [int(e) if e.isdigit() else e for e in categoryID.split(",")]
-		if sellerID == "":
+		accessToken = request.GET.get("access_token", "")
+		tokenPayload = get_token_payload(accessToken, "sellerID")
+		if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
+			sellerArr = [tokenPayload["sellerID"]]
+		elif sellerID == "":
 			sellerArr = []
 		else:
 			sellerArr = [int(e) if e.isdigit() else e for e in sellerID.split(",")]

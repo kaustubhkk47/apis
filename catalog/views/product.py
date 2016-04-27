@@ -162,7 +162,6 @@ def update_product(request):
         
 
     except Exception as e:
-        print e
         closeDBConnection()
         return customResponse("4XX", {"error": "could not update"})
     else:

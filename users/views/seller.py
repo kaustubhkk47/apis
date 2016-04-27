@@ -80,7 +80,6 @@ def update_seller(request):
 		requestbody = request.body.decode("utf-8")
 		seller = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		print e
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
 	if not len(seller) or not "sellerID" in seller or not seller["sellerID"]!=None:
