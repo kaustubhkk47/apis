@@ -31,6 +31,8 @@ class OrderItem(models.Model):
 
     current_status = models.IntegerField(default=0)
 
+    remarks = models.TextField(blank=True)
+
     cancellation_remarks = models.TextField(blank=True)
     cancellation_time = models.DateTimeField(null=True, blank=True)
 
@@ -73,6 +75,8 @@ def validateOrderProductsData(orderProducts):
             flag = False
         if not "actual_price_per_piece" in orderProduct or not orderProduct["actual_price_per_piece"]!=None:
             flag = False
+        if not "remarks" in orderProduct or not orderProduct["remarks"]!=None:
+            orderProduct["remarks"] = ""
 
     return flag
 
