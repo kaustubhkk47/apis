@@ -48,6 +48,9 @@ def serialize_product(productsItem):
         "category_slug" : productsItem.category.slug
     }
 
+    if hasattr(productsItem, 'productdetails'):
+        product = serialize_product_details(productsItem, product)
+
     product["product_lot"] = serialize_product_lots(productsItem)
     product["url"] = productsItem.category.slug + "-" + str(productsItem.category.id) + "/" + productsItem.slug+ "-" + str(productsItem.id)
 
@@ -87,9 +90,5 @@ def multiple_products_parser(productQuerySet):
     products = []
     for productsItem in productQuerySet:
         product = serialize_product(productsItem)
-
-        if hasattr(productsItem, 'productdetails'):
-            product = serialize_product_details(productsItem, product)
-
         products.append(product)
     return products
