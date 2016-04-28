@@ -16,16 +16,16 @@ def get_order_details(request, statusArr=[], sellersArr=[]):
 	try:
 		if len(statusArr) == 0 and len(sellersArr) == 0:
 			orderItems = OrderItem.objects.all().select_related('suborder', 'suborder__seller', 'suborder__order',
-													   'suborder__order__buyer', 'order_shipment', 'order_shipment__pickup', 'order_shipment__drop', 'seller_payment')
-		elif len(sellersArr) == 0:
+													   'suborder__order__buyer', 'order_shipment', 'order_shipment__pickup', 'order_shipment__drop', 'seller_payment','product')
+		elif len(sellersArr) == 0 and len(statusArr) == 1:
 			orderItems = OrderItem.objects.filter(current_status__in=statusArr).select_related(
-				'suborder', 'suborder__seller', 'suborder__order', 'suborder__order__buyer', 'order_shipment', 'order_shipment__pickup', 'order_shipment__drop', 'seller_payment')
-		elif len(statusArr) == 0:
+				'suborder', 'suborder__seller', 'suborder__order', 'suborder__order__buyer', 'order_shipment', 'order_shipment__pickup', 'order_shipment__drop', 'seller_payment','product')
+		elif len(sellersArr) == 1 and len(statusArr) == 0:
 			orderItems = OrderItem.objects.filter(suborder__seller__id__in=sellersArr).select_related(
-				'suborder', 'suborder__seller', 'suborder__order', 'suborder__order__buyer', 'order_shipment', 'order_shipment__pickup', 'order_shipment__drop', 'seller_payment')
+				'suborder', 'suborder__seller', 'suborder__order', 'suborder__order__buyer', 'order_shipment', 'order_shipment__pickup', 'order_shipment__drop', 'seller_payment','product')
 		else:
 			orderItems = OrderItem.objects.filter(current_status__in=statusArr,suborder__seller__id__in=sellersArr).select_related(
-				'suborder', 'suborder__seller', 'suborder__order', 'suborder__order__buyer', 'order_shipment', 'order_shipment__pickup', 'order_shipment__drop', 'seller_payment')
+				'suborder', 'suborder__seller', 'suborder__order', 'suborder__order__buyer', 'order_shipment', 'order_shipment__pickup', 'order_shipment__drop', 'seller_payment','product')
 		closeDBConnection()
 		body = parseOrderItem(orderItems)
 		statusCode = "2XX"
@@ -102,6 +102,7 @@ def post_new_order(request):
 			subOrderItem["product_count"] = 1
 			subOrderItem["undiscounted_price"] = Decimal(orderProduct["lots"])*Decimal(orderProduct["undiscounted_price_per_piece"])*Decimal(orderProduct["lot_size"])
 			subOrderItem["final_price"] = Decimal(orderProduct["final_price"])
+			subOrderItem["remarks"] = orderProduct["remarks"]
 			subOrderItem["total_price"] = Decimal(orderProduct["total_price"])
 			subOrderItem["seller"] = seller
 			subOrders.append(subOrderItem)	

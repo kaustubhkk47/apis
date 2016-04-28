@@ -1,5 +1,6 @@
 from users.serializers.seller import serialize_seller, serialize_seller_address
 from users.serializers.buyer import serialize_buyer, serialize_buyer_address
+from catalog.serializers.product import serialize_product
 from ..models.orderItem import OrderItemStatus
 
 def parseOrderItem(orderItemQuerySet):
@@ -20,7 +21,7 @@ def serializeOrderItem(orderItemEntry):
 		orderItem["order_shipment"] = serializeOrderShipment(orderItemEntry.order_shipment)
 	if hasattr(orderItemEntry,"seller_payment"):
 		orderItem["seller_payment"] = serializeSellerPayment(orderItemEntry.seller_payment)
-	orderItem["productID"] = orderItemEntry.product_id
+	orderItem["product"] = serialize_product(orderItemEntry.product)
 	orderItem["lots"] = orderItemEntry.lots
 	orderItem["undiscounted_price_per_piece"] = orderItemEntry.undiscounted_price_per_piece
 	orderItem["actual_price_per_piece"] = orderItemEntry.actual_price_per_piece
@@ -32,6 +33,7 @@ def serializeOrderItem(orderItemEntry):
 	orderItem["created_at"] = orderItemEntry.created_at
 	orderItem["updated_at"] = orderItemEntry.updated_at
 	orderItem["current_status"] = orderItemEntry.current_status
+	orderItem["remarks"] = orderItemEntry.remarks
 	orderItem["current_status_display_value"] = OrderItemStatus[orderItemEntry.current_status]
 	orderItem["cancellation_remarks"] = orderItemEntry.cancellation_remarks
 	orderItem["cancellation_time"] = orderItemEntry.cancellation_time
