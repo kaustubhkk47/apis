@@ -11,14 +11,13 @@ from decimal import Decimal
 
 
 def get_product_details(request, productsArr=[], categoriesArr = [],sellerArr =[]):
-
     try:
         if len(productsArr) == 0:
             if len(categoriesArr) == 0 and len(sellerArr) == 0:
                 products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related('seller', 'productdetails', 'category')
-            elif len(categoriesArr) == 1 and len(sellerArr) == 0:
+            elif len(categoriesArr) > 0 and len(sellerArr) == 0:
                 products = Product.objects.filter(category__id__in=categoriesArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails')
-            elif len(categoriesArr) == 0 and len(sellerArr) == 1:
+            elif len(categoriesArr) == 0 and len(sellerArr) > 0:
                 products = Product.objects.filter(seller__id__in=sellerArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails')
             else:
                 products = Product.objects.filter(category__id__in=categoriesArr,seller__id__in=sellerArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails')
@@ -72,6 +71,7 @@ def post_new_product(request):
 
     product["slug"] = slugify(product["name"])
     product["min_price_per_unit"] = parseMinPricePerUnit(product["product_lot"])
+    product["display_name"] = product["details"]["brand"] + " " +product["name"] + " " + product["details"]["seller_catalog_number"]
 
     try:
 
@@ -130,6 +130,7 @@ def update_product(request):
         if "details" in product and product["details"]:
             detailsSent = 1
             productdetails = product["details"]
+            productPtr.display_name = product["details"]["brand"] + " " +product["name"] + " " + product["details"]["seller_catalog_number"]
             if hasattr(productPtr, "productdetails"):
                 validateProductDetailsData(productdetails, productPtr.productdetails)
                 populateProductDetailsData(productPtr.productdetails, productdetails)
