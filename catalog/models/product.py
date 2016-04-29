@@ -4,6 +4,7 @@ from users.models import Seller
 from .category import Category
 from django.template.defaultfilters import slugify
 from decimal import Decimal
+import datetime
 
 class Product(models.Model):
     seller = models.ForeignKey(Seller)
@@ -19,7 +20,9 @@ class Product(models.Model):
     lot_size = models.PositiveIntegerField(default=1)
     price_per_lot = models.DecimalField(max_digits=10, decimal_places=2, blank=False)
 
-    images = models.CommaSeparatedIntegerField(max_length=255, blank=True)
+    image_path = models.TextField(blank=True)
+    image_name = models.TextField(blank=True)
+    image_numbers = models.TextField(blank=True)
 
     verification = models.BooleanField(default=False)
     show_online = models.BooleanField(default=True)
@@ -27,6 +30,8 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     slug = models.CharField(max_length=100, blank=True)
+
+    display_name = models.TextField()
 
     delete_status = models.BooleanField(default=False)
 
@@ -44,17 +49,27 @@ class ProductDetails(models.Model):
     gender = models.CharField(max_length=20, blank=True)
     pattern = models.CharField(max_length=40, blank=True)
     style = models.CharField(max_length=40, blank=True)
-    gsm = models.CharField(max_length=40, blank=True)
+    fabric_gsm = models.CharField(max_length=40, blank=True)
     sleeve = models.CharField(max_length=40, blank=True)
     neck_collar_type = models.CharField(max_length=40, blank=True)
     length = models.CharField(max_length=40, blank=True)
     work_decoration_type = models.CharField(max_length=40, blank=True)
     colours = models.CharField(max_length=100, blank=True)
     sizes = models.CharField(max_length=100, blank=True)
-    fabric = models.CharField(max_length=100, blank=True)
+    #fabric = models.CharField(max_length=100, blank=True)
     special_feature = models.TextField(blank=True)
+    packaging_details = models.TextField(blank=True)
+    availability = models.TextField(blank=True)
+    dispatched_in = models.TextField(blank=True)
+    lot_description = models.TextField(blank=True)
+    weight_per_unit = models.DecimalField(max_digits=10, decimal_places=2, blank=True, default=0.0)
+
+    sample_type = models.TextField(blank=True)
+    sample_description = models.TextField(blank=True)
+    sample_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, default=0.0)
 
     manufactured_country = models.CharField(max_length=50, blank=True, default="India")
+    manufactured_city = models.CharField(max_length=50, blank=True)
     warranty = models.CharField(max_length=100, blank=True)
 
     remarks = models.TextField()
@@ -90,6 +105,8 @@ def validateProductData(product, oldproduct, is_new):
         product["show_online"] = oldproduct.show_online
     if not "slug" in product or not product["slug"]!=None:
         product["slug"] = oldproduct.slug
+    if not "display_name" in product or not product["display_name"]!=None:
+        product["display_name"] = oldproduct.display_name
         
     if is_new == 1 and flag == 1:
         return False
@@ -111,8 +128,8 @@ def validateProductDetailsData(productdetails, oldproductdetails):
         productdetails["style"] = oldproductdetails.style
     if not "sleeve" in productdetails or not productdetails["sleeve"]!=None:
         productdetails["sleeve"] = oldproductdetails.sleeve
-    if not "gsm" in productdetails or not productdetails["gsm"]!=None:
-        productdetails["gsm"] = oldproductdetails.gsm
+    if not "fabric_gsm" in productdetails or not productdetails["fabric_gsm"]!=None:
+        productdetails["fabric_gsm"] = oldproductdetails.fabric_gsm
     if not "neck_collar_type" in productdetails or not productdetails["neck_collar_type"]!=None:
         productdetails["neck_collar_type"] = oldproductdetails.neck_collar_type
     if not "length" in productdetails or not productdetails["length"]!=None:
@@ -129,10 +146,26 @@ def validateProductDetailsData(productdetails, oldproductdetails):
         productdetails["manufactured_country"] = oldproductdetails.manufactured_country
     if not "warranty" in productdetails or not productdetails["warranty"]!=None:
         productdetails["warranty"] = oldproductdetails.warranty
-    if not "fabric" in productdetails or not productdetails["fabric"]!=None:
-        productdetails["fabric"] = oldproductdetails.fabric
     if not "remarks" in productdetails or not productdetails["remarks"]!=None:
         productdetails["remarks"] = oldproductdetails.remarks
+    if not "packaging_details" in productdetails or not productdetails["packaging_details"]!=None:
+        productdetails["packaging_details"] = oldproductdetails.packaging_details
+    if not "availability" in productdetails or not productdetails["availability"]!=None:
+        productdetails["availability"] = oldproductdetails.availability
+    if not "dispatched_in" in productdetails or not productdetails["dispatched_in"]!=None:
+        productdetails["dispatched_in"] = oldproductdetails.dispatched_in
+    if not "manufactured_city" in productdetails or not productdetails["manufactured_city"]!=None:
+        productdetails["manufactured_city"] = oldproductdetails.manufactured_city
+    if not "lot_description" in productdetails or not productdetails["lot_description"]!=None:
+        productdetails["lot_description"] = oldproductdetails.lot_description
+    if not "weight_per_unit" in productdetails or not productdetails["weight_per_unit"]!=None:
+        productdetails["weight_per_unit"] = oldproductdetails.weight_per_unit
+    if not "sample_type" in productdetails or not productdetails["sample_type"]!=None:
+        productdetails["sample_type"] = oldproductdetails.sample_type
+    if not "sample_description" in productdetails or not productdetails["sample_description"]!=None:
+        productdetails["sample_description"] = oldproductdetails.sample_description
+    if not "sample_price" in productdetails or not productdetails["sample_price"]!=None:
+        productdetails["sample_price"] = oldproductdetails.sample_price
 
 def populateProductData(productPtr, product):
     productPtr.name = product["name"]
@@ -145,6 +178,15 @@ def populateProductData(productPtr, product):
     productPtr.verification = bool(product["verification"])
     productPtr.show_online = bool(product["show_online"])
     productPtr.slug = slugify(product["name"])
+    productPtr.display_name = product["display_name"]
+    if "image_count" in product and product["image_count"]!=None:
+        nowtime = datetime.datetime.now()
+        productPtr.image_path = "static/media/productimages/" + str(productPtr.seller.id) + "/" + nowtime.strftime('%Y%m%d%H%M%S') + "/"
+        productPtr.image_name = slugify(productPtr.display_name)
+        image_numbers = {}
+        for i in range(1, product["image_count"] + 1):
+            image_numbers[i] = i
+        productPtr.image_numbers = str(image_numbers)
 
 def populateProductDetailsData(productDetailsPtr, productdetails):
     productDetailsPtr.seller_catalog_number = productdetails["seller_catalog_number"]
@@ -153,7 +195,7 @@ def populateProductDetailsData(productDetailsPtr, productdetails):
     productDetailsPtr.gender = productdetails["gender"]
     productDetailsPtr.pattern = productdetails["pattern"]
     productDetailsPtr.style = productdetails["style"]
-    productDetailsPtr.gsm = productdetails["gsm"]
+    productDetailsPtr.fabric_gsm = productdetails["fabric_gsm"]
     productDetailsPtr.sleeve = productdetails["sleeve"]
     productDetailsPtr.neck_collar_type = productdetails["neck_collar_type"]
     productDetailsPtr.length = productdetails["length"]
@@ -164,4 +206,12 @@ def populateProductDetailsData(productDetailsPtr, productdetails):
     productDetailsPtr.manufactured_country = productdetails["manufactured_country"]
     productDetailsPtr.warranty = productdetails["warranty"]
     productDetailsPtr.remarks = productdetails["remarks"]
-    productDetailsPtr.fabric = productdetails["fabric"]
+    productDetailsPtr.packaging_details = productdetails["packaging_details"]
+    productDetailsPtr.availability = productdetails["availability"]
+    productDetailsPtr.dispatched_in = productdetails["dispatched_in"]
+    productDetailsPtr.manufactured_city = productdetails["manufactured_city"]
+    productDetailsPtr.lot_description = productdetails["lot_description"]
+    productDetailsPtr.weight_per_unit = Decimal(productdetails["weight_per_unit"])
+    productDetailsPtr.sample_type = productdetails["sample_type"]
+    productDetailsPtr.sample_description = productdetails["sample_description"]
+    productDetailsPtr.sample_price = Decimal(productdetails["sample_price"])
