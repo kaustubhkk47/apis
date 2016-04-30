@@ -2,6 +2,7 @@ from decimal import Decimal
 import settings
 
 from ..models.productLot import ProductLot
+from .category import serialize_categories
 
 def serialize_product_lots(productsItem):
 
@@ -48,12 +49,8 @@ def serialize_product(productsItem):
         "sellerID" : productsItem.seller.id
     }
 
-    product["category"] = {
-        "category_name" : productsItem.category.name,
-        "categoryID" : productsItem.category.id,
-        "category_slug" : productsItem.category.slug
-    }
-
+    product["category"] = serialize_categories(productsItem.category)
+    
     if hasattr(productsItem, 'productdetails'):
         product = serialize_product_details(productsItem, product)
 
