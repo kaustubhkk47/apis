@@ -8,9 +8,9 @@ from users.models.seller import Seller
 import json
 from django.template.defaultfilters import slugify
 from decimal import Decimal
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-
-def get_product_details(request, productsArr=[], categoriesArr = [],sellerArr =[]):
+def get_product_details(request, productsArr=[], categoriesArr = [],sellerArr =[], pageNumber=0,productsperPage=20):
     try:
         if len(productsArr) == 0:
             if len(categoriesArr) == 0 and len(sellerArr) == 0:
@@ -23,11 +23,23 @@ def get_product_details(request, productsArr=[], categoriesArr = [],sellerArr =[
                 products = Product.objects.filter(category__id__in=categoriesArr,seller__id__in=sellerArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails')
         else:
             products = Product.objects.filter(id__in=productsArr, delete_status=False, seller__delete_status=False,category__delete_status=False).select_related('seller', 'productdetails', 'category')
-            
+
         closeDBConnection()
-        response = multiple_products_parser(products)
+
+        if pageNumber > 0:
+            pageNumber = 1
+            paginator = Paginator(products, productsperPage)
+            try:
+                pageProducts = paginator.page(pageNumber)
+            except EmptyPage:
+                pageProducts = paginator.page(paginator.num_pages)
+            response = multiple_products_parser(pageProducts)
+            body = {"products": response,"total_products":paginator.count, "total_pages":paginator.num_pages}
+        else:
+            response = multiple_products_parser(products)
+            body = {"products": response}
+            
         statusCode = "2XX"
-        body = {"products": response}
     except Exception as e:
         statusCode = "4XX"
         body = {"error": "Invalid product"}

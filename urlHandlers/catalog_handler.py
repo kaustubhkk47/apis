@@ -32,6 +32,8 @@ def product_details(request):
 		productID = request.GET.get("productID", "")
 		categoryID = request.GET.get("categoryID", "")
 		sellerID = request.GET.get("sellerID", "")
+		pageNumber = request.GET.get("page_number", 0)
+		productsperPage = request.GET.get("products_per_page", 20)
 		if productID == "":
 			productsArr = []
 		else:
@@ -48,7 +50,7 @@ def product_details(request):
 			sellerArr = []
 		else:
 			sellerArr = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
-		return product.get_product_details(request,productsArr,categoriesArr,sellerArr)
+		return product.get_product_details(request,productsArr,categoriesArr,sellerArr,pageNumber,productsperPage)
 	elif request.method == "POST":
 		return product.post_new_product(request)
 	elif request.method == "PUT":
