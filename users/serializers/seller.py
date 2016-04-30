@@ -21,7 +21,7 @@ def serialize_seller(seller_entry):
         "created_at" : seller_entry.created_at,
         "updated_at" : seller_entry.updated_at,
         "address" : seller_addresses,
-        "bank_details" : seller_bankdetails
+        "bankdetails" : seller_bankdetails
     }
     
     if hasattr(seller_entry,'sellerdetails'):

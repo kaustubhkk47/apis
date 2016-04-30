@@ -181,7 +181,7 @@ def populateProductData(productPtr, product):
     productPtr.display_name = product["display_name"]
     if "image_count" in product and product["image_count"]!=None:
         nowtime = datetime.datetime.now()
-        productPtr.image_path = "static/media/productimages/" + str(productPtr.seller.id) + "/" + nowtime.strftime('%Y%m%d%H%M%S') + "/"
+        productPtr.image_path = "media/productimages/" + str(productPtr.seller.id) + "/" + nowtime.strftime('%Y%m%d%H%M%S') + "/"
         productPtr.image_name = slugify(productPtr.display_name)
         image_numbers = {}
         for i in range(1, product["image_count"] + 1):

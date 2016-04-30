@@ -6,27 +6,29 @@ import shutil
 import ast
 from PIL import Image
 
-productURL = "http://localhost:8000/products/"
+productURL = "http://api.probzip.com/products/"
 redFill = openpyxl.styles.PatternFill(start_color='FA5858',end_color='FA5858',fill_type='solid')
 greenFill = openpyxl.styles.PatternFill(start_color='00FF40',end_color='00FF40',fill_type='solid')
 
 imageDirectory = "./images/"
 originalSizePath = ""
-thumbnailSizePath = "100x100/"
-mediumSizePath = "300x300/"
-largeSizePath = "600x600/"
+thumbnailSizePath = "200x200/"
+mediumSizePath = "400x400/"
+largeSizePath = "700x700/"
 
 allSizePaths = [originalSizePath, thumbnailSizePath, mediumSizePath, largeSizePath]
-allImageSizes = [2000.0, 100.0, 300.0, 600.0]
+allImageSizes = [2000.0, 200.0, 400.0, 700.0]
 fileFormatExtensions = [".jpg", ".jpeg",".png"]
 
 
 def read_file():
+        #filename = raw_input()
 	try:
 		wb = openpyxl.load_workbook("./ProductDataSheet.xlsx")
+		#wb = openpyxl.load_workbook(filename)
 		send_products_data(wb)
 	except Exception as e:
-		print 'file not found'
+		print e
 
 def send_products_data(wb):
 	row = 5
@@ -111,14 +113,14 @@ def fill_product_data(wb , i):
 	productData = {}
 
 	try:
-		productData["categoryID"] = 1
-		productData["sellerID"] = parseInt(wb.worksheets[0]["E4"].value)
+		productData["categoryID"] = get_categoryID(wb.worksheets[1]["D"+str(i)].value, wb)
+		productData["sellerID"] = parseInt(wb.worksheets[0]["F4"].value)
 
 		productData["name"] = str(wb.worksheets[1]["A"+str(i)].value)
-		productData["price_per_unit"] = parseFloat(wb.worksheets[3]["G"+str(i)].value)
-		productData["unit"] = str(wb.worksheets[3]["E"+str(i)].value)
-		productData["tax"] = parseFloat(wb.worksheets[3]["K"+str(i)].value)
-		productData["lot_size"] = parseInt(wb.worksheets[3]["H"+str(i)].value)
+		productData["price_per_unit"] = parseFloat(wb.worksheets[2]["G"+str(i)].value)
+		productData["unit"] = str(wb.worksheets[2]["E"+str(i)].value)
+		productData["tax"] = parseFloat(wb.worksheets[2]["K"+str(i)].value)
+		productData["lot_size"] = parseInt(wb.worksheets[2]["H"+str(i)].value)
 		productData["price_per_lot"] = parseFloat(productData["lot_size"]*productData["price_per_unit"])
 		productData["image_count"] = countImages(i)
 	
@@ -139,24 +141,42 @@ def fill_product_data(wb , i):
 		productDetails["special_feature"] = str(wb.worksheets[1]["P"+str(i)].value)
 		productDetails["packaging_details"] = str(wb.worksheets[1]["Q"+str(i)].value)
 		productDetails["availability"] = str(wb.worksheets[1]["R"+str(i)].value)
-		productDetails["weight_per_unit"] = parseFloat(wb.worksheets[3]["F"+str(i)].value)
+		productDetails["weight_per_unit"] = parseFloat(wb.worksheets[2]["F"+str(i)].value)
 		productDetails["dispatched_in"] = str(wb.worksheets[1]["S"+str(i)].value)
-		productDetails["sample_type"] = str(wb.worksheets[3]["M"+str(i)].value)
-		productDetails["sample_description"] = str(wb.worksheets[3]["N"+str(i)].value)
-		productDetails["sample_price"] = parseFloat(wb.worksheets[3]["O"+str(i)].value)
+		productDetails["sample_type"] = str(wb.worksheets[2]["M"+str(i)].value)
+		productDetails["sample_description"] = str(wb.worksheets[2]["N"+str(i)].value)
+		productDetails["sample_price"] = parseFloat(wb.worksheets[2]["O"+str(i)].value)
 
-		productDetails["manufactured_country"] = str(wb.worksheets[0]["C7"].value)
-		productDetails["manufactured_city"] = str(wb.worksheets[0]["D7"].value)
+		productDetails["manufactured_country"] = "India"
+		productDetails["manufactured_city"] = str(wb.worksheets[0]["C7"].value)
 
 		productData["details"] = productDetails
 
 		productData["product_lot"] = fill_product_lot_data(wb,i)
 
 	except Exception as e:
-		return {}
 		post_feedback(wb, i, "Data was incorrect")
 
 	return productData
+
+def get_categoryID(value, wb):
+	ws = wb.worksheets[3]
+	row = 2
+	maxRow = get_max_category_row(wb)
+	for i in range(2,maxRow+1):
+		if ws["A"+str(i)].value == value:
+			return parseInt(ws["B" +str(i)].value)
+
+def get_max_category_row(wb):
+	row = 2
+	ws = wb.worksheets[3]
+	while True:
+		categoryName = str(ws["A"+str(row)].value)
+		if categoryName == "" or categoryName == None or categoryName == 'None':
+			break
+		else:
+			row += 1
+	return row-1
 
 def countImages(row):
 	imgNo = 1
@@ -176,8 +196,8 @@ def countImages(row):
 def fill_product_lot_data(wb,i):
 	productLotData = []
 
-	column = 16
-	ws = wb.worksheets[3]
+	column = 13
+	ws = wb.worksheets[2]
 
 	while True:
 		from_lot = str(ws.cell(row = i, column = column).value)
