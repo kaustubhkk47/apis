@@ -162,9 +162,21 @@ def fill_product_data(wb , i):
 def get_categoryID(value, wb):
 	ws = wb.worksheets[3]
 	row = 2
-	for i in range(2,10):
+	maxRow = get_max_category_row(wb)
+	for i in range(2,maxRow+1):
 		if ws["A"+str(i)].value == value:
 			return parseInt(ws["B" +str(i)].value)
+
+def get_max_category_row(wb):
+	row = 2
+	ws = wb.worksheets[3]
+	while True:
+		categoryName = str(ws["A"+str(row)].value)
+		if categoryName == "" or categoryName == None or categoryName == 'None':
+			break
+		else:
+			row += 1
+	return row-1
 
 def countImages(row):
 	imgNo = 1
