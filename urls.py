@@ -16,6 +16,8 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from urlHandlers import catalog_handler, user_handler, order_handler
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -39,3 +41,5 @@ urlpatterns += [
     url(r'^users/seller/login/$', user_handler.seller_login),
     url(r'^users/internaluser/login/$', user_handler.internaluser_login)
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
