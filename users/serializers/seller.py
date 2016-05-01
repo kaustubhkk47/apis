@@ -21,7 +21,7 @@ def serialize_seller(seller_entry):
         "created_at" : seller_entry.created_at,
         "updated_at" : seller_entry.updated_at,
         "address" : seller_addresses,
-        "bankdetails" : seller_bankdetails
+        "bank_details" : seller_bankdetails
     }
     
     if hasattr(seller_entry,'sellerdetails'):
@@ -70,7 +70,7 @@ def serialize_seller_bankdetails(seller_bankdetails_queryset):
     for seller_bankdetail in seller_bankdetails_queryset:
         
         seller_bankdetails_entry = {
-            "bankdetailsID" : seller_bankdetail.id,
+            "bank_detailsID" : seller_bankdetail.id,
             "account_holders_name" : seller_bankdetail.account_holders_name,
             "account_number" : seller_bankdetail.account_number,
             "ifsc" : seller_bankdetail.ifsc,
