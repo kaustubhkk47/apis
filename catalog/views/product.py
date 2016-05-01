@@ -10,7 +10,7 @@ from django.template.defaultfilters import slugify
 from decimal import Decimal
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-def get_product_details(request, productsArr=[], categoriesArr = [],sellerArr =[], pageNumber=0,productsperPage=20):
+def get_product_details(request, productsArr=[], categoriesArr = [],sellerArr =[], pageNumber=0,productsperPage=6):
     try:
         if len(productsArr) == 0:
             if len(categoriesArr) == 0 and len(sellerArr) == 0:
