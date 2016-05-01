@@ -36,10 +36,10 @@ def post_new_seller(request):
 
 	validateSellerAddressData(seller["address"], SellerAddress())
 
-	if not "bankdetails" in seller or not seller["bankdetails"]!=None:
-		seller["bankdetails"] = {}
+	if not "bank_details" in seller or not seller["bank_details"]!=None:
+		seller["bank_details"] = {}
 
-	validateSellerBankdetailsData(seller["bankdetails"], SellerBankDetails())
+	validateSellerBankdetailsData(seller["bank_details"], SellerBankDetails())
 
 	if not "details" in seller or not seller["details"]!=None:
 			seller["details"] = {}
@@ -56,7 +56,7 @@ def post_new_seller(request):
 		newAddress = SellerAddress(seller=newSeller)
 		populateSellerAddressData(newAddress, selleraddress)
 
-		sellerbankdetails = seller["bankdetails"]
+		sellerbankdetails = seller["bank_details"]
 		newBankDetails = SellerBankDetails(seller=newSeller)
 		populateSellerBankDetailsData(newBankDetails, sellerbankdetails)
 		
@@ -130,12 +130,12 @@ def update_seller(request):
 			populateSellerAddressData(sellerAddressPtr, selleraddress)
 			
 
-		if "bankdetails" in seller and seller["bankdetails"]!=None:
+		if "bank_details" in seller and seller["bank_details"]!=None:
 			bankdetailsSent = 1
-			sellerbankdetails = seller["bankdetails"]
-			if not "bankdetailsID" in sellerbankdetails or not sellerbankdetails["bankdetailsID"]:
+			sellerbankdetails = seller["bank_details"]
+			if not "bank_detailsID" in sellerbankdetails or not sellerbankdetails["bank_detailsID"]:
 				return customResponse("4XX", {"error": "Bank details id not sent"})
-			sellerBankDetailsPtr = SellerBankDetails.objects.filter(id = int(sellerbankdetails["bankdetailsID"]))
+			sellerBankDetailsPtr = SellerBankDetails.objects.filter(id = int(sellerbankdetails["bank_detailsID"]))
 
 			if len(sellerBankDetailsPtr) == 0:
 				return customResponse("4XX", {"error": "Invalid bankdetails id sent"})

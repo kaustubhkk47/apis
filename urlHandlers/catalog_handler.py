@@ -33,7 +33,7 @@ def product_details(request):
 		categoryID = request.GET.get("categoryID", "")
 		sellerID = request.GET.get("sellerID", "")
 		pageNumber = request.GET.get("page_number", 0)
-		productsperPage = request.GET.get("products_per_page", 20)
+		productsperPage = request.GET.get("items_per_page", 6)
 		if productID == "":
 			productsArr = []
 		else:
