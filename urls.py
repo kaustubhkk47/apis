@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from urlHandlers import catalog_handler, user_handler, order_handler
+from urlHandlers import catalog_handler, user_handler, order_handler, lead_handler
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -38,4 +38,8 @@ urlpatterns += [
     url(r'^users/seller/$', user_handler.seller_details),
     url(r'^users/seller/login/$', user_handler.seller_login),
     url(r'^users/internaluser/login/$', user_handler.internaluser_login)
+]
+
+urlpatterns += [
+    url(r'^leads/buyer/$', lead_handler.buyer_leads)
 ]
