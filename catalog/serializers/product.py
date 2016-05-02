@@ -47,16 +47,17 @@ def serialize_product(productsItem):
 	image["image_path"] = productsItem.image_path
 	image["image_name"] = productsItem.image_name
 	
-	image_numbers = productsItem.image_numbers
+	image_numbers = str(productsItem.image_numbers)
+	
 	try:
-	   image_numbers = ast.literal_eval(image_numbers)
+		image_numbers = ast.literal_eval(image_numbers)
 	except Exception as e:
-		pass
-	else:
 		image_numbers = {}
+
 	image_numers_arr = []
+
 	for i in range(len(image_numbers)):
-		image_numers_arr.append(image_numbers[i])
+		image_numers_arr.append(image_numbers[i+1])
 
 	image["image_numbers"] = image_numers_arr
 	image["image_count"] = len(image_numbers)
