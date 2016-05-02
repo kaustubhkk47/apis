@@ -31,10 +31,12 @@ def get_product_details(request, productsArr=[], categoriesArr = [],sellerArr =[
             paginator = Paginator(products, productsperPage)
             try:
                 pageProducts = paginator.page(pageNumber)
+            except PageNotAnInteger:
+                pageProducts = []
             except EmptyPage:
-                pageProducts = paginator.page(paginator.num_pages)
+                pageProducts = []
             response = multiple_products_parser(pageProducts)
-            body = {"products": response,"total_products":paginator.count, "total_pages":paginator.num_pages}
+            body = {"products": response,"total_products":paginator.count, "total_pages":paginator.num_pages, "page_number":pageNumber}
         else:
             response = multiple_products_parser(products)
             body = {"products": response}

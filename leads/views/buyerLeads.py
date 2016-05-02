@@ -3,6 +3,7 @@ import json
 
 from ..models.buyerLeads import BuyerLeads, validateBuyerLeadData, populateBuyerLead
 from ..serializers.buyerLeads import serialize_buyer_lead
+from catalog.models.product import Product
 
 def post_new_buyer_lead(request):
 	try:
@@ -18,6 +19,15 @@ def post_new_buyer_lead(request):
 		newBuyerLead = BuyerLeads()
 
 		populateBuyerLead(newBuyerLead, buyerLead)
+
+		if "productID" in buyerLead and buyerLead["productID"]!=None:
+			productPtr = Product.objects.filter(id=buyerLead["productID"])
+
+			if len(productPtr) == 0:
+				return customResponse("4XX", {"error": "invalid product id sent"})
+				
+			productPtr = productPtr[0]
+			newBuyerLead.product = productPtr
 
 		newBuyerLead.save()
 	except Exception as e:

@@ -1,6 +1,10 @@
 from django.db import models
 
+from catalog.models.product import Product
+
 class BuyerLeads(models.Model):
+
+	product = models.ForeignKey(Product, blank = True, null=True)
 
 	name = models.CharField(max_length=200, blank=True)
 	email = models.EmailField(max_length=255, blank=True)
@@ -13,23 +17,23 @@ class BuyerLeads(models.Model):
 
 def validateBuyerLeadData(buyerlead, oldbuyerlead, is_new):
 
-    flag = 0
+	flag = 0
 
-    if not "name" in buyerlead or not buyerlead["name"]!=None:
-        flag = 1
-        buyerlead["name"] = oldbuyerlead.name
-    if not "mobile_number" in buyerlead or not buyerlead["mobile_number"]!=None:
-        flag = 1
-        buyerlead["mobile_number"] = oldbuyerlead.mobile_number
-    if not "email" in buyerlead or not buyerlead["email"]!=None:
-        buyerlead["email"] = oldbuyerlead.email
+	if not "name" in buyerlead or not buyerlead["name"]!=None:
+		flag = 1
+		buyerlead["name"] = oldbuyerlead.name
+	if not "mobile_number" in buyerlead or not buyerlead["mobile_number"]!=None:
+		flag = 1
+		buyerlead["mobile_number"] = oldbuyerlead.mobile_number
+	if not "email" in buyerlead or not buyerlead["email"]!=None:
+		buyerlead["email"] = oldbuyerlead.email
 
-    if is_new == 1 and flag == 1:
-        return False
+	if is_new == 1 and flag == 1:
+		return False
 
-    return True
+	return True
 
 def populateBuyerLead(buyerleadPtr, buyerlead):
-    buyerleadPtr.name = buyerlead["name"]
-    buyerleadPtr.email = buyerlead["email"]
-    buyerleadPtr.mobile_number = buyerlead["mobile_number"]
+	buyerleadPtr.name = buyerlead["name"]
+	buyerleadPtr.email = buyerlead["email"]
+	buyerleadPtr.mobile_number = buyerlead["mobile_number"]
