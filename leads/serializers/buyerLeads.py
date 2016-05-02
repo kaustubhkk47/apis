@@ -7,4 +7,4 @@ def serialize_buyer_lead(buyerlead_entry):
         "mobile_number" : buyerlead_entry.mobile_number
 	}
 
-	return buyerLead
+	return buyerLeads

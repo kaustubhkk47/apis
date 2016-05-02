@@ -16,6 +16,9 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from urlHandlers import catalog_handler, user_handler, order_handler, lead_handler
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -40,6 +43,10 @@ urlpatterns += [
     url(r'^users/internaluser/login/$', user_handler.internaluser_login)
 ]
 
+<<<<<<< HEAD
 urlpatterns += [
     url(r'^leads/buyer/$', lead_handler.buyer_leads)
 ]
+=======
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+>>>>>>> 36651c3c8a08d4a10d7f7a9ed6d97bb807ae3b32
