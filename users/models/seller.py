@@ -180,3 +180,19 @@ def populateSellerBankDetailsData(sellerBankDetailsPtr,sellerbankdetails):
     sellerBankDetailsPtr.branch = sellerbankdetails["branch"]
     sellerBankDetailsPtr.branch_city = sellerbankdetails["branch_city"]
     sellerBankDetailsPtr.branch_pincode = sellerbankdetails["branch_pincode"]
+
+def sellerEmailExists(email):
+    sellerPtr = Seller.objects.filter(email=email)
+
+    if len(sellerPtr) > 0:
+        return True
+
+    return False
+
+def sellerMobileNumberExists(mobileNumber):
+    sellerPtr = Seller.objects.filter(mobile_number=mobileNumber)
+
+    if len(sellerPtr) > 0:
+        return True
+
+    return False

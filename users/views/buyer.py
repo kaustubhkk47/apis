@@ -1,7 +1,7 @@
 from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string
 import json
 
-from ..models.buyer import Buyer, BuyerAddress, BuyerDetails, validateBuyerData,validateBuyerDetailsData, validateBuyerAddressData, populateBuyer, populateBuyerDetails, populateBuyerAddress
+from ..models.buyer import *
 from ..serializers.buyer import serialize_buyer, parse_buyer
 
 
@@ -32,6 +32,12 @@ def post_new_buyer(request):
 
 	if not len(buyer) or not validateBuyerData(buyer, Buyer(), 1):
 		return customResponse("4XX", {"error": "Invalid data for buyer sent"})
+
+	if buyerEmailExists(buyer["email"]):
+		return customResponse("4XX", {"error": "buyer email already exists"})
+
+	if buyerMobileNumberExists(buyer["mobile_number"]):
+		return customResponse("4XX", {"error": "buyer phone number already exists"})
 
 	if not "address" in buyer or not buyer["address"]!=None:
 		buyer["address"] = {}
