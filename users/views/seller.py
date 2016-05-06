@@ -1,6 +1,6 @@
 from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_date_time
 import json
-from ..models.seller import Seller, SellerAddress, SellerBankDetails, SellerDetails, validateSellerData, validateSellerAddressData, validateSellerDetailsData, validateSellerBankdetailsData, populateSellerData, populateSellerDetailsData,populateSellerAddressData, populateSellerBankDetailsData
+from ..models.seller import *
 from ..serializers.seller import parse_seller, serialize_seller
 
 def get_seller_details(request,sellersArr=[]):
@@ -30,6 +30,12 @@ def post_new_seller(request):
 
 	if not len(seller) or not validateSellerData(seller, Seller(), 1):
 		return customResponse("4XX", {"error": "Invalid data for seller sent"})
+
+	if sellerEmailExists(seller["email"]):
+		return customResponse("4XX", {"error": "seller email already exists"})
+
+	if sellerMobileNumberExists(seller["mobile_number"]):
+		return customResponse("4XX", {"error": "seller phone number already exists"})
 
 	if not "address" in seller or not seller["address"]!=None:
 		seller["address"] = {}
