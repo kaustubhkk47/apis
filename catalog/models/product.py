@@ -6,6 +6,9 @@ from django.template.defaultfilters import slugify
 from decimal import Decimal
 import datetime
 
+#Make changes in model, validate, populate and serializer 
+#Also make changes in upload script
+
 class Product(models.Model):
     seller = models.ForeignKey(Seller)
     category = models.ForeignKey(Category)
@@ -34,6 +37,7 @@ class Product(models.Model):
     display_name = models.TextField()
 
     delete_status = models.BooleanField(default=False)
+    is_catalog = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name
@@ -107,6 +111,10 @@ def validateProductData(product, oldproduct, is_new):
         product["slug"] = oldproduct.slug
     if not "display_name" in product or not product["display_name"]!=None:
         product["display_name"] = oldproduct.display_name
+    if not "is_catalog" in product or not product["is_catalog"]!=None:
+        product["is_catalog"] = oldproduct.is_catalog
+    if not "delete_status" in product or not product["delete_status"]!=None:
+        product["delete_status"] = oldproduct.delete_status
         
     if is_new == 1 and flag == 1:
         return False
@@ -179,6 +187,8 @@ def populateProductData(productPtr, product):
     productPtr.show_online = bool(product["show_online"])
     productPtr.slug = slugify(product["name"])
     productPtr.display_name = product["display_name"]
+    productPtr.is_catalog = product["is_catalog"]
+    productPtr.delete_status = product["delete_status"]
     if "image_count" in product and product["image_count"]!=None:
         nowtime = datetime.datetime.now()
         productPtr.image_path = "media/productimages/" + str(productPtr.seller.id) + "/" + nowtime.strftime('%Y%m%d%H%M%S') + "/"

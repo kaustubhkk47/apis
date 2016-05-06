@@ -146,3 +146,9 @@ BASE_WEBAPP_URL = "http://localhost:8001/"
 ## cores settings
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = False
+
+EMAIL_BACKEND = 'django_ses.SESBackend'
+AWS_SES_ACCESS_KEY_ID = "AKIAIT5T7FW3ZKHIXMDA"
+AWS_SES_SECRET_ACCESS_KEY = "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"
+AWS_SES_REGION_NAME = 'us-west-2'
+AWS_SES_REGION_ENDPOINT = 'email.us-west-2.amazonaws.com'

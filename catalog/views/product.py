@@ -24,8 +24,6 @@ def get_product_details(request, productsArr=[], categoriesArr = [],sellerArr =[
         else:
             products = Product.objects.filter(id__in=productsArr, delete_status=False, seller__delete_status=False,category__delete_status=False).select_related('seller', 'productdetails', 'category')
 
-        closeDBConnection()
-
         if pageNumber > 0:
             pageNumber = 1
             paginator = Paginator(products, productsperPage)
@@ -45,6 +43,8 @@ def get_product_details(request, productsArr=[], categoriesArr = [],sellerArr =[
     except Exception as e:
         statusCode = "4XX"
         body = {"error": "Invalid product"}
+
+    closeDBConnection()
 
     return customResponse(statusCode, body)
 
