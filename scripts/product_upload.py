@@ -20,15 +20,30 @@ allSizePaths = [originalSizePath, thumbnailSizePath, mediumSizePath, largeSizePa
 allImageSizes = [2000.0, 200.0, 400.0, 700.0]
 fileFormatExtensions = [".jpg", ".jpeg",".png"]
 
+inputFileName = "./ProductDataSheet.xlsx"
+outputFileName = "./ProductDataSheetf.xlsx"
 
-def read_file():
-        #filename = raw_input()
+def upload_products():
+	wb = read_file()
 	try:
-		wb = openpyxl.load_workbook("./ProductDataSheet.xlsx")
-		#wb = openpyxl.load_workbook(filename)
 		send_products_data(wb)
 	except Exception as e:
 		print e
+
+def modify_product_prices():
+	wb = read_file()
+	try:
+		send_modified_product_prices(wb)
+	except Exception as e:
+		print e
+	
+def read_file():
+	try:
+		wb = openpyxl.load_workbook(inputFileName,data_only=True)
+		print "File read correctly"	
+	except Exception as e:
+		print e
+	return wb
 
 def send_products_data(wb):
 	row = 5
@@ -49,26 +64,66 @@ def send_products_data(wb):
 
 					if jsonText["statusCode"] != "2XX":
 						post_feedback(wb, row, jsonText["body"]["error"])
+						print jsonText["body"]["error"]
 					else:
 						moveImages(jsonText, row, wb)
-						post_feedback(wb, row, "Success")
+						post_feedback(wb, row, "Success",jsonText["body"]["product"]["productID"])
+						print "Success"
 				except Exception as e:
 					print e
-					post_feedback(wb, row, "Incorrect response from server")
+					post_feedback(wb, row, e)
 			else:
 				post_feedback(wb, row, "Error response from server")
 
 		row += 1
 
-	wb.save("./ProductDataSheetf.xlsx")
+	wb.save(outputFileName)
+
+def send_modified_product_prices(wb):
+	row = 5
+	column = 1
+	ws = wb.worksheets[1]
+	while True:
+		productName = str(ws.cell(row = row, column = column).value)
+		if productName == "" or productName == None or productName == 'None':
+			break
+		productData = json.dumps(fill_modified_product_prices(wb, row))
+
+		if productData != {}:
+			response = requests.put(productURL, data = productData)
+			if response.status_code == requests.codes.ok:
+				try:
+					jsonText = json.loads(response.text)
+
+					if jsonText["statusCode"] != "2XX":
+						post_feedback(wb, row, jsonText["body"]["error"])
+						print jsonText["body"]["error"]
+					else:
+						post_feedback(wb, row, "Success",jsonText["body"]["product"]["productID"])
+						print "Success"
+				except Exception as e:
+					print e
+					post_feedback(wb, row, e)
+			else:
+				post_feedback(wb, row, "Error response from server")
+
+		row += 1
+
+	wb.save(outputFileName)
 
 def moveImages(jsonText, row, wb):
 	imgNo = 1
-	body = jsonText["body"]["product"]
-	image_path = body["image_path"]
-	image_name = body["image_name"]
-	image_numbers = body["image_numbers"]
-	image_numbers = ast.literal_eval(image_numbers)
+	body = jsonText["body"]["product"]["image"]
+	image_path = str(body["image_path"])
+	image_name = str(body["image_name"])
+	image_numbers = str(body["image_numbers"])
+	if len(image_numbers) == 2:
+		image_numbers = []
+	elif len(image_numbers) == 3:
+		image_numbers = [int(image_numbers[1])]
+	else:
+		image_numbers = str(image_numbers[1:len(image_numbers)-1])
+		image_numbers = [int(float(x)) for x in image_numbers.split(',')]
 	for sizePath in allSizePaths:
 		create_image_directory(image_path, sizePath)
 	while True:
@@ -81,7 +136,7 @@ def moveImages(jsonText, row, wb):
 				for i in range(len(allSizePaths)):
 					sizePath = allSizePaths[i]
 					directory = imageDirectory + image_path + sizePath
-					newPath = directory + image_name + "-" + str(image_numbers[imgNo]) + ".jpg"
+					newPath = directory + image_name + "-" + str(image_numbers[imgNo-1]) + ".jpg"
 					imgnew = resize_image(img, allImageSizes[i])
 					imgnew.save(newPath,format="JPEG",quality=75)
 				os.remove(imagePath)
@@ -108,6 +163,17 @@ def resize_image(img, x):
 	
 def post_image_feedback(wb, row, feedback):
 	wb.worksheets[1]["V"+str(row)].value = str(feedback) + " images moved"
+
+def fill_modified_product_prices(wb , i):
+	productData = {}
+
+	try:
+		productData["productID"] = parseInt(wb.worksheets[1]["V"+str(i)].value)
+		productData["product_lot"] = fill_product_lot_data(wb,i)
+	except Exception as e:
+		post_feedback(wb, i, "Data was incorrect")
+
+	return productData
 
 def fill_product_data(wb , i):
 	productData = {}
@@ -213,14 +279,15 @@ def fill_product_lot_data(wb,i):
 		productLotData.append(productLot)
 
 		column += 3
-		
+
 
 	return productLotData
 
-def post_feedback(wb, i, feedback):
+def post_feedback(wb, i, feedback, productID=0):
 	wb.worksheets[1]["U"+str(i)].value = feedback
 	if feedback == "Success":
 		wb.worksheets[1]["U"+str(i)].fill = greenFill
+		wb.worksheets[1]["V"+str(i)] = int(productID)
 	else:
 		wb.worksheets[1]["U"+str(i)].fill = redFill
 

@@ -1,5 +1,7 @@
 from django.db import models
 
+#Make changes in model, validate, populate and serializer 
+
 class InternalUser(models.Model):
     name = models.CharField(max_length=200, blank=True)
     email = models.EmailField(max_length=255, blank=False, unique=True)

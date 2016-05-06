@@ -1,6 +1,6 @@
 from django.db import models
 
-## Whenever making any changes, add fields to models, serializers and validation
+#Make changes in model, validate, populate and serializer 
 
 class Buyer(models.Model):
     name = models.CharField(max_length=200, blank=True)
