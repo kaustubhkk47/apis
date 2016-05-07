@@ -56,7 +56,7 @@ def send_products_data(wb):
 			break
 		productData = json.dumps(fill_product_data(wb, row))
 
-		if productData != {}:
+		if not (productData == {} or productData == "{}"):
 			response = requests.post(productURL, data = productData)
 			if response.status_code == requests.codes.ok:
 				try:
@@ -89,7 +89,7 @@ def send_modified_product_prices(wb):
 			break
 		productData = json.dumps(fill_modified_product_prices(wb, row))
 
-		if productData != {}:
+		if not (productData == {} or productData == "{}"):
 			response = requests.put(productURL, data = productData)
 			if response.status_code == requests.codes.ok:
 				try:
@@ -185,7 +185,7 @@ def fill_product_data(wb , i):
 		productData["name"] = str(wb.worksheets[1]["A"+str(i)].value)
 		productData["price_per_unit"] = parseFloat(wb.worksheets[2]["G"+str(i)].value)
 		productData["unit"] = str(wb.worksheets[2]["E"+str(i)].value)
-		productData["tax"] = parseFloat(wb.worksheets[2]["K"+str(i)].value)
+		productData["tax"] = 0.0
 		productData["lot_size"] = parseInt(wb.worksheets[2]["H"+str(i)].value)
 		productData["price_per_lot"] = parseFloat(productData["lot_size"]*productData["price_per_unit"])
 		productData["image_count"] = countImages(i)
@@ -209,9 +209,9 @@ def fill_product_data(wb , i):
 		productDetails["availability"] = str(wb.worksheets[1]["R"+str(i)].value)
 		productDetails["weight_per_unit"] = parseFloat(wb.worksheets[2]["F"+str(i)].value)
 		productDetails["dispatched_in"] = str(wb.worksheets[1]["S"+str(i)].value)
-		productDetails["sample_type"] = str(wb.worksheets[2]["M"+str(i)].value)
-		productDetails["sample_description"] = str(wb.worksheets[2]["N"+str(i)].value)
-		productDetails["sample_price"] = parseFloat(wb.worksheets[2]["O"+str(i)].value)
+		productDetails["sample_type"] = str(wb.worksheets[2]["J"+str(i)].value)
+		productDetails["sample_description"] = str(wb.worksheets[2]["K"+str(i)].value)
+		productDetails["sample_price"] = parseFloat(wb.worksheets[2]["L"+str(i)].value)
 
 		productDetails["manufactured_country"] = "India"
 		productDetails["manufactured_city"] = str(wb.worksheets[0]["C7"].value)
@@ -221,6 +221,9 @@ def fill_product_data(wb , i):
 		productData["product_lot"] = fill_product_lot_data(wb,i)
 
 	except Exception as e:
+		productData = {}
+		print e
+		print "Data was incorrect"
 		post_feedback(wb, i, "Data was incorrect")
 
 	return productData
