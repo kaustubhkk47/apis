@@ -89,7 +89,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'probzip_db',
         'USER': 'aditya',
-        'PASSWORD': 'devil_coder77'
+        'PASSWORD': 'devil_coder77',
+	'PORT': '29323',
+	'HOST': 'web409.webfaction.com'
     }
 }
 
