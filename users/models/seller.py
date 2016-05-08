@@ -33,6 +33,9 @@ class SellerAddress(models.Model):
     contact_number = models.CharField(max_length=11, blank=True)
     pincode = models.CharField(max_length=6, blank=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     def __unicode__(self):
         return self.seller.name
 
@@ -50,6 +53,9 @@ class SellerDetails(models.Model):
     pan_verification = models.BooleanField(default=0, blank=False, null=False)
     tin_verification = models.BooleanField(default=0, blank=False, null=False)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     def __unicode__(self):
         return self.seller.name
 
@@ -65,6 +71,9 @@ class SellerBankDetails(models.Model):
     branch  = models.CharField(max_length=200, blank=True)
     branch_city = models.CharField(max_length=50, blank=True)
     branch_pincode = models.CharField(max_length=6, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
         return self.seller.name

@@ -33,6 +33,9 @@ class BuyerAddress(models.Model):
     pincode = models.CharField(max_length=6, blank=True)
     priority = models.IntegerField(default=1)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     def __unicode__(self):
         return self.buyer.name
 
@@ -47,6 +50,9 @@ class BuyerDetails(models.Model):
     buying_capacity = models.CharField(max_length=20, blank=True)
     buys_from = models.CharField(max_length=20, blank=True)
     purchasing_states = models.TextField(blank = True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
         return self.buyer.name
