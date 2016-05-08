@@ -18,6 +18,9 @@ class SellerPayment(models.Model):
 
     details = models.TextField(blank=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     def __unicode__(self):
         return str(self.suborder.order.id) + "-" + str(self.suborder.id)
 

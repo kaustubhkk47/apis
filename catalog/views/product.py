@@ -25,7 +25,6 @@ def get_product_details(request, productsArr=[], categoriesArr = [],sellerArr =[
             products = Product.objects.filter(id__in=productsArr, delete_status=False, seller__delete_status=False,category__delete_status=False).select_related('seller', 'productdetails', 'category')
 
         if pageNumber > 0:
-            pageNumber = 1
             paginator = Paginator(products, productsperPage)
             try:
                 pageProducts = paginator.page(pageNumber)
