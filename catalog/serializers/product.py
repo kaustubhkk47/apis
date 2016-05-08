@@ -40,7 +40,8 @@ def serialize_product(productsItem):
 	product["updated_at"] = productsItem.updated_at
 	product["slug"] = productsItem.slug
 	product["display_name"] = productsItem.display_name
-	product["display_name"] = productsItem.display_name
+	product["is_catalog"] = productsItem.is_catalog
+	product["delete_status"] = productsItem.delete_status
 
 	image ={}
 

@@ -20,6 +20,7 @@ def serialize_seller(seller_entry):
         "email_verification" : seller_entry.email_verification,
         "created_at" : seller_entry.created_at,
         "updated_at" : seller_entry.updated_at,
+        "company_profile" : seller_entry.company_profile,
         "address" : seller_addresses,
         "bank_details" : seller_bankdetails
     }

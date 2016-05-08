@@ -1,6 +1,6 @@
 from django.db import models
 
-## Whenever making any changes, add fields to models, serializers and validation
+#Make changes in model, validate, populate and serializer 
 
 class Buyer(models.Model):
     name = models.CharField(max_length=200, blank=True)
@@ -59,11 +59,13 @@ def validateBuyerData(buyer, oldbuyer, is_new):
         flag = 1
         buyer["name"] = oldbuyer.name
     if not "company_name" in buyer or not buyer["company_name"]!=None:
+        flag = 1
         buyer["company_name"] = oldbuyer.company_name
     if not "mobile_number" in buyer or not buyer["mobile_number"]!=None:
         flag = 1
         buyer["mobile_number"] = oldbuyer.mobile_number
     if not "email" in buyer or not buyer["email"]!=None:
+        flag = 1
         buyer["email"] = oldbuyer.email
     if not "password" in buyer or not buyer["password"]!=None:
         buyer["password"] = oldbuyer.password
@@ -146,3 +148,19 @@ def populateBuyerAddress(buyerAddressPtr, buyeraddress):
     buyerAddressPtr.country = buyeraddress["country"]
     buyerAddressPtr.contact_number = buyeraddress["contact_number"]
     buyerAddressPtr.pincode = buyeraddress["pincode"]
+
+def buyerEmailExists(email):
+    buyerPtr = Buyer.objects.filter(email=email)
+
+    if len(buyerPtr) > 0:
+        return True
+
+    return False
+
+def buyerMobileNumberExists(mobileNumber):
+    buyerPtr = Buyer.objects.filter(mobile_number=mobileNumber)
+
+    if len(buyerPtr) > 0:
+        return True
+
+    return False

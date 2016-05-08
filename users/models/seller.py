@@ -1,6 +1,8 @@
 from django.db import models
 from scripts.utils import validate_date_time
 
+#Make changes in model, validate, populate and serializer 
+
 class Seller(models.Model):
     name = models.CharField(max_length=200, blank=True)
     company_name = models.CharField(max_length=200, blank=True)
@@ -10,6 +12,7 @@ class Seller(models.Model):
     alternate_phone_number = models.CharField(max_length=11, blank=True)
     mobile_verification = models.BooleanField(default=False)
     email_verification = models.BooleanField(default=False)
+    company_profile = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -88,6 +91,8 @@ def validateSellerData(seller, oldseller, isnew):
         seller["mobile_verification"] = oldseller.mobile_verification
     if not "email_verification" in seller or not seller["email_verification"]!=None:
         seller["email_verification"] = oldseller.email_verification
+    if not "company_profile" in seller or not seller["company_profile"]!=None:
+        seller["company_profile"] = oldseller.company_profile
 
     if isnew == 1 and flag == 1:
         return False
@@ -153,6 +158,7 @@ def populateSellerData(sellerPtr, seller):
     sellerPtr.alternate_phone_number = seller["alternate_phone_number"]
     sellerPtr.mobile_verification = bool(seller["mobile_verification"])
     sellerPtr.email_verification = bool(seller["email_verification"])
+    sellerPtr.company_profile = seller["company_profile"]
 
 def populateSellerDetailsData(sellerDetailsPtr,sellerdetails):
     sellerDetailsPtr.cst = sellerdetails["cst"]
@@ -180,3 +186,19 @@ def populateSellerBankDetailsData(sellerBankDetailsPtr,sellerbankdetails):
     sellerBankDetailsPtr.branch = sellerbankdetails["branch"]
     sellerBankDetailsPtr.branch_city = sellerbankdetails["branch_city"]
     sellerBankDetailsPtr.branch_pincode = sellerbankdetails["branch_pincode"]
+
+def sellerEmailExists(email):
+    sellerPtr = Seller.objects.filter(email=email)
+
+    if len(sellerPtr) > 0:
+        return True
+
+    return False
+
+def sellerMobileNumberExists(mobileNumber):
+    sellerPtr = Seller.objects.filter(mobile_number=mobileNumber)
+
+    if len(sellerPtr) > 0:
+        return True
+
+    return False
