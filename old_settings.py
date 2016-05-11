@@ -157,3 +157,4 @@ AWS_SES_SECRET_ACCESS_KEY = "rKNF97P1bo+x4jpjEM/pM9O1all/1CBnwf3JyBDN"
 AWS_SES_REGION_NAME = 'us-west-2'
 AWS_SES_REGION_ENDPOINT = 'email.us-west-2.amazonaws.com'
 
+
