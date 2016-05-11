@@ -13,7 +13,6 @@ class Seller(models.Model):
     mobile_verification = models.BooleanField(default=False)
     email_verification = models.BooleanField(default=False)
     company_profile = models.TextField(blank=True)
-    seller_conditions = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -103,8 +102,6 @@ def validateSellerData(seller, oldseller, isnew):
         seller["email_verification"] = oldseller.email_verification
     if not "company_profile" in seller or not seller["company_profile"]!=None:
         seller["company_profile"] = oldseller.company_profile
-    if not "seller_conditions" in seller or not seller["seller_conditions"]!=None:
-        seller["seller_conditions"] = oldseller.seller_conditions
 
     if isnew == 1 and flag == 1:
         return False
@@ -171,7 +168,6 @@ def populateSellerData(sellerPtr, seller):
     sellerPtr.mobile_verification = bool(seller["mobile_verification"])
     sellerPtr.email_verification = bool(seller["email_verification"])
     sellerPtr.company_profile = seller["company_profile"]
-    sellerPtr.seller_conditions = seller["seller_conditions"]
 
 def populateSellerDetailsData(sellerDetailsPtr,sellerdetails):
     sellerDetailsPtr.cst = sellerdetails["cst"]
