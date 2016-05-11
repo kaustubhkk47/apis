@@ -158,7 +158,7 @@ def internaluser_login(request):
 		# if check_token(request)
 		try:
 			internaluser = InternalUser.objects.get(email=email)
-		except InternalUser.DoesNotExist:
+		except Seller.DoesNotExist:
 			return customResponse("4XX", {"error": "Invalid internaluser credentials"})
 
 		if password == internaluser.password:

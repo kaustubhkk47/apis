@@ -21,7 +21,6 @@ def serialize_seller(seller_entry):
         "created_at" : seller_entry.created_at,
         "updated_at" : seller_entry.updated_at,
         "company_profile" : seller_entry.company_profile,
-        "seller_conditions" : seller_entry.seller_conditions,
         "address" : seller_addresses,
         "bank_details" : seller_bankdetails
     }
