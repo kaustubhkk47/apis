@@ -5,7 +5,7 @@ from ..models.orderItem import *
 from ..models.orderShipment import *
 from ..models.subOrder import *
 from ..serializers.orderitem import *
-from payments.models.sellerPayment import *
+from ..models.payments import *
 from users.models.buyer import *
 from users.models.seller import *
 from decimal import Decimal

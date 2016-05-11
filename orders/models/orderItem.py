@@ -4,8 +4,8 @@ from catalog.models.product import *
 from .order import *
 from .subOrder import *
 from .orderShipment import *
-from payments.models.buyerPayment import BuyerPayment
-from payments.models.sellerPayment import SellerPayment
+from .payments import BuyerPayment
+from .payments import SellerPayment
 
 from catalog.models.product import Product
 

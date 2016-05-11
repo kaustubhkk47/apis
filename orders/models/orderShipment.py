@@ -5,7 +5,7 @@ from users.models.seller import *
 
 from .order import *
 from .orderItem import *
-from orders.models.subOrder import *
+from .subOrder import *
 
 
 class OrderShipment(models.Model):
