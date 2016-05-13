@@ -44,7 +44,6 @@ INSTALLED_APPS += [
     'users',
     'catalog',
     'orders',
-    'payments',
     'leads'
 ]
 
