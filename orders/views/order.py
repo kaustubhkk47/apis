@@ -12,7 +12,7 @@ from decimal import Decimal
 import datetime
 
 
-def get_order_details(request, statusArr=[], sellersArr=[]):
+def get_order_details(request, statusArr=[], sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
 	try:
 		if len(statusArr) == 0 and len(sellersArr) == 0:
 			orderItems = OrderItem.objects.all().select_related('suborder', 'suborder__seller', 'suborder__order',

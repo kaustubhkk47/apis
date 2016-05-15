@@ -19,6 +19,7 @@ class Seller(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     delete_status = models.BooleanField(default=False)
+    show_online = models.BooleanField(default=True)
 
     def __unicode__(self):
         return self.name
@@ -105,6 +106,8 @@ def validateSellerData(seller, oldseller, isnew):
         seller["company_profile"] = oldseller.company_profile
     if not "seller_conditions" in seller or not seller["seller_conditions"]!=None:
         seller["seller_conditions"] = oldseller.seller_conditions
+    if not "show_online" in seller or not seller["show_online"]!=None:
+        seller["show_online"] = oldseller.show_online
 
     if isnew == 1 and flag == 1:
         return False
@@ -172,6 +175,7 @@ def populateSellerData(sellerPtr, seller):
     sellerPtr.email_verification = bool(seller["email_verification"])
     sellerPtr.company_profile = seller["company_profile"]
     sellerPtr.seller_conditions = seller["seller_conditions"]
+    sellerPtr.show_online = seller["show_online"]
 
 def populateSellerDetailsData(sellerDetailsPtr,sellerdetails):
     sellerDetailsPtr.cst = sellerdetails["cst"]
