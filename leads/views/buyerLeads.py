@@ -31,7 +31,6 @@ def post_new_buyer_lead(request):
 
 		newBuyerLead.save()
 	except Exception as e:
-		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
