@@ -72,7 +72,6 @@ def validateBuyerData(buyer, oldbuyer, is_new):
         flag = 1
         buyer["mobile_number"] = oldbuyer.mobile_number
     if not "email" in buyer or not buyer["email"]!=None:
-        flag = 1
         buyer["email"] = oldbuyer.email
     if not "password" in buyer or not buyer["password"]!=None:
         buyer["password"] = oldbuyer.password
