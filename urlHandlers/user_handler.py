@@ -57,15 +57,27 @@ def seller_details(request):
 
 	if request.method == "GET":
 		sellerID = request.GET.get("sellerID", "")
+
 		accessToken = request.GET.get("access_token", "")
 		tokenPayload = get_token_payload(accessToken, "sellerID")
+		isSeller = 0
+		
 		if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
 			sellersArr = [tokenPayload["sellerID"]]
+			isSeller = 1
 		elif sellerID == "":
 			sellersArr = []
 		else:
 			sellersArr = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
-		return seller.get_seller_details(request,sellersArr)
+
+		tokenPayload = get_token_payload(accessToken, "internaluserID")
+		isInternalUser = 0
+		internalusersArr = []
+		if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
+			internalusersArr = [tokenPayload["internaluserID"]]
+			isInternalUser = 1
+
+		return seller.get_seller_details(request,sellersArr, isSeller,internalusersArr,isInternalUser)
 	elif request.method == "POST":
 		return seller.post_new_seller(request)
 	elif request.method == "PUT":

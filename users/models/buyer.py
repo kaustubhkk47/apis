@@ -48,6 +48,7 @@ class BuyerDetails(models.Model):
     buyer_interest = models.TextField(blank = True)
     customer_type = models.CharField(max_length=20, blank=True)
     buying_capacity = models.CharField(max_length=20, blank=True)
+    purchase_duration = models.CharField(max_length=20, blank=True)
     buys_from = models.CharField(max_length=20, blank=True)
     purchasing_states = models.TextField(blank = True)
 
@@ -71,7 +72,6 @@ def validateBuyerData(buyer, oldbuyer, is_new):
         flag = 1
         buyer["mobile_number"] = oldbuyer.mobile_number
     if not "email" in buyer or not buyer["email"]!=None:
-        flag = 1
         buyer["email"] = oldbuyer.email
     if not "password" in buyer or not buyer["password"]!=None:
         buyer["password"] = oldbuyer.password
@@ -103,6 +103,8 @@ def validateBuyerDetailsData(buyerdetails, oldbuyerdetails):
         buyerdetails["customer_type"] = oldbuyerdetails.customer_type
     if not "buying_capacity" in buyerdetails or not buyerdetails["buying_capacity"]!=None:
         buyerdetails["buying_capacity"] = oldbuyerdetails.buying_capacity
+    if not "purchase_duration" in buyerdetails or not buyerdetails["purchase_duration"]!=None:
+        buyerdetails["purchase_duration"] = oldbuyerdetails.purchase_duration
     if not "buys_from" in buyerdetails or not buyerdetails["buys_from"]!=None:
         buyerdetails["buys_from"] = oldbuyerdetails.buys_from
     if not "purchasing_states" in buyerdetails or not buyerdetails["purchasing_states"]!=None:
@@ -142,6 +144,7 @@ def populateBuyerDetails(buyerDetailsPtr, buyerdetails):
     buyerDetailsPtr.buyer_interest = buyerdetails["buyer_interest"]
     buyerDetailsPtr.customer_type = buyerdetails["customer_type"]
     buyerDetailsPtr.buying_capacity = buyerdetails["buying_capacity"]
+    buyerDetailsPtr.purchase_duration = buyerdetails["purchase_duration"]
     buyerDetailsPtr.buys_from = buyerdetails["buys_from"]
     buyerDetailsPtr.purchasing_states = buyerdetails["purchasing_states"]
     buyerDetailsPtr.vat_tin = buyerdetails["vat_tin"]

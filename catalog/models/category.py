@@ -35,4 +35,3 @@ def populateCategoryData(categoryPtr, category):
 	categoryPtr.name = category["name"]
 	categoryPtr.display_name = category["display_name"]
 	categoryPtr.slug = category["slug"]
-    
