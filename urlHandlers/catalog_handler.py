@@ -34,23 +34,40 @@ def product_details(request):
 		sellerID = request.GET.get("sellerID", "")
 		pageNumber = request.GET.get("page_number", 0)
 		productsperPage = request.GET.get("items_per_page", 6)
+		accessToken = request.GET.get("access_token", "")
+
 		if productID == "":
 			productsArr = []
 		else:
 			productsArr = [int(e) if e.isdigit() else e for e in productID.split(",")]
+
 		if categoryID == "":
 			categoriesArr = []
 		else:
 			categoriesArr = [int(e) if e.isdigit() else e for e in categoryID.split(",")]
-		accessToken = request.GET.get("access_token", "")
+
+		tokenPayload = {}
+		
+		
 		tokenPayload = get_token_payload(accessToken, "sellerID")
+		isSeller = 0
+		
 		if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
+			isSeller = 1
 			sellerArr = [tokenPayload["sellerID"]]
 		elif sellerID == "":
 			sellerArr = []
 		else:
 			sellerArr = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
-		return product.get_product_details(request,productsArr,categoriesArr,sellerArr,pageNumber,productsperPage)
+
+		tokenPayload = get_token_payload(accessToken, "internaluserID")
+		isInternalUser = 0
+		internalusersArr = []
+		if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
+			internalusersArr = [tokenPayload["internaluserID"]]
+			isInternalUser = 1
+
+		return product.get_product_details(request,productsArr,categoriesArr,sellerArr, isSeller,pageNumber,productsperPage,internalusersArr,isInternalUser)
 	elif request.method == "POST":
 		return product.post_new_product(request)
 	elif request.method == "PUT":

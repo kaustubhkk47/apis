@@ -39,6 +39,9 @@ class Product(models.Model):
     delete_status = models.BooleanField(default=False)
     is_catalog = models.BooleanField(default=False)
 
+    class Meta:
+        ordering = ["-id"]
+
     def __unicode__(self):
         return self.name
 

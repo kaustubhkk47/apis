@@ -14,11 +14,14 @@ class Seller(models.Model):
     email_verification = models.BooleanField(default=False)
     company_profile = models.TextField(blank=True)
     seller_conditions = models.TextField(blank=True)
+    concerned_person = models.TextField(blank=True,default="")
+    concerned_person_number = models.TextField(blank=True,default="")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     delete_status = models.BooleanField(default=False)
+    show_online = models.BooleanField(default=True)
 
     def __unicode__(self):
         return self.name
@@ -105,6 +108,12 @@ def validateSellerData(seller, oldseller, isnew):
         seller["company_profile"] = oldseller.company_profile
     if not "seller_conditions" in seller or not seller["seller_conditions"]!=None:
         seller["seller_conditions"] = oldseller.seller_conditions
+    if not "show_online" in seller or not seller["show_online"]!=None:
+        seller["show_online"] = oldseller.show_online
+    if not "concerned_person" in seller or not seller["concerned_person"]!=None:
+        seller["concerned_person"] = oldseller.concerned_person
+    if not "concerned_person_number" in seller or not seller["concerned_person_number"]!=None:
+        seller["concerned_person_number"] = oldseller.concerned_person_number
 
     if isnew == 1 and flag == 1:
         return False
@@ -172,6 +181,9 @@ def populateSellerData(sellerPtr, seller):
     sellerPtr.email_verification = bool(seller["email_verification"])
     sellerPtr.company_profile = seller["company_profile"]
     sellerPtr.seller_conditions = seller["seller_conditions"]
+    sellerPtr.show_online = seller["show_online"]
+    sellerPtr.concerned_person = seller["concerned_person"]
+    sellerPtr.concerned_person_number = seller["concerned_person_number"]
 
 def populateSellerDetailsData(sellerDetailsPtr,sellerdetails):
     sellerDetailsPtr.cst = sellerdetails["cst"]
