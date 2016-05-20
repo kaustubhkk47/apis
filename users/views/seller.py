@@ -91,7 +91,11 @@ def post_new_seller(request):
 		from_email = "info@wholdus.com"
 		attachment = "/home/probzip/webapps/wholdus_website/build/files/SellerTNC.pdf"
 
+<<<<<<< HEAD
 		create_email(mail_template_file,mail_dict,subject,from_email,to,attachment)		
+=======
+		#create_email(mail_template_file,mail_dict,subject,from_email,to,attachment)		
+>>>>>>> 928d56ce4cbd5d4370386193c907e22327887310
 
 		return customResponse("2XX", {"seller" : serialize_seller(newSeller)})
 
