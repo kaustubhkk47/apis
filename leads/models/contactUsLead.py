@@ -4,8 +4,10 @@ class ContactUsLead(models.Model):
 
 	email = models.EmailField(max_length=255, blank=True)
 	mobile_number = models.CharField(max_length=11, blank=True, db_index=True)
-
 	remarks = models.TextField(blank=True)
+
+	status = models.IntegerField(default=0)
+	comments = models.TextField(blank=True)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)

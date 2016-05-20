@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import admin
 from scripts.utils import validate_date_time
 
 #Make changes in model, validate, populate and serializer 
@@ -25,6 +26,9 @@ class Seller(models.Model):
 
     def __unicode__(self):
         return self.name
+
+class SellerAdmin(admin.ModelAdmin):
+    exclude = ('password',)
 
 class SellerAddress(models.Model):
     seller = models.ForeignKey(Seller)

@@ -1,16 +1,19 @@
 from django.db import models
 
 from catalog.models.product import Product
+from catalog.models.category import Category
 
 class BuyerLeads(models.Model):
 
 	product = models.ForeignKey(Product, blank = True, null=True)
+	category = models.ForeignKey(Category, blank = True, null=True)
 
 	name = models.CharField(max_length=200, blank=True)
 	email = models.EmailField(max_length=255, blank=True)
 	mobile_number = models.CharField(max_length=11, blank=True, db_index=True)
 
 	status = models.IntegerField(default=0)
+	comments = models.TextField(blank=True)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
