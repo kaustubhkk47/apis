@@ -4,6 +4,7 @@ import json
 from ..models.buyerLeads import BuyerLeads, validateBuyerLeadData, populateBuyerLead
 from ..serializers.buyerLeads import serialize_buyer_lead
 from catalog.models.product import Product
+from catalog.models.category import Category
 
 def post_new_buyer_lead(request):
 	try:
@@ -29,8 +30,18 @@ def post_new_buyer_lead(request):
 			productPtr = productPtr[0]
 			newBuyerLead.product = productPtr
 
+		if "categoryID" in buyerLead and buyerLead["categoryID"]!=None:
+			categoryPtr = Category.objects.filter(id=buyerLead["categoryID"])
+
+			if len(categoryPtr) == 0:
+				return customResponse("4XX", {"error": "invalid category id sent"})
+				
+			categoryPtr = categoryPtr[0]
+			newBuyerLead.category = categoryPtr
+
 		newBuyerLead.save()
 	except Exception as e:
+		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:

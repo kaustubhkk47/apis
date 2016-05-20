@@ -44,6 +44,8 @@ class OrderItem(models.Model):
 
     tracking_url = models.URLField(null=True, blank=True)
 
+    class Meta:
+        ordering = ["-id"]
 
     def __unicode__(self):
         return str(self.suborder.order.id) + "-" + str(self.suborder.id) + "-" + str(self.id)

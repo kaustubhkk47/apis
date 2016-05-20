@@ -8,7 +8,7 @@ admin.site.register(Buyer)
 admin.site.register(BuyerAddress)
 admin.site.register(BuyerDetails)
 
-admin.site.register(Seller)
+admin.site.register(Seller,SellerAdmin)
 admin.site.register(SellerAddress)
 admin.site.register(SellerDetails)
 admin.site.register(SellerBankDetails)
