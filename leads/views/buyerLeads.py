@@ -1,4 +1,4 @@
-from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string
+from scripts.utils import *
 import json
 
 from ..models.buyerLeads import BuyerLeads, validateBuyerLeadData, populateBuyerLead
@@ -41,9 +41,17 @@ def post_new_buyer_lead(request):
 
 		newBuyerLead.save()
 	except Exception as e:
-		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
 		closeDBConnection()
+
+		if("email" in buyerLead and buyerLead["email"]):
+			mail_template_file = "leads/buyer_lead.html"
+			mail_dict = {}
+			subject = "We at Wholdus have received your request"
+			to = [buyerLead["email"]]
+			from_email = "info@wholdus.com"
+			create_email(mail_template_file,mail_dict,subject,from_email,to)
+
 		return customResponse("2XX", {"buyer_lead" : serialize_buyer_lead(newBuyerLead)})
