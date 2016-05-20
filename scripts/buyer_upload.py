@@ -31,7 +31,7 @@ def send_buyers_data(wb):
 	ws = wb.worksheets[0]
 
 	while True:
-		buyerName = str(ws.cell(row = row, column = column).value)
+		buyerName = toString(ws.cell(row = row, column = column).value)
 		if buyerName == "" or buyerName == None or buyerName == 'None':
 			break
 		buyerData = json.dumps(fill_buyer_data(wb, row))
@@ -62,36 +62,36 @@ def fill_buyer_data(wb , i):
 	buyerData = {}
 
 	try:
-		buyerData["name"] = str(wb.worksheets[0]["A"+str(i)].value)
-		buyerData["company_name"] = str(wb.worksheets[0]["B"+str(i)].value)
-		buyerData["mobile_number"] = str(wb.worksheets[0]["C"+str(i)].value)
-		buyerData["email"] = str(wb.worksheets[0]["D"+str(i)].value)
-		buyerData["password"] = str(wb.worksheets[0]["E"+str(i)].value)
-		buyerData["alternate_phone_number"] = str(wb.worksheets[0]["F"+str(i)].value)
+		buyerData["name"] = toString(wb.worksheets[0]["A"+toString(i)].value)
+		buyerData["company_name"] = toString(wb.worksheets[0]["B"+toString(i)].value)
+		buyerData["mobile_number"] = toString(wb.worksheets[0]["C"+toString(i)].value)
+		buyerData["email"] = toString(wb.worksheets[0]["D"+toString(i)].value)
+		buyerData["password"] = toString(wb.worksheets[0]["E"+toString(i)].value)
+		buyerData["alternate_phone_number"] = toString(wb.worksheets[0]["F"+toString(i)].value)
 		buyerData["mobile_verification"] = True
 		buyerData["email_verification"] = True
-		buyerData["gender"] = str(wb.worksheets[0]["G"+str(i)].value)
+		buyerData["gender"] = toString(wb.worksheets[0]["G"+toString(i)].value)
 	
 		buyerDetails = {}
-		buyerDetails["vat_tin"] = str(wb.worksheets[0]["H"+str(i)].value)
-		buyerDetails["cst"] = str(wb.worksheets[0]["I"+str(i)].value)
-		buyerDetails["buyer_interest"] = str(wb.worksheets[0]["J"+str(i)].value)
-		buyerDetails["customer_type"] = str(wb.worksheets[0]["K"+str(i)].value)
-		buyerDetails["purchase_duration"] = str(wb.worksheets[0]["L"+str(i)].value)
-		buyerDetails["buying_capacity"] = str(wb.worksheets[0]["M"+str(i)].value)
-		buyerDetails["buys_from"] = str(wb.worksheets[0]["N"+str(i)].value)
-		buyerDetails["purchasing_states"] = str(wb.worksheets[0]["O"+str(i)].value)
+		buyerDetails["vat_tin"] = toString(wb.worksheets[0]["H"+toString(i)].value)
+		buyerDetails["cst"] = toString(wb.worksheets[0]["I"+toString(i)].value)
+		buyerDetails["buyer_interest"] = toString(wb.worksheets[0]["J"+toString(i)].value)
+		buyerDetails["customer_type"] = toString(wb.worksheets[0]["K"+toString(i)].value)
+		buyerDetails["purchase_duration"] = toString(wb.worksheets[0]["L"+toString(i)].value)
+		buyerDetails["buying_capacity"] = toString(wb.worksheets[0]["M"+toString(i)].value)
+		buyerDetails["buys_from"] = toString(wb.worksheets[0]["N"+toString(i)].value)
+		buyerDetails["purchasing_states"] = toString(wb.worksheets[0]["O"+toString(i)].value)
 
 		buyerData["details"] = buyerDetails
 
 		buyerAddress = {}
-		buyerAddress["address"] = str(wb.worksheets[0]["P"+str(i)].value)
-		buyerAddress["landmark"] = str(wb.worksheets[0]["Q"+str(i)].value)
-		buyerAddress["city"] = str(wb.worksheets[0]["R"+str(i)].value)
-		buyerAddress["state"] = str(wb.worksheets[0]["S"+str(i)].value)
-		buyerAddress["country"] = str(wb.worksheets[0]["T"+str(i)].value)
-		buyerAddress["contact_number"] = str(wb.worksheets[0]["U"+str(i)].value)
-		buyerAddress["pincode"] = str(wb.worksheets[0]["V"+str(i)].value)
+		buyerAddress["address"] = toString(wb.worksheets[0]["P"+toString(i)].value)
+		buyerAddress["landmark"] = toString(wb.worksheets[0]["Q"+toString(i)].value)
+		buyerAddress["city"] = toString(wb.worksheets[0]["R"+toString(i)].value)
+		buyerAddress["state"] = toString(wb.worksheets[0]["S"+toString(i)].value)
+		buyerAddress["country"] = toString(wb.worksheets[0]["T"+toString(i)].value)
+		buyerAddress["contact_number"] = toString(wb.worksheets[0]["U"+toString(i)].value)
+		buyerAddress["pincode"] = toString(wb.worksheets[0]["V"+toString(i)].value)
 		
 		buyerData["address"] = buyerAddress
 
@@ -104,12 +104,12 @@ def fill_buyer_data(wb , i):
 	return buyerData
 
 def post_feedback(wb, i, feedback, buyerID=0):
-	wb.worksheets[0]["X"+str(i)].value = feedback
+	wb.worksheets[0]["X"+toString(i)].value = feedback
 	if feedback == "Success":
-		wb.worksheets[0]["X"+str(i)].fill = greenFill
-		wb.worksheets[0]["Y"+str(i)] = int(buyerID)
+		wb.worksheets[0]["X"+toString(i)].fill = greenFill
+		wb.worksheets[0]["Y"+toString(i)] = int(buyerID)
 	else:
-		wb.worksheets[0]["X"+str(i)].fill = redFill
+		wb.worksheets[0]["X"+toString(i)].fill = redFill
 
 def parseFloat(x):
 	if x == None or x == 0:
@@ -122,3 +122,9 @@ def parseInt(x):
 		return int(0)
 	else:
 		return int(x)
+
+def toString(x):
+	if (type(x) == "unicode"):
+		x.encode("utf-8","ignore").strip()
+	else:
+		toString(x).strip()

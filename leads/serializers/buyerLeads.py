@@ -12,4 +12,9 @@ def serialize_buyer_lead(buyerlead_entry):
 	except:
 		buyerLead["productID"] = None
 
+	try:
+		buyerLead["categoryID"] = buyerlead_entry.category.id
+	except:
+		buyerLead["categoryID"] = None
+
 	return buyerLead

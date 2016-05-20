@@ -14,7 +14,6 @@ def serialize_seller(seller_entry):
         "company_name" : seller_entry.company_name,
         "mobile_number" : seller_entry.mobile_number,
         "email" : seller_entry.email,
-        "password" : seller_entry.password,
         "alternate_phone_number" : seller_entry.alternate_phone_number,
         "mobile_verification" : seller_entry.mobile_verification,
         "email_verification" : seller_entry.email_verification,
