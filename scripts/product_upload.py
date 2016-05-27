@@ -5,8 +5,9 @@ import os
 import shutil
 import ast
 from PIL import Image
+import time
 
-productURL = "http://api.probzip.com/products/"
+productURL = "http://api.wholdus.com/products/"
 redFill = openpyxl.styles.PatternFill(start_color='FA5858',end_color='FA5858',fill_type='solid')
 greenFill = openpyxl.styles.PatternFill(start_color='00FF40',end_color='00FF40',fill_type='solid')
 
@@ -25,10 +26,12 @@ outputFileName = "./ProductDataSheetf.xlsx"
 
 def upload_products():
 	wb = read_file()
+	success = 0
 	try:
-		send_products_data(wb)
+		success = send_products_data(wb)
 	except Exception as e:
 		print e
+	return success
 
 def modify_product_prices():
 	wb = read_file()
@@ -38,17 +41,24 @@ def modify_product_prices():
 		print e
 	
 def read_file():
+	wb = None
 	try:
+		print "Reading file"
 		wb = openpyxl.load_workbook(inputFileName,data_only=True)
 		print "File read correctly"	
 	except Exception as e:
+		print "File could not be read"
 		print e
+		raw_input("Press enter to exit")
+		exit()
 	return wb
 
 def send_products_data(wb):
 	row = 5
 	column = 1
 	ws = wb.worksheets[1]
+
+	success = 1
 
 	while True:
 		productName = toString(ws.cell(row = row, column = column).value)
@@ -65,6 +75,7 @@ def send_products_data(wb):
 					if jsonText["statusCode"] != "2XX":
 						post_feedback(wb, row, jsonText["body"]["error"])
 						print jsonText["body"]["error"]
+						success = 0
 					else:
 						moveImages(jsonText, row, wb)
 						post_feedback(wb, row, "Success",jsonText["body"]["product"]["productID"])
@@ -72,12 +83,15 @@ def send_products_data(wb):
 				except Exception as e:
 					print e
 					post_feedback(wb, row, e)
+					success = 0
 			else:
 				post_feedback(wb, row, "Error response from server")
+				success = 0
 
 		row += 1
 
 	wb.save(outputFileName)
+	return success
 
 def send_modified_product_prices(wb):
 	row = 5
@@ -307,7 +321,23 @@ def parseInt(x):
 		return int(x)
 
 def toString(x):
-	if (type(x) == "unicode"):
-		x.encode("utf-8","ignore").strip()
+	if (isinstance(x, unicode)):
+		return x.encode("utf-8","ignore").strip()
 	else:
-		toString(x).strip()
+		return str(x).strip()
+
+
+if __name__ == "__main__":
+	print "Enter 1 to upload products or 2 to modify product prices"
+	x = input("")
+	if x == 1:
+		if(upload_products()==1):
+			print "Products uploaded successfully"
+		else:
+			print "Some problem was encountered while uploading"
+	elif x == 2:
+		modify_product_prices()
+	else:
+		print "Wrong input"
+	
+	raw_input("Press enter to exit")
