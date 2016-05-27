@@ -14,7 +14,6 @@ def serialize_seller(seller_entry):
         "company_name" : seller_entry.company_name,
         "mobile_number" : seller_entry.mobile_number,
         "email" : seller_entry.email,
-        "password" : seller_entry.password,
         "alternate_phone_number" : seller_entry.alternate_phone_number,
         "mobile_verification" : seller_entry.mobile_verification,
         "email_verification" : seller_entry.email_verification,
@@ -22,6 +21,9 @@ def serialize_seller(seller_entry):
         "updated_at" : seller_entry.updated_at,
         "company_profile" : seller_entry.company_profile,
         "seller_conditions" : seller_entry.seller_conditions,
+        "concerned_person" : seller_entry.concerned_person,
+        "concerned_person_number" : seller_entry.concerned_person_number,
+        "show_online" : seller_entry.show_online,
         "address" : seller_addresses,
         "bank_details" : seller_bankdetails
     }

@@ -10,19 +10,22 @@ from django.template.defaultfilters import slugify
 from decimal import Decimal
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-def get_product_details(request, productsArr=[], categoriesArr = [],sellerArr =[], pageNumber=0,productsperPage=6):
+def get_product_details(request, productsArr=[], categoriesArr = [],sellerArr =[], isSeller=0,pageNumber=0,productsperPage=6,internalusersArr=[],isInternalUser=0):
     try:
         if len(productsArr) == 0:
             if len(categoriesArr) == 0 and len(sellerArr) == 0:
-                products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related('seller', 'productdetails', 'category')
+                products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related('seller', 'productdetails', 'category').order_by('-id')
             elif len(categoriesArr) > 0 and len(sellerArr) == 0:
-                products = Product.objects.filter(category__id__in=categoriesArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails')
+                products = Product.objects.filter(category__id__in=categoriesArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails').order_by('-id')
             elif len(categoriesArr) == 0 and len(sellerArr) > 0:
-                products = Product.objects.filter(seller__id__in=sellerArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails')
+                products = Product.objects.filter(seller__id__in=sellerArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails').order_by('-id')
             else:
-                products = Product.objects.filter(category__id__in=categoriesArr,seller__id__in=sellerArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails')
+                products = Product.objects.filter(category__id__in=categoriesArr,seller__id__in=sellerArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails').order_by('-id')
         else:
-            products = Product.objects.filter(id__in=productsArr, delete_status=False, seller__delete_status=False,category__delete_status=False).select_related('seller', 'productdetails', 'category')
+            products = Product.objects.filter(id__in=productsArr, delete_status=False, seller__delete_status=False,category__delete_status=False).select_related('seller', 'productdetails', 'category').order_by('-id')
+
+        if isSeller==0 and isInternalUser==0:
+            products = products.filter(verification=True,show_online=True)
 
         if pageNumber > 0:
             paginator = Paginator(products, productsperPage)

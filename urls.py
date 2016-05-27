@@ -44,7 +44,8 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-    url(r'^leads/buyer/$', lead_handler.buyer_leads)
+    url(r'^leads/buyer/$', lead_handler.buyer_leads),
+    url(r'^leads/contactus/$', lead_handler.contactus_leads)
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

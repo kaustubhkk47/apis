@@ -5,6 +5,7 @@ from .category import Category
 from django.template.defaultfilters import slugify
 from decimal import Decimal
 import datetime
+import math
 
 #Make changes in model, validate, populate and serializer 
 #Also make changes in upload script
@@ -38,6 +39,9 @@ class Product(models.Model):
 
     delete_status = models.BooleanField(default=False)
     is_catalog = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-id"]
 
     def __unicode__(self):
         return self.name
@@ -228,3 +232,4 @@ def populateProductDetailsData(productDetailsPtr, productdetails):
     productDetailsPtr.sample_type = productdetails["sample_type"]
     productDetailsPtr.sample_description = productdetails["sample_description"]
     productDetailsPtr.sample_price = Decimal(productdetails["sample_price"])
+

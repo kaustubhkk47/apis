@@ -5,8 +5,9 @@ import os
 import shutil
 import ast
 from PIL import Image
+import time
 
-productURL = "http://api.probzip.com/products/"
+productURL = "http://api.wholdus.com/products/"
 redFill = openpyxl.styles.PatternFill(start_color='FA5858',end_color='FA5858',fill_type='solid')
 greenFill = openpyxl.styles.PatternFill(start_color='00FF40',end_color='00FF40',fill_type='solid')
 
@@ -25,10 +26,12 @@ outputFileName = "./ProductDataSheetf.xlsx"
 
 def upload_products():
 	wb = read_file()
+	success = 0
 	try:
-		send_products_data(wb)
+		success = send_products_data(wb)
 	except Exception as e:
 		print e
+	return success
 
 def modify_product_prices():
 	wb = read_file()
@@ -38,11 +41,16 @@ def modify_product_prices():
 		print e
 	
 def read_file():
+	wb = None
 	try:
+		print "Reading file"
 		wb = openpyxl.load_workbook(inputFileName,data_only=True)
 		print "File read correctly"	
 	except Exception as e:
+		print "File could not be read"
 		print e
+		raw_input("Press enter to exit")
+		exit()
 	return wb
 
 def send_products_data(wb):
@@ -50,8 +58,10 @@ def send_products_data(wb):
 	column = 1
 	ws = wb.worksheets[1]
 
+	success = 1
+
 	while True:
-		productName = str(ws.cell(row = row, column = column).value)
+		productName = toString(ws.cell(row = row, column = column).value)
 		if productName == "" or productName == None or productName == 'None':
 			break
 		productData = json.dumps(fill_product_data(wb, row))
@@ -65,6 +75,7 @@ def send_products_data(wb):
 					if jsonText["statusCode"] != "2XX":
 						post_feedback(wb, row, jsonText["body"]["error"])
 						print jsonText["body"]["error"]
+						success = 0
 					else:
 						moveImages(jsonText, row, wb)
 						post_feedback(wb, row, "Success",jsonText["body"]["product"]["productID"])
@@ -72,19 +83,22 @@ def send_products_data(wb):
 				except Exception as e:
 					print e
 					post_feedback(wb, row, e)
+					success = 0
 			else:
 				post_feedback(wb, row, "Error response from server")
+				success = 0
 
 		row += 1
 
 	wb.save(outputFileName)
+	return success
 
 def send_modified_product_prices(wb):
 	row = 5
 	column = 1
 	ws = wb.worksheets[1]
 	while True:
-		productName = str(ws.cell(row = row, column = column).value)
+		productName = toString(ws.cell(row = row, column = column).value)
 		if productName == "" or productName == None or productName == 'None':
 			break
 		productData = json.dumps(fill_modified_product_prices(wb, row))
@@ -114,29 +128,29 @@ def send_modified_product_prices(wb):
 def moveImages(jsonText, row, wb):
 	imgNo = 1
 	body = jsonText["body"]["product"]["image"]
-	image_path = str(body["image_path"])
-	image_name = str(body["image_name"])
-	image_numbers = str(body["image_numbers"])
+	image_path = toString(body["image_path"])
+	image_name = toString(body["image_name"])
+	image_numbers = toString(body["image_numbers"])
 	if len(image_numbers) == 2:
 		image_numbers = []
 	elif len(image_numbers) == 3:
 		image_numbers = [int(image_numbers[1])]
 	else:
-		image_numbers = str(image_numbers[1:len(image_numbers)-1])
+		image_numbers = toString(image_numbers[1:len(image_numbers)-1])
 		image_numbers = [int(float(x)) for x in image_numbers.split(',')]
 	for sizePath in allSizePaths:
 		create_image_directory(image_path, sizePath)
 	while True:
 		check = 0
 		for extension in fileFormatExtensions:
-			imagePath = imageDirectory + str(row) + "-" + str(imgNo) + extension
+			imagePath = imageDirectory + toString(row) + "-" + toString(imgNo) + extension
 			if os.path.isfile(imagePath):
 				check = 1
 				img = Image.open(imagePath)
 				for i in range(len(allSizePaths)):
 					sizePath = allSizePaths[i]
 					directory = imageDirectory + image_path + sizePath
-					newPath = directory + image_name + "-" + str(image_numbers[imgNo-1]) + ".jpg"
+					newPath = directory + image_name + "-" + toString(image_numbers[imgNo-1]) + ".jpg"
 					imgnew = resize_image(img, allImageSizes[i])
 					imgnew.save(newPath,format="JPEG",quality=75)
 				os.remove(imagePath)
@@ -162,13 +176,13 @@ def resize_image(img, x):
 	return img
 	
 def post_image_feedback(wb, row, feedback):
-	wb.worksheets[1]["V"+str(row)].value = str(feedback) + " images moved"
+	wb.worksheets[1]["V"+toString(row)].value = toString(feedback) + " images moved"
 
 def fill_modified_product_prices(wb , i):
 	productData = {}
 
 	try:
-		productData["productID"] = parseInt(wb.worksheets[1]["V"+str(i)].value)
+		productData["productID"] = parseInt(wb.worksheets[1]["V"+toString(i)].value)
 		productData["product_lot"] = fill_product_lot_data(wb,i)
 	except Exception as e:
 		post_feedback(wb, i, "Data was incorrect")
@@ -179,42 +193,42 @@ def fill_product_data(wb , i):
 	productData = {}
 
 	try:
-		productData["categoryID"] = get_categoryID(wb.worksheets[1]["D"+str(i)].value, wb)
+		productData["categoryID"] = get_categoryID(wb.worksheets[1]["D"+toString(i)].value, wb)
 		productData["sellerID"] = parseInt(wb.worksheets[0]["F4"].value)
 
-		productData["name"] = str(wb.worksheets[1]["A"+str(i)].value)
-		productData["price_per_unit"] = parseFloat(wb.worksheets[2]["G"+str(i)].value)
-		productData["unit"] = str(wb.worksheets[2]["E"+str(i)].value)
+		productData["name"] = toString(wb.worksheets[1]["A"+toString(i)].value)
+		productData["price_per_unit"] = parseFloat(wb.worksheets[2]["G"+toString(i)].value)
+		productData["unit"] = toString(wb.worksheets[2]["E"+toString(i)].value)
 		productData["tax"] = 0.0
-		productData["lot_size"] = parseInt(wb.worksheets[2]["H"+str(i)].value)
+		productData["lot_size"] = parseInt(wb.worksheets[2]["H"+toString(i)].value)
 		productData["price_per_lot"] = parseFloat(productData["lot_size"]*productData["price_per_unit"])
 		productData["image_count"] = countImages(i)
 	
 		productDetails = {}
-		productDetails["seller_catalog_number"] = str(wb.worksheets[1]["B"+str(i)].value)
-		productDetails["brand"] = str(wb.worksheets[1]["C"+str(i)].value)
-		productDetails["description"] = str(wb.worksheets[1]["E"+str(i)].value)
-		productDetails["gender"] = str(wb.worksheets[1]["F"+str(i)].value)
-		productDetails["pattern"] = str(wb.worksheets[1]["G"+str(i)].value)
-		productDetails["style"] = str(wb.worksheets[1]["H"+str(i)].value)
-		productDetails["fabric_gsm"] = str(wb.worksheets[1]["I"+str(i)].value)
-		productDetails["sleeve"] = str(wb.worksheets[1]["J"+str(i)].value)
-		productDetails["neck_collar_type"] = str(wb.worksheets[1]["K"+str(i)].value)
-		productDetails["length"] = str(wb.worksheets[1]["L"+str(i)].value)
-		productDetails["work_decoration_type"] = str(wb.worksheets[1]["M"+str(i)].value)
-		productDetails["colours"] = str(wb.worksheets[1]["N"+str(i)].value)
-		productDetails["sizes"] = str(wb.worksheets[1]["O"+str(i)].value)
-		productDetails["special_feature"] = str(wb.worksheets[1]["P"+str(i)].value)
-		productDetails["packaging_details"] = str(wb.worksheets[1]["Q"+str(i)].value)
-		productDetails["availability"] = str(wb.worksheets[1]["R"+str(i)].value)
-		productDetails["weight_per_unit"] = parseFloat(wb.worksheets[2]["F"+str(i)].value)
-		productDetails["dispatched_in"] = str(wb.worksheets[1]["S"+str(i)].value)
-		productDetails["sample_type"] = str(wb.worksheets[2]["J"+str(i)].value)
-		productDetails["sample_description"] = str(wb.worksheets[2]["K"+str(i)].value)
-		productDetails["sample_price"] = parseFloat(wb.worksheets[2]["L"+str(i)].value)
+		productDetails["seller_catalog_number"] = toString(wb.worksheets[1]["B"+toString(i)].value)
+		productDetails["brand"] = toString(wb.worksheets[1]["C"+toString(i)].value)
+		productDetails["description"] = toString(wb.worksheets[1]["E"+toString(i)].value)
+		productDetails["gender"] = toString(wb.worksheets[1]["F"+toString(i)].value)
+		productDetails["pattern"] = toString(wb.worksheets[1]["G"+toString(i)].value)
+		productDetails["style"] = toString(wb.worksheets[1]["H"+toString(i)].value)
+		productDetails["fabric_gsm"] = toString(wb.worksheets[1]["I"+toString(i)].value)
+		productDetails["sleeve"] = toString(wb.worksheets[1]["J"+toString(i)].value)
+		productDetails["neck_collar_type"] = toString(wb.worksheets[1]["K"+toString(i)].value)
+		productDetails["length"] = toString(wb.worksheets[1]["L"+toString(i)].value)
+		productDetails["work_decoration_type"] = toString(wb.worksheets[1]["M"+toString(i)].value)
+		productDetails["colours"] = toString(wb.worksheets[1]["N"+toString(i)].value)
+		productDetails["sizes"] = toString(wb.worksheets[1]["O"+toString(i)].value)
+		productDetails["special_feature"] = toString(wb.worksheets[1]["P"+toString(i)].value)
+		productDetails["packaging_details"] = toString(wb.worksheets[1]["Q"+toString(i)].value)
+		productDetails["availability"] = toString(wb.worksheets[1]["R"+toString(i)].value)
+		productDetails["weight_per_unit"] = parseFloat(wb.worksheets[2]["F"+toString(i)].value)
+		productDetails["dispatched_in"] = toString(wb.worksheets[1]["S"+toString(i)].value)
+		productDetails["sample_type"] = toString(wb.worksheets[2]["J"+toString(i)].value)
+		productDetails["sample_description"] = toString(wb.worksheets[2]["K"+toString(i)].value)
+		productDetails["sample_price"] = parseFloat(wb.worksheets[2]["L"+toString(i)].value)
 
 		productDetails["manufactured_country"] = "India"
-		productDetails["manufactured_city"] = str(wb.worksheets[0]["C7"].value)
+		productDetails["manufactured_city"] = toString(wb.worksheets[0]["C7"].value)
 
 		productData["details"] = productDetails
 
@@ -233,14 +247,14 @@ def get_categoryID(value, wb):
 	row = 2
 	maxRow = get_max_category_row(wb)
 	for i in range(2,maxRow+1):
-		if ws["A"+str(i)].value == value:
-			return parseInt(ws["B" +str(i)].value)
+		if ws["A"+toString(i)].value == value:
+			return parseInt(ws["B" +toString(i)].value)
 
 def get_max_category_row(wb):
 	row = 2
 	ws = wb.worksheets[3]
 	while True:
-		categoryName = str(ws["A"+str(row)].value)
+		categoryName = toString(ws["A"+toString(row)].value)
 		if categoryName == "" or categoryName == None or categoryName == 'None':
 			break
 		else:
@@ -252,7 +266,7 @@ def countImages(row):
 	while True:
 		check = 0
 		for extension in fileFormatExtensions:
-			imagePath = imageDirectory + str(row) + "-" + str(imgNo) + extension
+			imagePath = imageDirectory + toString(row) + "-" + toString(imgNo) + extension
 			if os.path.isfile(imagePath):
 				check = 1
 		if(check == 0):
@@ -269,7 +283,7 @@ def fill_product_lot_data(wb,i):
 	ws = wb.worksheets[2]
 
 	while True:
-		from_lot = str(ws.cell(row = i, column = column).value)
+		from_lot = toString(ws.cell(row = i, column = column).value)
 		if from_lot == 0 or from_lot == None or from_lot == "None":
 			return productLotData
 		to_lot = parseInt(ws.cell(row = i, column = column+1).value)
@@ -287,12 +301,12 @@ def fill_product_lot_data(wb,i):
 	return productLotData
 
 def post_feedback(wb, i, feedback, productID=0):
-	wb.worksheets[1]["U"+str(i)].value = feedback
+	wb.worksheets[1]["U"+toString(i)].value = feedback
 	if feedback == "Success":
-		wb.worksheets[1]["U"+str(i)].fill = greenFill
-		wb.worksheets[1]["V"+str(i)] = int(productID)
+		wb.worksheets[1]["U"+toString(i)].fill = greenFill
+		wb.worksheets[1]["V"+toString(i)] = int(productID)
 	else:
-		wb.worksheets[1]["U"+str(i)].fill = redFill
+		wb.worksheets[1]["U"+toString(i)].fill = redFill
 
 def parseFloat(x):
 	if x == None or x == 0:
@@ -305,3 +319,25 @@ def parseInt(x):
 		return int(0)
 	else:
 		return int(x)
+
+def toString(x):
+	if (isinstance(x, unicode)):
+		return x.encode("utf-8","ignore").strip()
+	else:
+		return str(x).strip()
+
+
+if __name__ == "__main__":
+	print "Enter 1 to upload products or 2 to modify product prices"
+	x = input("")
+	if x == 1:
+		if(upload_products()==1):
+			print "Products uploaded successfully"
+		else:
+			print "Some problem was encountered while uploading"
+	elif x == 2:
+		modify_product_prices()
+	else:
+		print "Wrong input"
+	
+	raw_input("Press enter to exit")

@@ -6,6 +6,7 @@ SERVER_USER = "probzip@probzip.webfactional.com"
  
 # Set the user to use for ssh
 env.user = "probzip"
+env.password = "Probzip@1234"
 env.hosts = ["probzip.webfactional.com"]
  
 # Restrict the function to the 'web' role
@@ -19,5 +20,5 @@ def get_version():
 def hello():
     print("Hello world!")
 
-def restart_webserver():
-	sudo("~/webapps/"+APP_NAME+"apache2/bin/restart")
+def restart_server():
+	run("~/webapps/"+APP_NAME+"apache2/bin/restart")

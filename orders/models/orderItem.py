@@ -1,11 +1,12 @@
 from django.db import models
 
 from catalog.models.product import *
+from catalog.models.productLot import *
 from .order import *
 from .subOrder import *
 from .orderShipment import *
-from payments.models.buyerPayment import BuyerPayment
-from payments.models.sellerPayment import SellerPayment
+from .payments import BuyerPayment
+from .payments import SellerPayment
 
 from catalog.models.product import Product
 
@@ -14,15 +15,14 @@ class OrderItem(models.Model):
     suborder = models.ForeignKey(SubOrder)
     product = models.ForeignKey(Product)
     order_shipment = models.ForeignKey(OrderShipment,null=True,blank=True)
-    #buyerPayment = models.ForeignKey(BuyerPayment)
     seller_payment = models.ForeignKey(SellerPayment,null=True,blank=True)
 
-    lots = models.PositiveIntegerField()
-    undiscounted_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2)
-    actual_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    cod_charge = models.DecimalField(max_digits=10, decimal_places=2)
-    shipping_charge = models.DecimalField(max_digits=10, decimal_places=2)
+    pieces = models.PositiveIntegerField(default=0)
+    lots = models.PositiveIntegerField(default=0)
+    retail_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+    calculated_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+    edited_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+    
     final_price = models.DecimalField(max_digits=10, decimal_places=2)
     lot_size = models.PositiveIntegerField(default=1)
 
@@ -36,14 +36,8 @@ class OrderItem(models.Model):
     cancellation_remarks = models.TextField(blank=True)
     cancellation_time = models.DateTimeField(null=True, blank=True)
 
-    merchant_notified_time = models.DateTimeField(null=True, blank=True)
-    sent_for_pickup_time = models.DateTimeField(null=True, blank=True)
-    lost_time = models.DateTimeField(null=True, blank=True)
-    completed_time = models.DateTimeField(null=True, blank=True)
-    closed_time = models.DateTimeField(null=True, blank=True)
-
-    tracking_url = models.URLField(null=True, blank=True)
-
+    class Meta:
+        ordering = ["-id"]
 
     def __unicode__(self):
         return str(self.suborder.order.id) + "-" + str(self.suborder.id) + "-" + str(self.id)
@@ -56,29 +50,39 @@ def validateOrderProductsData(orderProducts):
         if not "productID" in orderProduct or not orderProduct["productID"]!=None:
             flag = False
 
-        productPtr = Product.objects.filter(id=orderProduct["productID"])
+        productPtr = Product.objects.filter(id=int(orderProduct["productID"]))
         if len(productPtr) == 0:
+            return False
+
+        productPtr = productPtr[0]
+
+        if not "pieces" in orderProduct or not orderProduct["pieces"]!=None:
             flag = False
-        if not "lots" in orderProduct or not orderProduct["lots"]!=None:
-            flag = False
-        if not "lot_size" in orderProduct or not orderProduct["lot_size"]!=None:
-            flag = False
-        if not "undiscounted_price_per_piece" in orderProduct or not orderProduct["undiscounted_price_per_piece"]!=None:
-            flag = False
-        if not "total_price" in orderProduct or not orderProduct["total_price"]!=None:
-            flag = False
-        if not "cod_charge" in orderProduct or not orderProduct["cod_charge"]!=None:
-            flag = False
-        if not "shipping_charge" in orderProduct or not orderProduct["shipping_charge"]!=None:
-            flag = False
-        if not "final_price" in orderProduct or not orderProduct["final_price"]!=None:
-            flag = False
-        if not "actual_price_per_piece" in orderProduct or not orderProduct["actual_price_per_piece"]!=None:
+        if not "edited_price_per_piece" in orderProduct or not orderProduct["edited_price_per_piece"]!=None:
             flag = False
         if not "remarks" in orderProduct or not orderProduct["remarks"]!=None:
             orderProduct["remarks"] = ""
 
+        orderProduct["retail_price_per_piece"] = productPtr.price_per_unit
+        orderProduct["lot_size"] = productPtr.lot_size
+
+        if flag == True:
+            orderProduct["final_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
+            orderProduct["lots"] = int(math.ceil(float(orderProduct["pieces"])/productPtr.lot_size))
+            orderProduct["calculated_price_per_piece"] = getCalculatedPricePerPiece(int(orderProduct["productID"]),orderProduct["lots"])
+
     return flag
+
+def populateOrderItemData(OrderItemPtr, orderItem):
+    OrderItemPtr.pieces = int(orderItem["pieces"])
+    OrderItemPtr.lots = orderItem["lots"]
+    OrderItemPtr.retail_price_per_piece = Decimal(orderItem["retail_price_per_piece"])
+    OrderItemPtr.calculated_price_per_piece = Decimal(orderItem["calculated_price_per_piece"])
+    OrderItemPtr.edited_price_per_piece = Decimal(orderItem["edited_price_per_piece"])
+    OrderItemPtr.final_price = Decimal(orderItem["final_price"])
+    OrderItemPtr.lot_size = int(orderItem["lot_size"])
+    OrderItemPtr.remarks = orderItem["remarks"]
+    OrderItemPtr.current_status = 0
 
 def validateOrderItemStatus(status, current_status):
     if current_status == 0 and not (status == 1 or status == 10):

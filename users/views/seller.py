@@ -1,9 +1,11 @@
-from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_date_time
+from scripts.utils import *
 import json
 from ..models.seller import *
 from ..serializers.seller import parse_seller, serialize_seller
 
-def get_seller_details(request,sellersArr=[]):
+
+
+def get_seller_details(request,sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
 	try:
 		if len(sellersArr)==0:
 
@@ -79,6 +81,18 @@ def post_new_seller(request):
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
 		closeDBConnection()
+		
+		seller_email = str(newSeller.email)
+		seller_password = str(newSeller.password)
+		mail_template_file = "seller/registration_success.html"
+		mail_dict = {"email":seller_email,"password":seller_password}
+		subject = str(newSeller.name) + " congratulations on your successful registration as a seller"
+		to = [seller_email]
+		from_email = "info@wholdus.com"
+		attachment = "/home/probzip/webapps/wholdus_website/build/files/SellerTNC.pdf"
+
+		create_email(mail_template_file,mail_dict,subject,from_email,to,attachment)		
+
 		return customResponse("2XX", {"seller" : serialize_seller(newSeller)})
 
 def update_seller(request):
@@ -193,4 +207,3 @@ def delete_seller(request):
 	else:
 		closeDBConnection()
 		return customResponse("2XX", {"seller": "seller deleted"})
-

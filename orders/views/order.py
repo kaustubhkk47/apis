@@ -4,15 +4,15 @@ from ..models.order import *
 from ..models.orderItem import *
 from ..models.orderShipment import *
 from ..models.subOrder import *
-from ..serializers.orderitem import *
-from payments.models.sellerPayment import *
+from ..serializers.order import *
+from ..models.payments import *
 from users.models.buyer import *
 from users.models.seller import *
 from decimal import Decimal
 import datetime
 
 
-def get_order_details(request, statusArr=[], sellersArr=[]):
+def get_order_details(request, statusArr=[], sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
 	try:
 		if len(statusArr) == 0 and len(sellersArr) == 0:
 			orderItems = OrderItem.objects.all().select_related('suborder', 'suborder__seller', 'suborder__order',
@@ -46,7 +46,7 @@ def post_new_order(request):
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
 	if not len(order):
-		return customResponse("4XX", {"error": "Invalid data for buyer sent"})
+		return customResponse("4XX", {"error": "Invalid data for order sent"})
 
 	if not "buyerID" in order or not order["buyerID"]!=None:
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
@@ -74,8 +74,9 @@ def post_new_order(request):
 	subOrders = []
 
 	orderProductCount = 0
-	orderUndiscountedPrice = Decimal(0.0)
-	orderFinalPrice = Decimal(0.0)
+	orderRetailPrice = Decimal(0.0)
+	orderCalculatedPrice = Decimal(0.0)
+	orderEditedPrice = Decimal(0.0)
 
 	for orderProduct in orderProducts:
 		
@@ -86,72 +87,69 @@ def post_new_order(request):
 		sellerID = seller.id
 
 		orderProductCount += 1
-		orderUndiscountedPrice += Decimal(orderProduct["lots"])*Decimal(orderProduct["undiscounted_price_per_piece"])*Decimal(orderProduct["lot_size"])
-		orderFinalPrice += Decimal(orderProduct["final_price"])
+		orderRetailPrice += Decimal(orderProduct["pieces"])*Decimal(orderProduct["retail_price_per_piece"])
+		orderCalculatedPrice += Decimal(orderProduct["pieces"])*Decimal(orderProduct["calculated_price_per_piece"])
+		orderEditedPrice += Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
 
 		if sellerID in sellersHash:
 			subOrders[sellersHash[sellerID]]["order_products"].append(orderProduct)
 			subOrders[sellersHash[sellerID]]["product_count"] += 1
-			subOrders[sellersHash[sellerID]]["undiscounted_price"] += Decimal(orderProduct["lots"])*Decimal(orderProduct["undiscounted_price_per_piece"])*Decimal(orderProduct["lot_size"])
-			subOrders[sellersHash[sellerID]]["final_price"] += Decimal(orderProduct["final_price"])
-			subOrders[sellersHash[sellerID]]["total_price"] += Decimal(orderProduct["total_price"])
+			subOrders[sellersHash[sellerID]]["retail_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["retail_price_per_piece"])
+			subOrders[sellersHash[sellerID]]["calculated_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["calculated_price_per_piece"])
+			subOrders[sellersHash[sellerID]]["edited_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])			
 		else:
 			sellersHash[sellerID] = len(sellersHash)
 			subOrderItem = {}
 			subOrderItem["order_products"] = [orderProduct]
 			subOrderItem["product_count"] = 1
-			subOrderItem["undiscounted_price"] = Decimal(orderProduct["lots"])*Decimal(orderProduct["undiscounted_price_per_piece"])*Decimal(orderProduct["lot_size"])
-			subOrderItem["final_price"] = Decimal(orderProduct["final_price"])
-			subOrderItem["remarks"] = orderProduct["remarks"]
-			subOrderItem["total_price"] = Decimal(orderProduct["total_price"])
+			subOrderItem["retail_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["retail_price_per_piece"])
+			subOrderItem["calculated_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["calculated_price_per_piece"])
+			subOrderItem["edited_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
 			subOrderItem["seller"] = seller
 			subOrders.append(subOrderItem)	
 
 	buyerAddressPtr = BuyerAddress.objects.filter(buyer__id=int(buyerPtr.id))
 	buyerAddressPtr = buyerAddressPtr[0]
 
+	orderData = {}
+	orderData["product_count"] = orderProductCount
+	orderData["retail_price"] = orderRetailPrice
+	orderData["calculated_price"] = orderCalculatedPrice
+	orderData["edited_price"] = orderEditedPrice
+	orderData["remarks"] = orderRemarks
+	orderData["buyerID"] = int(order["buyerID"])
+
 	try:
 		newOrder = Order(buyer=buyerPtr)
-		newOrder.product_count = orderProductCount
-		newOrder.undiscounted_price = orderUndiscountedPrice
-		newOrder.total_price = orderFinalPrice
-		newOrder.remarks = orderRemarks
+		populateOrderData(newOrder, orderData)
 		newOrder.save()
+
 
 		for subOrder in subOrders:
 			newSubOrder = SubOrder(order=newOrder, seller=subOrder["seller"])
-			newSubOrder.product_count = subOrder["product_count"]
-			newSubOrder.undiscounted_price = subOrder["undiscounted_price"]
-			newSubOrder.total_price = subOrder["total_price"]
-			newSubOrder.final_price = subOrder["final_price"]
+			populateSubOrderData(newSubOrder,subOrder,newOrder.id)
 			newSubOrder.save()
 
-			sellerAddressPtr = SellerAddress.objects.filter(seller__id=int(subOrder["seller"].id))
-			sellerAddressPtr = sellerAddressPtr[0]
+			#sellerAddressPtr = SellerAddress.objects.filter(seller__id=int(subOrder["seller"].id))
+			#sellerAddressPtr = sellerAddressPtr[0]
 
 			for orderItem in subOrder["order_products"]:
 
-				newSellerPayment = SellerPayment(suborder=newSubOrder)
-				newSellerPayment.save()
+				#newSellerPayment = SellerPayment(suborder=newSubOrder)
+				#newSellerPayment.save()
 
-				newOrderShipment = OrderShipment(suborder=newSubOrder,pickup=sellerAddressPtr,drop=buyerAddressPtr)
-				newOrderShipment.save()
+				#newOrderShipment = OrderShipment(suborder=newSubOrder,pickup=sellerAddressPtr,drop=buyerAddressPtr)
+				#newOrderShipment.save()
 
 				productPtr = Product.objects.filter(id=orderItem["productID"])
 				productPtr = productPtr[0]
 
-				newOrderItem = OrderItem(suborder=newSubOrder,product=productPtr,order_shipment=newOrderShipment,seller_payment=newSellerPayment)
-				newOrderItem.lots = orderItem["lots"]
-				newOrderItem.undiscounted_price_per_piece = Decimal(orderItem["undiscounted_price_per_piece"])
-				newOrderItem.actual_price_per_piece = Decimal(orderItem["actual_price_per_piece"])
-				newOrderItem.total_price = Decimal(orderItem["total_price"])
-				newOrderItem.cod_charge = Decimal(orderItem["cod_charge"])
-				newOrderItem.shipping_charge = Decimal(orderItem["shipping_charge"])
-				newOrderItem.final_price = Decimal(orderItem["final_price"])
-				newOrderItem.lot_size = int(orderItem["lot_size"])
-				newOrderItem.current_status = 0
+				newOrderItem = OrderItem(suborder=newSubOrder,product=productPtr)
+				populateOrderItemData(newOrderItem, orderItem)
 				newOrderItem.save()
+
 	except Exception as e:
+		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
