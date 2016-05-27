@@ -1,6 +1,7 @@
 import openpyxl
 import requests
 import json
+import time
 
 buyerURL = "http://api.probzip.com/users/buyer/"
 
@@ -125,6 +126,6 @@ def parseInt(x):
 
 def toString(x):
 	if (type(x) == "unicode"):
-		x.encode("utf-8","ignore").strip()
+		return x.encode("utf-8","ignore").strip()
 	else:
-		toString(x).strip()
+		return str(x).strip()
