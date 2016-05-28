@@ -37,40 +37,9 @@ def populateOrderData(orderPtr, order):
     orderPtr.save()
     orderPtr.display_number = "1" + "%05d" %(order["buyerID"],) +"%06d" %(orderPtr.id,)
 
-        
-
-orderPaymentStatus = {
-    "not_paid":{
-        "value":0,
-        "display_value":"Not paid"
-    },
-    "buyer_paid":{
-        "value":1,
-        "display_value":"Paid by buyer"
-    },
-    "paid_to_seller":{
-        "value":2,
-        "display_value":"Paid to all merchants"
-    }
-}
-
-
 orderStatus = {
-    "unconfirmed" : {
-        "value":0,
-        "display_value":"Pending confirmation"
-    },
-    "confirmed" : {
-        "value":1,
-        "display_value":"Confirmed by buyer"
-    },
-    "completed" :{
-        "value":2,
-        "display_value":"Completed"
-    },
-    "cancelled":{
-        "value":3,
-        "display_value":"Cancelled"
-    }
+    0:"Placed",
+    1:"Confirmed",
+    2:"Completed"
 }
 

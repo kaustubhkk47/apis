@@ -51,3 +51,15 @@ class OrderShipment(models.Model):
 
     def __unicode__(self):
         return str(self.suborder.id)
+
+OrderShipmentStatus = {
+    1:"Shipment created",
+    2:"3PL notified",
+    3:"3PL manifested",
+    4:"3PL in transit",
+    5:"3PL stuck in transit",
+    6:"Delivered",
+    7:"RTO in transit",
+    8:"RTO delivered",
+    9:"Lost"
+}

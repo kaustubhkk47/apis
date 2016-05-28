@@ -39,7 +39,7 @@ def parseMinPricePerUnit(product_lots):
 	return product_lots[len(product_lots)-1]["price_per_unit"]
 
 def getCalculatedPricePerPiece(productID, lots):
-    productLotsQuerySet = ProductLot.objects.filter(product__id = productID).order_by('lot_size_from')
+    productLotsQuerySet = ProductLot.objects.filter(product_id = productID).order_by('lot_size_from')
     
     if lots < productLotsQuerySet[0].lot_size_from:
         return productLotsQuerySet[0].price_per_unit

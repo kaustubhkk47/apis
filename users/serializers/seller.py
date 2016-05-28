@@ -2,10 +2,10 @@ from ..models.seller import SellerAddress, SellerBankDetails
 
 def serialize_seller(seller_entry):
     
-    seller_addresses_queryset = SellerAddress.objects.filter(seller__id = seller_entry.id)
+    seller_addresses_queryset = SellerAddress.objects.filter(seller_id = seller_entry.id)
     seller_addresses = serialize_seller_addresses(seller_addresses_queryset)
     
-    seller_bankdetails_queryset = SellerBankDetails.objects.filter(seller__id = seller_entry.id)
+    seller_bankdetails_queryset = SellerBankDetails.objects.filter(seller_id = seller_entry.id)
     seller_bankdetails = serialize_seller_bankdetails(seller_bankdetails_queryset)
     
     seller = {

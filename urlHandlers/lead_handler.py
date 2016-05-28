@@ -1,12 +1,20 @@
 from django.views.decorators.csrf import csrf_exempt
 from scripts.utils import customResponse, get_token_payload
-from leads.views import buyerLeads,contactUsLead
+from leads.views import buyerLeads,contactUsLead, sellerLeads
 
 @csrf_exempt
 def buyer_leads(request):
 
 	if request.method == "POST":
 		return buyerLeads.post_new_buyer_lead(request)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
+def seller_leads(request):
+
+	if request.method == "POST":
+		return sellerLeads.post_new_seller_lead(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 

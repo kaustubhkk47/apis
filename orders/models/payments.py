@@ -43,79 +43,29 @@ class SellerPayment(models.Model):
         return str(self.suborder.order.id) + "-" + str(self.suborder.id)
 
 SellerPaymentStatus = {
-	"not_paid":{
-		"value":0,
-		"display_value":"Not paid"
-	},
-	"paid":{
-		"value":0,
-		"display_value":"Paid"
-	}
+	0:"Not Paid",
+	1:"Paid"
 }
 
 SellerPaymentMethod = {
-	"neft":{
-		"value":0,
-		"display_value": "NEFT"
-	},
-	"imps":{
-		"value":1,
-		"display_value":"IMPS"
-	},
-	"rtgs":{
-		"value":2,
-		"display_value":"RTGS"
-	}
+	0:"NEFT",
+	1:"IMPS",
+	2:"RTGS"
 }
 
-"""
 BuyerPaymentStatus = {
-	"not_paid":{
-		"value":0,
-		"display_value":"Not paid"
-	},
-	"paid":{
-		"value":0,
-		"display_value":"Paid"
-	}
+	0:"Not Paid",
+	1:"Paid"
 }
 
 BuyerPaymentMethod = {
-	"cod":{
-		"value" = 0,
-		"display_value" = "Cash on delivery"
-	}
-	"neft":{
-		"value":1,
-		"display_value" = "NEFT"
-	},
-	"demand_draft":{
-		"value":2,
-		"display_value":"Demand draft"
-	},
-	"cash_deposit":{
-		"value":3,
-		"display_value":"Cash deposit"
-	},
-	"cheque":{
-		"value":4,
-		"display_value":"Cheque"
-	},
-	"debit_card":{
-		"value":5,
-		"display_value":"Debit card"
-	},
-	"credit_card":{
-		"value":6,
-		"display_value":"Credit card"
-	},
-	"net_banking":{
-		"value":7,
-		"display_value":"Net banking"
-	},
-	"wallet":{
-		"value":8,
-		"display_value":"Wallet"
-	}
+	0:"COD",
+	1:"NEFT",
+	2:"Demand Draft",
+	3:"Cash deposit",
+	4:"Cheque",
+	5:"Debit Card",
+	6:"Credit Card",
+	7:"Net Banking",
+	8:"Wallet"
 }
-"""

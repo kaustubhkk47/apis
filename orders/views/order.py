@@ -12,24 +12,83 @@ from decimal import Decimal
 import datetime
 
 
-def get_order_details(request, statusArr=[], sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
+def get_order_shipment_details(request, statusArr=[], sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
 	try:
 		if len(statusArr) == 0 and len(sellersArr) == 0:
-			orderItems = OrderItem.objects.all().select_related('suborder', 'suborder__seller', 'suborder__order',
-													   'suborder__order__buyer', 'order_shipment', 'order_shipment__pickup', 'order_shipment__drop', 'seller_payment','product')
+			orderShipments = OrderShipment.objects.all()
 		elif len(sellersArr) == 0 and len(statusArr) == 1:
-			orderItems = OrderItem.objects.filter(current_status__in=statusArr).select_related(
-				'suborder', 'suborder__seller', 'suborder__order', 'suborder__order__buyer', 'order_shipment', 'order_shipment__pickup', 'order_shipment__drop', 'seller_payment','product')
+			orderShipments = OrderShipment.objects.filter(current_status__in=statusArr)
 		elif len(sellersArr) == 1 and len(statusArr) == 0:
-			orderItems = OrderItem.objects.filter(suborder__seller__id__in=sellersArr).select_related(
-				'suborder', 'suborder__seller', 'suborder__order', 'suborder__order__buyer', 'order_shipment', 'order_shipment__pickup', 'order_shipment__drop', 'seller_payment','product')
+			orderShipments = OrderItem.objects.filter(suborder__seller_id__in=sellersArr)
 		else:
-			orderItems = OrderItem.objects.filter(current_status__in=statusArr,suborder__seller__id__in=sellersArr).select_related(
-				'suborder', 'suborder__seller', 'suborder__order', 'suborder__order__buyer', 'order_shipment', 'order_shipment__pickup', 'order_shipment__drop', 'seller_payment','product')
+			orderShipments = OrderItem.objects.filter(current_status__in=statusArr,suborder__seller_id__in=sellersArr)
+		closeDBConnection()
+		body = parseOrderShipments(orderShipments)
+		statusCode = "2XX"
+		response = {"order_shipments": body}
+
+	except Exception as e:
+		statusCode = "4XX"
+		response = {"error": "Invalid request"}
+
+	return customResponse(statusCode, response)
+
+def get_order_item_details(request, statusArr=[], sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
+	try:
+		if len(statusArr) == 0 and len(sellersArr) == 0:
+			orderItems = OrderItem.objects.all().select_related('product')
+		elif len(sellersArr) == 0 and len(statusArr) == 1:
+			orderItems = OrderItem.objects.filter(current_status__in=statusArr).select_related('product')
+		elif len(sellersArr) == 1 and len(statusArr) == 0:
+			orderItems = OrderItem.objects.filter(suborder__seller_id__in=sellersArr).select_related('product')
+		else:
+			orderItems = OrderItem.objects.filter(current_status__in=statusArr,suborder__seller_id__in=sellersArr).select_related('product')
 		closeDBConnection()
 		body = parseOrderItem(orderItems)
 		statusCode = "2XX"
 		response = {"order_items": body}
+
+	except Exception as e:
+		statusCode = "4XX"
+		response = {"error": "Invalid request"}
+
+	return customResponse(statusCode, response)
+
+def get_suborder_details(request, statusArr=[], sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
+	try:
+		if len(statusArr) == 0 and len(sellersArr) == 0:
+			subOrders = SubOrder.objects.all().select_related('seller')
+		elif len(sellersArr) == 0 and len(statusArr) == 1:
+			subOrders = SubOrder.objects.filter(suborder_status__in=statusArr).select_related('seller')
+		elif len(sellersArr) == 1 and len(statusArr) == 0:
+			subOrders = SubOrder.objects.filter(seller_id__in=sellersArr).select_related('seller')
+		else:
+			subOrders = SubOrder.objects.filter(suborder_status__in=statusArr,	seller_id__in=sellersArr).select_related('seller')
+		closeDBConnection()
+		body = parseSubOrders(subOrders)
+		statusCode = "2XX"
+		response = {"sub_orders": body}
+
+	except Exception as e:
+		statusCode = "4XX"
+		response = {"error": "Invalid request"}
+
+	return customResponse(statusCode, response)
+
+def get_order_details(request, statusArr=[], buyersArr=[], isBuyer=0,internalusersArr=[],isInternalUser=0):
+	try:
+		if len(statusArr) == 0 and len(buyersArr) == 0:
+			Orders = Order.objects.all().select_related('buyer')
+		elif len(buyersArr) == 0 and len(statusArr) == 1:
+			Orders = Order.objects.filter(order_status__in=statusArr).select_related('buyer')
+		elif len(buyersArr) == 1 and len(statusArr) == 0:
+			Orders = Order.objects.filter(buyer_id__in=buyersArr).select_related('buyer')
+		else:
+			Orders = Order.objects.filter(order_status__in=statusArr,buyer_id__in=buyersArr).select_related('buyer')
+		closeDBConnection()
+		body = parseOrders(Orders)
+		statusCode = "2XX"
+		response = {"orders": body}
 
 	except Exception as e:
 		statusCode = "4XX"
@@ -108,7 +167,7 @@ def post_new_order(request):
 			subOrderItem["seller"] = seller
 			subOrders.append(subOrderItem)	
 
-	buyerAddressPtr = BuyerAddress.objects.filter(buyer__id=int(buyerPtr.id))
+	buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
 	buyerAddressPtr = buyerAddressPtr[0]
 
 	orderData = {}
@@ -130,7 +189,7 @@ def post_new_order(request):
 			populateSubOrderData(newSubOrder,subOrder,newOrder.id)
 			newSubOrder.save()
 
-			#sellerAddressPtr = SellerAddress.objects.filter(seller__id=int(subOrder["seller"].id))
+			#sellerAddressPtr = SellerAddress.objects.filter(seller_id=int(subOrder["seller"].id))
 			#sellerAddressPtr = sellerAddressPtr[0]
 
 			for orderItem in subOrder["order_products"]:

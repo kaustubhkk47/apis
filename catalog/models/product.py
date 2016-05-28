@@ -83,7 +83,7 @@ class ProductDetails(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    remarks = models.TextField()
+    remarks = models.TextField(blank=True)
 
     def __unicode__(self):
         return self.product.name

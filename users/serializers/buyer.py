@@ -2,7 +2,7 @@ from ..models.buyer import BuyerAddress, BuyerDetails
 
 def serialize_buyer(buyer_entry):
 
-    buyer_addresses_queryset = BuyerAddress.objects.filter(buyer__id = buyer_entry.id)
+    buyer_addresses_queryset = BuyerAddress.objects.filter(buyer_id = buyer_entry.id)
 
     buyer_addresses = serialize_buyer_addresses(buyer_addresses_queryset)
 
