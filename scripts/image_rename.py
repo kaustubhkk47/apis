@@ -69,7 +69,7 @@ def start_rename_images_with_filenames(wb):
 			break
 		else:		
 			count = 0
-
+			catalogNumber = removeSpecialChars(catalogNumber)
 			for i in range(len(cleanFileList)):
 				fileName = cleanFileList[i]
 				if catalogNumber in fileName:
@@ -81,8 +81,8 @@ def start_rename_images_with_filenames(wb):
 						try:
 							shutil.move(filePath,newFilePath)
 							count += 1
-						except:
-							pass
+						except Exception as e:
+							print e
 
 			if count > 0:
 				post_feedback(wb, row, "Success",count)

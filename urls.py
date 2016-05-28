@@ -30,6 +30,9 @@ urlpatterns += [
 ]
 
 urlpatterns += [
+    url(r'^ordershipment/$', order_handler.order_shipment_details),
+    url(r'^orderitem/$', order_handler.order_item_details),
+    url(r'^suborder/$', order_handler.suborder_details),
     url(r'^orders/$', order_handler.order_details)
 ]
 
@@ -45,6 +48,7 @@ urlpatterns += [
 
 urlpatterns += [
     url(r'^leads/buyer/$', lead_handler.buyer_leads),
+    url(r'^leads/seller/$', lead_handler.seller_leads),
     url(r'^leads/contactus/$', lead_handler.contactus_leads)
 ]
 

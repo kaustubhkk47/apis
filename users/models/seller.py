@@ -25,7 +25,7 @@ class Seller(models.Model):
     show_online = models.BooleanField(default=True)
 
     def __unicode__(self):
-        return self.name
+        return self.name + "-" + self.company_name
 
 class SellerAdmin(admin.ModelAdmin):
     exclude = ('password',)

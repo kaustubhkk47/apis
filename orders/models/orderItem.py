@@ -115,17 +115,8 @@ def validateOrderItemStatus(status, current_status):
 
 
 OrderItemStatus = {
-	0:"Order Placed",
-	1:"Merchant notified",
-    2:"3PL notified",
-    3:"3PL manifested",
-    4:"3PL in transit",
-    5:"3PL stuck in transit",
-    6:"Delivered",
-    7:"RTO in transit",
-    8:"RTO delivered",
-    9:"Lost",
-    10:"Cancelled",
-    11:"Completed",
-    12:"Order Closed"
+	0:"Placed",
+    1:"Confirmed",
+	2:"Merchant notified",
+    3:"Shipped"
 }

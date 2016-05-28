@@ -40,24 +40,8 @@ def populateSubOrderData(subOrderPtr, subOrder,orderID):
     subOrderPtr.save()
     subOrderPtr.display_number = "1" + "%05d" %(subOrder["seller"].id,) +"%06d" %(subOrderPtr.id,) + "%06d" %(orderID,)
 
-subOrderPaymentStatus = {
-    "not_paid_to_seller": {
-        "value": 0,
-        "display_value": "Not paid to seller"
-    },
-    "paid_to_seller": {
-        "value": 1,
-        "display_value": "Paid to seller"
-    }
-}
-
-subOrderStatus = {
-    "unconfirmed": {
-        "value": 0,
-        "display_value": "Pending confirmation"
-    },
-    "confirmed": {
-        "value": 1,
-        "display_value": "Confirmed by seller"
-    },
+SubOrderStatus = {
+    0:"Unconfirmed",
+    1:"Confirmed",
+    2:"Completed"
 }
