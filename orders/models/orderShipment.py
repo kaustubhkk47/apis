@@ -36,6 +36,7 @@ class OrderShipment(models.Model):
 
     current_status = models.IntegerField(default=0)
 
+    tpl_notified_time = models.DateTimeField(null=True, blank=True)
     tpl_manifested_time = models.DateTimeField(null=True, blank=True)
     tpl_in_transit_time = models.DateTimeField(null=True, blank=True)
     tpl_stuck_in_transit_time = models.DateTimeField(null=True, blank=True)
@@ -104,8 +105,10 @@ def populateOrderShipment(OrderShipmentPtr, orderShipment):
     OrderShipmentPtr.remarks = orderShipment["remarks"]
     OrderShipmentPtr.rto_remarks = orderShipment["rto_remarks"]
     OrderShipmentPtr.tracking_url = orderShipment["tracking_url"]
+    OrderShipmentPtr.current_status = 1
 
 OrderShipmentStatus = {
+    0:"Default",
     1:"Shipment created",
     2:"3PL notified",
     3:"3PL manifested",

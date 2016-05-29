@@ -97,6 +97,16 @@ def parseSubOrders(subOrderQuerySet):
 
 	return subOrders
 
+def parseSellerPayments(sellerPaymentQuerySet):
+
+	sellerPayments = []
+
+	for sellerPayment in sellerPaymentQuerySet:
+		sellerPaymentEntry = serializeSellerPayment(sellerPayment)
+		sellerPayments.append(sellerPaymentEntry)
+
+	return sellerPayments
+
 def serializeSellerPayment(SellerPaymentEntry):
 	sellerPayment = {}
 	sellerPayment["suborderID"] = SellerPaymentEntry.suborder_id
@@ -182,6 +192,16 @@ def serializeBuyerPayment(BuyerPaymentEntry):
 	buyerPayment["updated_at"] = BuyerPaymentEntry.updated_at
 
 	return buyerPayment
+
+def parseBuyerPayments(buyerPaymentQuerySet):
+
+	buyerPayments = []
+
+	for buyerPayment in buyerPaymentQuerySet:
+		buyerPaymentEntry = serializeBuyerPayment(buyerPayment)
+		buyerPayments.append(buyerPaymentEntry)
+
+	return buyerPayments
 
 def serializeOrderShipment(orderShipmentEntry):
 	orderShipment = {

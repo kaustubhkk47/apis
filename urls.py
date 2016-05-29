@@ -33,7 +33,9 @@ urlpatterns += [
     url(r'^ordershipment/$', order_handler.order_shipment_details),
     url(r'^orderitem/$', order_handler.order_item_details),
     url(r'^suborder/$', order_handler.suborder_details),
-    url(r'^orders/$', order_handler.order_details)
+    url(r'^orders/$', order_handler.order_details),
+    url(r'^buyerpayment/$', order_handler.buyer_payment_details),
+    url(r'^sellerpayment/$', order_handler.seller_payment_details)
 ]
 
 urlpatterns += [

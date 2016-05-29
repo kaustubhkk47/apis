@@ -34,6 +34,14 @@ def validate_date(date_text):
 
     return True
 
+def validate_date_time(date_text):
+    try:
+        datetime.datetime.strptime(date_text, '%Y-%m-%d %H:%M:%S.%f')
+    except ValueError:
+        return False
+
+    return True
+
 def check_token_validity(access_token):
     if not access_token:
         ## log the exception into db

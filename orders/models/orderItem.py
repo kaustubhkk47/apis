@@ -99,6 +99,21 @@ def validateOrderShipmentItemsData(orderItems):
 
     return flag
 
+def validateSellerPaymentItemsData(orderItems):
+
+    flag = True
+
+    for orderItem in orderItems:
+
+        if not "orderitemID" in orderItem or orderItem["orderitemID"]==None:
+            flag = False
+
+        orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))
+        if len(orderItemPtr) == 0:
+            return False
+
+    return flag
+
 def validateOrderItemStatus(status, current_status):
     if current_status == 0 and not (status == 1 or status == 10):
         return False
@@ -133,5 +148,6 @@ OrderItemStatus = {
 	0:"Placed",
     1:"Confirmed",
 	2:"Merchant notified",
-    3:"Shipped"
+    3:"Shipped",
+    4:"Cancelled"
 }
