@@ -96,6 +96,66 @@ def get_order_details(request, statusArr=[], buyersArr=[], isBuyer=0,internaluse
 
 	return customResponse(statusCode, response)
 
+def post_new_order_shipment(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		orderShipment = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(orderShipment) or not validateOrderShipmentData(orderShipment):
+		return customResponse("4XX", {"error": "Invalid data for order shipment sent"})
+
+	if not "suborderID" in orderShipment or orderShipment["suborderID"]==None:
+		return customResponse("4XX", {"error": "Id for sub order not sent"})
+
+	subOrderPtr = SubOrder.objects.filter(id=int(orderShipment["suborderID"])).select_related('order')
+
+	if len(subOrderPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for sub order sent"})
+
+	subOrderPtr = subOrderPtr[0]
+
+	sellerAddressPtr = SellerAddress.objects.filter(seller_id=subOrderPtr.seller_id)
+	sellerAddressPtr = sellerAddressPtr[0]
+
+	buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=subOrderPtr.order.buyer_id)
+	buyerAddressPtr = buyerAddressPtr[0]
+
+	if not "order_items" in orderShipment or orderShipment["order_items"]==None:
+		return customResponse("4XX", {"error": "Order items in order shipment not sent"})
+
+	if not validateOrderShipmentItemsData(orderShipment["order_items"]):
+		return customResponse("4XX", {"error": "Order items in order shipment not sent properly sent"})
+
+	try:
+		newOrderShipment = OrderShipment(suborder=subOrderPtr, pickup_address=sellerAddressPtr, drop_address=buyerAddressPtr)
+		populateOrderShipment(newOrderShipment, orderShipment)
+		newOrderShipment.save()
+
+		subOrderPtr.cod_charge += newOrderShipment.cod_charge
+		subOrderPtr.shipping_charge += newOrderShipment.shipping_charge
+		subOrderPtr.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
+		subOrderPtr.save()
+
+		subOrderPtr.order.cod_charge += newOrderShipment.cod_charge
+		subOrderPtr.order.shipping_charge += newOrderShipment.shipping_charge
+		subOrderPtr.order.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
+		subOrderPtr.order.save()
+
+		for orderItem in orderShipment["order_items"]:
+			orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))
+			orderItemPtr = orderItemPtr[0]
+			orderItemPtr.order_shipment = newOrderShipment
+			orderItemPtr.save()	
+
+	except Exception as e:
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to create entry in db"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"order_shipment": serializeOrderShipment(newOrderShipment)})
+
 
 def post_new_order(request):
 	try:
@@ -107,7 +167,7 @@ def post_new_order(request):
 	if not len(order):
 		return customResponse("4XX", {"error": "Invalid data for order sent"})
 
-	if not "buyerID" in order or not order["buyerID"]!=None:
+	if not "buyerID" in order or order["buyerID"]==None:
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
 	buyerPtr = Buyer.objects.filter(id=int(order["buyerID"]))
@@ -117,7 +177,7 @@ def post_new_order(request):
 
 	buyerPtr = buyerPtr[0]
 
-	if not "products" in order or not order["products"]!=None:
+	if not "products" in order or order["products"]==None:
 		return customResponse("4XX", {"error": "Products in order not sent"})
 	if not validateOrderProductsData(order["products"]):
 		return customResponse("4XX", {"error": "Products in order not sent properly sent"})
@@ -126,7 +186,7 @@ def post_new_order(request):
 
 	sellersHash = {}
 
-	if not "remarks" in order or not order["remarks"]!=None:
+	if not "remarks" in order or order["remarks"]==None:
 		order["remarks"] = ""
 	orderRemarks = order["remarks"]
 
@@ -189,8 +249,7 @@ def post_new_order(request):
 			populateSubOrderData(newSubOrder,subOrder,newOrder.id)
 			newSubOrder.save()
 
-			#sellerAddressPtr = SellerAddress.objects.filter(seller_id=int(subOrder["seller"].id))
-			#sellerAddressPtr = sellerAddressPtr[0]
+			
 
 			for orderItem in subOrder["order_products"]:
 
@@ -208,7 +267,6 @@ def post_new_order(request):
 				newOrderItem.save()
 
 	except Exception as e:
-		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -222,10 +280,10 @@ def update_order(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(order) or not "orderitemID" in order or not order["orderitemID"]!=None:
+	if not len(order) or not "orderitemID" in order or order["orderitemID"]==None:
 		return customResponse("4XX", {"error": "Id for order item not sent"})
 
-	if not "status" in order or not order["status"]!=None:
+	if not "status" in order or order["status"]==None:
 		return customResponse("4XX", {"error": "Current status not sent"})
 
 	status = int(order["status"])

@@ -35,6 +35,8 @@ def order_shipment_details(request):
 			statusArr = [int(e) if e.isdigit() else e for e in status.split(",")]
 
 		return order.get_order_shipment_details(request,statusArr,sellersArr, isSeller,internalusersArr,isInternalUser)
+	elif request.method == "POST":
+		return order.post_new_order_shipment(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 

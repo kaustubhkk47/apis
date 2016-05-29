@@ -61,7 +61,7 @@ def post_new_product(request):
     if not len(product) or not validateProductData(product, Product(), 1):
         return customResponse("4XX", {"error": "Invalid data for product sent"})
 
-    if not "sellerID" in product or not product["sellerID"]!=None:
+    if not "sellerID" in product or product["sellerID"]==None:
         return customResponse("4XX", {"error": "Seller id for product not sent"})
 
     sellerPtr = Seller.objects.filter(id=int(product["sellerID"]))
@@ -69,7 +69,7 @@ def post_new_product(request):
         return customResponse("4XX", {"error": "Invalid id for seller sent"})
     sellerPtr = sellerPtr[0]
 
-    if not "categoryID" in product or not product["categoryID"]!=None:
+    if not "categoryID" in product or product["categoryID"]==None:
         return customResponse("4XX", {"error": "Category id for product not sent"})
 
     categoryPtr = Category.objects.filter(id=int(product["categoryID"]))
@@ -121,7 +121,7 @@ def update_product(request):
     except Exception as e:
         return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-    if not len(product) or not "productID" in product or not product["productID"]!=None:
+    if not len(product) or not "productID" in product or product["productID"]==None:
         return customResponse("4XX", {"error": "Id for product not sent"})
 
     productPtr = Product.objects.filter(id=int(product["productID"])).select_related('productdetails')
@@ -192,7 +192,7 @@ def delete_product(request):
     except Exception as e:
         return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-    if not len(product) or not "productID" in product or not product["productID"]!=None:
+    if not len(product) or not "productID" in product or product["productID"]==None:
         return customResponse("4XX", {"error": "Id for product not sent"})
 
     productPtr = Product.objects.filter(id=int(product["productID"]))

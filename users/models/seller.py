@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib import admin
-from scripts.utils import validate_date_time
+from scripts.utils import validate_date
 
 #Make changes in model, validate, populate and serializer 
 
@@ -90,33 +90,33 @@ def validateSellerData(seller, oldseller, isnew):
 
     flag = 0
 
-    if not "name" in seller or not seller["name"]!=None:
+    if not "name" in seller or seller["name"]==None:
         flag = 1
         seller["name"] = oldseller.name
-    if not "company_name" in seller or not seller["company_name"]!=None:
+    if not "company_name" in seller or seller["company_name"]==None:
         seller["company_name"] = oldseller.company_name
-    if not "mobile_number" in seller or not seller["mobile_number"]!=None:
+    if not "mobile_number" in seller or seller["mobile_number"]==None:
         flag = 1
         seller["mobile_number"] = oldseller.mobile_number
-    if not "email" in seller or not seller["email"]!=None:
+    if not "email" in seller or seller["email"]==None:
         seller["email"] = oldseller.email
-    if not "password" in seller or not seller["password"]!=None:
+    if not "password" in seller or seller["password"]==None:
         seller["password"] = oldseller.password
-    if not "alternate_phone_number" in seller or not seller["alternate_phone_number"]!=None:
+    if not "alternate_phone_number" in seller or seller["alternate_phone_number"]==None:
         seller["alternate_phone_number"] = oldseller.alternate_phone_number
-    if not "mobile_verification" in seller or not seller["mobile_verification"]!=None:
+    if not "mobile_verification" in seller or seller["mobile_verification"]==None:
         seller["mobile_verification"] = oldseller.mobile_verification
-    if not "email_verification" in seller or not seller["email_verification"]!=None:
+    if not "email_verification" in seller or seller["email_verification"]==None:
         seller["email_verification"] = oldseller.email_verification
-    if not "company_profile" in seller or not seller["company_profile"]!=None:
+    if not "company_profile" in seller or seller["company_profile"]==None:
         seller["company_profile"] = oldseller.company_profile
-    if not "seller_conditions" in seller or not seller["seller_conditions"]!=None:
+    if not "seller_conditions" in seller or seller["seller_conditions"]==None:
         seller["seller_conditions"] = oldseller.seller_conditions
-    if not "show_online" in seller or not seller["show_online"]!=None:
+    if not "show_online" in seller or seller["show_online"]==None:
         seller["show_online"] = oldseller.show_online
-    if not "concerned_person" in seller or not seller["concerned_person"]!=None:
+    if not "concerned_person" in seller or seller["concerned_person"]==None:
         seller["concerned_person"] = oldseller.concerned_person
-    if not "concerned_person_number" in seller or not seller["concerned_person_number"]!=None:
+    if not "concerned_person_number" in seller or seller["concerned_person_number"]==None:
         seller["concerned_person_number"] = oldseller.concerned_person_number
 
     if isnew == 1 and flag == 1:
@@ -126,52 +126,52 @@ def validateSellerData(seller, oldseller, isnew):
 
 def validateSellerAddressData(selleraddress, oldselleraddress):
 
-    if not "address" in selleraddress or not selleraddress["address"]!=None:
+    if not "address" in selleraddress or selleraddress["address"]==None:
         selleraddress["address"] = oldselleraddress.address
-    if not "landmark" in selleraddress or not selleraddress["landmark"]!=None:
+    if not "landmark" in selleraddress or selleraddress["landmark"]==None:
         selleraddress["landmark"] = oldselleraddress.landmark
-    if not "city" in selleraddress or not selleraddress["city"]!=None:
+    if not "city" in selleraddress or selleraddress["city"]==None:
         selleraddress["city"] = oldselleraddress.city
-    if not "state" in selleraddress or not selleraddress["state"]!=None:
+    if not "state" in selleraddress or selleraddress["state"]==None:
         selleraddress["state"] = oldselleraddress.state
-    if not "country" in selleraddress or not selleraddress["country"]!=None:
+    if not "country" in selleraddress or selleraddress["country"]==None:
         selleraddress["country"] = oldselleraddress.country
-    if not "contact_number" in selleraddress or not selleraddress["contact_number"]!=None:
+    if not "contact_number" in selleraddress or selleraddress["contact_number"]==None:
         selleraddress["contact_number"] = oldselleraddress.contact_number
-    if not "pincode" in selleraddress or not selleraddress["pincode"]!=None:
+    if not "pincode" in selleraddress or selleraddress["pincode"]==None:
         selleraddress["pincode"] = oldselleraddress.pincode
 
 def validateSellerDetailsData(sellerdetails, oldsellerdetails):
-    if not "vat_tin" in sellerdetails or not sellerdetails["vat_tin"]!=None:
+    if not "vat_tin" in sellerdetails or sellerdetails["vat_tin"]==None:
         sellerdetails["vat_tin"] = oldsellerdetails.vat_tin
-    if not "cst" in sellerdetails or not sellerdetails["cst"]!=None:
+    if not "cst" in sellerdetails or sellerdetails["cst"]==None:
         sellerdetails["cst"] = oldsellerdetails.cst
-    if not "pan" in sellerdetails or not sellerdetails["pan"]!=None:
+    if not "pan" in sellerdetails or sellerdetails["pan"]==None:
         sellerdetails["pan"] = oldsellerdetails.pan
-    if not "name_on_pan" in sellerdetails or not sellerdetails["name_on_pan"]!=None:
+    if not "name_on_pan" in sellerdetails or sellerdetails["name_on_pan"]==None:
         sellerdetails["name_on_pan"] = oldsellerdetails.name_on_pan
-    if not "dob_on_pan" in sellerdetails or not sellerdetails["dob_on_pan"]!=None or not validate_date_time(sellerdetails["dob_on_pan"]):
+    if not "dob_on_pan" in sellerdetails or sellerdetails["dob_on_pan"]==None or not validate_date(sellerdetails["dob_on_pan"]):
         sellerdetails["dob_on_pan"] = oldsellerdetails.dob_on_pan
-    if not "pan_verification" in sellerdetails or not sellerdetails["pan_verification"]!=None:
+    if not "pan_verification" in sellerdetails or sellerdetails["pan_verification"]==None:
         sellerdetails["pan_verification"] = oldsellerdetails.pan_verification
-    if not "tin_verification" in sellerdetails or not sellerdetails["tin_verification"]!=None:
+    if not "tin_verification" in sellerdetails or sellerdetails["tin_verification"]==None:
         sellerdetails["tin_verification"] = oldsellerdetails.tin_verification
 
 def validateSellerBankdetailsData(sellerbankdetails, oldsellerbankdetails):
 
-    if not "account_holders_name" in sellerbankdetails or not sellerbankdetails["account_holders_name"]!=None:
+    if not "account_holders_name" in sellerbankdetails or sellerbankdetails["account_holders_name"]==None:
         sellerbankdetails["account_holders_name"] = oldsellerbankdetails.account_holders_name
-    if not "account_number" in sellerbankdetails or not sellerbankdetails["account_number"]!=None:
+    if not "account_number" in sellerbankdetails or sellerbankdetails["account_number"]==None:
         sellerbankdetails["account_number"] = oldsellerbankdetails.account_number
-    if not "ifsc" in sellerbankdetails or not sellerbankdetails["ifsc"]!=None:
+    if not "ifsc" in sellerbankdetails or sellerbankdetails["ifsc"]==None:
         sellerbankdetails["ifsc"] = oldsellerbankdetails.ifsc
-    if not "bank_name" in sellerbankdetails or not sellerbankdetails["bank_name"]!=None:
+    if not "bank_name" in sellerbankdetails or sellerbankdetails["bank_name"]==None:
         sellerbankdetails["bank_name"] = oldsellerbankdetails.bank_name
-    if not "branch" in sellerbankdetails or not sellerbankdetails["branch"]!=None:
+    if not "branch" in sellerbankdetails or sellerbankdetails["branch"]==None:
         sellerbankdetails["branch"] = oldsellerbankdetails.branch
-    if not "branch_city" in sellerbankdetails or not sellerbankdetails["branch_city"]!=None:
+    if not "branch_city" in sellerbankdetails or sellerbankdetails["branch_city"]==None:
         sellerbankdetails["branch_city"] = oldsellerbankdetails.branch_city
-    if not "branch_pincode" in sellerbankdetails or not sellerbankdetails["branch_pincode"]!=None:
+    if not "branch_pincode" in sellerbankdetails or sellerbankdetails["branch_pincode"]==None:
         sellerbankdetails["branch_pincode"] = oldsellerbankdetails.branch_pincode 
 
 def populateSellerData(sellerPtr, seller):

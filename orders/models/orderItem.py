@@ -47,7 +47,7 @@ def validateOrderProductsData(orderProducts):
     flag = True
 
     for orderProduct in orderProducts:
-        if not "productID" in orderProduct or not orderProduct["productID"]!=None:
+        if not "productID" in orderProduct or orderProduct["productID"]==None:
             flag = False
 
         productPtr = Product.objects.filter(id=int(orderProduct["productID"]))
@@ -56,11 +56,11 @@ def validateOrderProductsData(orderProducts):
 
         productPtr = productPtr[0]
 
-        if not "pieces" in orderProduct or not orderProduct["pieces"]!=None:
+        if not "pieces" in orderProduct or orderProduct["pieces"]==None:
             flag = False
-        if not "edited_price_per_piece" in orderProduct or not orderProduct["edited_price_per_piece"]!=None:
+        if not "edited_price_per_piece" in orderProduct or orderProduct["edited_price_per_piece"]==None:
             flag = False
-        if not "remarks" in orderProduct or not orderProduct["remarks"]!=None:
+        if not "remarks" in orderProduct or orderProduct["remarks"]==None:
             orderProduct["remarks"] = ""
 
         orderProduct["retail_price_per_piece"] = productPtr.price_per_unit
@@ -83,6 +83,21 @@ def populateOrderItemData(OrderItemPtr, orderItem):
     OrderItemPtr.lot_size = int(orderItem["lot_size"])
     OrderItemPtr.remarks = orderItem["remarks"]
     OrderItemPtr.current_status = 0
+
+def validateOrderShipmentItemsData(orderItems):
+
+    flag = True
+
+    for orderItem in orderItems:
+
+        if not "orderitemID" in orderItem or orderItem["orderitemID"]==None:
+            flag = False
+
+        orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))
+        if len(orderItemPtr) == 0:
+            return False
+
+    return flag
 
 def validateOrderItemStatus(status, current_status):
     if current_status == 0 and not (status == 1 or status == 10):

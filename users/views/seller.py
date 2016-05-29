@@ -39,17 +39,17 @@ def post_new_seller(request):
 	if sellerMobileNumberExists(seller["mobile_number"]):
 		return customResponse("4XX", {"error": "seller phone number already exists"})
 
-	if not "address" in seller or not seller["address"]!=None:
+	if not "address" in seller or seller["address"]==None:
 		seller["address"] = {}
 
 	validateSellerAddressData(seller["address"], SellerAddress())
 
-	if not "bank_details" in seller or not seller["bank_details"]!=None:
+	if not "bank_details" in seller or seller["bank_details"]==None:
 		seller["bank_details"] = {}
 
 	validateSellerBankdetailsData(seller["bank_details"], SellerBankDetails())
 
-	if not "details" in seller or not seller["details"]!=None:
+	if not "details" in seller or seller["details"]==None:
 			seller["details"] = {}
 
 	validateSellerDetailsData(seller["details"], SellerDetails())
@@ -102,7 +102,7 @@ def update_seller(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(seller) or not "sellerID" in seller or not seller["sellerID"]!=None:
+	if not len(seller) or not "sellerID" in seller or seller["sellerID"]==None:
 		return customResponse("4XX", {"error": "Id for seller not sent"})
 
 	sellerPtr = Seller.objects.filter(id=int(seller["sellerID"])).select_related('sellerdetails')

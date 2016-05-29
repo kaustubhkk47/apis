@@ -26,7 +26,7 @@ def convert_keys_to_string(dictionary):
     return dict((str(k), convert_keys_to_string(v))
         for k, v in dictionary.items())
 
-def validate_date_time(date_text):
+def validate_date(date_text):
     try:
         datetime.datetime.strptime(date_text, '%Y-%m-%d')
     except ValueError:

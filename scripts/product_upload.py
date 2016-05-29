@@ -1,4 +1,4 @@
-	import openpyxl
+import openpyxl
 import requests
 import json
 import os
@@ -70,7 +70,12 @@ def send_products_data(wb):
 			break
 		productData = json.dumps(fill_product_data(wb, row))
 
-		if not (productData == {} or productData == "{}"):
+		imageCount = countImages(row)
+
+		if imageCount==0:
+			post_feedback(wb, row, "0 images present")
+
+		elif not (productData == {} or productData == "{}"):
 			response = requests.post(productURL, data = productData)
 			if response.status_code == requests.codes.ok:
 				try:

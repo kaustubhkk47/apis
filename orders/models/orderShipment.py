@@ -7,6 +7,9 @@ from .order import *
 from .orderItem import *
 from .subOrder import *
 
+from scripts.utils import validate_date
+from decimal import Decimal
+
 
 class OrderShipment(models.Model):
 
@@ -52,6 +55,56 @@ class OrderShipment(models.Model):
     def __unicode__(self):
         return str(self.suborder.id)
 
+def validateOrderShipmentData(orderShipment):
+
+    flag = True
+
+    if not "invoice_number" in orderShipment or orderShipment["invoice_number"]==None:
+        orderShipment["invoice_number"] = ""
+    if not "invoice_date" in orderShipment or orderShipment["invoice_date"]==None or not validate_date(orderShipment["invoice_date"]):
+        flag = False
+    if not "logistics_partner" in orderShipment or orderShipment["logistics_partner"]==None:
+        orderShipment["logistics_partner"] = "Fedex"
+    if not "waybill_number" in orderShipment or orderShipment["waybill_number"]==None:
+        orderShipment["waybill_number"] = ""
+    if not "packaged_weight" in orderShipment or orderShipment["packaged_weight"]==None:
+        flag = False
+    if not "packaged_length" in orderShipment or orderShipment["packaged_length"]==None:
+        flag = False
+    if not "packaged_breadth" in orderShipment or orderShipment["packaged_breadth"]==None:
+        flag = False
+    if not "packaged_height" in orderShipment or orderShipment["packaged_height"]==None:
+        flag = False
+    if not "cod_charge" in orderShipment or orderShipment["cod_charge"]==None:
+        flag = False
+    if not "shipping_charge" in orderShipment or orderShipment["shipping_charge"]==None:
+        flag = False
+    if not "remarks" in orderShipment or orderShipment["remarks"]==None:
+        orderShipment["remarks"] = ""
+    if not "rto_remarks" in orderShipment or orderShipment["rto_remarks"]==None:
+        orderShipment["rto_remarks"] = ""
+    if not "tracking_url" in orderShipment or orderShipment["tracking_url"]==None:
+        orderShipment["tracking_url"] = ""
+    
+    return flag
+
+
+
+def populateOrderShipment(OrderShipmentPtr, orderShipment):
+    OrderShipmentPtr.invoice_number = orderShipment["invoice_number"]
+    OrderShipmentPtr.invoice_date = orderShipment["invoice_date"]
+    OrderShipmentPtr.logistics_partner = orderShipment["logistics_partner"]
+    OrderShipmentPtr.waybill_number = orderShipment["waybill_number"]
+    OrderShipmentPtr.packaged_weight = Decimal(orderShipment["packaged_weight"])
+    OrderShipmentPtr.packaged_length = Decimal(orderShipment["packaged_length"])
+    OrderShipmentPtr.packaged_breadth = Decimal(orderShipment["packaged_breadth"])
+    OrderShipmentPtr.packaged_height = Decimal(orderShipment["packaged_height"])
+    OrderShipmentPtr.cod_charge = Decimal(orderShipment["cod_charge"])
+    OrderShipmentPtr.shipping_charge = Decimal(orderShipment["shipping_charge"])
+    OrderShipmentPtr.remarks = orderShipment["remarks"]
+    OrderShipmentPtr.rto_remarks = orderShipment["rto_remarks"]
+    OrderShipmentPtr.tracking_url = orderShipment["tracking_url"]
+
 OrderShipmentStatus = {
     1:"Shipment created",
     2:"3PL notified",
@@ -63,3 +116,4 @@ OrderShipmentStatus = {
     8:"RTO delivered",
     9:"Lost"
 }
+
