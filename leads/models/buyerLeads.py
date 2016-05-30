@@ -25,13 +25,13 @@ def validateBuyerLeadData(buyerlead, oldbuyerlead, is_new):
 
 	flag = 0
 
-	if not "name" in buyerlead or not buyerlead["name"]!=None:
+	if not "name" in buyerlead or buyerlead["name"]==None:
 		flag = 1
 		buyerlead["name"] = oldbuyerlead.name
-	if not "mobile_number" in buyerlead or not buyerlead["mobile_number"]!=None:
+	if not "mobile_number" in buyerlead or buyerlead["mobile_number"]==None:
 		flag = 1
 		buyerlead["mobile_number"] = oldbuyerlead.mobile_number
-	if not "email" in buyerlead or not buyerlead["email"]!=None:
+	if not "email" in buyerlead or buyerlead["email"]==None:
 		buyerlead["email"] = oldbuyerlead.email
 
 	if is_new == 1 and flag == 1:

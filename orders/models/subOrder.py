@@ -3,6 +3,8 @@ from django.db import models
 from users.models.seller import *
 from .order import *
 
+import datetime
+
 class SubOrder(models.Model):
 
     order = models.ForeignKey(Order)
@@ -23,6 +25,7 @@ class SubOrder(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    confirmed_time = models.DateTimeField(null=True, blank=True)
     merchant_notified_time = models.DateTimeField(null=True, blank=True)
     completed_time = models.DateTimeField(null=True, blank=True)
     closed_time = models.DateTimeField(null=True, blank=True)
@@ -37,11 +40,15 @@ def populateSubOrderData(subOrderPtr, subOrder,orderID):
     subOrderPtr.calculated_price = subOrder["calculated_price"]
     subOrderPtr.edited_price = subOrder["edited_price"]
     subOrderPtr.final_price = subOrder["edited_price"]
+    subOrderPtr.suborder_status = 1
+    subOrderPtr.confirmed_time = datetime.datetime.now()
     subOrderPtr.save()
     subOrderPtr.display_number = "1" + "%05d" %(subOrder["seller"].id,) +"%06d" %(subOrderPtr.id,) + "%06d" %(orderID,)
 
 SubOrderStatus = {
     0:"Unconfirmed",
     1:"Confirmed",
-    2:"Completed"
+    2:"Merchant Notified",
+    3:"Completed",
+    4:"Closed"
 }

@@ -20,13 +20,13 @@ def validateSellerLeadData(sellerlead, oldsellerlead, is_new):
 
 	flag = 0
 
-	if not "company_name" in sellerlead or not sellerlead["company_name"]!=None:
+	if not "company_name" in sellerlead or sellerlead["company_name"]==None:
 		flag = 1
 		sellerlead["company_name"] = oldsellerlead.company_name
-	if not "mobile_number" in sellerlead or not sellerlead["mobile_number"]!=None:
+	if not "mobile_number" in sellerlead or sellerlead["mobile_number"]==None:
 		flag = 1
 		sellerlead["mobile_number"] = oldsellerlead.mobile_number
-	if not "email" in sellerlead or not sellerlead["email"]!=None:
+	if not "email" in sellerlead or sellerlead["email"]==None:
 		sellerlead["email"] = oldsellerlead.email
 
 	if is_new == 1 and flag == 1:

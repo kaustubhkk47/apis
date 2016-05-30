@@ -19,11 +19,11 @@ def validateContactUsLeadData(contactUsLead, oldcontactUsLead, is_new):
 
 	flag = 0
 
-	if not "remarks" in contactUsLead or not contactUsLead["remarks"]!=None:
+	if not "remarks" in contactUsLead or contactUsLead["remarks"]==None:
 		contactUsLead["remarks"] = oldcontactUsLead.remarks
-	if not "mobile_number" in contactUsLead or not contactUsLead["mobile_number"]!=None:
+	if not "mobile_number" in contactUsLead or contactUsLead["mobile_number"]==None:
 		contactUsLead["mobile_number"] = oldcontactUsLead.mobile_number
-	if not "email" in contactUsLead or not contactUsLead["email"]!=None:
+	if not "email" in contactUsLead or contactUsLead["email"]==None:
 		contactUsLead["email"] = oldcontactUsLead.email
 
 	if is_new == 1 and flag == 1:
