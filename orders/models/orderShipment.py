@@ -104,8 +104,8 @@ def populateOrderShipment(OrderShipmentPtr, orderShipment):
     OrderShipmentPtr.shipping_charge = Decimal(orderShipment["shipping_charge"])
     OrderShipmentPtr.remarks = orderShipment["remarks"]
     OrderShipmentPtr.rto_remarks = orderShipment["rto_remarks"]
-    OrderShipmentPtr.tracking_url = orderShipment["tracking_url"]
-    OrderShipmentPtr.current_status = 1
+    OrderShipmentPtr.tracking_url = "https://www.fedex.com/apps/fedextrack/?action=track&trackingnumber="+orderShipment["waybill_number"]+"&cntry_code=in"
+    OrderShipmentPtr.current_status = 3
 
 OrderShipmentStatus = {
     0:"Default",

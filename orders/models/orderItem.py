@@ -82,7 +82,7 @@ def populateOrderItemData(OrderItemPtr, orderItem):
     OrderItemPtr.final_price = Decimal(orderItem["final_price"])
     OrderItemPtr.lot_size = int(orderItem["lot_size"])
     OrderItemPtr.remarks = orderItem["remarks"]
-    OrderItemPtr.current_status = 0
+    OrderItemPtr.current_status = 1
 
 def validateOrderShipmentItemsData(orderItems):
 
