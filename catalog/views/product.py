@@ -16,16 +16,16 @@ def get_product_details(request, productsArr=[], categoriesArr = [],sellerArr =[
             if len(categoriesArr) == 0 and len(sellerArr) == 0:
                 products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related('seller', 'productdetails', 'category').order_by('-id')
             elif len(categoriesArr) > 0 and len(sellerArr) == 0:
-                products = Product.objects.filter(category__id__in=categoriesArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails').order_by('-id')
+                products = Product.objects.filter(category_id__in=categoriesArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails').order_by('-id')
             elif len(categoriesArr) == 0 and len(sellerArr) > 0:
-                products = Product.objects.filter(seller__id__in=sellerArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails').order_by('-id')
+                products = Product.objects.filter(seller_id__in=sellerArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails').order_by('-id')
             else:
-                products = Product.objects.filter(category__id__in=categoriesArr,seller__id__in=sellerArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails').order_by('-id')
+                products = Product.objects.filter(category_id__in=categoriesArr,seller_id__in=sellerArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails').order_by('-id')
         else:
             products = Product.objects.filter(id__in=productsArr, delete_status=False, seller__delete_status=False,category__delete_status=False).select_related('seller', 'productdetails', 'category').order_by('-id')
 
         if isSeller==0 and isInternalUser==0:
-            products = products.filter(verification=True,show_online=True)
+            products = products.filter(verification=True,show_online=True,seller__show_online=True)
 
         if pageNumber > 0:
             paginator = Paginator(products, productsperPage)
@@ -61,7 +61,7 @@ def post_new_product(request):
     if not len(product) or not validateProductData(product, Product(), 1):
         return customResponse("4XX", {"error": "Invalid data for product sent"})
 
-    if not "sellerID" in product or not product["sellerID"]!=None:
+    if not "sellerID" in product or product["sellerID"]==None:
         return customResponse("4XX", {"error": "Seller id for product not sent"})
 
     sellerPtr = Seller.objects.filter(id=int(product["sellerID"]))
@@ -69,7 +69,7 @@ def post_new_product(request):
         return customResponse("4XX", {"error": "Invalid id for seller sent"})
     sellerPtr = sellerPtr[0]
 
-    if not "categoryID" in product or not product["categoryID"]!=None:
+    if not "categoryID" in product or product["categoryID"]==None:
         return customResponse("4XX", {"error": "Category id for product not sent"})
 
     categoryPtr = Category.objects.filter(id=int(product["categoryID"]))
@@ -121,7 +121,7 @@ def update_product(request):
     except Exception as e:
         return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-    if not len(product) or not "productID" in product or not product["productID"]!=None:
+    if not len(product) or not "productID" in product or product["productID"]==None:
         return customResponse("4XX", {"error": "Id for product not sent"})
 
     productPtr = Product.objects.filter(id=int(product["productID"])).select_related('productdetails')
@@ -192,7 +192,7 @@ def delete_product(request):
     except Exception as e:
         return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-    if not len(product) or not "productID" in product or not product["productID"]!=None:
+    if not len(product) or not "productID" in product or product["productID"]==None:
         return customResponse("4XX", {"error": "Id for product not sent"})
 
     productPtr = Product.objects.filter(id=int(product["productID"]))

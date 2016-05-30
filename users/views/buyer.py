@@ -39,12 +39,12 @@ def post_new_buyer(request):
 	if buyerMobileNumberExists(buyer["mobile_number"]):
 		return customResponse("4XX", {"error": "buyer phone number already exists"})
 
-	if not "address" in buyer or not buyer["address"]!=None:
+	if not "address" in buyer or buyer["address"]==None:
 		buyer["address"] = {}
 		
 	validateBuyerAddressData(buyer["address"], BuyerAddress())
 
-	if not "details" in buyer or not buyer["details"]!=None:
+	if not "details" in buyer or buyer["details"]==None:
 		buyer["details"] = {}
 
 	try:
@@ -82,7 +82,7 @@ def update_buyer(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer) or not "buyerID" in buyer or not buyer["buyerID"]!=None:
+	if not len(buyer) or not "buyerID" in buyer or buyer["buyerID"]==None:
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
 	buyerPtr = Buyer.objects.filter(id=int(buyer["buyerID"])).select_related('buyerdetails')

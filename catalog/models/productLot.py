@@ -21,11 +21,11 @@ def validateProductLotData(product_lots):
 	flag = 1
 	for i in range(len(product_lots)):
 		product_lot = product_lots[i]
-		if not "lot_size_from" in product_lot or not product_lot["lot_size_from"]!=None:
+		if not "lot_size_from" in product_lot or product_lot["lot_size_from"]==None:
 			flag = 0
-		if not "lot_size_to" in product_lot or not product_lot["lot_size_to"]!=None:
+		if not "lot_size_to" in product_lot or product_lot["lot_size_to"]==None:
 			flag = 0
-		if not "price_per_unit" in product_lot or not product_lot["price_per_unit"]!=None:
+		if not "price_per_unit" in product_lot or product_lot["price_per_unit"]==None:
 			flag = 0
 
 	return flag
@@ -39,7 +39,7 @@ def parseMinPricePerUnit(product_lots):
 	return product_lots[len(product_lots)-1]["price_per_unit"]
 
 def getCalculatedPricePerPiece(productID, lots):
-    productLotsQuerySet = ProductLot.objects.filter(product__id = productID).order_by('lot_size_from')
+    productLotsQuerySet = ProductLot.objects.filter(product_id = productID).order_by('lot_size_from')
     
     if lots < productLotsQuerySet[0].lot_size_from:
         return productLotsQuerySet[0].price_per_unit

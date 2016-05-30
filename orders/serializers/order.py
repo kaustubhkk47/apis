@@ -3,6 +3,7 @@ from users.serializers.buyer import serialize_buyer, serialize_buyer_address
 from catalog.serializers.product import serialize_product
 from ..models.orderItem import OrderItemStatus, OrderItem
 from ..models.subOrder import SubOrder
+from ..models.orderShipment import OrderShipment
 from ..models.payments import BuyerPayment, SellerPayment
 
 def parseOrderItem(orderItemQuerySet):
@@ -17,10 +18,11 @@ def parseOrderItem(orderItemQuerySet):
 
 def serializeOrderItem(orderItemEntry):
 	orderItem = {}
-
+	orderItem["suborderID"] = orderItemEntry.suborder_id
+	orderItem["ordershipmentID"] = orderItemEntry.order_shipment_id
+	orderItem["sellerpaymentID"] = orderItemEntry.seller_payment_id
 	orderItem["orderitemID"] = orderItemEntry.id
 	orderItem["product"] = serialize_product(orderItemEntry.product)
-
 	orderItem["pieces"] = orderItemEntry.pieces
 	orderItem["lots"] = orderItemEntry.lots
 	orderItem["retail_price_per_piece"] = orderItemEntry.retail_price_per_piece
@@ -38,9 +40,9 @@ def serializeOrderItem(orderItemEntry):
 
 def serializeSubOrder(subOrderEntry):
 	subOrder = {}
+	subOrder["orderID"]=subOrderEntry.order_id
 	subOrder["suborderID"]=subOrderEntry.id
 	subOrder["seller"]=serialize_seller(subOrderEntry.seller)
-
 	subOrder["product_count"] = subOrderEntry.product_count
 	subOrder["retail_price"] = subOrderEntry.retail_price
 	subOrder["calculated_price"] = subOrderEntry.calculated_price
@@ -56,7 +58,7 @@ def serializeSubOrder(subOrderEntry):
 	subOrder["completed_time"] = subOrderEntry.completed_time
 	subOrder["closed_time"] = subOrderEntry.closed_time
 
-	sellerPaymentQuerySet = SellerPayment.objects.filter(suborder__id = subOrderEntry.id)
+	sellerPaymentQuerySet = SellerPayment.objects.filter(suborder_id = subOrderEntry.id)
 	sellerPayments = []
 
 	for sellerPayment in sellerPaymentQuerySet:
@@ -65,7 +67,16 @@ def serializeSubOrder(subOrderEntry):
 
 	subOrder["seller_payments"] = sellerPayments
 
-	orderItemQuerySet = OrderItem.objects.filter(suborder__id = subOrderEntry.id)
+	orderShipmentQuerySet = OrderShipment.objects.filter(suborder_id = subOrderEntry.id)
+	orderShipments = []
+
+	for orderShipment in orderShipmentQuerySet:
+		orderShipmentEntry = serializeOrderShipment(orderShipment)
+		orderShipments.append(orderShipmentEntry)
+
+	subOrder["order_shipments"] = orderShipments
+
+	orderItemQuerySet = OrderItem.objects.filter(suborder_id = subOrderEntry.id).select_related('product')
 	orderItems = []
 
 	for orderItem in orderItemQuerySet:
@@ -76,8 +87,29 @@ def serializeSubOrder(subOrderEntry):
 		
 	return subOrder
 
+def parseSubOrders(subOrderQuerySet):
+
+	subOrders = []
+
+	for subOrder in subOrderQuerySet:
+		subOrderEntry = serializeSubOrder(subOrder)
+		subOrders.append(subOrderEntry)
+
+	return subOrders
+
+def parseSellerPayments(sellerPaymentQuerySet):
+
+	sellerPayments = []
+
+	for sellerPayment in sellerPaymentQuerySet:
+		sellerPaymentEntry = serializeSellerPayment(sellerPayment)
+		sellerPayments.append(sellerPaymentEntry)
+
+	return sellerPayments
+
 def serializeSellerPayment(SellerPaymentEntry):
 	sellerPayment = {}
+	sellerPayment["suborderID"] = SellerPaymentEntry.suborder_id
 	sellerPayment["sellerpaymentID"] = SellerPaymentEntry.id
 	sellerPayment["payment_status"] = SellerPaymentEntry.payment_status
 	sellerPayment["payment_method"] = SellerPaymentEntry.payment_method
@@ -88,7 +120,7 @@ def serializeSellerPayment(SellerPaymentEntry):
 	sellerPayment["created_at"] = SellerPaymentEntry.created_at
 	sellerPayment["updated_at"] = SellerPaymentEntry.updated_at
 
-	orderItemQuerySet = OrderItem.objects.filter(seller_payment__id = SellerPaymentEntry.id)
+	orderItemQuerySet = OrderItem.objects.filter(seller_payment_id = SellerPaymentEntry.id).select_related('product')
 	orderItems = []
 
 	for orderItem in orderItemQuerySet:
@@ -116,7 +148,7 @@ def serializeOrder(orderEntry):
 	order["created_at"]=orderEntry.created_at
 	order["updated_at"]=orderEntry.updated_at
 
-	subOrderQuerySet = SubOrder.objects.filter(order__id = orderEntry.id)
+	subOrderQuerySet = SubOrder.objects.filter(order_id = orderEntry.id).select_related('seller')
 	subOrders = []
 
 	for subOrder in subOrderQuerySet:
@@ -125,7 +157,7 @@ def serializeOrder(orderEntry):
 
 	order["sub_orders"] = subOrders
 
-	buyerPaymentQuerySet = BuyerPayment.objects.filter(order__id = orderEntry.id)
+	buyerPaymentQuerySet = BuyerPayment.objects.filter(order_id = orderEntry.id)
 	buyerPayments = []
 
 	for buyerPayment in buyerPaymentQuerySet:
@@ -136,8 +168,19 @@ def serializeOrder(orderEntry):
 	
 	return order
 
+def parseOrders(OrderQuerySet):
+
+	Orders = []
+
+	for Order in OrderQuerySet:
+		OrderEntry = serializeOrder(Order)
+		Orders.append(OrderEntry)
+
+	return Orders
+
 def serializeBuyerPayment(BuyerPaymentEntry):
 	buyerPayment = {}
+	buyerPayment["orderID"] = BuyerPaymentEntry.order_id
 	buyerPayment["buyerpaymentID"] = BuyerPaymentEntry.id
 	buyerPayment["payment_status"] = BuyerPaymentEntry.payment_status
 	buyerPayment["payment_method"] = BuyerPaymentEntry.payment_method
@@ -150,8 +193,19 @@ def serializeBuyerPayment(BuyerPaymentEntry):
 
 	return buyerPayment
 
+def parseBuyerPayments(buyerPaymentQuerySet):
+
+	buyerPayments = []
+
+	for buyerPayment in buyerPaymentQuerySet:
+		buyerPaymentEntry = serializeBuyerPayment(buyerPayment)
+		buyerPayments.append(buyerPaymentEntry)
+
+	return buyerPayments
+
 def serializeOrderShipment(orderShipmentEntry):
 	orderShipment = {
+		"suborderID":orderShipmentEntry.suborder_id,
 		"ordershipmentID": orderShipmentEntry.id,
 		"pickup_address": serialize_seller_address(orderShipmentEntry.pickup_address),
 		"drop_address": serialize_buyer_address(orderShipmentEntry.drop_address),
@@ -181,7 +235,7 @@ def serializeOrderShipment(orderShipmentEntry):
 		"updated_at": orderShipmentEntry.updated_at
 	}
 
-	orderItemQuerySet = OrderItem.objects.filter(order_shipment__id = orderShipmentEntry.id)
+	orderItemQuerySet = OrderItem.objects.filter(order_shipment_id = orderShipmentEntry.id).select_related('product')
 	orderItems = []
 
 	for orderItem in orderItemQuerySet:
@@ -191,3 +245,13 @@ def serializeOrderShipment(orderShipmentEntry):
 	orderShipment["order_items"] = orderItems
 	
 	return orderShipment
+
+def parseOrderShipments(orderShipmentQuerySet):
+
+	orderShipments = []
+
+	for orderShipment in orderShipmentQuerySet:
+		orderShipmentEntry = serializeOrderShipment(orderShipment)
+		orderShipments.append(orderShipmentEntry)
+
+	return orderShipments

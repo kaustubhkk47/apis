@@ -4,8 +4,10 @@ import json
 import os
 import shutil
 import ast
-from PIL import Image
+from PIL import Image, ImageFile
 import time
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 productURL = "http://api.wholdus.com/products/"
 redFill = openpyxl.styles.PatternFill(start_color='FA5858',end_color='FA5858',fill_type='solid')
@@ -23,6 +25,8 @@ fileFormatExtensions = [".jpg", ".jpeg",".png"]
 
 inputFileName = "./ProductDataSheet.xlsx"
 outputFileName = "./ProductDataSheetf.xlsx"
+
+startRow = 5
 
 def upload_products():
 	wb = read_file()
@@ -54,7 +58,7 @@ def read_file():
 	return wb
 
 def send_products_data(wb):
-	row = 5
+	row = startRow
 	column = 1
 	ws = wb.worksheets[1]
 
@@ -66,7 +70,12 @@ def send_products_data(wb):
 			break
 		productData = json.dumps(fill_product_data(wb, row))
 
-		if not (productData == {} or productData == "{}"):
+		imageCount = countImages(row)
+
+		if imageCount==0:
+			post_feedback(wb, row, "0 images present")
+
+		elif not (productData == {} or productData == "{}"):
 			response = requests.post(productURL, data = productData)
 			if response.status_code == requests.codes.ok:
 				try:
@@ -94,7 +103,7 @@ def send_products_data(wb):
 	return success
 
 def send_modified_product_prices(wb):
-	row = 5
+	row = startRow
 	column = 1
 	ws = wb.worksheets[1]
 	while True:

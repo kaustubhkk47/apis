@@ -8,7 +8,7 @@ import ast
 
 def serialize_product_lots(productsItem):
 
-	productLotsQuerySet = ProductLot.objects.filter(product__id = productsItem.id)
+	productLotsQuerySet = ProductLot.objects.filter(product_id = productsItem.id)
 	productLots = []
 
 	for productLot in productLotsQuerySet:
