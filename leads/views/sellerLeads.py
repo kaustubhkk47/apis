@@ -1,8 +1,21 @@
 from scripts.utils import *
 import json
 
-from ..models.sellerLeads import SellerLeads, validateSellerLeadData, populateSellerLead
-from ..serializers.sellerLeads import serialize_seller_lead
+from ..models.sellerLeads import *
+from ..serializers.sellerLeads import *
+
+def get_seller_leads(request):
+	try:
+		sellerLeads = SellerLeads.objects.all()
+		closeDBConnection()
+		body = parseSellerLeads(sellerLeads)
+		statusCode = "2XX"
+		response = {"seller_leads": body}
+	except Exception, e:
+		statusCode = "4XX"
+		response = {"error": "Invalid request"}
+	return customResponse(statusCode, response)
+	
 
 def post_new_seller_lead(request):
 	try:
