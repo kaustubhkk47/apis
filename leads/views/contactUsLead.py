@@ -2,7 +2,20 @@ from scripts.utils import *
 import json
 
 from ..models.contactUsLead import ContactUsLead, validateContactUsLeadData, populateContactUsLead
-from ..serializers.contactUsLead import serialize_contactus_lead
+from ..serializers.contactUsLead import *
+
+def get_contactus_leads(request):
+	try:
+		contactusLeads = ContactUsLead.objects.all()
+		closeDBConnection()
+		body = parseContactUsLeads(contactusLeads)
+		statusCode = "2XX"
+		response = {"contactus_leads": body}
+	except Exception, e:
+		print e
+		statusCode = "4XX"
+		response = {"error": "Invalid request"}
+	return customResponse(statusCode, response)
 
 def post_new_contactus_lead(request):
 	try:
@@ -34,4 +47,4 @@ def post_new_contactus_lead(request):
 			from_email = "info@wholdus.com"
 			create_email(mail_template_file,mail_dict,subject,from_email,to)
 
-		return customResponse("2XX", {"contactUs_lead" : serialize_contactus_lead(newcontactUsLead)})
+		return customResponse("2XX", {"contactus_lead" : serialize_contactus_lead(newcontactUsLead)})

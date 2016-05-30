@@ -1,10 +1,22 @@
 from scripts.utils import *
 import json
 
-from ..models.buyerLeads import BuyerLeads, validateBuyerLeadData, populateBuyerLead
-from ..serializers.buyerLeads import serialize_buyer_lead
+from ..models.buyerLeads import *
+from ..serializers.buyerLeads import *
 from catalog.models.product import Product
 from catalog.models.category import Category
+
+def get_buyer_leads(request):
+	try:
+		buyerLeads = BuyerLeads.objects.all()
+		closeDBConnection()
+		body = parseBuyerLeads(buyerLeads)
+		statusCode = "2XX"
+		response = {"buyer_leads": body}
+	except Exception, e:
+		statusCode = "4XX"
+		response = {"error": "Invalid request"}
+	return customResponse(statusCode, response)
 
 def post_new_buyer_lead(request):
 	try:
