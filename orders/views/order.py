@@ -190,6 +190,7 @@ def post_new_order_shipment(request):
 			orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))
 			orderItemPtr = orderItemPtr[0]
 			orderItemPtr.order_shipment = newOrderShipment
+			orderItemPtr.current_status = 3
 			orderItemPtr.save()	
 
 	except Exception as e:
@@ -434,6 +435,8 @@ def update_order_shipment(request):
 			orderShipmentPtr.rto_in_transit_time = datetime.datetime.now()
 		elif status == 8:
 			orderShipmentPtr.rto_delivered_time = datetime.datetime.now()
+			if "rto_remarks" in orderShipment and not orderShipment["rto_remarks"]==None:
+				orderShipmentPtr.rto_remarks = orderShipment["rto_remarks"]
 		elif status == 9:
 			orderShipmentPtr.lost_time = datetime.datetime.now()
 		else:
@@ -477,6 +480,11 @@ def update_suborder(request):
 
 		if status == 2:
 			subOrderPtr.merchant_notified_time = datetime.datetime.now()
+
+			orderItemQuerySet = OrderItem.objects.filter(suborder_id = subOrderPtr.id)
+			for orderItem in orderItemQuerySet:
+				orderItem.current_status = 2
+				orderItem.save()
 		elif status == 3:
 			subOrderPtr.completed_time = datetime.datetime.now()
 		elif status == 4:

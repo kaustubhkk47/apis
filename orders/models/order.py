@@ -34,6 +34,7 @@ def populateOrderData(orderPtr, order):
     orderPtr.edited_price = order["edited_price"]
     orderPtr.final_price = order["edited_price"]
     orderPtr.remarks = order["remarks"]
+    orderPtr.order_status = 1
     orderPtr.save()
     orderPtr.display_number = "1" + "%05d" %(order["buyerID"],) +"%06d" %(orderPtr.id,)
 

@@ -48,3 +48,34 @@ def post_new_contactus_lead(request):
 			create_email(mail_template_file,mail_dict,subject,from_email,to)
 
 		return customResponse("2XX", {"contactus_lead" : serialize_contactus_lead(newcontactUsLead)})
+
+def update_contactus_lead(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		contactusLead = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(contactusLead) or not "contactusleadID" in contactusLead or contactusLead["contactusleadID"]==None:
+		return customResponse("4XX", {"error": "Id for contactus lead not sent"})
+
+	contactusLeadPtr = ContactUsLead.objects.filter(id=int(contactusLead["contactusleadID"]))
+
+	if len(contactusLeadPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for contactus lead sent"})
+
+	contactusLeadPtr = contactusLeadPtr[0]
+
+	if not validateContactUsLeadData(contactusLead, contactusLeadPtr, 0):
+		return customResponse("4XX", {"error": "Invalid data for contactus lead sent"})
+
+	try:
+		populateContactUsLead(contactusLeadPtr, contactusLead)
+		contactusLeadPtr.save()
+
+	except Exception as e:
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to update contactus lead"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"contactus_lead" : serialize_contactus_lead(contactusLeadPtr)})

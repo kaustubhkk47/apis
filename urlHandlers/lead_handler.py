@@ -9,6 +9,8 @@ def buyer_leads(request):
 		return buyerLeads.get_buyer_leads(request)
 	if request.method == "POST":
 		return buyerLeads.post_new_buyer_lead(request)
+	elif request.method == "PUT":
+		return buyerLeads.update_buyer_lead(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -19,6 +21,8 @@ def seller_leads(request):
 		return sellerLeads.get_seller_leads(request)
 	elif request.method == "POST":
 		return sellerLeads.post_new_seller_lead(request)
+	elif request.method == "PUT":
+		return sellerLeads.update_seller_lead(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -29,5 +33,7 @@ def contactus_leads(request):
 		return contactUsLead.get_contactus_leads(request)
 	if request.method == "POST":
 		return contactUsLead.post_new_contactus_lead(request)
+	elif request.method == "PUT":
+		return contactUsLead.update_contactus_lead(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})

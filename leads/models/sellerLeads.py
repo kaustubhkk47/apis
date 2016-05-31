@@ -28,6 +28,10 @@ def validateSellerLeadData(sellerlead, oldsellerlead, is_new):
 		sellerlead["mobile_number"] = oldsellerlead.mobile_number
 	if not "email" in sellerlead or sellerlead["email"]==None:
 		sellerlead["email"] = oldsellerlead.email
+	if not "status" in sellerlead or sellerlead["status"]==None:
+		sellerlead["status"] = oldsellerlead.status
+	if not "comments" in sellerlead or sellerlead["comments"]==None:
+		sellerlead["comments"] = oldsellerlead.comments
 
 	if is_new == 1 and flag == 1:
 		return False
@@ -38,3 +42,5 @@ def populateSellerLead(sellerleadPtr, sellerlead):
 	sellerleadPtr.company_name = sellerlead["company_name"]
 	sellerleadPtr.email = sellerlead["email"]
 	sellerleadPtr.mobile_number = sellerlead["mobile_number"]
+	sellerleadPtr.status = int(sellerlead["status"])
+	sellerleadPtr.comments = sellerlead["comments"]
