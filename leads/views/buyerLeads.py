@@ -67,3 +67,35 @@ def post_new_buyer_lead(request):
 			create_email(mail_template_file,mail_dict,subject,from_email,to)
 
 		return customResponse("2XX", {"buyer_lead" : serialize_buyer_lead(newBuyerLead)})
+
+def update_buyer_lead(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyerLead = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyerLead) or not "buyerleadID" in buyerLead or buyerLead["buyerleadID"]==None:
+		return customResponse("4XX", {"error": "Id for buyer lead not sent"})
+
+	buyerLeadPtr = BuyerLeads.objects.filter(id=int(buyerLead["buyerleadID"]))
+
+	if len(buyerLeadPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for buyer lead sent"})
+
+	buyerLeadPtr = buyerLeadPtr[0]
+
+	if not validateBuyerLeadData(buyerLead, buyerLeadPtr, 0):
+		return customResponse("4XX", {"error": "Invalid data for buyer lead sent"})
+
+	try:
+		populateBuyerLead(buyerLeadPtr, buyerLead)
+		buyerLeadPtr.save()
+
+	except Exception as e:
+		print e
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to update buyer lead"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer_lead" : serialize_buyer_lead(buyerLeadPtr)})
