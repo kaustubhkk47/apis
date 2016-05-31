@@ -33,6 +33,10 @@ def validateBuyerLeadData(buyerlead, oldbuyerlead, is_new):
 		buyerlead["mobile_number"] = oldbuyerlead.mobile_number
 	if not "email" in buyerlead or buyerlead["email"]==None:
 		buyerlead["email"] = oldbuyerlead.email
+	if not "status" in buyerlead or buyerlead["status"]==None:
+		buyerlead["status"] = oldbuyerlead.status
+	if not "comments" in buyerlead or buyerlead["comments"]==None:
+		buyerlead["comments"] = oldbuyerlead.comments
 
 	if is_new == 1 and flag == 1:
 		return False
@@ -43,3 +47,5 @@ def populateBuyerLead(buyerleadPtr, buyerlead):
 	buyerleadPtr.name = buyerlead["name"]
 	buyerleadPtr.email = buyerlead["email"]
 	buyerleadPtr.mobile_number = buyerlead["mobile_number"]
+	buyerleadPtr.status = int(buyerlead["status"])
+	buyerleadPtr.comments = buyerlead["comments"]
