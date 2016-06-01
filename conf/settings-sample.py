@@ -1,3 +1,5 @@
+## import from conf file
+
 ## Secret Key
 
 SECRET_KEY = ''
