@@ -8,8 +8,6 @@ DATABASES = {
     
 }
 
-BASE_WEBAPP_URL = ""
-
 ##Static
 
 STATIC_ROOT = ""
