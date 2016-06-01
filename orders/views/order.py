@@ -111,13 +111,11 @@ def get_suborder_details(request,subOrderParameters):
 		if "sellersArr" in subOrderParameters:
 			subOrders = subOrders.filter(seller_id__in=subOrderParameters["sellersArr"])
 
-
 		body = parseSubOrders(subOrders)
 		statusCode = "2XX"
 		response = {"sub_orders": body}
 
 	except Exception as e:
-		print e
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 

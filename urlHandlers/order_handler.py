@@ -78,7 +78,6 @@ def suborder_details(request):
 		if subOrderParameters["isSeller"] == 0 and subOrderParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		#return order.get_suborder_details(request,statusArr,sellersArr, isSeller,internalusersArr,isInternalUser)
 		return order.get_suborder_details(request,subOrderParameters)
 	elif request.method == "PUT":
 		return order.update_suborder(request)
