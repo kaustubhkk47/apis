@@ -97,25 +97,31 @@ def get_buyer_payment_details(request, statusArr=[], buyersArr=[], isBuyer=0,int
 
 	return customResponse(statusCode, response)
 
-def get_suborder_details(request, statusArr=[], sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
+def get_suborder_details(request,subOrderParameters):
 	try:
-		if len(statusArr) == 0 and len(sellersArr) == 0:
-			subOrders = SubOrder.objects.all().select_related('seller')
-		elif len(sellersArr) == 0 and len(statusArr) == 1:
-			subOrders = SubOrder.objects.filter(suborder_status__in=statusArr).select_related('seller')
-		elif len(sellersArr) == 1 and len(statusArr) == 0:
-			subOrders = SubOrder.objects.filter(seller_id__in=sellersArr).select_related('seller')
-		else:
-			subOrders = SubOrder.objects.filter(suborder_status__in=statusArr,	seller_id__in=sellersArr).select_related('seller')
-		closeDBConnection()
+		
+		subOrders = SubOrder.objects.all().select_related('seller')
+		
+		if "subOrderArr" in subOrderParameters:
+			subOrders = subOrders.filter(id__in=subOrderParameters["subOrderArr"])
+
+		if "statusArr" in subOrderParameters:
+			subOrders = subOrders.filter(suborder_status__in=subOrderParameters["statusArr"])
+
+		if "sellersArr" in subOrderParameters:
+			subOrders = subOrders.filter(seller_id__in=subOrderParameters["sellersArr"])
+
+
 		body = parseSubOrders(subOrders)
 		statusCode = "2XX"
 		response = {"sub_orders": body}
 
 	except Exception as e:
+		print e
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
+	closeDBConnection()
 	return customResponse(statusCode, response)
 
 def get_order_details(request, statusArr=[], buyersArr=[], isBuyer=0,internalusersArr=[],isInternalUser=0):

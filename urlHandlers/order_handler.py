@@ -46,33 +46,40 @@ def order_shipment_details(request):
 def suborder_details(request):
 
 	if request.method == "GET":
+
+		subOrderParameters = {}
+
 		status = request.GET.get("status", "")
 		sellerID = request.GET.get("sellerID", "")
-
+		subOrderID = request.GET.get("suborderID", "")
 		accessToken = request.GET.get("access_token", "")
+
 		tokenPayload = get_token_payload(accessToken, "sellerID")
-		isSeller = 0
+		subOrderParameters["isSeller"] = 0
 		if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
-			sellersArr = [tokenPayload["sellerID"]]
-			isSeller = 1
-		elif sellerID == "":
-			sellersArr = []
+			subOrderParameters["sellersArr"] = [tokenPayload["sellerID"]]
+			subOrderParameters["isSeller"] = 1
 		else:
-			sellersArr = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
+			subOrderParameters["sellersArr"] = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
 
 		tokenPayload = get_token_payload(accessToken, "internaluserID")
-		isInternalUser = 0
-		internalusersArr = []
+		subOrderParameters["isInternalUser"] = 0
+		subOrderParameters["internalusersArr"] = []
 		if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
-			internalusersArr = [tokenPayload["internaluserID"]]
-			isInternalUser = 1
+			subOrderParameters["internalusersArr"] = [tokenPayload["internaluserID"]]
+			subOrderParameters["isInternalUser"] = 1
 
-		if status == "":
-			statusArr = []
-		else:
-			statusArr = [int(e) if e.isdigit() else e for e in status.split(",")]
+		if status != "":
+			subOrderParameters["statusArr"] = [int(e) if e.isdigit() else e for e in status.split(",")]
 
-		return order.get_suborder_details(request,statusArr,sellersArr, isSeller,internalusersArr,isInternalUser)
+		if subOrderID != "":
+			subOrderParameters["subOrderArr"] = [int(e) if e.isdigit() else e for e in subOrderID.split(",")]
+
+		if subOrderParameters["isSeller"] == 0 and subOrderParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		#return order.get_suborder_details(request,statusArr,sellersArr, isSeller,internalusersArr,isInternalUser)
+		return order.get_suborder_details(request,subOrderParameters)
 	elif request.method == "PUT":
 		return order.update_suborder(request)
 
