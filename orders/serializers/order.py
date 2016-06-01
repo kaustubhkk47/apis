@@ -43,6 +43,7 @@ def serializeSubOrder(subOrderEntry):
 	subOrder["orderID"]=subOrderEntry.order_id
 	subOrder["suborderID"]=subOrderEntry.id
 	subOrder["seller"]=serialize_seller(subOrderEntry.seller)
+	subOrder["buyer"]=serialize_buyer(subOrderEntry.order.buyer)
 	subOrder["product_count"] = subOrderEntry.product_count
 	subOrder["retail_price"] = subOrderEntry.retail_price
 	subOrder["calculated_price"] = subOrderEntry.calculated_price
@@ -148,7 +149,7 @@ def serializeOrder(orderEntry):
 	order["created_at"]=orderEntry.created_at
 	order["updated_at"]=orderEntry.updated_at
 
-	subOrderQuerySet = SubOrder.objects.filter(order_id = orderEntry.id).select_related('seller')
+	subOrderQuerySet = SubOrder.objects.filter(order_id = orderEntry.id).select_related('seller','order__buyer')
 	subOrders = []
 
 	for subOrder in subOrderQuerySet:
