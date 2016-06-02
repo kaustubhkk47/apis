@@ -8,33 +8,38 @@ import jwt as JsonWebToken
 def order_shipment_details(request):
 
 	if request.method == "GET":
+
+		orderShipmentParameters = {}
+
 		status = request.GET.get("status", "")
 		sellerID = request.GET.get("sellerID", "")
-
+		orderShipmentID = request.GET.get("ordershipmentID", "")
 		accessToken = request.GET.get("access_token", "")
+
 		tokenPayload = get_token_payload(accessToken, "sellerID")
-		isSeller = 0
+		orderShipmentParameters["isSeller"] = 0
 		if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
-			sellersArr = [tokenPayload["sellerID"]]
-			isSeller = 1
-		elif sellerID == "":
-			sellersArr = []
-		else:
-			sellersArr = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
+			orderShipmentParameters["sellersArr"] = [tokenPayload["sellerID"]]
+			orderShipmentParameters["isSeller"] = 1
+		elif sellerID != "":
+			orderShipmentParameters["sellersArr"] = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
 
 		tokenPayload = get_token_payload(accessToken, "internaluserID")
-		isInternalUser = 0
-		internalusersArr = []
+		orderShipmentParameters["isInternalUser"] = 0
 		if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
-			internalusersArr = [tokenPayload["internaluserID"]]
-			isInternalUser = 1
+			orderShipmentParameters["internalusersArr"] = [tokenPayload["internaluserID"]]
+			orderShipmentParameters["isInternalUser"] = 1
 
-		if status == "":
-			statusArr = []
-		else:
-			statusArr = [int(e) if e.isdigit() else e for e in status.split(",")]
+		if status != "":
+			orderShipmentParameters["statusArr"] = [int(e) if e.isdigit() else e for e in status.split(",")]
 
-		return order.get_order_shipment_details(request,statusArr,sellersArr, isSeller,internalusersArr,isInternalUser)
+		if orderShipmentID != "":
+			orderShipmentParameters["orderShipmentArr"] = [int(e) if e.isdigit() else e for e in orderShipmentID.split(",")]
+
+		if orderShipmentParameters["isSeller"] == 0 and orderShipmentParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return order.get_order_shipment_details(request,orderShipmentParameters)
 	elif request.method == "POST":
 		return order.post_new_order_shipment(request)
 	elif request.method == "PUT":
@@ -59,12 +64,11 @@ def suborder_details(request):
 		if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
 			subOrderParameters["sellersArr"] = [tokenPayload["sellerID"]]
 			subOrderParameters["isSeller"] = 1
-		else:
+		elif sellerID != "":
 			subOrderParameters["sellersArr"] = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
 
 		tokenPayload = get_token_payload(accessToken, "internaluserID")
 		subOrderParameters["isInternalUser"] = 0
-		subOrderParameters["internalusersArr"] = []
 		if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
 			subOrderParameters["internalusersArr"] = [tokenPayload["internaluserID"]]
 			subOrderParameters["isInternalUser"] = 1
