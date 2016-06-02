@@ -13,17 +13,20 @@ from decimal import Decimal
 import datetime
 
 
-def get_order_shipment_details(request, statusArr=[], sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
+def get_order_shipment_details(request, orderShipmentParameters):
 	try:
-		if len(statusArr) == 0 and len(sellersArr) == 0:
-			orderShipments = OrderShipment.objects.all()
-		elif len(sellersArr) == 0 and len(statusArr) == 1:
-			orderShipments = OrderShipment.objects.filter(current_status__in=statusArr)
-		elif len(sellersArr) == 1 and len(statusArr) == 0:
-			orderShipments = OrderItem.objects.filter(suborder__seller_id__in=sellersArr)
-		else:
-			orderShipments = OrderItem.objects.filter(current_status__in=statusArr,suborder__seller_id__in=sellersArr)
-		closeDBConnection()
+		orderShipments = OrderShipment.objects.all().select_related('suborder','pickup_address','drop_address')
+		
+		if "orderShipmentArr" in orderShipmentParameters:
+			orderShipments = orderShipments.filter(id__in=orderShipmentParameters["orderShipmentArr"])
+
+		if "statusArr" in orderShipmentParameters:
+			orderShipments = orderShipments.filter(current_status__in=orderShipmentParameters["statusArr"])
+
+		if "sellersArr" in orderShipmentParameters:
+			orderShipments = orderShipments.filter(suborder__seller_id__in=orderShipmentParameters["sellersArr"])
+
+		
 		body = parseOrderShipments(orderShipments)
 		statusCode = "2XX"
 		response = {"order_shipments": body}
@@ -31,7 +34,7 @@ def get_order_shipment_details(request, statusArr=[], sellersArr=[], isSeller=0,
 	except Exception as e:
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
-
+	closeDBConnection()
 	return customResponse(statusCode, response)
 
 def get_order_item_details(request, statusArr=[], sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
@@ -44,7 +47,6 @@ def get_order_item_details(request, statusArr=[], sellersArr=[], isSeller=0,inte
 			orderItems = OrderItem.objects.filter(suborder__seller_id__in=sellersArr).select_related('product')
 		else:
 			orderItems = OrderItem.objects.filter(current_status__in=statusArr,suborder__seller_id__in=sellersArr).select_related('product')
-		closeDBConnection()
 		body = parseOrderItem(orderItems)
 		statusCode = "2XX"
 		response = {"order_items": body}
@@ -53,6 +55,7 @@ def get_order_item_details(request, statusArr=[], sellersArr=[], isSeller=0,inte
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
+	closeDBConnection()
 	return customResponse(statusCode, response)
 
 def get_seller_payment_details(request, statusArr=[], sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
@@ -65,7 +68,6 @@ def get_seller_payment_details(request, statusArr=[], sellersArr=[], isSeller=0,
 			sellerPayments = SellerPayment.objects.filter(suborder__seller_id__in=sellersArr)
 		else:
 			sellerPayments = SellerPayment.objects.filter(payment_status__in=statusArr,suborder__seller_id__in=sellersArr)
-		closeDBConnection()
 		body = parseSellerPayments(sellerPayments)
 		statusCode = "2XX"
 		response = {"seller_payments": body}
@@ -74,6 +76,7 @@ def get_seller_payment_details(request, statusArr=[], sellersArr=[], isSeller=0,
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
+	closeDBConnection()
 	return customResponse(statusCode, response)
 
 def get_buyer_payment_details(request, statusArr=[], buyersArr=[], isBuyer=0,internalusersArr=[],isInternalUser=0):
@@ -86,7 +89,6 @@ def get_buyer_payment_details(request, statusArr=[], buyersArr=[], isBuyer=0,int
 			buyerPayments = BuyerPayment.objects.filter(order__buyer_id__in=buyersArr)
 		else:
 			buyerPayments = BuyerPayment.objects.filter(payment_status__in=statusArr,order__buyer_id__in=buyersArr)
-		closeDBConnection()
 		body = parseBuyerPayments(buyerPayments)
 		statusCode = "2XX"
 		response = {"buyer_payments": body}
@@ -95,6 +97,7 @@ def get_buyer_payment_details(request, statusArr=[], buyersArr=[], isBuyer=0,int
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
+	closeDBConnection()
 	return customResponse(statusCode, response)
 
 def get_suborder_details(request,subOrderParameters):
@@ -132,7 +135,6 @@ def get_order_details(request, statusArr=[], buyersArr=[], isBuyer=0,internaluse
 			Orders = Order.objects.filter(buyer_id__in=buyersArr).select_related('buyer')
 		else:
 			Orders = Order.objects.filter(order_status__in=statusArr,buyer_id__in=buyersArr).select_related('buyer')
-		closeDBConnection()
 		body = parseOrders(Orders)
 		statusCode = "2XX"
 		response = {"orders": body}
@@ -141,6 +143,7 @@ def get_order_details(request, statusArr=[], buyersArr=[], isBuyer=0,internaluse
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
+	closeDBConnection()
 	return customResponse(statusCode, response)
 
 def post_new_order_shipment(request):
