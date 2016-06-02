@@ -36,7 +36,7 @@ def populateOrderData(orderPtr, order):
     orderPtr.remarks = order["remarks"]
     orderPtr.order_status = 1
     orderPtr.save()
-    orderPtr.display_number = "1" + "%05d" %(order["buyerID"],) +"%06d" %(orderPtr.id,)
+    orderPtr.display_number = "1" +"%06d" %(orderPtr.id,)
 
 orderStatus = {
     0:"Placed",

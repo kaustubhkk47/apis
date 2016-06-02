@@ -63,8 +63,9 @@ def post_new_buyer_lead(request):
 			mail_dict = {}
 			subject = "We at Wholdus have received your request"
 			to = [buyerLead["email"]]
-			from_email = "info@wholdus.com"
-			create_email(mail_template_file,mail_dict,subject,from_email,to)
+			from_email = "Wholdus Info <info@wholdus.com>"
+			bcc = ["manish@wholdus.com"]
+			create_email(mail_template_file,mail_dict,subject,from_email,to,bcc=bcc)
 
 		return customResponse("2XX", {"buyer_lead" : serialize_buyer_lead(newBuyerLead)})
 
