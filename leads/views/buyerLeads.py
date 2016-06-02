@@ -8,7 +8,7 @@ from catalog.models.category import Category
 
 def get_buyer_leads(request):
 	try:
-		buyerLeads = BuyerLeads.objects.all()
+		buyerLeads = BuyerLeads.objects.all().select_related('product','category','product__seller')
 		closeDBConnection()
 		body = parseBuyerLeads(buyerLeads)
 		statusCode = "2XX"
