@@ -43,7 +43,7 @@ def populateSubOrderData(subOrderPtr, subOrder,orderID):
     subOrderPtr.suborder_status = 1
     subOrderPtr.confirmed_time = datetime.datetime.now()
     subOrderPtr.save()
-    subOrderPtr.display_number = "1" + "%05d" %(subOrder["seller"].id,) +"%06d" %(subOrderPtr.id,) + "%06d" %(orderID,)
+    subOrderPtr.display_number = "%04d" %(subOrder["seller"].id,) + "-" + "1" + "%06d" %(orderID,)
 
 SubOrderStatus = {
     0:"Unconfirmed",

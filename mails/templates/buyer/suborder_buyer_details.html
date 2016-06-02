@@ -1,0 +1,41 @@
+<table style="width:100%;text-align:center;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);margin-bottom: 10px;background-color: #FFFFFF">
+
+	<tr>
+		<td style="background-color:#512da8   ;color:#FFFFFF;font-size:20px;padding: 8px 15px;">
+		Buyer Details
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			<table style="width:100%;vertical-align:center;text-align:center;padding: 8px 15px;">
+				<tr>
+					<td>
+						<p><strong>Buyer Name : </strong><font size=3>{{buyer.name}}</font> </br></p>
+						<p><strong>Company Name : </strong><font size=3>{{buyer.company_name}}</font> </br></p>
+						<p><strong>Address : </strong></p>
+						<strong>
+						{% if buyerAddress.address|length > 0 %}
+    						<p>{{ buyerAddress.address }},</p>
+						{% else %}
+						{% endif %}
+						{% if buyerAddress.landmark|length > 0 %}
+    						<p>{{ buyerAddress.landmark }},</p>
+						{% else %}
+						{% endif %}
+						{% if buyerAddress.city|length > 0 %}
+    						<p>{{ buyerAddress.city }} -  {{ buyerAddress.pincode }},</p>
+						{% else %}
+						{% endif %}
+						{% if buyerAddress.state|length > 0 %}
+    						<p>{{ buyerAddress.state }}.</p>
+						{% else %}
+						{% endif %}
+						</strong>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+
+</table>

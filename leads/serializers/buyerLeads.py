@@ -1,3 +1,6 @@
+from catalog.serializers.category import serialize_categories
+from catalog.serializers.product import serialize_product
+
 def serialize_buyer_lead(buyerlead_entry):
 
 	buyerLead = {
@@ -12,14 +15,14 @@ def serialize_buyer_lead(buyerlead_entry):
 	}
 
 	try:
-		buyerLead["productID"] = buyerlead_entry.product_id
+		buyerLead["product"] = serialize_product(buyerlead_entry.product)
 	except:
-		buyerLead["productID"] = None
+		buyerLead["product"] = None
 
 	try:
-		buyerLead["categoryID"] = buyerlead_entry.category_id
+		buyerLead["category"] = serialize_categories(buyerlead_entry.category)
 	except:
-		buyerLead["categoryID"] = None
+		buyerLead["category"] = None
 
 	return buyerLead
 

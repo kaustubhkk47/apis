@@ -207,6 +207,7 @@ def parseBuyerPayments(buyerPaymentQuerySet):
 def serializeOrderShipment(orderShipmentEntry):
 	orderShipment = {
 		"suborderID":orderShipmentEntry.suborder_id,
+		"suborder_display_number":orderShipmentEntry.suborder.display_number,
 		"ordershipmentID": orderShipmentEntry.id,
 		"pickup_address": serialize_seller_address(orderShipmentEntry.pickup_address),
 		"drop_address": serialize_buyer_address(orderShipmentEntry.drop_address),
@@ -239,11 +240,16 @@ def serializeOrderShipment(orderShipmentEntry):
 	orderItemQuerySet = OrderItem.objects.filter(order_shipment_id = orderShipmentEntry.id).select_related('product')
 	orderItems = []
 
+	finalPrice = 0.0
+
 	for orderItem in orderItemQuerySet:
 		orderItemEntry = serializeOrderItem(orderItem)
 		orderItems.append(orderItemEntry)
+		if orderItem.current_status != 4:
+			finalPrice += float(orderItem.final_price)
 
 	orderShipment["order_items"] = orderItems
+	orderShipment["final_price"] = finalPrice
 	
 	return orderShipment
 

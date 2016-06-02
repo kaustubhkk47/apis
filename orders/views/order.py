@@ -1,4 +1,4 @@
-from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string
+from scripts.utils import *
 import json
 from ..models.order import *
 from ..models.orderItem import *
@@ -13,17 +13,20 @@ from decimal import Decimal
 import datetime
 
 
-def get_order_shipment_details(request, statusArr=[], sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
+def get_order_shipment_details(request, orderShipmentParameters):
 	try:
-		if len(statusArr) == 0 and len(sellersArr) == 0:
-			orderShipments = OrderShipment.objects.all()
-		elif len(sellersArr) == 0 and len(statusArr) == 1:
-			orderShipments = OrderShipment.objects.filter(current_status__in=statusArr)
-		elif len(sellersArr) == 1 and len(statusArr) == 0:
-			orderShipments = OrderItem.objects.filter(suborder__seller_id__in=sellersArr)
-		else:
-			orderShipments = OrderItem.objects.filter(current_status__in=statusArr,suborder__seller_id__in=sellersArr)
-		closeDBConnection()
+		orderShipments = OrderShipment.objects.all().select_related('suborder','pickup_address','drop_address')
+		
+		if "orderShipmentArr" in orderShipmentParameters:
+			orderShipments = orderShipments.filter(id__in=orderShipmentParameters["orderShipmentArr"])
+
+		if "statusArr" in orderShipmentParameters:
+			orderShipments = orderShipments.filter(current_status__in=orderShipmentParameters["statusArr"])
+
+		if "sellersArr" in orderShipmentParameters:
+			orderShipments = orderShipments.filter(suborder__seller_id__in=orderShipmentParameters["sellersArr"])
+
+		
 		body = parseOrderShipments(orderShipments)
 		statusCode = "2XX"
 		response = {"order_shipments": body}
@@ -31,7 +34,7 @@ def get_order_shipment_details(request, statusArr=[], sellersArr=[], isSeller=0,
 	except Exception as e:
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
-
+	closeDBConnection()
 	return customResponse(statusCode, response)
 
 def get_order_item_details(request, statusArr=[], sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
@@ -44,7 +47,6 @@ def get_order_item_details(request, statusArr=[], sellersArr=[], isSeller=0,inte
 			orderItems = OrderItem.objects.filter(suborder__seller_id__in=sellersArr).select_related('product')
 		else:
 			orderItems = OrderItem.objects.filter(current_status__in=statusArr,suborder__seller_id__in=sellersArr).select_related('product')
-		closeDBConnection()
 		body = parseOrderItem(orderItems)
 		statusCode = "2XX"
 		response = {"order_items": body}
@@ -53,6 +55,7 @@ def get_order_item_details(request, statusArr=[], sellersArr=[], isSeller=0,inte
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
+	closeDBConnection()
 	return customResponse(statusCode, response)
 
 def get_seller_payment_details(request, statusArr=[], sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
@@ -65,7 +68,6 @@ def get_seller_payment_details(request, statusArr=[], sellersArr=[], isSeller=0,
 			sellerPayments = SellerPayment.objects.filter(suborder__seller_id__in=sellersArr)
 		else:
 			sellerPayments = SellerPayment.objects.filter(payment_status__in=statusArr,suborder__seller_id__in=sellersArr)
-		closeDBConnection()
 		body = parseSellerPayments(sellerPayments)
 		statusCode = "2XX"
 		response = {"seller_payments": body}
@@ -74,6 +76,7 @@ def get_seller_payment_details(request, statusArr=[], sellersArr=[], isSeller=0,
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
+	closeDBConnection()
 	return customResponse(statusCode, response)
 
 def get_buyer_payment_details(request, statusArr=[], buyersArr=[], isBuyer=0,internalusersArr=[],isInternalUser=0):
@@ -86,7 +89,6 @@ def get_buyer_payment_details(request, statusArr=[], buyersArr=[], isBuyer=0,int
 			buyerPayments = BuyerPayment.objects.filter(order__buyer_id__in=buyersArr)
 		else:
 			buyerPayments = BuyerPayment.objects.filter(payment_status__in=statusArr,order__buyer_id__in=buyersArr)
-		closeDBConnection()
 		body = parseBuyerPayments(buyerPayments)
 		statusCode = "2XX"
 		response = {"buyer_payments": body}
@@ -95,6 +97,7 @@ def get_buyer_payment_details(request, statusArr=[], buyersArr=[], isBuyer=0,int
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
+	closeDBConnection()
 	return customResponse(statusCode, response)
 
 def get_suborder_details(request,subOrderParameters):
@@ -132,7 +135,6 @@ def get_order_details(request, statusArr=[], buyersArr=[], isBuyer=0,internaluse
 			Orders = Order.objects.filter(buyer_id__in=buyersArr).select_related('buyer')
 		else:
 			Orders = Order.objects.filter(order_status__in=statusArr,buyer_id__in=buyersArr).select_related('buyer')
-		closeDBConnection()
 		body = parseOrders(Orders)
 		statusCode = "2XX"
 		response = {"orders": body}
@@ -141,6 +143,7 @@ def get_order_details(request, statusArr=[], buyersArr=[], isBuyer=0,internaluse
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
+	closeDBConnection()
 	return customResponse(statusCode, response)
 
 def post_new_order_shipment(request):
@@ -374,15 +377,31 @@ def post_new_order(request):
 			populateSubOrderData(newSubOrder,subOrder,newOrder.id)
 			newSubOrder.save()
 
-			
+			mail_template_file = "seller/new_order.html"
+			subject = "New order received with order ID " + newSubOrder.display_number
+			to = [subOrder["seller"].email]
+			from_email = "Wholdus Info <info@wholdus.com>"
+			bcc = ["manish@wholdus.com"]
+			mail_dict = {}
+			mail_dict["suborder"] = {
+				"suborderNumber":newSubOrder.display_number,
+				"product_count":newSubOrder.product_count,
+				"final_price":'{0:.1f}'.format(newSubOrder.final_price)
+			}
+			mail_dict["buyer"] = {
+				"name":buyerPtr.name,
+				"company_name":buyerPtr.company_name
+			}
+			mail_dict["buyerAddress"] = {
+				"address":buyerAddressPtr.address,
+				"landmark":buyerAddressPtr.landmark,
+				"city":buyerAddressPtr.city,
+				"state":buyerAddressPtr.state,
+				"pincode":buyerAddressPtr.pincode
+			}
+			mail_dict["orderItems"] = []
 
 			for orderItem in subOrder["order_products"]:
-
-				#newSellerPayment = SellerPayment(suborder=newSubOrder)
-				#newSellerPayment.save()
-
-				#newOrderShipment = OrderShipment(suborder=newSubOrder,pickup=sellerAddressPtr,drop=buyerAddressPtr)
-				#newOrderShipment.save()
 
 				productPtr = Product.objects.filter(id=orderItem["productID"])
 				productPtr = productPtr[0]
@@ -391,7 +410,23 @@ def post_new_order(request):
 				populateOrderItemData(newOrderItem, orderItem)
 				newOrderItem.save()
 
+				imageLink = "http://api.wholdus.com/" + productPtr.image_path + "200x200/" + productPtr.image_name + "-1.jpg"
+
+				mailOrderItem = {
+					"name":productPtr.display_name,
+					"catalog_number":productPtr.productdetails.seller_catalog_number,
+					"pieces":newOrderItem.pieces,
+					"price_per_piece":newOrderItem.edited_price_per_piece,
+					"final_price":newOrderItem.final_price,
+					"image_link":imageLink
+				}
+
+				mail_dict["orderItems"].append(mailOrderItem)
+
+			create_email(mail_template_file,mail_dict,subject,from_email,to,bcc=bcc)
+
 	except Exception as e:
+		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -524,6 +559,9 @@ def cancel_order_item(request):
 
 	if not "cancellation_remarks" in orderItem or orderItem["cancellation_remarks"]==None:
 		orderItem["cancellation_remarks"] = ""
+
+	if orderItemPtr.current_status == 4:
+		return customResponse("4XX", {"error": "Already cancelled"})
 
 	try:
 		orderItemPtr.current_status = 4
