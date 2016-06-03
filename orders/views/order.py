@@ -400,6 +400,7 @@ def post_new_order(request):
 				"pincode":buyerAddressPtr.pincode
 			}
 			mail_dict["orderItems"] = []
+			totalPieces = 0
 
 			for orderItem in subOrder["order_products"]:
 
@@ -411,6 +412,7 @@ def post_new_order(request):
 				newOrderItem.save()
 
 				imageLink = "http://api.wholdus.com/" + productPtr.image_path + "200x200/" + productPtr.image_name + "-1.jpg"
+				productLink = "http://www.wholdus.com/" + productPtr.category.slug + "-" + str(productPtr.category_id) + "/" +productPtr.slug +"-" + str(productPtr.id)
 
 				mailOrderItem = {
 					"name":productPtr.display_name,
@@ -418,10 +420,18 @@ def post_new_order(request):
 					"pieces":newOrderItem.pieces,
 					"price_per_piece":newOrderItem.edited_price_per_piece,
 					"final_price":newOrderItem.final_price,
-					"image_link":imageLink
+					"image_link":imageLink,
+					"product_link":productLink
 				}
 
+				if newOrderItem.remarks != "":
+					mailOrderItem["remarks"] = newOrderItem.remarks
+
+				totalPieces += newOrderItem.pieces
+
 				mail_dict["orderItems"].append(mailOrderItem)
+
+			mail_dict["suborder"]["pieces"] = totalPieces
 
 			create_email(mail_template_file,mail_dict,subject,from_email,to,bcc=bcc)
 

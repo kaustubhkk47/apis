@@ -56,7 +56,7 @@ def post_new_buyer_lead(request):
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
-		closeDBConnection()
+		
 
 		if("email" in buyerLead and buyerLead["email"]):
 			mail_template_file = "leads/buyer_lead.html"
@@ -65,7 +65,16 @@ def post_new_buyer_lead(request):
 			to = [buyerLead["email"]]
 			from_email = "Wholdus Info <info@wholdus.com>"
 			bcc = ["manish@wholdus.com"]
+
+			if newBuyerLead.product_id != None:
+				mail_dict["product_name"] = newBuyerLead.product.display_name
+
+			if newBuyerLead.category_id != None:
+				mail_dict["category_name"] = newBuyerLead.category.display_name
+
 			create_email(mail_template_file,mail_dict,subject,from_email,to,bcc=bcc)
+
+		closeDBConnection()
 
 		return customResponse("2XX", {"buyer_lead" : serialize_buyer_lead(newBuyerLead)})
 
