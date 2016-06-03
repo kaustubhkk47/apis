@@ -108,15 +108,15 @@ def populateOrderShipment(OrderShipmentPtr, orderShipment):
     OrderShipmentPtr.current_status = 3
 
 OrderShipmentStatus = {
-    0:"Default",
-    1:"Shipment created",
-    2:"3PL notified",
-    3:"3PL manifested",
-    4:"3PL in transit",
-    5:"3PL stuck in transit",
-    6:"Delivered",
-    7:"RTO in transit",
-    8:"RTO delivered",
-    9:"Lost"
+    0:{"display_value":"Sent for Pickup","display_time":"sent_for_pickup_time"},
+    1:{"display_value":"Shipment created","display_time":"created_at"},
+    2:{"display_value":"3PL notified","display_time":"tpl_notified_time"},
+    3:{"display_value":"3PL manifested","display_time":"tpl_manifested_time"},
+    4:{"display_value":"3PL in transit","display_time":"tpl_in_transit_time"},
+    5:{"display_value":"3PL stuck in transit","display_time":"tpl_stuck_in_transit_time"},
+    6:{"display_value":"Delivered","display_time":"delivered_time"},
+    7:{"display_value":"RTO in transit","display_time":"rto_in_transit_time"},
+    8:{"display_value":"RTO delivered","display_time":"rto_delivered_time"},
+    9:{"display_value":"Lost","display_time":"lost_time"}
 }
 
