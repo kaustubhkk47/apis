@@ -64,7 +64,7 @@ def post_new_buyer_lead(request):
 			subject = "We at Wholdus have received your request"
 			to = [buyerLead["email"]]
 			from_email = "Wholdus Info <info@wholdus.com>"
-			bcc = ["manish@wholdus.com"]
+			bcc = ["manish@wholdus.com","aditya.rana@wholdus.com"]
 
 			if newBuyerLead.product_id != None:
 				mail_dict["product_name"] = newBuyerLead.product.display_name
