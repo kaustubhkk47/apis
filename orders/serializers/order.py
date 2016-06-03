@@ -3,7 +3,7 @@ from users.serializers.buyer import serialize_buyer, serialize_buyer_address
 from catalog.serializers.product import serialize_product
 from ..models.orderItem import OrderItemStatus, OrderItem
 from ..models.subOrder import SubOrder
-from ..models.orderShipment import OrderShipment
+from ..models.orderShipment import OrderShipment, OrderShipmentStatus
 from ..models.payments import BuyerPayment, SellerPayment
 
 def parseOrderItem(orderItemQuerySet):
@@ -222,7 +222,6 @@ def serializeOrderShipment(orderShipmentEntry):
 		"cod_charge": orderShipmentEntry.cod_charge,
 		"shipping_charge": orderShipmentEntry.shipping_charge,
 		"remarks": orderShipmentEntry.remarks,
-		"current_status": orderShipmentEntry.current_status,
 		"tpl_manifested_time": orderShipmentEntry.tpl_manifested_time,
 		"tpl_in_transit_time": orderShipmentEntry.tpl_in_transit_time,
 		"tpl_stuck_in_transit_time": orderShipmentEntry.tpl_stuck_in_transit_time,
@@ -250,6 +249,18 @@ def serializeOrderShipment(orderShipmentEntry):
 
 	orderShipment["order_items"] = orderItems
 	orderShipment["final_price"] = finalPrice
+
+	orderShipment["status"] = {
+		"value": orderShipmentEntry.current_status,
+		"display_value":OrderShipmentStatus[orderShipmentEntry.current_status]["display_value"]
+	}
+
+	try:
+		orderShipment["status"]["display_time"] = getattr(orderShipmentEntry,OrderShipmentStatus[orderShipmentEntry.current_status]["display_time"])
+		orderShipment["status"]["display_time_name"] = OrderShipmentStatus[orderShipmentEntry.current_status]["display_time"]
+	except Exception, e:
+		pass
+	
 	
 	return orderShipment
 
