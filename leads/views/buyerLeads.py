@@ -68,6 +68,10 @@ def post_new_buyer_lead(request):
 
 			if newBuyerLead.product_id != None:
 				mail_dict["product_name"] = newBuyerLead.product.display_name
+				imageLink = "http://api.wholdus.com/" + newBuyerLead.product.image_path + "400x400/" + newBuyerLead.product.image_name + "-1.jpg"
+				productLink = "http://www.wholdus.com/" + newBuyerLead.product.category.slug + "-" + str(newBuyerLead.product.category_id) + "/" +newBuyerLead.product.slug +"-" + str(newBuyerLead.product.id)
+				mail_dict["product_link"] = productLink
+				mail_dict["image_link"] = imageLink
 
 			if newBuyerLead.category_id != None:
 				mail_dict["category_name"] = newBuyerLead.category.display_name
