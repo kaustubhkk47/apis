@@ -12,7 +12,8 @@
         		<td style="background-color: #FFFFFF;padding: 0px 25px;">
         			<p>Thank you for showing interest in our products!</br></p>
                     {% if product_name|length > 0 %}
-                        <p> You have contacted us for <strong>{{ product_name }}.</strong></p>
+                        <p> You have contacted us for <a href="{{product_link}}"><strong>{{ product_name }}.</strong></a></p>
+                        <p><img src="{{image_link}}"></p>
                     {% else %}
                     {% endif %}
                     {% if category_name|length > 0 %}
