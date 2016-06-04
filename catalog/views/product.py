@@ -10,33 +10,32 @@ from django.template.defaultfilters import slugify
 from decimal import Decimal
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-def get_product_details(request, productsArr=[], categoriesArr = [],sellerArr =[], isSeller=0,pageNumber=0,productsperPage=6,internalusersArr=[],isInternalUser=0):
+def get_product_details(request, productParameters):
     try:
-        if len(productsArr) == 0:
-            if len(categoriesArr) == 0 and len(sellerArr) == 0:
-                products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related('seller', 'productdetails', 'category').order_by('-id')
-            elif len(categoriesArr) > 0 and len(sellerArr) == 0:
-                products = Product.objects.filter(category_id__in=categoriesArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails').order_by('-id')
-            elif len(categoriesArr) == 0 and len(sellerArr) > 0:
-                products = Product.objects.filter(seller_id__in=sellerArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails').order_by('-id')
-            else:
-                products = Product.objects.filter(category_id__in=categoriesArr,seller_id__in=sellerArr,delete_status=False,seller__delete_status=False,category__delete_status=False).select_related('category','seller','productdetails').order_by('-id')
-        else:
-            products = Product.objects.filter(id__in=productsArr, delete_status=False, seller__delete_status=False,category__delete_status=False).select_related('seller', 'productdetails', 'category').order_by('-id')
+        products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related('seller', 'productdetails', 'category').order_by('-id')
 
-        if isSeller==0 and isInternalUser==0:
+        if "categoriesArr" in productParameters:
+            products = products.filter(category_id__in=productParameters["categoriesArr"])
+
+        if "productsArr" in productParameters:
+            products = products.filter(id__in=productParameters["productsArr"])
+
+        if "sellerArr" in productParameters:
+            products = products.filter(seller_id__in=productParameters["sellerArr"])
+
+        if productParameters["isSeller"]==0 and productParameters["isInternalUser"]==0:
             products = products.filter(verification=True,show_online=True,seller__show_online=True)
 
-        if pageNumber > 0:
-            paginator = Paginator(products, productsperPage)
+        if "pageNumber" in productParameters:
+            paginator = Paginator(products, productParameters["productsperPage"])
             try:
-                pageProducts = paginator.page(pageNumber)
+                pageProducts = paginator.page(productParameters["pageNumber"])
             except PageNotAnInteger:
                 pageProducts = []
             except EmptyPage:
                 pageProducts = []
             response = multiple_products_parser(pageProducts)
-            body = {"products": response,"total_products":paginator.count, "total_pages":paginator.num_pages, "page_number":pageNumber}
+            body = {"products": response,"total_products":paginator.count, "total_pages":paginator.num_pages, "page_number":productParameters["pageNumber"]}
         else:
             response = multiple_products_parser(products)
             body = {"products": response}
@@ -47,7 +46,6 @@ def get_product_details(request, productsArr=[], categoriesArr = [],sellerArr =[
         body = {"error": "Invalid product"}
 
     closeDBConnection()
-
     return customResponse(statusCode, body)
 
 

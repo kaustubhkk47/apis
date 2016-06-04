@@ -9,12 +9,14 @@ import jwt as JsonWebToken
 def categories_details(request):
 
 	if request.method == "GET":
+
+		categoriesParameters = {}
+
 		categoryID = request.GET.get("categoryID", "")
-		if categoryID == "":
-			categoriesArr = []
-		else:
-			categoriesArr = [int(e) if e.isdigit() else e for e in categoryID.split(",")]
-		return categories.get_categories_details(request,categoriesArr)
+		if categoryID != "":
+			categoriesParameters["categoriesArr"] = [int(e) if e.isdigit() else e for e in categoryID.split(",")]
+
+		return categories.get_categories_details(request,categoriesParameters)
 	elif request.method == "POST":
 		return categories.post_new_category(request)
 	elif request.method == "PUT":
@@ -29,6 +31,9 @@ def categories_details(request):
 def product_details(request):
 
 	if request.method == "GET":
+
+		productParameters = {}
+
 		productID = request.GET.get("productID", "")
 		categoryID = request.GET.get("categoryID", "")
 		sellerID = request.GET.get("sellerID", "")
@@ -36,38 +41,31 @@ def product_details(request):
 		productsperPage = request.GET.get("items_per_page", 6)
 		accessToken = request.GET.get("access_token", "")
 
-		if productID == "":
-			productsArr = []
-		else:
-			productsArr = [int(e) if e.isdigit() else e for e in productID.split(",")]
+		if productID != "":
+			productParameters["productsArr"] = [int(e) if e.isdigit() else e for e in productID.split(",")]
 
-		if categoryID == "":
-			categoriesArr = []
-		else:
-			categoriesArr = [int(e) if e.isdigit() else e for e in categoryID.split(",")]
-
-		tokenPayload = {}
-		
+		if categoryID != "":
+			productParameters["categoriesArr"] = [int(e) if e.isdigit() else e for e in categoryID.split(",")]
 		
 		tokenPayload = get_token_payload(accessToken, "sellerID")
-		isSeller = 0
-		
+		productParameters["isSeller"] = 0		
 		if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
-			isSeller = 1
-			sellerArr = [tokenPayload["sellerID"]]
-		elif sellerID == "":
-			sellerArr = []
-		else:
-			sellerArr = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
+			productParameters["isSeller"] = 1
+			productParameters["sellerArr"] = [tokenPayload["sellerID"]]
+		elif sellerID != "":
+			productParameters["sellerArr"] = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
 
 		tokenPayload = get_token_payload(accessToken, "internaluserID")
-		isInternalUser = 0
-		internalusersArr = []
+		productParameters["isInternalUser"] = 0
 		if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
-			internalusersArr = [tokenPayload["internaluserID"]]
-			isInternalUser = 1
+			productParameters["internalusersArr"] = [tokenPayload["internaluserID"]]
+			productParameters["isInternalUser"] = 1
 
-		return product.get_product_details(request,productsArr,categoriesArr,sellerArr, isSeller,pageNumber,productsperPage,internalusersArr,isInternalUser)
+		if pageNumber > 0:
+			productParameters["pageNumber"] = pageNumber
+			productParameters["productsperPage"] = productsperPage
+
+		return product.get_product_details(request,productParameters)
 	elif request.method == "POST":
 		return product.post_new_product(request)
 	elif request.method == "PUT":

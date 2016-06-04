@@ -37,16 +37,20 @@ def get_order_shipment_details(request, orderShipmentParameters):
 	closeDBConnection()
 	return customResponse(statusCode, response)
 
-def get_order_item_details(request, statusArr=[], sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
+def get_order_item_details(request, orderItemParameters):
 	try:
-		if len(statusArr) == 0 and len(sellersArr) == 0:
-			orderItems = OrderItem.objects.all().select_related('product')
-		elif len(sellersArr) == 0 and len(statusArr) == 1:
-			orderItems = OrderItem.objects.filter(current_status__in=statusArr).select_related('product')
-		elif len(sellersArr) == 1 and len(statusArr) == 0:
-			orderItems = OrderItem.objects.filter(suborder__seller_id__in=sellersArr).select_related('product')
-		else:
-			orderItems = OrderItem.objects.filter(current_status__in=statusArr,suborder__seller_id__in=sellersArr).select_related('product')
+
+		orderItems = OrderItem.objects.all().select_related('product')
+		
+		if "orderItemArr" in orderItemParameters:
+			orderItems = orderItems.filter(id__in=orderItemParameters["orderItemArr"])
+
+		if "statusArr" in orderItemParameters:
+			orderItems = orderItems.filter(current_status__in=orderItemParameters["statusArr"])
+
+		if "sellersArr" in orderItemParameters:
+			orderItems = orderItems.filter(suborder__seller_id__in=orderItemParameters["sellersArr"])
+
 		body = parseOrderItem(orderItems)
 		statusCode = "2XX"
 		response = {"order_items": body}
@@ -125,17 +129,20 @@ def get_suborder_details(request,subOrderParameters):
 	closeDBConnection()
 	return customResponse(statusCode, response)
 
-def get_order_details(request, statusArr=[], buyersArr=[], isBuyer=0,internalusersArr=[],isInternalUser=0):
+def get_order_details(request, orderParameters):
 	try:
-		if len(statusArr) == 0 and len(buyersArr) == 0:
-			Orders = Order.objects.all().select_related('buyer')
-		elif len(buyersArr) == 0 and len(statusArr) == 1:
-			Orders = Order.objects.filter(order_status__in=statusArr).select_related('buyer')
-		elif len(buyersArr) == 1 and len(statusArr) == 0:
-			Orders = Order.objects.filter(buyer_id__in=buyersArr).select_related('buyer')
-		else:
-			Orders = Order.objects.filter(order_status__in=statusArr,buyer_id__in=buyersArr).select_related('buyer')
-		body = parseOrders(Orders)
+		orders = Order.objects.all().select_related('buyer')
+		
+		if "orderArr" in orderParameters:
+			orders = orders.filter(id__in=orderParameters["orderArr"])
+
+		if "statusArr" in orderParameters:
+			orders = orders.filter(order_status__in=orderParameters["statusArr"])
+
+		if "buyerssArr" in orderParameters:
+			orders = orders.filter(buyer_id__in=orderParameters["buyerssArr"])
+
+		body = parseOrders(orders)
 		statusCode = "2XX"
 		response = {"orders": body}
 
