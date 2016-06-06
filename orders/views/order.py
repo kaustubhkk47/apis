@@ -11,6 +11,7 @@ from users.models.buyer import *
 from users.models.seller import *
 from decimal import Decimal
 import datetime
+import settings
 
 
 def get_order_shipment_details(request, orderShipmentParameters):
@@ -200,14 +201,87 @@ def post_new_order_shipment(request):
 		subOrderPtr.order.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
 		subOrderPtr.order.save()
 
+		finalPrice = 0.0
+
+		manifest_dict = {}
+		manifest_dict["orderItems"] = []
+
 		for orderItem in orderShipment["order_items"]:
 			orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))
 			orderItemPtr = orderItemPtr[0]
 			orderItemPtr.order_shipment = newOrderShipment
 			orderItemPtr.current_status = 3
-			orderItemPtr.save()	
+			finalPrice += float(orderItemPtr.final_price)
+			orderItemPtr.save()
+
+			manifestOrderItem = {
+				"name":orderItemPtr.product.display_name,
+				"pieces":orderItemPtr.pieces
+			}
+
+			manifest_dict["orderItems"].append(manifestOrderItem)
+
+		buyerPtr = subOrderPtr.order.buyer
+		sellerPtr = subOrderPtr.seller
+
+		outputLink = "media/generateddocs/shipmentmanifest/" + str(sellerPtr.id) +"/" + str(subOrderPtr.display_number) + "/"
+		outputDirectory = settings.STATIC_ROOT + outputLink
+		outputFileName = str(newOrderShipment.waybill_number) + ".pdf"
+
+		newOrderShipment.final_price = finalPrice
+		newOrderShipment.manifest_link = outputLink + outputFileName
+		newOrderShipment.save()
+
+		manifest_dict["order"] = {
+			"display_number": subOrderPtr.display_number
+		}
+
+		manifest_dict["buyer"] = {
+			"name": buyerPtr.name
+		}
+
+		manifest_dict["buyer_address"] = {
+			"address": buyerAddressPtr.address,
+			"landmark": buyerAddressPtr.landmark,
+			"city": buyerAddressPtr.city,
+			"state": buyerAddressPtr.state,
+			"pincode": buyerAddressPtr.pincode
+		}
+
+
+		manifest_dict["seller"] = {
+			"name": sellerPtr.name,
+			"company_name": sellerPtr.company_name,
+			"vat_tin": sellerPtr.sellerdetails.vat_tin
+		}
+
+		manifest_dict["seller_address"] = {
+			"address": sellerAddressPtr.address,
+			"landmark": sellerAddressPtr.landmark,
+			"city": sellerAddressPtr.city,
+			"state": sellerAddressPtr.state,
+			"pincode": sellerAddressPtr.pincode
+		}
+
+		manifest_dict["shipment"] = {
+			"waybill_number": newOrderShipment.waybill_number,
+			"shipping_amount": '{0:.0f}'.format(newOrderShipment.cod_charge + newOrderShipment.shipping_charge),
+			"logistics_partner": newOrderShipment.logistics_partner,
+			"invoice_number": newOrderShipment.invoice_number,
+			"final_price": '{0:.0f}'.format(newOrderShipment.final_price),
+			"packaged_length": '{0:.0f}'.format(newOrderShipment.packaged_length),
+			"packaged_breadth": '{0:.0f}'.format(newOrderShipment.packaged_breadth),
+			"packaged_height": '{0:.0f}'.format(newOrderShipment.packaged_height),
+			"packaged_weight": '{0:.2f}'.format(newOrderShipment.packaged_weight)
+		}
+
+		
+		template_file = "manifest/shipment_manifest.html"
+
+		generate_pdf(template_file, manifest_dict, outputDirectory, outputFileName)
 
 	except Exception as e:
+		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -599,6 +673,10 @@ def cancel_order_item(request):
 		orderItemPtr.suborder.order.edited_price -= orderItemPtr.pieces*orderItemPtr.edited_price_per_piece
 		orderItemPtr.suborder.order.final_price -= orderItemPtr.final_price
 		orderItemPtr.suborder.order.save()
+
+		if orderItemPtr.order_shipment != None:
+			orderItemPtr.order_shipment.final_price -= orderItemPtr.final_price
+			orderItemPtr.order_shipment.save()
 		
 	except Exception as e:
 		closeDBConnection()
