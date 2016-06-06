@@ -8,6 +8,7 @@ import os
 from django.core.mail import EmailMessage
 from django.template import Context
 from django.template.loader import get_template
+from xhtml2pdf import pisa as pisa
 
 def closeDBConnection():
     connection.close()
@@ -75,3 +76,17 @@ def create_email(mail_template_file,mail_dict,subject,from_email,to,attachment="
 
     email.content_subtype = "html"
     email.send(fail_silently=True)
+
+def generate_pdf(template_src, context_dict, output_directory, output_file_name):
+    template = get_template(template_src)
+    context = Context(context_dict)
+    html  = template.render(context)
+
+    if not os.path.exists(output_directory):
+        os.makedirs(output_directory)
+
+    filename = output_directory + output_file_name
+
+    resultFile = open(filename, "w+b")
+    pisaStatus = pisa.CreatePDF(html, dest=resultFile)
+    resultFile.close() 

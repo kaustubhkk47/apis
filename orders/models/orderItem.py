@@ -97,6 +97,11 @@ def validateOrderShipmentItemsData(orderItems):
         if len(orderItemPtr) == 0:
             return False
 
+        orderItemPtr = orderItemPtr[0]
+
+        if orderItemPtr.current_status == 4:
+            return False
+
     return flag
 
 def validateSellerPaymentItemsData(orderItems):

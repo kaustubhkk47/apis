@@ -239,16 +239,12 @@ def serializeOrderShipment(orderShipmentEntry):
 	orderItemQuerySet = OrderItem.objects.filter(order_shipment_id = orderShipmentEntry.id).select_related('product')
 	orderItems = []
 
-	finalPrice = 0.0
-
 	for orderItem in orderItemQuerySet:
 		orderItemEntry = serializeOrderItem(orderItem)
 		orderItems.append(orderItemEntry)
-		if orderItem.current_status != 4:
-			finalPrice += float(orderItem.final_price)
 
 	orderShipment["order_items"] = orderItems
-	orderShipment["final_price"] = finalPrice
+	orderShipment["final_price"] = orderShipmentEntry.final_price
 
 	orderShipment["status"] = {
 		"value": orderShipmentEntry.current_status,
