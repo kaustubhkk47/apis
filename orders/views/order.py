@@ -226,7 +226,7 @@ def post_new_order_shipment(request):
 
 		outputLink = "media/generateddocs/shipmentmanifest/" + str(sellerPtr.id) +"/" + str(subOrderPtr.display_number) + "/"
 		outputDirectory = settings.STATIC_ROOT + outputLink
-		outputFileName = str(newOrderShipment.waybill_number) + ".pdf"
+		outputFileName = "Label-" + str(newOrderShipment.waybill_number) + ".pdf"
 
 		newOrderShipment.final_price = finalPrice
 		newOrderShipment.manifest_link = outputLink + outputFileName
@@ -281,7 +281,6 @@ def post_new_order_shipment(request):
 		generate_pdf(template_file, manifest_dict, outputDirectory, outputFileName)
 
 	except Exception as e:
-		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -313,7 +312,6 @@ def post_new_buyer_payment(request):
 		populateBuyerPayment(newBuyerPayment, buyerPayment)
 		newBuyerPayment.save()
 	except Exception as e:
-		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -358,7 +356,6 @@ def post_new_seller_payment(request):
 			orderItemPtr.save()
 
 	except Exception as e:
-		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -517,7 +514,6 @@ def post_new_order(request):
 			create_email(mail_template_file,mail_dict,subject,from_email,to,bcc=bcc)
 
 	except Exception as e:
-		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:

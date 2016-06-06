@@ -107,7 +107,6 @@ def update_buyer_lead(request):
 		buyerLeadPtr.save()
 
 	except Exception as e:
-		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to update buyer lead"})
 	else:
