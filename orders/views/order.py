@@ -226,7 +226,7 @@ def post_new_order_shipment(request):
 
 		outputLink = "media/generateddocs/shipmentmanifest/" + str(sellerPtr.id) +"/" + str(subOrderPtr.display_number) + "/"
 		outputDirectory = settings.STATIC_ROOT + outputLink
-		outputFileName = "Label-" + str(newOrderShipment.waybill_number) + ".pdf"
+		outputFileName = "Manifest-" + str(newOrderShipment.id) + "-" + str(subOrderPtr.display_number) + ".pdf"
 
 		newOrderShipment.final_price = finalPrice
 		newOrderShipment.manifest_link = outputLink + outputFileName
