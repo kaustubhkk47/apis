@@ -52,6 +52,7 @@ def serializeSubOrder(subOrderEntry):
 	subOrder["shipping_charge"] = subOrderEntry.shipping_charge
 	subOrder["final_price"] = subOrderEntry.final_price
 	subOrder["suborder_status"] = subOrderEntry.suborder_status
+	subOrder["suborder_payment_status"] = subOrderEntry.suborder_payment_status
 	subOrder["display_number"] = subOrderEntry.display_number
 	subOrder["created_at"] = subOrderEntry.created_at
 	subOrder["updated_at"] = subOrderEntry.updated_at
@@ -144,6 +145,7 @@ def serializeOrder(orderEntry):
 	order["shipping_charge"]=orderEntry.shipping_charge
 	order["final_price"]=orderEntry.final_price
 	order["order_status"]=orderEntry.order_status
+	order["order_payment_status"]=orderEntry.order_payment_status
 	order["display_number"]=orderEntry.display_number
 	order["remarks"]=orderEntry.remarks
 	order["created_at"]=orderEntry.created_at

@@ -184,7 +184,7 @@ def post_new_order_shipment(request):
 		return customResponse("4XX", {"error": "Order items in order shipment not sent"})
 
 	if not validateOrderShipmentItemsData(orderShipment["order_items"]):
-		return customResponse("4XX", {"error": "Order items in order shipment not sent properly sent"})
+		return customResponse("4XX", {"error": "Inappropriate order items in order shipment sent"})
 
 	try:
 		newOrderShipment = OrderShipment(suborder=subOrderPtr, pickup_address=sellerAddressPtr, drop_address=buyerAddressPtr)
@@ -194,11 +194,13 @@ def post_new_order_shipment(request):
 		subOrderPtr.cod_charge += newOrderShipment.cod_charge
 		subOrderPtr.shipping_charge += newOrderShipment.shipping_charge
 		subOrderPtr.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
+		subOrderPtr.suborder_status = 3
 		subOrderPtr.save()
 
 		subOrderPtr.order.cod_charge += newOrderShipment.cod_charge
 		subOrderPtr.order.shipping_charge += newOrderShipment.shipping_charge
 		subOrderPtr.order.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
+		subOrderPtr.order.order_status = 2
 		subOrderPtr.order.save()
 
 		finalPrice = 0.0
@@ -210,7 +212,7 @@ def post_new_order_shipment(request):
 			orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))
 			orderItemPtr = orderItemPtr[0]
 			orderItemPtr.order_shipment = newOrderShipment
-			orderItemPtr.current_status = 3
+			orderItemPtr.current_status = 8
 			finalPrice += float(orderItemPtr.final_price)
 			orderItemPtr.save()
 
@@ -297,6 +299,18 @@ def post_new_buyer_payment(request):
 	if not len(buyerPayment) or not validateBuyerPaymentData(buyerPayment):
 		return customResponse("4XX", {"error": "Invalid data for buyer payment sent"})
 
+	if buyerPayment["payment_method"] == 0:
+		if not "ordershipmentID" in buyerPayment or buyerPayment["ordershipmentID"]==None:
+			return customResponse("4XX", {"error": "Id for order shipment not sent"})
+
+		OrderShipmentPtr = OrderShipment.objects.filter(id=int(buyerPayment["ordershipmentID"]))
+
+		if len(OrderShipmentPtr) == 0:
+			return customResponse("4XX", {"error": "Invalid id for order shipment sent"})
+
+		OrderShipmentPtr = OrderShipmentPtr[0]
+
+
 	if not "orderID" in buyerPayment or buyerPayment["orderID"]==None:
 		return customResponse("4XX", {"error": "Id for order not sent"})
 
@@ -310,13 +324,21 @@ def post_new_buyer_payment(request):
 	try:
 		newBuyerPayment = BuyerPayment(order=OrderPtr)
 		populateBuyerPayment(newBuyerPayment, buyerPayment)
+		if buyerPayment["payment_method"] == 0:
+			newBuyerPayment.order_shipment = OrderShipmentPtr
+
+		if buyerPayment["fully_paid"] == 1:
+			OrderPtr.order_payment_status = 1
+		else:
+			OrderPtr.order_payment_status = 2
+		OrderPtr.save()
 		newBuyerPayment.save()
 	except Exception as e:
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"order_shipment": serializeBuyerPayment(newBuyerPayment)})
+		return customResponse("2XX", {"buyer_payment": serializeBuyerPayment(newBuyerPayment)})
 
 def post_new_seller_payment(request):
 	try:
@@ -338,22 +360,35 @@ def post_new_seller_payment(request):
 
 	SubOrderPtr = SubOrderPtr[0]
 
-	if not "order_items" in sellerPayment or sellerPayment["order_items"]==None:
-		return customResponse("4XX", {"error": "Order items in order shipment not sent"})
+	if sellerPayment["fully_paid"] == 0:
+		if not "order_items" in sellerPayment or sellerPayment["order_items"]==None:
+			return customResponse("4XX", {"error": "Order items in order shipment not sent"})
 
-	if not validateSellerPaymentItemsData(sellerPayment["order_items"]):
-		return customResponse("4XX", {"error": "Order items in order shipment not sent properly sent"})
+		if not validateSellerPaymentItemsData(sellerPayment["order_items"]):
+			return customResponse("4XX", {"error": "Order items in order shipment not sent properly sent"})
 
 	try:
 		newSellerPayment = SellerPayment(suborder=SubOrderPtr)
 		populateSellerPayment(newSellerPayment, sellerPayment)
 		newSellerPayment.save()
 
-		for orderItem in sellerPayment["order_items"]:
-			orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))
-			orderItemPtr = orderItemPtr[0]
-			orderItemPtr.seller_payment = newSellerPayment
-			orderItemPtr.save()
+		if sellerPayment["fully_paid"] == 1:
+			SubOrderPtr.suborder_payment_status = 1
+
+			orderItemQuerySet = OrderItem.objects.filter(suborder_id = SubOrderPtr.id)
+			for orderItem in orderItemQuerySet:
+				orderItem.seller_payment = newSellerPayment
+				orderItem.save()
+		else:
+			SubOrderPtr.suborder_payment_status = 2
+
+			for orderItem in sellerPayment["order_items"]:
+				orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))
+				orderItemPtr = orderItemPtr[0]
+				orderItemPtr.seller_payment = newSellerPayment
+				orderItemPtr.save()
+
+		SubOrderPtr.save()
 
 	except Exception as e:
 		closeDBConnection()
@@ -542,35 +577,41 @@ def update_order_shipment(request):
 
 	orderShipmentPtr = orderShipmentPtr[0]
 
-	#if not validateOrderItemStatus(status,orderItemPtr.current_status):
-	#	return customResponse("4XX", {"error": "Improper status sent"})
+	if not validateOrderShipmentStatus(status,orderShipmentPtr.current_status):
+		return customResponse("4XX", {"error": "Improper status sent"})
 
 	try:
-
-		if status == 2:
-			orderShipmentPtr.tpl_notified_time = datetime.datetime.now()
-		elif status == 3:
-			orderShipmentPtr.tpl_manifested_time = datetime.datetime.now()
-		elif status == 4:
+		if status == 4:
 			orderShipmentPtr.tpl_in_transit_time = datetime.datetime.now()
+			update_order_item_status(orderShipmentPtr.id, 9)
 		elif status == 5:
 			orderShipmentPtr.tpl_stuck_in_transit_time = datetime.datetime.now()
+			update_order_item_status(orderShipmentPtr.id, 10)
 		elif status == 6:
 			orderShipmentPtr.delivered_time = datetime.datetime.now()
+			update_order_item_status(orderShipmentPtr.id, 11)
+			update_order_completion_status(orderShipmentPtr.suborder.order)
+			update_suborder_completion_status(orderShipmentPtr.suborder)
 		elif status == 7:
 			orderShipmentPtr.rto_in_transit_time = datetime.datetime.now()
+			update_order_item_status(orderShipmentPtr.id, 12)
 		elif status == 8:
 			orderShipmentPtr.rto_delivered_time = datetime.datetime.now()
 			if "rto_remarks" in orderShipment and not orderShipment["rto_remarks"]==None:
 				orderShipmentPtr.rto_remarks = orderShipment["rto_remarks"]
+			update_order_item_status(orderShipmentPtr.id, 13)
+			update_order_completion_status(orderShipmentPtr.suborder.order)
+			update_suborder_completion_status(orderShipmentPtr.suborder)
 		elif status == 9:
 			orderShipmentPtr.lost_time = datetime.datetime.now()
-		else:
-			return customResponse("4XX", {"error": "invalid status sent"})
+			update_order_item_status(orderShipmentPtr.id, 14)
+			update_order_completion_status(orderShipmentPtr.suborder.order)
+			update_suborder_completion_status(orderShipmentPtr.suborder)
 		
 		orderShipmentPtr.current_status = status
 		orderShipmentPtr.save()
 	except Exception as e:
+		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "could not update"})
 	else:

@@ -19,6 +19,7 @@ class SubOrder(models.Model):
     final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
 
     suborder_status = models.IntegerField(default=0)
+    suborder_payment_status = models.IntegerField(default=0)
 
     display_number = models.CharField(max_length=20, blank=True)
 
@@ -49,6 +50,12 @@ SubOrderStatus = {
     0:"Unconfirmed",
     1:"Confirmed",
     2:"Merchant Notified",
-    3:"Completed",
-    4:"Closed"
+    3:"Shipped",
+    4:"Completed"
+}
+
+SubOrderPaymentStatus = {
+    0:"Paid",
+    1:"Not Paid",
+    2:"Partially paid"
 }

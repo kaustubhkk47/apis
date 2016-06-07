@@ -16,6 +16,7 @@ class Order(models.Model):
     final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
     
     order_status = models.IntegerField(default=0)
+    order_payment_status = models.IntegerField(default=0)
 
     display_number = models.CharField(max_length=20, blank=True)
 
@@ -41,6 +42,16 @@ def populateOrderData(orderPtr, order):
 orderStatus = {
     0:"Placed",
     1:"Confirmed",
-    2:"Completed"
+    2:"Shipped",
+    3:"Completed"
 }
+
+OrderPaymentStatus = {
+    0:"Not Paid",
+    1:"Paid",
+    2:"Partially paid"
+}
+
+## Status: Placed, confirmed, shipped, delivered
+## Payment status : paid, not paid, partially paid
 
