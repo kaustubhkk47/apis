@@ -115,7 +115,7 @@ def order_details(request):
 			orderParameters["isInternalUser"] = 1
 
 		if orderID != "":
-			subOrderParameters["orderArr"] = [int(e) if e.isdigit() else e for e in orderID.split(",")]
+			orderParameters["orderArr"] = [int(e) if e.isdigit() else e for e in orderID.split(",")]
 
 		if status != "":
 			orderParameters["statusArr"] = [int(e) if e.isdigit() else e for e in status.split(",")]
