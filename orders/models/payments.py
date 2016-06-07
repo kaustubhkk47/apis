@@ -26,6 +26,9 @@ class BuyerPayment(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	class Meta:
+		ordering = ["-id"]
+
 	def __unicode__(self):
 		return str(self.id)
 
@@ -43,6 +46,9 @@ class SellerPayment(models.Model):
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		ordering = ["-id"]
 
 	def __unicode__(self):
 		return str(self.suborder.order.id) + "-" + str(self.suborder.id)

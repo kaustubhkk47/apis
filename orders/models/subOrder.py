@@ -31,6 +31,9 @@ class SubOrder(models.Model):
     completed_time = models.DateTimeField(null=True, blank=True)
     closed_time = models.DateTimeField(null=True, blank=True)
 
+    class Meta:
+        ordering = ["-id"]
+
     def __unicode__(self):
         return str(self.order.id) + "-" + str(self.id)
 

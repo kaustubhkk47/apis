@@ -56,6 +56,9 @@ class OrderShipment(models.Model):
 
     manifest_link = models.TextField(blank=True)
 
+    class Meta:
+        ordering = ["-id"]
+
     def __unicode__(self):
         return str(self.suborder.id) + "-" + str(self.id)
 
