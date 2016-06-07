@@ -84,7 +84,7 @@ def populateOrderItemData(OrderItemPtr, orderItem):
     OrderItemPtr.remarks = orderItem["remarks"]
     OrderItemPtr.current_status = 1
 
-def validateOrderShipmentItemsData(orderItems):
+def validateOrderShipmentItemsData(orderItems, subOrderID):
 
     flag = True
 
@@ -103,6 +103,9 @@ def validateOrderShipmentItemsData(orderItems):
             return False
 
         if orderItemPtr.order_shipment != None:
+            return False
+
+        if orderItemPtr.suborder_id != subOrderID:
             return False
 
     return flag

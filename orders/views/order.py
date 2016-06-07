@@ -183,7 +183,7 @@ def post_new_order_shipment(request):
 	if not "order_items" in orderShipment or orderShipment["order_items"]==None:
 		return customResponse("4XX", {"error": "Order items in order shipment not sent"})
 
-	if not validateOrderShipmentItemsData(orderShipment["order_items"]):
+	if not validateOrderShipmentItemsData(orderShipment["order_items"], subOrderPtr.id):
 		return customResponse("4XX", {"error": "Inappropriate order items in order shipment sent"})
 
 	try:
@@ -228,7 +228,7 @@ def post_new_order_shipment(request):
 
 		outputLink = "media/generateddocs/shipmentmanifest/" + str(sellerPtr.id) +"/" + str(subOrderPtr.display_number) + "/"
 		outputDirectory = settings.STATIC_ROOT + outputLink
-		outputFileName = "Manifest-" + str(newOrderShipment.id) + "-" + str(subOrderPtr.display_number) + ".pdf"
+		outputFileName = "WholdusManifest-" + str(newOrderShipment.id) + "-" + str(subOrderPtr.display_number) + ".pdf"
 
 		newOrderShipment.final_price = finalPrice
 		newOrderShipment.manifest_link = outputLink + outputFileName
@@ -271,6 +271,7 @@ def post_new_order_shipment(request):
 			"logistics_partner": newOrderShipment.logistics_partner,
 			"invoice_number": newOrderShipment.invoice_number,
 			"final_price": '{0:.0f}'.format(newOrderShipment.final_price),
+			"amount_to_collect":'{0:.0f}'.format(float(newOrderShipment.cod_charge) + float(newOrderShipment.shipping_charge) + float(newOrderShipment.final_price)),
 			"packaged_length": '{0:.0f}'.format(newOrderShipment.packaged_length),
 			"packaged_breadth": '{0:.0f}'.format(newOrderShipment.packaged_breadth),
 			"packaged_height": '{0:.0f}'.format(newOrderShipment.packaged_height),
@@ -283,6 +284,7 @@ def post_new_order_shipment(request):
 		generate_pdf(template_file, manifest_dict, outputDirectory, outputFileName)
 
 	except Exception as e:
+		print error
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
