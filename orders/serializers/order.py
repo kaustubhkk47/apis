@@ -5,18 +5,19 @@ from ..models.orderItem import OrderItemStatus, OrderItem
 from ..models.subOrder import SubOrder
 from ..models.orderShipment import OrderShipment, OrderShipmentStatus
 from ..models.payments import BuyerPayment, SellerPayment
+from ..models.order import Order
 
-def parseOrderItem(orderItemQuerySet):
+def parseOrderItem(orderItemQuerySet, orderItemParameters = {}):
 
 	orderItems = []
 
 	for orderItem in orderItemQuerySet:
-		orderItemEntry = serializeOrderItem(orderItem)
+		orderItemEntry = serializeOrderItem(orderItem, orderItemParameters)
 		orderItems.append(orderItemEntry)
 
 	return orderItems
 
-def serializeOrderItem(orderItemEntry):
+def serializeOrderItem(orderItemEntry, orderItemParameters = {}):
 	orderItem = {}
 	orderItem["suborderID"] = orderItemEntry.suborder_id
 	orderItem["ordershipmentID"] = orderItemEntry.order_shipment_id
@@ -38,7 +39,7 @@ def serializeOrderItem(orderItemEntry):
 	orderItem["cancellation_time"] = orderItemEntry.cancellation_time
 	return orderItem
 
-def serializeSubOrder(subOrderEntry):
+def serializeSubOrder(subOrderEntry, subOrderParameters = {}):
 	subOrder = {}
 	subOrder["orderID"]=subOrderEntry.order_id
 	subOrder["suborderID"]=subOrderEntry.id
@@ -60,7 +61,8 @@ def serializeSubOrder(subOrderEntry):
 	subOrder["completed_time"] = subOrderEntry.completed_time
 	subOrder["closed_time"] = subOrderEntry.closed_time
 
-	sellerPaymentQuerySet = SellerPayment.objects.filter(suborder_id = subOrderEntry.id)
+	sellerPaymentQuerySet = filterSellerPayment(subOrderParameters)
+	sellerPaymentQuerySet = sellerPaymentQuerySet.filter(suborder_id = subOrderEntry.id)
 	sellerPayments = []
 
 	for sellerPayment in sellerPaymentQuerySet:
@@ -69,7 +71,8 @@ def serializeSubOrder(subOrderEntry):
 
 	subOrder["seller_payments"] = sellerPayments
 
-	orderShipmentQuerySet = OrderShipment.objects.filter(suborder_id = subOrderEntry.id)
+	orderShipmentQuerySet = filterOrderShipment(subOrderParameters)
+	orderShipmentQuerySet = orderShipmentQuerySet.filter(suborder_id = subOrderEntry.id)
 	orderShipments = []
 
 	for orderShipment in orderShipmentQuerySet:
@@ -78,7 +81,8 @@ def serializeSubOrder(subOrderEntry):
 
 	subOrder["order_shipments"] = orderShipments
 
-	orderItemQuerySet = OrderItem.objects.filter(suborder_id = subOrderEntry.id).select_related('product')
+	orderItemQuerySet = filterOrderItem(subOrderParameters)
+	orderItemQuerySet = orderItemQuerySet.filter(suborder_id = subOrderEntry.id)
 	orderItems = []
 
 	for orderItem in orderItemQuerySet:
@@ -89,27 +93,27 @@ def serializeSubOrder(subOrderEntry):
 		
 	return subOrder
 
-def parseSubOrders(subOrderQuerySet):
+def parseSubOrders(subOrderQuerySet, subOrderParameters = {}):
 
 	subOrders = []
 
 	for subOrder in subOrderQuerySet:
-		subOrderEntry = serializeSubOrder(subOrder)
+		subOrderEntry = serializeSubOrder(subOrder, subOrderParameters)
 		subOrders.append(subOrderEntry)
 
 	return subOrders
 
-def parseSellerPayments(sellerPaymentQuerySet):
+def parseSellerPayments(sellerPaymentQuerySet, sellerPaymentParameters = {}):
 
 	sellerPayments = []
 
 	for sellerPayment in sellerPaymentQuerySet:
-		sellerPaymentEntry = serializeSellerPayment(sellerPayment)
+		sellerPaymentEntry = serializeSellerPayment(sellerPayment, sellerPaymentParameters)
 		sellerPayments.append(sellerPaymentEntry)
 
 	return sellerPayments
 
-def serializeSellerPayment(SellerPaymentEntry):
+def serializeSellerPayment(SellerPaymentEntry, sellerPaymentParameters = {}):
 	sellerPayment = {}
 	sellerPayment["suborderID"] = SellerPaymentEntry.suborder_id
 	sellerPayment["sellerpaymentID"] = SellerPaymentEntry.id
@@ -122,7 +126,8 @@ def serializeSellerPayment(SellerPaymentEntry):
 	sellerPayment["created_at"] = SellerPaymentEntry.created_at
 	sellerPayment["updated_at"] = SellerPaymentEntry.updated_at
 
-	orderItemQuerySet = OrderItem.objects.filter(seller_payment_id = SellerPaymentEntry.id).select_related('product')
+	orderItemQuerySet = filterOrderItem(sellerPaymentParameters)
+	orderItemQuerySet = orderItemQuerySet.filter(seller_payment_id = SellerPaymentEntry.id)
 	orderItems = []
 
 	for orderItem in orderItemQuerySet:
@@ -133,7 +138,7 @@ def serializeSellerPayment(SellerPaymentEntry):
 
 	return sellerPayment
 
-def serializeOrder(orderEntry):
+def serializeOrder(orderEntry, orderParameters = {}):
 	order = {}
 	order["orderID"]=orderEntry.id
 	order["buyer"]=serialize_buyer(orderEntry.buyer)
@@ -151,7 +156,9 @@ def serializeOrder(orderEntry):
 	order["created_at"]=orderEntry.created_at
 	order["updated_at"]=orderEntry.updated_at
 
-	subOrderQuerySet = SubOrder.objects.filter(order_id = orderEntry.id).select_related('seller','order__buyer')
+	subOrderQuerySet = filterSubOrder(orderParameters)
+	subOrderQuerySet = subOrderQuerySet.filter(order_id = orderEntry.id)
+
 	subOrders = []
 
 	for subOrder in subOrderQuerySet:
@@ -160,7 +167,8 @@ def serializeOrder(orderEntry):
 
 	order["sub_orders"] = subOrders
 
-	buyerPaymentQuerySet = BuyerPayment.objects.filter(order_id = orderEntry.id)
+	buyerPaymentQuerySet = filterBuyerPayment(orderParameters)
+	buyerPaymentQuerySet = buyerPaymentQuerySet.filter(order_id = orderEntry.id)
 	buyerPayments = []
 
 	for buyerPayment in buyerPaymentQuerySet:
@@ -171,17 +179,17 @@ def serializeOrder(orderEntry):
 	
 	return order
 
-def parseOrders(OrderQuerySet):
+def parseOrders(OrderQuerySet, orderParameters = {}):
 
 	Orders = []
 
 	for Order in OrderQuerySet:
-		OrderEntry = serializeOrder(Order)
+		OrderEntry = serializeOrder(Order, orderParameters)
 		Orders.append(OrderEntry)
 
 	return Orders
 
-def serializeBuyerPayment(BuyerPaymentEntry):
+def serializeBuyerPayment(BuyerPaymentEntry, buyerPaymentParameters= {}):
 	buyerPayment = {}
 	buyerPayment["orderID"] = BuyerPaymentEntry.order_id
 	buyerPayment["buyerpaymentID"] = BuyerPaymentEntry.id
@@ -194,19 +202,22 @@ def serializeBuyerPayment(BuyerPaymentEntry):
 	buyerPayment["created_at"] = BuyerPaymentEntry.created_at
 	buyerPayment["updated_at"] = BuyerPaymentEntry.updated_at
 
+	if BuyerPaymentEntry.order_shipment != None:
+		buyerPayment["ordershipmentID"] = BuyerPaymentEntry.order_shipment.id
+
 	return buyerPayment
 
-def parseBuyerPayments(buyerPaymentQuerySet):
+def parseBuyerPayments(buyerPaymentQuerySet, buyerPaymentParameters = {}):
 
 	buyerPayments = []
 
 	for buyerPayment in buyerPaymentQuerySet:
-		buyerPaymentEntry = serializeBuyerPayment(buyerPayment)
+		buyerPaymentEntry = serializeBuyerPayment(buyerPayment, buyerPaymentParameters)
 		buyerPayments.append(buyerPaymentEntry)
 
 	return buyerPayments
 
-def serializeOrderShipment(orderShipmentEntry):
+def serializeOrderShipment(orderShipmentEntry, orderShipmentParameters = {}):
 	orderShipment = {
 		"suborderID":orderShipmentEntry.suborder_id,
 		"suborder_display_number":orderShipmentEntry.suborder.display_number,
@@ -238,7 +249,12 @@ def serializeOrderShipment(orderShipmentEntry):
 		"updated_at": orderShipmentEntry.updated_at
 	}
 
-	orderItemQuerySet = OrderItem.objects.filter(order_shipment_id = orderShipmentEntry.id).select_related('product')
+	orderItemQuerySet = filterOrderItem(orderShipmentParameters)
+	orderItemQuerySet = orderItemQuerySet.filter(order_shipment_id = orderShipmentEntry.id)
+
+	if "orderItemStatusArr" in orderShipmentParameters:
+		orderItemQuerySet = orderItemQuerySet.filter(current_status__in=orderShipmentParameters["orderItemStatusArr"])
+		
 	orderItems = []
 
 	for orderItem in orderItemQuerySet:
@@ -259,15 +275,104 @@ def serializeOrderShipment(orderShipmentEntry):
 	except Exception, e:
 		pass
 	
-	
 	return orderShipment
 
-def parseOrderShipments(orderShipmentQuerySet):
+def parseOrderShipments(orderShipmentQuerySet, orderShipmentParameters = {}):
 
 	orderShipments = []
 
 	for orderShipment in orderShipmentQuerySet:
-		orderShipmentEntry = serializeOrderShipment(orderShipment)
+		orderShipmentEntry = serializeOrderShipment(orderShipment, orderShipmentParameters)
 		orderShipments.append(orderShipmentEntry)
 
 	return orderShipments
+
+def filterOrderShipment(orderShipmentParameters):
+	orderShipments = OrderShipment.objects.all().select_related('suborder','pickup_address','drop_address')
+		
+	if "orderShipmentArr" in orderShipmentParameters:
+		orderShipments = orderShipments.filter(id__in=orderShipmentParameters["orderShipmentArr"])
+
+	if "orderShipmentStatusArr" in orderShipmentParameters:
+		orderShipments = orderShipments.filter(current_status__in=orderShipmentParameters["orderShipmentStatusArr"])
+
+	if "sellersArr" in orderShipmentParameters:
+		orderShipments = orderShipments.filter(suborder__seller_id__in=orderShipmentParameters["sellersArr"])
+
+	return orderShipments
+
+def filterOrderItem(orderItemParameters):
+	orderItems = OrderItem.objects.all().select_related('product')
+		
+	if "orderItemArr" in orderItemParameters:
+		orderItems = orderItems.filter(id__in=orderItemParameters["orderItemArr"])
+
+	if "statusArr" in orderItemParameters:
+		orderItems = orderItems.filter(current_status__in=orderItemParameters["statusArr"])
+
+	if "sellersArr" in orderItemParameters:
+		orderItems = orderItems.filter(suborder__seller_id__in=orderItemParameters["sellersArr"])
+
+	return orderItems
+
+def filterSellerPayment(sellerPaymentParameters):
+	sellerPayments = SellerPayment.objects.all()
+
+	if "sellerPaymentArr" in sellerPaymentParameters:
+		sellerPayments = sellerPayments.filter(id__in=sellerPaymentParameters["sellerPaymentArr"])
+
+	if "sellerPaymentStatusArr" in sellerPaymentParameters:
+		sellerPayments = sellerPayments.filter(payment_status__in=sellerPaymentParameters["sellerPaymentStatusArr"])
+
+	if "sellersArr" in sellerPaymentParameters:
+		sellerPayments = sellerPayments.filter(suborder__seller_id__in=sellerPaymentParameters["sellersArr"])
+
+	if "subOrderArr" in sellerPaymentParameters:
+		sellerPayments = sellerPayments.filter(suborder_id__in=sellerPaymentParameters["subOrderArr"])
+
+	return sellerPayments
+
+def filterBuyerPayment(buyerPaymentParameters):
+	buyerPayments = BuyerPayment.objects.all()
+
+	if "buyerPaymentArr" in buyerPaymentParameters:
+		buyerPayments = buyerPayments.filter(id__in=buyerPaymentParameters["buyerPaymentArr"])
+
+	if "buyerPaymentStatusArr" in buyerPaymentParameters:
+		buyerPayments = buyerPayments.filter(payment_status__in=buyerPaymentParameters["buyerPaymentStatusArr"])
+
+	if "buyersArr" in buyerPaymentParameters:
+		buyerPayments = buyerPayments.filter(order__buyer_id__in=buyerPaymentParameters["buyersArr"])
+
+	if "orderArr" in buyerPaymentParameters:
+		buyerPayments = buyerPayments.filter(order_id__in=buyerPaymentParameters["orderArr"])
+
+	return buyerPayments
+
+def filterSubOrder(subOrderParameters):
+	subOrders = SubOrder.objects.all().select_related('seller','order__buyer')
+		
+	if "subOrderArr" in subOrderParameters:
+		subOrders = subOrders.filter(id__in=subOrderParameters["subOrderArr"])
+
+	if "subOrderStatusArr" in subOrderParameters:
+		subOrders = subOrders.filter(suborder_status__in=subOrderParameters["subOrderStatusArr"])
+
+	if "sellersArr" in subOrderParameters:
+		subOrders = subOrders.filter(seller_id__in=subOrderParameters["sellersArr"])
+
+	return subOrders
+
+def filterOrder(orderParameters):
+	orders = Order.objects.all().select_related('buyer')
+		
+	if "orderArr" in orderParameters:
+		orders = orders.filter(id__in=orderParameters["orderArr"])
+
+	if "orderStatusArr" in orderParameters:
+		orders = orders.filter(order_status__in=orderParameters["orderStatusArr"])
+
+	if "buyersArr" in orderParameters:
+		orders = orders.filter(buyer_id__in=orderParameters["buyersArr"])
+
+	return orders

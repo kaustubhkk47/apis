@@ -13,22 +13,12 @@ from decimal import Decimal
 import datetime
 import settings
 
-
 def get_order_shipment_details(request, orderShipmentParameters):
 	try:
-		orderShipments = OrderShipment.objects.all().select_related('suborder','pickup_address','drop_address')
+
+		orderShipments = filterOrderShipment(orderShipmentParameters)
 		
-		if "orderShipmentArr" in orderShipmentParameters:
-			orderShipments = orderShipments.filter(id__in=orderShipmentParameters["orderShipmentArr"])
-
-		if "statusArr" in orderShipmentParameters:
-			orderShipments = orderShipments.filter(current_status__in=orderShipmentParameters["statusArr"])
-
-		if "sellersArr" in orderShipmentParameters:
-			orderShipments = orderShipments.filter(suborder__seller_id__in=orderShipmentParameters["sellersArr"])
-
-		
-		body = parseOrderShipments(orderShipments)
+		body = parseOrderShipments(orderShipments, orderShipmentParameters)
 		statusCode = "2XX"
 		response = {"order_shipments": body}
 
@@ -41,18 +31,8 @@ def get_order_shipment_details(request, orderShipmentParameters):
 def get_order_item_details(request, orderItemParameters):
 	try:
 
-		orderItems = OrderItem.objects.all().select_related('product')
-		
-		if "orderItemArr" in orderItemParameters:
-			orderItems = orderItems.filter(id__in=orderItemParameters["orderItemArr"])
-
-		if "statusArr" in orderItemParameters:
-			orderItems = orderItems.filter(current_status__in=orderItemParameters["statusArr"])
-
-		if "sellersArr" in orderItemParameters:
-			orderItems = orderItems.filter(suborder__seller_id__in=orderItemParameters["sellersArr"])
-
-		body = parseOrderItem(orderItems)
+		orderItems = filterOrderItem(orderItemParameters)
+		body = parseOrderItem(orderItems,orderItemParameters)
 		statusCode = "2XX"
 		response = {"order_items": body}
 
@@ -63,17 +43,11 @@ def get_order_item_details(request, orderItemParameters):
 	closeDBConnection()
 	return customResponse(statusCode, response)
 
-def get_seller_payment_details(request, statusArr=[], sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
+def get_seller_payment_details(request, sellerPaymentParameters):
 	try:
-		if len(statusArr) == 0 and len(sellersArr) == 0:
-			sellerPayments = SellerPayment.objects.all()
-		elif len(sellersArr) == 0 and len(statusArr) == 1:
-			sellerPayments = SellerPayment.objects.filter(payment_status__in=statusArr)
-		elif len(sellersArr) == 1 and len(statusArr) == 0:
-			sellerPayments = SellerPayment.objects.filter(suborder__seller_id__in=sellersArr)
-		else:
-			sellerPayments = SellerPayment.objects.filter(payment_status__in=statusArr,suborder__seller_id__in=sellersArr)
-		body = parseSellerPayments(sellerPayments)
+		sellerPayments = filterSellerPayment(sellerPaymentParameters)
+
+		body = parseSellerPayments(sellerPayments,sellerPaymentParameters)
 		statusCode = "2XX"
 		response = {"seller_payments": body}
 
@@ -84,17 +58,12 @@ def get_seller_payment_details(request, statusArr=[], sellersArr=[], isSeller=0,
 	closeDBConnection()
 	return customResponse(statusCode, response)
 
-def get_buyer_payment_details(request, statusArr=[], buyersArr=[], isBuyer=0,internalusersArr=[],isInternalUser=0):
+def get_buyer_payment_details(request, buyerPaymentParameters):
 	try:
-		if len(statusArr) == 0 and len(buyersArr) == 0:
-			buyerPayments = BuyerPayment.objects.all()
-		elif len(buyersArr) == 0 and len(statusArr) == 1:
-			buyerPayments = BuyerPayment.objects.filter(payment_status__in=statusArr)
-		elif len(buyersArr) == 1 and len(statusArr) == 0:
-			buyerPayments = BuyerPayment.objects.filter(order__buyer_id__in=buyersArr)
-		else:
-			buyerPayments = BuyerPayment.objects.filter(payment_status__in=statusArr,order__buyer_id__in=buyersArr)
-		body = parseBuyerPayments(buyerPayments)
+
+		buyerPayments = filterBuyerPayment(buyerPaymentParameters)
+		
+		body = parseBuyerPayments(buyerPayments,buyerPaymentParameters)
 		statusCode = "2XX"
 		response = {"buyer_payments": body}
 
@@ -108,18 +77,9 @@ def get_buyer_payment_details(request, statusArr=[], buyersArr=[], isBuyer=0,int
 def get_suborder_details(request,subOrderParameters):
 	try:
 		
-		subOrders = SubOrder.objects.all().select_related('seller')
-		
-		if "subOrderArr" in subOrderParameters:
-			subOrders = subOrders.filter(id__in=subOrderParameters["subOrderArr"])
+		subOrders = filterSubOrder(subOrderParameters)
 
-		if "statusArr" in subOrderParameters:
-			subOrders = subOrders.filter(suborder_status__in=subOrderParameters["statusArr"])
-
-		if "sellersArr" in subOrderParameters:
-			subOrders = subOrders.filter(seller_id__in=subOrderParameters["sellersArr"])
-
-		body = parseSubOrders(subOrders)
+		body = parseSubOrders(subOrders,subOrderParameters)
 		statusCode = "2XX"
 		response = {"sub_orders": body}
 
@@ -132,22 +92,14 @@ def get_suborder_details(request,subOrderParameters):
 
 def get_order_details(request, orderParameters):
 	try:
-		orders = Order.objects.all().select_related('buyer')
-		
-		if "orderArr" in orderParameters:
-			orders = orders.filter(id__in=orderParameters["orderArr"])
+		orders = filterOrder(orderParameters)
 
-		if "statusArr" in orderParameters:
-			orders = orders.filter(order_status__in=orderParameters["statusArr"])
-
-		if "buyerssArr" in orderParameters:
-			orders = orders.filter(buyer_id__in=orderParameters["buyerssArr"])
-
-		body = parseOrders(orders)
+		body = parseOrders(orders,orderParameters)
 		statusCode = "2XX"
 		response = {"orders": body}
 
 	except Exception as e:
+		print e
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
