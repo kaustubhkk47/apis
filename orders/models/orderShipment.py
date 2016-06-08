@@ -56,8 +56,11 @@ class OrderShipment(models.Model):
 
     manifest_link = models.TextField(blank=True)
 
+    class Meta:
+        ordering = ["-id"]
+
     def __unicode__(self):
-        return str(self.suborder.id)
+        return str(self.suborder.id) + "-" + str(self.id)
 
 def validateOrderShipmentData(orderShipment):
 
@@ -122,4 +125,25 @@ OrderShipmentStatus = {
     8:{"display_value":"RTO delivered","display_time":"rto_delivered_time"},
     9:{"display_value":"Lost","display_time":"lost_time"}
 }
+
+def validateOrderShipmentStatus(status, current_status):
+
+    if status not in [4,5,6,7,8,9]:
+        return False
+
+    if current_status == 3 and not(status == 4):
+        return False
+    if current_status == 4 and not(status == 5 or status == 6 or status == 7 or status == 9):
+        return False
+    elif current_status == 5 and not(status == 6 or status == 7 or status == 9):
+        return False
+    elif current_status == 6:
+        return False
+    elif current_status == 7 and not(status == 4 or status == 8 or status == 9):
+        return False
+    elif current_status == 8:
+        return False
+    elif current_status == 9:
+        return False
+    return True
 

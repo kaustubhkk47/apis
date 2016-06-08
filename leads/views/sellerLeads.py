@@ -4,9 +4,16 @@ import json
 from ..models.sellerLeads import *
 from ..serializers.sellerLeads import *
 
-def get_seller_leads(request):
+def get_seller_leads(request, sellerLeadParameters):
 	try:
 		sellerLeads = SellerLeads.objects.all()
+
+		if "sellerLeadsArr" in sellerLeadParameters:
+			sellerLeads = sellerLeads.filter(id__in=sellerLeadParameters["sellerLeadsArr"])
+
+		if "statusArr" in sellerLeadParameters:
+			sellerLeads = sellerLeads.filter(status__in=sellerLeadParameters["statusArr"])
+			
 		closeDBConnection()
 		body = parseSellerLeads(sellerLeads)
 		statusCode = "2XX"

@@ -84,7 +84,7 @@ def populateOrderItemData(OrderItemPtr, orderItem):
     OrderItemPtr.remarks = orderItem["remarks"]
     OrderItemPtr.current_status = 1
 
-def validateOrderShipmentItemsData(orderItems):
+def validateOrderShipmentItemsData(orderItems, subOrderID):
 
     flag = True
 
@@ -100,6 +100,12 @@ def validateOrderShipmentItemsData(orderItems):
         orderItemPtr = orderItemPtr[0]
 
         if orderItemPtr.current_status == 4:
+            return False
+
+        if orderItemPtr.order_shipment != None:
+            return False
+
+        if orderItemPtr.suborder_id != subOrderID:
             return False
 
     return flag
@@ -148,11 +154,50 @@ def validateOrderItemStatus(status, current_status):
         return False
     return True
 
+def update_order_item_status(orderShipmentID, status):
+
+    orderItemQuerySet = OrderItem.objects.filter(order_shipment_id =orderShipmentID)
+    for orderItem in orderItemQuerySet:
+        orderItem.current_status = status
+        orderItem.save()
+
+def update_order_completion_status(order):
+
+    orderItemQuerySet = OrderItem.objects.filter(suborder__order_id = order.id)
+    for orderItem in orderItemQuerySet:
+        if orderItem.current_status not in OrderItemCompletionStatus:
+            return
+
+    order.order_status = 3
+    order.save()
+
+def update_suborder_completion_status(subOrder):
+
+    orderItemQuerySet = OrderItem.objects.filter(suborder_id = subOrder.id)
+    for orderItem in orderItemQuerySet:
+        if orderItem.current_status not in OrderItemCompletionStatus:
+            return
+
+    subOrder.suborder_status = 4
+    subOrder.save()
+
 
 OrderItemStatus = {
 	0:"Placed",
     1:"Confirmed",
 	2:"Merchant notified",
     3:"Shipped",
-    4:"Cancelled"
+    4:"Cancelled",
+    5:"Sent for Pickup",
+    6:"Shipment created",
+    7:"3PL notified",
+    8:"3PL manifested",
+    9:"3PL in transit",
+    10:"3PL stuck in transit",
+    11:"Delivered",
+    12:"RTO in transit",
+    13:"RTO delivered",
+    14:"Lost"
 }
+
+OrderItemCompletionStatus = [4, 11, 13, 14]

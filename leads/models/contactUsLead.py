@@ -41,3 +41,8 @@ def populateContactUsLead(contactUsLeadPtr, contactUsLead):
 	contactUsLeadPtr.mobile_number = contactUsLead["mobile_number"]
 	contactUsLeadPtr.status = int(contactUsLead["status"])
 	contactUsLeadPtr.comments = contactUsLead["comments"]
+
+ContactUsLeadStatus = {
+	1:"New",
+	2:"Resolved"
+}

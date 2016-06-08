@@ -4,11 +4,18 @@ import json
 from ..models.contactUsLead import ContactUsLead, validateContactUsLeadData, populateContactUsLead
 from ..serializers.contactUsLead import *
 
-def get_contactus_leads(request):
+def get_contactus_leads(request,contactUsLeadParameters):
 	try:
-		contactusLeads = ContactUsLead.objects.all()
+		contactUsLeads = ContactUsLead.objects.all()
+
+		if "contactUsLeadsArr" in contactUsLeadParameters:
+			contactUsLeads = contactUsLeads.filter(id__in=contactUsLeadParameters["contactUsLeadsArr"])
+
+		if "statusArr" in contactUsLeadParameters:
+			contactUsLeads = contactUsLeads.filter(status__in=contactUsLeadParameters["statusArr"])
+
 		closeDBConnection()
-		body = parseContactUsLeads(contactusLeads)
+		body = parseContactUsLeads(contactUsLeads)
 		statusCode = "2XX"
 		response = {"contactus_leads": body}
 	except Exception, e:
