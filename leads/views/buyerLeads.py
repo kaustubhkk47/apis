@@ -21,7 +21,6 @@ def get_buyer_leads(request, buyerLeadParameters):
 		statusCode = "2XX"
 		response = {"buyer_leads": body}
 	except Exception, e:
-		print e
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 	return customResponse(statusCode, response)
