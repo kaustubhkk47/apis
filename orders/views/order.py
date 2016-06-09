@@ -594,8 +594,8 @@ def update_suborder(request):
 
 	subOrderPtr = subOrderPtr[0]
 
-	#if not validateOrderItemStatus(status,orderItemPtr.current_status):
-	#	return customResponse("4XX", {"error": "Improper status sent"})
+	if not validateSubOrderStatus(status,subOrderPtr.suborder_status):
+		return customResponse("4XX", {"error": "Improper status sent"})
 
 	try:
 
@@ -604,14 +604,9 @@ def update_suborder(request):
 
 			orderItemQuerySet = OrderItem.objects.filter(suborder_id = subOrderPtr.id)
 			for orderItem in orderItemQuerySet:
-				orderItem.current_status = 2
-				orderItem.save()
-		elif status == 3:
-			subOrderPtr.completed_time = datetime.datetime.now()
-		elif status == 4:
-			subOrderPtr.closed_time = datetime.datetime.now()
-		else:
-			return customResponse("4XX", {"error": "invalid status sent"})
+				if 	orderItem.current_status in [0,1]:
+					orderItem.current_status = 2
+					orderItem.save()
 		
 		subOrderPtr.suborder_status = status
 		subOrderPtr.save()

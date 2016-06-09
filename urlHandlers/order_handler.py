@@ -33,8 +33,8 @@ def suborder_details(request):
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return order.get_suborder_details(request,subOrderParameters)
-	#elif request.method == "PUT":
-	#	return order.update_suborder(request)
+	elif request.method == "PUT":
+		return order.update_suborder(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
