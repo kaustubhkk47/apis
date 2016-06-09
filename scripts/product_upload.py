@@ -28,6 +28,8 @@ outputFileName = "./ProductDataSheetf.xlsx"
 
 startRow = 5
 
+imageQualityPercent = 80
+
 def upload_products():
 	wb = read_file()
 	success = 0
@@ -161,7 +163,7 @@ def moveImages(jsonText, row, wb):
 					directory = imageDirectory + image_path + sizePath
 					newPath = directory + image_name + "-" + toString(image_numbers[imgNo-1]) + ".jpg"
 					imgnew = resize_image(img, allImageSizes[i])
-					imgnew.save(newPath,format="JPEG",quality=75)
+					imgnew.save(newPath,format="JPEG",quality=imageQualityPercent)
 				os.remove(imagePath)
 				
 		if(check == 0):

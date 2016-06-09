@@ -9,32 +9,7 @@ def order_shipment_details(request):
 
 	if request.method == "GET":
 
-		orderShipmentParameters = {}
-
-		status = request.GET.get("status", "")
-		sellerID = request.GET.get("sellerID", "")
-		orderShipmentID = request.GET.get("ordershipmentID", "")
-		accessToken = request.GET.get("access_token", "")
-
-		tokenPayload = get_token_payload(accessToken, "sellerID")
-		orderShipmentParameters["isSeller"] = 0
-		if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
-			orderShipmentParameters["sellersArr"] = [tokenPayload["sellerID"]]
-			orderShipmentParameters["isSeller"] = 1
-		elif sellerID != "":
-			orderShipmentParameters["sellersArr"] = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
-
-		tokenPayload = get_token_payload(accessToken, "internaluserID")
-		orderShipmentParameters["isInternalUser"] = 0
-		if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
-			orderShipmentParameters["internalusersArr"] = [tokenPayload["internaluserID"]]
-			orderShipmentParameters["isInternalUser"] = 1
-
-		if status != "":
-			orderShipmentParameters["statusArr"] = [int(e) if e.isdigit() else e for e in status.split(",")]
-
-		if orderShipmentID != "":
-			orderShipmentParameters["orderShipmentArr"] = [int(e) if e.isdigit() else e for e in orderShipmentID.split(",")]
+		orderShipmentParameters = populateParameters(request)
 
 		if orderShipmentParameters["isSeller"] == 0 and orderShipmentParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -52,32 +27,7 @@ def suborder_details(request):
 
 	if request.method == "GET":
 
-		subOrderParameters = {}
-
-		status = request.GET.get("status", "")
-		sellerID = request.GET.get("sellerID", "")
-		subOrderID = request.GET.get("suborderID", "")
-		accessToken = request.GET.get("access_token", "")
-
-		tokenPayload = get_token_payload(accessToken, "sellerID")
-		subOrderParameters["isSeller"] = 0
-		if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
-			subOrderParameters["sellersArr"] = [tokenPayload["sellerID"]]
-			subOrderParameters["isSeller"] = 1
-		elif sellerID != "":
-			subOrderParameters["sellersArr"] = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
-
-		tokenPayload = get_token_payload(accessToken, "internaluserID")
-		subOrderParameters["isInternalUser"] = 0
-		if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
-			subOrderParameters["internalusersArr"] = [tokenPayload["internaluserID"]]
-			subOrderParameters["isInternalUser"] = 1
-
-		if status != "":
-			subOrderParameters["statusArr"] = [int(e) if e.isdigit() else e for e in status.split(",")]
-
-		if subOrderID != "":
-			subOrderParameters["subOrderArr"] = [int(e) if e.isdigit() else e for e in subOrderID.split(",")]
+		subOrderParameters = populateParameters(request)
 
 		if subOrderParameters["isSeller"] == 0 and subOrderParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -92,33 +42,13 @@ def suborder_details(request):
 def order_details(request):
 
 	if request.method == "GET":
-		status = request.GET.get("status", "")
-		buyerID = request.GET.get("buyerID", "")
 
-		accessToken = request.GET.get("access_token", "")
-		tokenPayload = get_token_payload(accessToken, "buyerID")
-		isBuyer = 0
-		if "buyerID" in tokenPayload and tokenPayload["buyerID"]!=None:
-			buyerssArr = [tokenPayload["buyerID"]]
-			isBuyer = 1
-		elif buyerID == "":
-			buyerssArr = []
-		else:
-			buyerssArr = [int(e) if e.isdigit() else e for e in buyerID.split(",")]
+		orderParameters = populateParameters(request)
 
-		tokenPayload = get_token_payload(accessToken, "internaluserID")
-		isInternalUser = 0
-		internalusersArr = []
-		if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
-			internalusersArr = [tokenPayload["internaluserID"]]
-			isInternalUser = 1
+		if orderParameters["isBuyer"] == 0 and orderParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 
-		if status == "":
-			statusArr = []
-		else:
-			statusArr = [int(e) if e.isdigit() else e for e in status.split(",")]
-
-		return order.get_order_details(request,statusArr,buyerssArr, isBuyer,internalusersArr,isInternalUser)
+		return order.get_order_details(request,orderParameters)
 	elif request.method == "POST":
 		return order.post_new_order(request)
 
@@ -128,33 +58,13 @@ def order_details(request):
 def order_item_details(request):
 
 	if request.method == "GET":
-		status = request.GET.get("status", "")
-		sellerID = request.GET.get("sellerID", "")
 
-		accessToken = request.GET.get("access_token", "")
-		tokenPayload = get_token_payload(accessToken, "sellerID")
-		isSeller = 0
-		if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
-			sellersArr = [tokenPayload["sellerID"]]
-			isSeller = 1
-		elif sellerID == "":
-			sellersArr = []
-		else:
-			sellersArr = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
+		orderItemParameters = populateParameters(request)
 
-		tokenPayload = get_token_payload(accessToken, "internaluserID")
-		isInternalUser = 0
-		internalusersArr = []
-		if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
-			internalusersArr = [tokenPayload["internaluserID"]]
-			isInternalUser = 1
+		if orderItemParameters["isSeller"] == 0 and orderItemParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 
-		if status == "":
-			statusArr = []
-		else:
-			statusArr = [int(e) if e.isdigit() else e for e in status.split(",")]
-
-		return order.get_order_item_details(request,statusArr,sellersArr, isSeller,internalusersArr,isInternalUser)
+		return order.get_order_item_details(request,orderItemParameters)
 	elif request.method == "DELETE":
 		return order.cancel_order_item(request)
 
@@ -164,33 +74,13 @@ def order_item_details(request):
 def buyer_payment_details(request):
 
 	if request.method == "GET":
-		status = request.GET.get("status", "")
-		buyerID = request.GET.get("buyerID", "")
 
-		accessToken = request.GET.get("access_token", "")
-		tokenPayload = get_token_payload(accessToken, "buyerID")
-		isBuyer = 0
-		if "buyerID" in tokenPayload and tokenPayload["buyerID"]!=None:
-			buyersArr = [tokenPayload["buyerID"]]
-			isBuyer = 1
-		elif buyerID == "":
-			buyersArr = []
-		else:
-			buyersArr = [int(e) if e.isdigit() else e for e in buyerID.split(",")]
+		buyerPaymentParameters = populateParameters(request)
 
-		tokenPayload = get_token_payload(accessToken, "internaluserID")
-		isInternalUser = 0
-		internalusersArr = []
-		if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
-			internalusersArr = [tokenPayload["internaluserID"]]
-			isInternalUser = 1
+		if buyerPaymentParameters["isBuyer"] == 0 and buyerPaymentParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 
-		if status == "":
-			statusArr = []
-		else:
-			statusArr = [int(e) if e.isdigit() else e for e in status.split(",")]
-
-		return order.get_buyer_payment_details(request,statusArr,buyersArr, isBuyer,internalusersArr,isInternalUser)
+		return order.get_buyer_payment_details(request,buyerPaymentParameters)
 	elif request.method == "POST":
 		return order.post_new_buyer_payment(request)
 
@@ -201,34 +91,97 @@ def buyer_payment_details(request):
 def seller_payment_details(request):
 
 	if request.method == "GET":
-		status = request.GET.get("status", "")
-		sellerID = request.GET.get("sellerID", "")
 
-		accessToken = request.GET.get("access_token", "")
-		tokenPayload = get_token_payload(accessToken, "sellerID")
-		isSeller = 0
-		if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
-			sellersArr = [tokenPayload["sellerID"]]
-			isSeller = 1
-		elif sellerID == "":
-			sellersArr = []
-		else:
-			sellersArr = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
+		sellerPaymentParameters = populateParameters(request)
 
-		tokenPayload = get_token_payload(accessToken, "internaluserID")
-		isInternalUser = 0
-		internalusersArr = []
-		if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
-			internalusersArr = [tokenPayload["internaluserID"]]
-			isInternalUser = 1
+		if sellerPaymentParameters["isSeller"] == 0 and sellerPaymentParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 
-		if status == "":
-			statusArr = []
-		else:
-			statusArr = [int(e) if e.isdigit() else e for e in status.split(",")]
-
-		return order.get_seller_payment_details(request,statusArr,sellersArr, isSeller,internalusersArr,isInternalUser)
+		return order.get_seller_payment_details(request,sellerPaymentParameters)
 	elif request.method == "POST":
 		return order.post_new_seller_payment(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
+
+def populateParameters(request):
+
+	parameters = {}
+
+	accessToken = request.GET.get("access_token", "")
+
+	sellerID = request.GET.get("sellerID", "")
+
+	buyerID = request.GET.get("buyerID", "")
+
+	orderID = request.GET.get("orderID", "")
+	orderStatus = request.GET.get("order_status", "")
+
+	subOrderID = request.GET.get("suborderID", "")
+	subOrderStatus = request.GET.get("sub_order_status", "")
+
+	orderShipmentID = request.GET.get("ordershipmentID", "")
+	orderShipmentStatus = request.GET.get("order_shipment_status", "")
+	
+	orderItemID = request.GET.get("orderitemID", "")
+	orderItemStatus = request.GET.get("order_item_status", "")
+
+	buyerPaymentID = request.GET.get("buyerpaymentID", "")
+	buyerPaymentStatus = request.GET.get("buyer_payment_status", "")
+
+	sellerPaymentID = request.GET.get("sellerpaymentID", "")
+	sellerPaymentStatus = request.GET.get("seller_payment_status", "")
+	
+	
+	tokenPayload = get_token_payload(accessToken, "sellerID")
+	parameters["isSeller"] = 0
+	if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
+		parameters["sellersArr"] = [tokenPayload["sellerID"]]
+		parameters["isSeller"] = 1
+	elif sellerID != "":
+		parameters["sellersArr"] = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
+	
+	tokenPayload = get_token_payload(accessToken, "buyerID")
+	parameters["isBuyer"] = 0
+	if "buyerID" in tokenPayload and tokenPayload["buyerID"]!=None:
+		parameters["buyersArr"] = [tokenPayload["buyerID"]]
+		parameters["isBuyer"] = 1
+	elif buyerID != "":
+		parameters["buyersArr"] = [int(e) if e.isdigit() else e for e in buyerID.split(",")]
+
+	tokenPayload = get_token_payload(accessToken, "internaluserID")
+	parameters["isInternalUser"] = 0
+	if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
+		parameters["internalusersArr"] = [tokenPayload["internaluserID"]]
+		parameters["isInternalUser"] = 1
+
+	if orderID != "":
+		parameters["orderArr"] = [int(e) if e.isdigit() else e for e in orderID.split(",")]
+	if orderStatus != "":
+		parameters["orderStatusArr"] = [int(e) if e.isdigit() else e for e in orderStatus.split(",")]
+
+	if subOrderID != "":
+		parameters["subOrderArr"] = [int(e) if e.isdigit() else e for e in subOrderID.split(",")]
+	if subOrderStatus != "":
+		parameters["subOrderStatusArr"] = [int(e) if e.isdigit() else e for e in subOrderStatus.split(",")]
+	
+	if orderShipmentID != "":
+		parameters["orderShipmentArr"] = [int(e) if e.isdigit() else e for e in orderShipmentID.split(",")]
+	if orderShipmentStatus != "":
+		parameters["orderShipmentStatusArr"] = [int(e) if e.isdigit() else e for e in orderShipmentStatus.split(",")]
+	
+	if orderItemID != "":
+		parameters["orderItemArr"] = [int(e) if e.isdigit() else e for e in orderItemID.split(",")]
+	if orderItemStatus != "":
+		parameters["orderItemStatusArr"] = [int(e) if e.isdigit() else e for e in orderItemStatus.split(",")]
+
+	if buyerPaymentID != "":
+		parameters["buyerPaymentArr"] = [int(e) if e.isdigit() else e for e in buyerPaymentID.split(",")]
+	if buyerPaymentStatus != "":
+		parameters["buyerPaymentStatusArr"] = [int(e) if e.isdigit() else e for e in buyerPaymentStatus.split(",")]
+
+	if sellerPaymentID != "":
+		parameters["sellerPaymentArr"] = [int(e) if e.isdigit() else e for e in sellerPaymentID.split(",")]
+	if sellerPaymentStatus != "":
+		parameters["sellerPaymentStatusArr"] = [int(e) if e.isdigit() else e for e in sellerPaymentStatus.split(",")]	
+
+	return parameters

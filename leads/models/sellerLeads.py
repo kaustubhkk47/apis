@@ -44,3 +44,8 @@ def populateSellerLead(sellerleadPtr, sellerlead):
 	sellerleadPtr.mobile_number = sellerlead["mobile_number"]
 	sellerleadPtr.status = int(sellerlead["status"])
 	sellerleadPtr.comments = sellerlead["comments"]
+
+SellerLeadStatus = {
+	1:"New",
+	2:"Resolved"
+}

@@ -3,6 +3,8 @@ import json
 from ..models.seller import *
 from ..serializers.seller import parse_seller, serialize_seller
 
+from leads.models.sellerLeads import SellerLeads
+
 
 
 def get_seller_details(request,sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
@@ -75,6 +77,12 @@ def post_new_seller(request):
 		newSellerDetails.save()
 		newAddress.save()
 		newBankDetails.save()
+
+		sellerLeadsQuerySet = SellerLeads.objects.filter(email = newSeller.email)
+
+		for sellerLead in sellerLeadsQuerySet:
+			sellerLead.status = 1
+			sellerLead.save()
 
 	except Exception as e:
 		closeDBConnection()

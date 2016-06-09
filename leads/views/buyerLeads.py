@@ -6,14 +6,22 @@ from ..serializers.buyerLeads import *
 from catalog.models.product import Product
 from catalog.models.category import Category
 
-def get_buyer_leads(request):
+def get_buyer_leads(request, buyerLeadParameters):
 	try:
 		buyerLeads = BuyerLeads.objects.all().select_related('product','category','product__seller')
+
+		if "buyerLeadsArr" in buyerLeadParameters:
+			buyerLeads = buyerLeads.filter(id__in=buyerLeadParameters["buyerLeadsArr"])
+
+		if "statusArr" in buyerLeadParameters:
+			buyerLeads = buyerLeads.filter(status__in=buyerLeadParameters["statusArr"])
+
 		closeDBConnection()
 		body = parseBuyerLeads(buyerLeads)
 		statusCode = "2XX"
 		response = {"buyer_leads": body}
 	except Exception, e:
+		print e
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 	return customResponse(statusCode, response)
@@ -107,7 +115,6 @@ def update_buyer_lead(request):
 		buyerLeadPtr.save()
 
 	except Exception as e:
-		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to update buyer lead"})
 	else:

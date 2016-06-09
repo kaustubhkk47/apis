@@ -7,20 +7,21 @@ from ..serializers.category import categories_parser, serialize_categories
 from django.template.defaultfilters import slugify
 import json
 
-def get_categories_details(request, categoriesArr = []):
+def get_categories_details(request, categoriesParameters):
 	try:
-		if len(categoriesArr) == 0:
-			categories = Category.objects.filter(delete_status=False)
-		else:
-			categories = Category.objects.filter(id__in=categoriesArr,delete_status=False)
-		closeDBConnection()
+		categories = Category.objects.filter(delete_status=False)
+
+		if "categoriesArr" in categoriesParameters:
+			categories = categories.filter(id__in=categoriesParameters["categoriesArr"])
+
 		statusCode = "2XX"
 		body = {"categories": categories_parser(categories)}
 
 	except Exception as e:
 		statusCode = "4XX"
 		body = {"error": "Invalid category"}
-
+		
+	closeDBConnection()
 	return customResponse(statusCode, body)
 
 def post_new_category(request):

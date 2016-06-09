@@ -4,6 +4,7 @@ from users.models.seller import *
 from users.models.internalUser import *
 from users.models.buyer import *
 from .subOrder import *
+from .orderShipment import *
 from .order import *
 
 from scripts.utils import validate_date_time
@@ -12,6 +13,7 @@ from decimal import Decimal
 class BuyerPayment(models.Model):
 
 	order = models.ForeignKey(Order)
+	order_shipment = models.ForeignKey(OrderShipment,null=True,blank=True)
 
 	payment_status = models.IntegerField(default=0)
 	payment_method = models.IntegerField(default = 0)
@@ -23,6 +25,9 @@ class BuyerPayment(models.Model):
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		ordering = ["-id"]
 
 	def __unicode__(self):
 		return str(self.id)
@@ -42,24 +47,28 @@ class SellerPayment(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	class Meta:
+		ordering = ["-id"]
+
 	def __unicode__(self):
 		return str(self.suborder.order.id) + "-" + str(self.suborder.id)
 
 def validateBuyerPaymentData(buyerPayment):
-	flag = True
 
 	if not "payment_method" in buyerPayment or buyerPayment["payment_method"]==None:
-		flag = False
+		return False
 	if not "reference_number" in buyerPayment or buyerPayment["reference_number"]==None:
-		flag = False
+		return False
 	if not "details" in buyerPayment or buyerPayment["details"]==None:
 		buyerPayment["details"] = ""
 	if not "payment_time" in buyerPayment or buyerPayment["payment_time"]==None or not validate_date_time(buyerPayment["payment_time"]):
-		flag = False
+		return False
 	if not "payment_value" in buyerPayment or buyerPayment["payment_value"]==None:
-		flag = False
+		return False
+	if not "fully_paid" in buyerPayment or buyerPayment["fully_paid"]==None:
+		return False
 
-	return flag
+	return True
 
 def populateBuyerPayment(BuyerPaymentPtr, buyerPayment):
 	BuyerPaymentPtr.payment_method = int(buyerPayment["payment_method"])
@@ -67,22 +76,24 @@ def populateBuyerPayment(BuyerPaymentPtr, buyerPayment):
 	BuyerPaymentPtr.details = buyerPayment["details"]
 	BuyerPaymentPtr.payment_time = buyerPayment["payment_time"]
 	BuyerPaymentPtr.payment_value = Decimal(buyerPayment["payment_value"])
+	BuyerPaymentPtr.payment_status = 1
 
 def validateSellerPaymentData(sellerPayment):
-	flag = True
 
 	if not "payment_method" in sellerPayment or sellerPayment["payment_method"]==None:
-		flag = False
+		return False
 	if not "reference_number" in sellerPayment or sellerPayment["reference_number"]==None:
-		flag = False
+		return False
 	if not "details" in sellerPayment or sellerPayment["details"]==None:
 		sellerPayment["details"] = ""
 	if not "payment_time" in sellerPayment or sellerPayment["payment_time"]==None or not validate_date_time(sellerPayment["payment_time"]):
-		flag = False
+		return False
 	if not "payment_value" in sellerPayment or sellerPayment["payment_value"]==None:
-		flag = False
+		return False
+	if not "fully_paid" in sellerPayment or sellerPayment["fully_paid"]==None:
+		return False
 
-	return flag
+	return True
 
 def populateSellerPayment(SellerPaymentPtr, sellerPayment):
 	SellerPaymentPtr.payment_method = int(sellerPayment["payment_method"])
@@ -90,6 +101,7 @@ def populateSellerPayment(SellerPaymentPtr, sellerPayment):
 	SellerPaymentPtr.details = sellerPayment["details"]
 	SellerPaymentPtr.payment_time = sellerPayment["payment_time"]
 	SellerPaymentPtr.payment_value = Decimal(sellerPayment["payment_value"])
+	SellerPaymentPtr.payment_status = 1
 
 SellerPaymentStatus = {
 	0:"Not Paid",
@@ -104,7 +116,8 @@ SellerPaymentMethod = {
 
 BuyerPaymentStatus = {
 	0:"Not Paid",
-	1:"Paid"
+	1:"Paid",
+	2:"Partially Paid"
 }
 
 BuyerPaymentMethod = {
