@@ -8,7 +8,7 @@ import os
 from django.core.mail import EmailMessage
 from django.template import Context
 from django.template.loader import get_template
-from xhtml2pdf import pisa as pisa
+#from xhtml2pdf import pisa as pisa
 
 def closeDBConnection():
     connection.close()

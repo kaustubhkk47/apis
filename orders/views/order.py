@@ -99,7 +99,6 @@ def get_order_details(request, orderParameters):
 		response = {"orders": body}
 
 	except Exception as e:
-		print e
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
@@ -233,10 +232,9 @@ def post_new_order_shipment(request):
 		
 		template_file = "manifest/shipment_manifest.html"
 
-		generate_pdf(template_file, manifest_dict, outputDirectory, outputFileName)
+		#generate_pdf(template_file, manifest_dict, outputDirectory, outputFileName)
 
 	except Exception as e:
-		print error
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
