@@ -49,6 +49,24 @@ def populateSubOrderData(subOrderPtr, subOrder,orderID):
     subOrderPtr.save()
     subOrderPtr.display_number = "%04d" %(subOrder["seller"].id,) + "-" + "1" + "%06d" %(orderID,)
 
+def validateSubOrderStatus(status, current_status):
+
+    if status not in [2]:
+        return False
+
+    if current_status == 0:
+        return False
+    elif current_status == 1 and not(status == 2):
+        return False
+    elif current_status == 2:
+        return False
+    elif current_status == 3:
+        return False
+    elif current_status == 4:
+        return False
+
+    return True
+
 SubOrderStatus = {
     0:"Unconfirmed",
     1:"Confirmed",
