@@ -10,7 +10,7 @@
         	</tr>
         	<tr>
         		<td style="background-color: #FFFFFF;padding: 0px 25px;">
-        			<p>Thank you for showing interest in our products!</br></p>
+        			<p>Thank you for showing interest in our products <strong>{{name}}</strong>!</br></p>
                     {% if product_name|length > 0 %}
                         <p> You have contacted us for <a href="{{product_link}}"><strong>{{ product_name }}.</strong></a></p>
                         <p><img src="{{image_link}}"></p>
@@ -20,8 +20,13 @@
                         <p> You have contacted us for <strong>{{ category_name }}.</strong></p>
                     {% else %}
                     {% endif %}
-        			<p>We will get back to you soon.</br></p>
-                    <p>You can call also call or Whatsapp us at <strong>8800989926</strong> (Mr. Aditya Rana)</p>
+        			<p>We will get back to you soon
+                    {% if mobile_number|length > 0 %}
+                        on your phone number <strong>{{mobile_number}}</strong>
+                    {% else %}
+                    {% endif %}
+                    .</br></p>
+                    <p>You can also call or Whatsapp us at <strong>8800989926</strong> (Mr. Aditya Rana)</p>
         		</td>
     		</tr>
       	</table>

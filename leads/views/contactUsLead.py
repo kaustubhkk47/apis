@@ -48,10 +48,15 @@ def post_new_contactus_lead(request):
 		if("email" in contactUsLead and contactUsLead["email"]):
 			mail_template_file = "leads/contactus_lead.html"
 			mail_dict = {}
+			mail_dict["email"] = contactUsLead["email"]
+			if("mobile_number" in contactUsLead and contactUsLead["mobile_number"]):
+				mail_dict["mobile_number"] = contactUsLead["mobile_number"]
+			if("remarks" in contactUsLead and contactUsLead["remarks"]):
+				mail_dict["remarks"] = contactUsLead["remarks"]
 			subject = "We at Wholdus have received your request"
 			to = [contactUsLead["email"]]
 			from_email = "Wholdus Info <info@wholdus.com>"
-			bcc = ["manish@wholdus.com"]
+			bcc = ["manish@wholdus.com","kushagra@wholdus.com"]
 			create_email(mail_template_file,mail_dict,subject,from_email,to,bcc=bcc)
 
 		return customResponse("2XX", {"contactus_lead" : serialize_contactus_lead(newcontactUsLead)})

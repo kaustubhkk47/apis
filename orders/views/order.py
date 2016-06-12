@@ -436,35 +436,55 @@ def post_new_order(request):
 		populateOrderData(newOrder, orderData)
 		newOrder.save()
 
+		from_email = "Wholdus Info <info@wholdus.com>"
 
+		buyer_mail_template_file = "buyer/new_order.html"
+		buyer_subject = "New order received with order ID " + newOrder.display_number
+		buyer_to = [buyerPtr.email]
+		buyer_bcc = ["aditya.rana@wholdus.com", "kushagra@wholdus.com"]
+		buyer_mail_dict = {}
+
+		buyer_mail_dict["order"] = {
+			"orderNumber":newOrder.display_number,
+			"product_count":newOrder.product_count,
+			"final_price":'{0:.1f}'.format(newOrder.final_price)
+		}
+
+		buyerMargin = float((newOrder.retail_price - newOrder.final_price)/newOrder.retail_price*100)
+		buyer_mail_dict["order"]["total_margin"] = '{0:.1f}'.format(buyerMargin)
+
+		buyerTotalPieces = 0
+
+		buyer_mail_dict["subOrders"] = []
+		
 		for subOrder in subOrders:
 			newSubOrder = SubOrder(order=newOrder, seller=subOrder["seller"])
 			populateSubOrderData(newSubOrder,subOrder,newOrder.id)
 			newSubOrder.save()
 
-			mail_template_file = "seller/new_order.html"
-			subject = "New order received with order ID " + newSubOrder.display_number
-			to = [subOrder["seller"].email]
-			from_email = "Wholdus Info <info@wholdus.com>"
-			bcc = ["manish@wholdus.com"]
-			mail_dict = {}
-			mail_dict["suborder"] = {
+			seller_mail_template_file = "seller/new_suborder.html"
+			seller_subject = "New order received with order ID " + newSubOrder.display_number
+			seller_to = [subOrder["seller"].email]
+			seller_bcc = ["manish@wholdus.com"]
+			seller_mail_dict = {}
+
+			seller_mail_dict["suborder"] = {
 				"suborderNumber":newSubOrder.display_number,
 				"product_count":newSubOrder.product_count,
 				"final_price":'{0:.1f}'.format(newSubOrder.final_price)
 			}
-			mail_dict["buyer"] = {
+			seller_mail_dict["buyer"] = {
 				"name":buyerPtr.name,
 				"company_name":buyerPtr.company_name
 			}
-			mail_dict["buyerAddress"] = {
+			seller_mail_dict["buyerAddress"] = {
 				"address":buyerAddressPtr.address,
 				"landmark":buyerAddressPtr.landmark,
 				"city":buyerAddressPtr.city,
 				"state":buyerAddressPtr.state,
 				"pincode":buyerAddressPtr.pincode
 			}
-			mail_dict["orderItems"] = []
+			seller_mail_dict["orderItems"] = []
 			totalPieces = 0
 
 			for orderItem in subOrder["order_products"]:
@@ -489,16 +509,33 @@ def post_new_order(request):
 					"product_link":productLink
 				}
 
+				itemMargin = float((newOrderItem.retail_price_per_piece - newOrderItem.edited_price_per_piece)/newOrderItem.retail_price_per_piece*100)
+				mailOrderItem["margin"] = '{0:.1f}'.format(itemMargin)
+
 				if newOrderItem.remarks != "":
 					mailOrderItem["remarks"] = newOrderItem.remarks
 
 				totalPieces += newOrderItem.pieces
+				buyerTotalPieces += newOrderItem.pieces
 
-				mail_dict["orderItems"].append(mailOrderItem)
+				seller_mail_dict["orderItems"].append(mailOrderItem)
 
-			mail_dict["suborder"]["pieces"] = totalPieces
+			seller_mail_dict["suborder"]["pieces"] = totalPieces
+			seller_mail_dict["suborder"]["items_title"] = "Order Items"
 
-			create_email(mail_template_file,mail_dict,subject,from_email,to,bcc=bcc)
+			create_email(seller_mail_template_file,seller_mail_dict,seller_subject,from_email,seller_to,bcc=seller_bcc)
+
+			seller_mail_dict["suborder"]["isBuyer"] = "Yes"
+			if subOrder["seller"].company_name != None and subOrder["seller"].company_name != "":
+				seller_mail_dict["suborder"]["items_title"] = subOrder["seller"].company_name
+			else:
+				seller_mail_dict["suborder"]["items_title"] = subOrder["seller"].name
+			buyer_mail_dict["subOrders"].append(seller_mail_dict)
+
+		buyer_mail_dict["order"]["pieces"] = buyerTotalPieces
+
+		if buyerPtr.email != None and buyerPtr.email != "":	
+			create_email(buyer_mail_template_file,buyer_mail_dict,buyer_subject,from_email,buyer_to,bcc=buyer_bcc)
 
 	except Exception as e:
 		closeDBConnection()

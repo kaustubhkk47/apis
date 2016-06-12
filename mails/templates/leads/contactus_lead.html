@@ -10,9 +10,18 @@
         	</tr>
         	<tr>
         		<td style="background-color: #FFFFFF;padding: 0px 25px;">
-        			<p>Thank you for contacting us!</br></p>
-        			<p>We will get back to you soon.</br></p>
-                    <p>You can call also call or Whatsapp us at <strong>8586822777</strong> (Mr. Manish Yadav)</p>
+        			<p>Thank you for contacting us {{email}}!</br></p>
+        			<p>We will get back to you soon
+              {% if mobile_number|length > 0 %}
+                  on your phone number <strong>{{mobile_number}}</strong>
+              {% else %}
+              {% endif %}
+              {% if remarks|length > 0 %}
+                  with respect to your query "<strong>{{remarks}}</strong>"
+              {% else %}
+              {% endif %}
+              .</br></p>
+              <p>You can also call or Whatsapp us at <strong>8586822777</strong> (Mr. Manish Yadav)</p>
         		</td>
     		</tr>
       	</table>
