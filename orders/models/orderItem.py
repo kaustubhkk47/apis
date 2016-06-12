@@ -40,7 +40,7 @@ class OrderItem(models.Model):
         ordering = ["-id"]
 
     def __unicode__(self):
-        return str(self.suborder.order.id) + "-" + str(self.suborder.id) + "-" + str(self.id)
+        return str(self.id) + " - " + self.suborder.display_number + " - Price: " + str(self.final_price) + "-" + self.product.display_name + " - " + self.product.seller.name
 
 def validateOrderProductsData(orderProducts):
 

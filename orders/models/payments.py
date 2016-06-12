@@ -30,7 +30,7 @@ class BuyerPayment(models.Model):
 		ordering = ["-id"]
 
 	def __unicode__(self):
-		return str(self.id)
+		return str(self.id) + " - " + self.order.display_number + " - " + self.order.buyer.name
 
 class SellerPayment(models.Model):
 
@@ -51,7 +51,7 @@ class SellerPayment(models.Model):
 		ordering = ["-id"]
 
 	def __unicode__(self):
-		return str(self.suborder.order.id) + "-" + str(self.suborder.id)
+		return str(self.id) + " -" + self.suborder.display_number + " - " + self.suborder.seller.name
 
 def validateBuyerPaymentData(buyerPayment):
 

@@ -12,7 +12,7 @@ class Category(models.Model):
     delete_status = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return self.display_name
+        return str(self.id) + " - " + self.display_name
 
 
 def validateCategoryData(category, oldcategory, is_new):

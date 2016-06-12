@@ -25,7 +25,7 @@ class Seller(models.Model):
     show_online = models.BooleanField(default=True)
 
     def __unicode__(self):
-        return self.name + "-" + self.company_name
+        return str(self.id) + " - " +self.name + " - " + self.company_name + " - " + self.mobile_number
 
 class SellerAdmin(admin.ModelAdmin):
     exclude = ('password',)
@@ -45,7 +45,7 @@ class SellerAddress(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
-        return self.seller.name
+        return str(self.seller.id) + " - " +self.seller.name + " - " + self.seller.company_name + " - " + self.seller.mobile_number
 
 class SellerDetails(models.Model):
 
@@ -65,7 +65,7 @@ class SellerDetails(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
-        return self.seller.name
+        return str(self.seller.id) + " - " +self.seller.name + " - " + self.seller.company_name + " - " + self.seller.mobile_number
 
 class SellerBankDetails(models.Model):
 
@@ -84,7 +84,7 @@ class SellerBankDetails(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
-        return self.seller.name
+        return str(self.seller.id) + " - " +self.seller.name + " - " + self.seller.company_name + " - " + self.seller.mobile_number
 
 def validateSellerData(seller, oldseller, isnew):
 
