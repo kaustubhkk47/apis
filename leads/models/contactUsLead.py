@@ -13,7 +13,7 @@ class ContactUsLead(models.Model):
 	updated_at = models.DateTimeField(auto_now=True)
 
 	def __unicode__(self):
-		return self.mobile_number
+		return self.mobile_number + " - " + self.email
 
 def validateContactUsLeadData(contactUsLead, oldcontactUsLead, is_new):
 

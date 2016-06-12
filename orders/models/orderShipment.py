@@ -60,7 +60,7 @@ class OrderShipment(models.Model):
         ordering = ["-id"]
 
     def __unicode__(self):
-        return str(self.suborder.id) + "-" + str(self.id)
+        return str(self.id) + " - " + self.suborder.display_number + " - " + self.suborder.seller.name
 
 def validateOrderShipmentData(orderShipment):
 

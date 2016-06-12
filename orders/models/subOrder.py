@@ -35,7 +35,7 @@ class SubOrder(models.Model):
         ordering = ["-id"]
 
     def __unicode__(self):
-        return str(self.order.id) + "-" + str(self.id)
+        return str(self.id) + " - " + str(self.display_number) + " - " + self.seller.name + " - Price: " + str(self.final_price)
 
 def populateSubOrderData(subOrderPtr, subOrder,orderID):
     

@@ -29,7 +29,7 @@ class Order(models.Model):
         ordering = ["-id"]
 
     def __unicode__(self):
-        return str(self.id)
+        return str(self.id) + " - " + str(self.display_number) + " - " + self.buyer.name + " - Price: " + str(self.final_price)
 
 def populateOrderData(orderPtr, order):
     orderPtr.product_count = order["product_count"]
