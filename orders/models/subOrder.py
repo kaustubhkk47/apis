@@ -71,8 +71,9 @@ SubOrderStatus = {
     0:"Unconfirmed",
     1:"Confirmed",
     2:"Merchant Notified",
-    3:"Shipped",
-    4:"Completed"
+    3:"Partially Shipped",
+    4:"Shipped",
+    5:"Completed"
 }
 
 SubOrderPaymentStatus = {

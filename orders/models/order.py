@@ -45,8 +45,9 @@ def populateOrderData(orderPtr, order):
 orderStatus = {
     0:"Placed",
     1:"Confirmed",
-    2:"Shipped",
-    3:"Completed"
+    2:"Partially Shipped",
+    3:"Shipped",
+    4:"Completed"
 }
 
 OrderPaymentStatus = {
