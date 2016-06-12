@@ -14,7 +14,7 @@
 						<p><strong>Buyer Name : </strong><font size=3>{{buyer.name}}</font> </br></p>
 						<p><strong>Company Name : </strong><font size=3>{{buyer.company_name}}</font> </br></p>
 						<p><strong>Address : </strong></p>
-						<strong>
+						<font size=3>
 						{% if buyerAddress.address|length > 0 %}
     						<p>{{ buyerAddress.address }},</p>
 						{% else %}
@@ -31,7 +31,7 @@
     						<p>{{ buyerAddress.state }}.</p>
 						{% else %}
 						{% endif %}
-						</strong>
+						</font>
 					</td>
 				</tr>
 			</table>
