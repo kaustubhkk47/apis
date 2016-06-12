@@ -19,7 +19,7 @@ class BuyerLeads(models.Model):
 	updated_at = models.DateTimeField(auto_now=True)
 
 	def __unicode__(self):
-		return self.mobile_number
+		return self.mobile_number + " - " + self.name  + " - " + self.email
 
 def validateBuyerLeadData(buyerlead, oldbuyerlead, is_new):
 

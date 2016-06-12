@@ -14,7 +14,7 @@ class SellerLeads(models.Model):
 	updated_at = models.DateTimeField(auto_now=True)
 
 	def __unicode__(self):
-		return self.mobile_number
+		return self.mobile_number + " - " + self.company_name + " - " + self.email
 
 def validateSellerLeadData(sellerlead, oldsellerlead, is_new):
 

@@ -44,7 +44,7 @@ class Product(models.Model):
         ordering = ["-id"]
 
     def __unicode__(self):
-        return self.name
+        return str(self.id) + " - " + self.display_name  + " - " + self.seller.name
 
 class ProductDetails(models.Model):
 
@@ -86,7 +86,7 @@ class ProductDetails(models.Model):
     remarks = models.TextField(blank=True)
 
     def __unicode__(self):
-        return self.product.name
+        return str(self.product.id) + " - " + self.product.display_name  + " - " + self.product.seller.name
 
 def validateProductData(product, oldproduct, is_new):
 

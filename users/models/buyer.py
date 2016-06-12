@@ -19,7 +19,7 @@ class Buyer(models.Model):
     delete_status = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return self.name
+        return str(self.id) + " - " + self.name + " - " + self.company_name + " - " + self.mobile_number
 
 class BuyerAddress(models.Model):
     buyer = models.ForeignKey(Buyer)
@@ -37,7 +37,7 @@ class BuyerAddress(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
-        return self.buyer.name
+        return str(self.buyer.id) + " - " + self.buyer.name + " - " + self.buyer.company_name + " - " + self.buyer.mobile_number
 
 class BuyerDetails(models.Model):
     buyer = models.OneToOneField(Buyer)
@@ -56,7 +56,7 @@ class BuyerDetails(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
-        return self.buyer.name
+        return str(self.buyer.id) + " - " + self.buyer.name + " - " + self.buyer.company_name + " - " + self.buyer.mobile_number
 
 def validateBuyerData(buyer, oldbuyer, is_new):
 
