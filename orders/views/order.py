@@ -142,20 +142,7 @@ def post_new_order_shipment(request):
 		populateOrderShipment(newOrderShipment, orderShipment)
 		newOrderShipment.save()
 
-		subOrderPtr.cod_charge += newOrderShipment.cod_charge
-		subOrderPtr.shipping_charge += newOrderShipment.shipping_charge
-		subOrderPtr.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
-		subOrderPtr.suborder_status = 3
-		subOrderPtr.save()
-
-		subOrderPtr.order.cod_charge += newOrderShipment.cod_charge
-		subOrderPtr.order.shipping_charge += newOrderShipment.shipping_charge
-		subOrderPtr.order.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
-		subOrderPtr.order.order_status = 2
-		subOrderPtr.order.save()
-
 		finalPrice = 0.0
-
 		manifest_dict = {}
 		manifest_dict["orderItems"] = []
 
@@ -173,6 +160,45 @@ def post_new_order_shipment(request):
 			}
 
 			manifest_dict["orderItems"].append(manifestOrderItem)
+
+		isSubOrderShipped = 1
+		OrderItemPtr = OrderItem.objects.filter(suborder_id= subOrderPtr.id)
+
+		for orderItem in OrderItemPtr:
+			if orderItem.current_status in [0,1,2]:
+				isSubOrderShipped = 0
+				break
+
+		isOrderShipped = 1
+
+		OrderItemPtr = OrderItem.objects.filter(suborder__order_id= subOrderPtr.order_id)
+
+		for orderItem in OrderItemPtr:
+			if orderItem.current_status in [0,1,2]:
+				isOrderShipped = 0
+				break
+
+		if isSubOrderShipped == 1:
+			subOrderPtr.suborder_status = 4
+		else:
+			subOrderPtr.suborder_status = 3
+
+		subOrderPtr.cod_charge += newOrderShipment.cod_charge
+		subOrderPtr.shipping_charge += newOrderShipment.shipping_charge
+		subOrderPtr.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
+		
+		subOrderPtr.save()
+
+		if isOrderShipped == 1:
+			subOrderPtr.order.order_status = 3
+		else:
+			subOrderPtr.order.order_status = 2
+
+		subOrderPtr.order.cod_charge += newOrderShipment.cod_charge
+		subOrderPtr.order.shipping_charge += newOrderShipment.shipping_charge
+		subOrderPtr.order.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
+		
+		subOrderPtr.order.save()
 
 		buyerPtr = subOrderPtr.order.buyer
 		sellerPtr = subOrderPtr.seller
@@ -235,6 +261,7 @@ def post_new_order_shipment(request):
 		#generate_pdf(template_file, manifest_dict, outputDirectory, outputFileName)
 
 	except Exception as e:
+		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
