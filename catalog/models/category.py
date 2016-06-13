@@ -9,7 +9,12 @@ class Category(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    priority = models.PositiveIntegerField(default=0)
+
     delete_status = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["priority","-id"]
 
     def __unicode__(self):
         return str(self.id) + " - " + self.display_name
