@@ -261,7 +261,6 @@ def post_new_order_shipment(request):
 		#generate_pdf(template_file, manifest_dict, outputDirectory, outputFileName)
 
 	except Exception as e:
-		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
