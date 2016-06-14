@@ -14,7 +14,7 @@ class Category(models.Model):
     delete_status = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ["priority","-id"]
+        ordering = ["priority","id"]
 
     def __unicode__(self):
         return str(self.id) + " - " + self.display_name
