@@ -91,4 +91,6 @@ def generate_pdf(template_src, context_dict, output_directory, output_file_name)
     'quiet': ''
     }
 
-    pdfkit.from_string(html, filename, options=options)
+    config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
+
+    pdfkit.from_string(html, filename, options=options, configuration=config)
