@@ -7,4 +7,4 @@ django-ses==0.7.1
 django-smtp-ssl==1.0
 boto==2.1.0
 fabric==1.11.1
-xhtml2pdf==3.0.33
+django-wkhtmltopdf==3.0.0

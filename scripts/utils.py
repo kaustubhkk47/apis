@@ -8,7 +8,7 @@ import os
 from django.core.mail import EmailMessage
 from django.template import Context
 from django.template.loader import get_template
-#from xhtml2pdf import pisa as pisa
+import pdfkit
 
 def closeDBConnection():
     connection.close()
@@ -87,6 +87,8 @@ def generate_pdf(template_src, context_dict, output_directory, output_file_name)
 
     filename = output_directory + output_file_name
 
-    resultFile = open(filename, "w+b")
-    pisaStatus = pisa.CreatePDF(html, dest=resultFile)
-    resultFile.close() 
+    options = {
+    'quiet': ''
+    }
+
+    pdfkit.from_string(html, filename, options=options)

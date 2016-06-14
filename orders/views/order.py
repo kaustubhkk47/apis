@@ -258,7 +258,7 @@ def post_new_order_shipment(request):
 		
 		template_file = "manifest/shipment_manifest.html"
 
-		#generate_pdf(template_file, manifest_dict, outputDirectory, outputFileName)
+		generate_pdf(template_file, manifest_dict, outputDirectory, outputFileName)
 
 	except Exception as e:
 		closeDBConnection()
