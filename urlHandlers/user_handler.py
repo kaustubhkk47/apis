@@ -92,15 +92,15 @@ def buyer_login(request):
 
 	response = {}
 	if request.method == 'POST':
-		email = request.POST.get('email', '')
+		mobile_number = request.POST.get('mobile_number', '')
 		password = request.POST.get('password', '')
 
-		if not email or not password:
+		if not mobile_number or not password:
 			return customResponse("4XX", {"error": "Either email or password was empty"})
 
 		# if check_token(request)
 		try:
-			buyer = Buyer.objects.get(email=email)
+			buyer = Buyer.objects.get(mobile_number=mobile_number)
 		except Buyer.DoesNotExist:
 			return customResponse("4XX", {"error": "Invalid buyer credentials"})
 

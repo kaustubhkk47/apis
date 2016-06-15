@@ -1,5 +1,7 @@
 from django.db import models
 
+from catalog.models.category import Category
+
 #Make changes in model, validate, populate and serializer 
 
 class Buyer(models.Model):
@@ -24,13 +26,13 @@ class Buyer(models.Model):
 class BuyerAddress(models.Model):
     buyer = models.ForeignKey(Buyer)
 
-    address = models.CharField(max_length=255, blank=True, null=False)
+    address_line = models.CharField(max_length=255, blank=True, null=False)
     landmark = models.CharField(max_length=50, blank=True)
-    city = models.CharField(max_length=50, blank=True)
-    state = models.CharField(max_length=50, blank=True)
-    country = models.CharField(max_length=50, blank=True, default="India")
+    city_name = models.CharField(max_length=50, blank=True)
+    state_name = models.CharField(max_length=50, blank=True)
+    country_name = models.CharField(max_length=50, blank=True, default="India")
     contact_number = models.CharField(max_length=11, blank=True)
-    pincode = models.CharField(max_length=6, blank=True)
+    pincode_number = models.CharField(max_length=6, blank=True)
     priority = models.IntegerField(default=1)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -45,7 +47,6 @@ class BuyerDetails(models.Model):
     vat_tin = models.CharField(max_length=20, blank=True)
     cst = models.CharField(max_length=20, blank=True)
 
-    buyer_interest = models.TextField(blank = True)
     customer_type = models.CharField(max_length=20, blank=True)
     buying_capacity = models.CharField(max_length=20, blank=True)
     purchase_duration = models.CharField(max_length=20, blank=True)
@@ -57,6 +58,24 @@ class BuyerDetails(models.Model):
 
     def __unicode__(self):
         return str(self.buyer.id) + " - " + self.buyer.name + " - " + self.buyer.company_name + " - " + self.buyer.mobile_number
+"""
+class BuyerInterest(models.Model):
+
+    buyer = models.ForeignKey(Buyer)
+    category = models.ForeignKey(Category)
+
+    ## On a scale of 1 to 3
+
+    scale = models.PositiveIntegerField(default=2)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return str(self.buyer.id) + " - " + self.buyer.name + " - " + self.category.name
+
+#class BuyerType(models.Model):
+"""
 
 def validateBuyerData(buyer, oldbuyer, is_new):
 
@@ -88,8 +107,6 @@ def validateBuyerData(buyer, oldbuyer, is_new):
         return False
 
     return True
-
-
     
 def validateBuyerDetailsData(buyerdetails, oldbuyerdetails):
 
@@ -114,19 +131,19 @@ def validateBuyerDetailsData(buyerdetails, oldbuyerdetails):
 def validateBuyerAddressData(buyeraddress, oldbuyeraddress):
 
     if not "address" in buyeraddress or buyeraddress["address"]==None:
-        buyeraddress["address"] = oldbuyeraddress.address
+        buyeraddress["address"] = oldbuyeraddress.address_line
     if not "landmark" in buyeraddress or buyeraddress["landmark"]==None:
         buyeraddress["landmark"] = oldbuyeraddress.landmark
     if not "city" in buyeraddress or buyeraddress["city"]==None:
-        buyeraddress["city"] = oldbuyeraddress.city
+        buyeraddress["city"] = oldbuyeraddress.city_name
     if not "state" in buyeraddress or buyeraddress["state"]==None:
-        buyeraddress["state"] = oldbuyeraddress.state
+        buyeraddress["state"] = oldbuyeraddress.state_name
     if not "country" in buyeraddress or buyeraddress["country"]==None:
-        buyeraddress["country"] = oldbuyeraddress.country
+        buyeraddress["country"] = oldbuyeraddress.country_name
     if not "contact_number" in buyeraddress or buyeraddress["contact_number"]==None:
         buyeraddress["contact_number"] = oldbuyeraddress.contact_number
     if not "pincode" in buyeraddress or buyeraddress["pincode"]==None:
-        buyeraddress["pincode"] = oldbuyeraddress.pincode
+        buyeraddress["pincode"] = oldbuyeraddress.pincode_number
 
 def populateBuyer(buyerPtr, buyer):
     buyerPtr.name = buyer["name"]
@@ -150,13 +167,13 @@ def populateBuyerDetails(buyerDetailsPtr, buyerdetails):
     buyerDetailsPtr.vat_tin = buyerdetails["vat_tin"]
 
 def populateBuyerAddress(buyerAddressPtr, buyeraddress):
-    buyerAddressPtr.address = buyeraddress["address"]
+    buyerAddressPtr.address_line = buyeraddress["address"]
     buyerAddressPtr.landmark = buyeraddress["landmark"]
-    buyerAddressPtr.city = buyeraddress["city"]
-    buyerAddressPtr.state = buyeraddress["state"]
-    buyerAddressPtr.country = buyeraddress["country"]
+    buyerAddressPtr.city_name = buyeraddress["city"]
+    buyerAddressPtr.state_name = buyeraddress["state"]
+    buyerAddressPtr.country_name = buyeraddress["country"]
     buyerAddressPtr.contact_number = buyeraddress["contact_number"]
-    buyerAddressPtr.pincode = buyeraddress["pincode"]
+    buyerAddressPtr.pincode_number = buyeraddress["pincode"]
 
 def buyerEmailExists(email):
     buyerPtr = Buyer.objects.filter(email=email)

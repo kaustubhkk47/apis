@@ -26,7 +26,6 @@ def serialize_buyer(buyer_entry):
         buyer_details["detailsID"] = buyer_entry.buyerdetails.id
         buyer_details["vat_tin"] = buyer_entry.buyerdetails.vat_tin
         buyer_details["cst"] = buyer_entry.buyerdetails.cst
-        buyer_details["buyer_interest"] = buyer_entry.buyerdetails.buyer_interest
         buyer_details["customer_type"] = buyer_entry.buyerdetails.customer_type
         buyer_details["buying_capacity"] = buyer_entry.buyerdetails.buying_capacity
         buyer_details["buys_from"] = buyer_entry.buyerdetails.buys_from
@@ -51,13 +50,13 @@ def serialize_buyer_addresses(buyer_addresses_queryset):
 def serialize_buyer_address(buyer_address):
     buyer_address_entry = {
         "addressID" : buyer_address.id,
-        "address" : buyer_address.address,
+        "address" : buyer_address.address_line,
         "landmark" : buyer_address.landmark,
-        "city" : buyer_address.city,
-        "state" : buyer_address.state,
-        "country" : buyer_address.country,
+        "city" : buyer_address.city_name,
+        "state" : buyer_address.state_name,
+        "country" : buyer_address.country_name,
         "contact_number" : buyer_address.contact_number,
-        "pincode" : buyer_address.pincode,
+        "pincode" : buyer_address.pincode_number,
         "priority" : buyer_address.priority
     }
     return buyer_address_entry

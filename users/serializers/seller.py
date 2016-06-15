@@ -57,13 +57,13 @@ def serialize_seller_addresses(seller_addresses_queryset):
 def serialize_seller_address(seller_address):
     seller_address_entry = {
         "addressID" : seller_address.id,
-        "address" : seller_address.address,
+        "address" : seller_address.address_line,
         "landmark" : seller_address.landmark,
-        "city" : seller_address.city,
-        "state" : seller_address.state,
-        "country" : seller_address.country,
+        "city" : seller_address.city_name,
+        "state" : seller_address.state_name,
+        "country" : seller_address.country_name,
         "contact_number" : seller_address.contact_number,
-        "pincode" : seller_address.pincode
+        "pincode" : seller_address.pincode_number
     }
     return seller_address_entry
 

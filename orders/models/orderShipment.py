@@ -92,6 +92,8 @@ def validateOrderShipmentData(orderShipment):
         orderShipment["rto_remarks"] = ""
     if not "tracking_url" in orderShipment or orderShipment["tracking_url"]==None:
         orderShipment["tracking_url"] = ""
+    if not "all_items" in orderShipment or orderShipment["all_items"]==None:
+        flag = False
     
     return flag
 

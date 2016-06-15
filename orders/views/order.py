@@ -8,7 +8,9 @@ from ..models.payments import *
 from ..serializers.order import *
 from ..models.payments import *
 from users.models.buyer import *
+from users.serializers.buyer import *
 from users.models.seller import *
+from users.serializers.seller import *
 from decimal import Decimal
 import datetime
 import settings
@@ -84,6 +86,7 @@ def get_suborder_details(request,subOrderParameters):
 		response = {"sub_orders": body}
 
 	except Exception as e:
+		print e
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
@@ -131,12 +134,28 @@ def post_new_order_shipment(request):
 	buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=subOrderPtr.order.buyer_id)
 	buyerAddressPtr = buyerAddressPtr[0]
 
-	if not "order_items" in orderShipment or orderShipment["order_items"]==None:
-		return customResponse("4XX", {"error": "Order items in order shipment not sent"})
+	if (orderShipment["all_items"] == 0):
+		if not "order_items" in orderShipment or orderShipment["order_items"]==None:
+			return customResponse("4XX", {"error": "Order items in order shipment not sent"})
 
-	if not validateOrderShipmentItemsData(orderShipment["order_items"], subOrderPtr.id):
-		return customResponse("4XX", {"error": "Inappropriate order items in order shipment sent"})
+		if not validateOrderShipmentItemsData(orderShipment["order_items"], subOrderPtr.id):
+			return customResponse("4XX", {"error": "Inappropriate order items in order shipment sent"})
 
+		sentOrderItems = []
+		for orderItem in orderShipment["order_items"]:
+			sentOrderItems.append(int(orderItem["orderitemID"]))
+
+		if len(sentOrderItems) == 0:
+			return customResponse("4XX", {"error": "No order items in order shipment sent"})
+
+		allOrderItems = OrderItem.objects.filter(id__in=sentOrderItems)
+
+	elif (orderShipment["all_items"] == 1):
+		allOrderItems = OrderItem.objects.filter(suborder_id= subOrderPtr.id, current_status__in=[0,1,2,3])
+		if len(allOrderItems) == 0:
+			return customResponse("4XX", {"error": "No order items left to ship"})
+	else:
+		return customResponse("4XX", {"error": "Wrong value for all_items sent"})
 	try:
 		newOrderShipment = OrderShipment(suborder=subOrderPtr, pickup_address=sellerAddressPtr, drop_address=buyerAddressPtr)
 		populateOrderShipment(newOrderShipment, orderShipment)
@@ -146,9 +165,7 @@ def post_new_order_shipment(request):
 		manifest_dict = {}
 		manifest_dict["orderItems"] = []
 
-		for orderItem in orderShipment["order_items"]:
-			orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))
-			orderItemPtr = orderItemPtr[0]
+		for orderItemPtr in allOrderItems:
 			orderItemPtr.order_shipment = newOrderShipment
 			orderItemPtr.current_status = 8
 			finalPrice += float(orderItemPtr.final_price)
@@ -162,12 +179,14 @@ def post_new_order_shipment(request):
 			manifest_dict["orderItems"].append(manifestOrderItem)
 
 		isSubOrderShipped = 1
-		OrderItemPtr = OrderItem.objects.filter(suborder_id= subOrderPtr.id)
 
-		for orderItem in OrderItemPtr:
-			if orderItem.current_status in [0,1,2]:
-				isSubOrderShipped = 0
-				break
+		if orderShipment["all_items"] == 0:
+			OrderItemPtr = OrderItem.objects.filter(suborder_id= subOrderPtr.id)
+
+			for orderItem in OrderItemPtr:
+				if orderItem.current_status in [0,1,2]:
+					isSubOrderShipped = 0
+					break
 
 		isOrderShipped = 1
 
@@ -219,14 +238,7 @@ def post_new_order_shipment(request):
 			"name": buyerPtr.name
 		}
 
-		manifest_dict["buyer_address"] = {
-			"address": buyerAddressPtr.address,
-			"landmark": buyerAddressPtr.landmark,
-			"city": buyerAddressPtr.city,
-			"state": buyerAddressPtr.state,
-			"pincode": buyerAddressPtr.pincode
-		}
-
+		manifest_dict["buyer_address"] = serialize_buyer_address(buyerAddressPtr)
 
 		manifest_dict["seller"] = {
 			"name": sellerPtr.name,
@@ -234,13 +246,7 @@ def post_new_order_shipment(request):
 			"vat_tin": sellerPtr.sellerdetails.vat_tin
 		}
 
-		manifest_dict["seller_address"] = {
-			"address": sellerAddressPtr.address,
-			"landmark": sellerAddressPtr.landmark,
-			"city": sellerAddressPtr.city,
-			"state": sellerAddressPtr.state,
-			"pincode": sellerAddressPtr.pincode
-		}
+		manifest_dict["seller_address"] = serialize_seller_address(sellerAddressPtr)
 
 		manifest_dict["shipment"] = {
 			"waybill_number": newOrderShipment.waybill_number,
@@ -473,10 +479,10 @@ def post_new_order(request):
 		buyer_mail_dict["order"] = {
 			"orderNumber":newOrder.display_number,
 			"product_count":newOrder.product_count,
-			"final_price":'{0:.1f}'.format(newOrder.final_price)
+			"final_price":'{0:.0f}'.format(newOrder.final_price)
 		}
 
-		buyerMargin = float((newOrder.retail_price - newOrder.final_price)/newOrder.retail_price*100)
+		buyerMargin = (float(newOrder.retail_price) - float(newOrder.final_price))/float(newOrder.retail_price)*100
 		buyer_mail_dict["order"]["total_margin"] = '{0:.1f}'.format(buyerMargin)
 
 		buyerTotalPieces = 0
@@ -497,19 +503,14 @@ def post_new_order(request):
 			seller_mail_dict["suborder"] = {
 				"suborderNumber":newSubOrder.display_number,
 				"product_count":newSubOrder.product_count,
-				"final_price":'{0:.1f}'.format(newSubOrder.final_price)
+				"final_price":'{0:.0f}'.format(newSubOrder.final_price)
 			}
 			seller_mail_dict["buyer"] = {
 				"name":buyerPtr.name,
 				"company_name":buyerPtr.company_name
 			}
-			seller_mail_dict["buyerAddress"] = {
-				"address":buyerAddressPtr.address,
-				"landmark":buyerAddressPtr.landmark,
-				"city":buyerAddressPtr.city,
-				"state":buyerAddressPtr.state,
-				"pincode":buyerAddressPtr.pincode
-			}
+			seller_mail_dict["buyerAddress"] = serialize_buyer_address(buyerAddressPtr)
+			
 			seller_mail_dict["orderItems"] = []
 			totalPieces = 0
 
@@ -609,11 +610,11 @@ def update_order_shipment(request):
 			update_suborder_completion_status(orderShipmentPtr.suborder)
 		elif status == 7:
 			orderShipmentPtr.rto_in_transit_time = datetime.datetime.now()
+			if "rto_remarks" in orderShipment and not orderShipment["rto_remarks"]==None:
+				orderShipmentPtr.rto_remarks = orderShipment["rto_remarks"]
 			update_order_item_status(orderShipmentPtr.id, 12)
 		elif status == 8:
 			orderShipmentPtr.rto_delivered_time = datetime.datetime.now()
-			if "rto_remarks" in orderShipment and not orderShipment["rto_remarks"]==None:
-				orderShipmentPtr.rto_remarks = orderShipment["rto_remarks"]
 			update_order_item_status(orderShipmentPtr.id, 13)
 			update_order_completion_status(orderShipmentPtr.suborder.order)
 			update_suborder_completion_status(orderShipmentPtr.suborder)
@@ -626,7 +627,6 @@ def update_order_shipment(request):
 		orderShipmentPtr.current_status = status
 		orderShipmentPtr.save()
 	except Exception as e:
-		print e
 		closeDBConnection()
 		return customResponse("4XX", {"error": "could not update"})
 	else:

@@ -43,7 +43,7 @@ def populateSubOrderData(subOrderPtr, subOrder,orderID):
     subOrderPtr.retail_price = subOrder["retail_price"]
     subOrderPtr.calculated_price = subOrder["calculated_price"]
     subOrderPtr.edited_price = subOrder["edited_price"]
-    subOrderPtr.final_price = subOrder["edited_price"]
+    subOrderPtr.final_price = round(subOrder["edited_price"])
     subOrderPtr.suborder_status = 1
     subOrderPtr.confirmed_time = datetime.datetime.now()
     subOrderPtr.save()
@@ -68,12 +68,12 @@ def validateSubOrderStatus(status, current_status):
     return True
 
 SubOrderStatus = {
-    0:"Unconfirmed",
-    1:"Confirmed",
-    2:"Merchant Notified",
-    3:"Partially Shipped",
-    4:"Shipped",
-    5:"Completed"
+    0:{"display_value":"Unconfirmed"},
+    1:{"display_value":"Confirmed"},
+    2:{"display_value":"Merchant Notified"},
+    3:{"display_value":"Partially Shipped"},
+    4:{"display_value":"Shipped"},
+    5:{"display_value":"Completed"}
 }
 
 SubOrderPaymentStatus = {
