@@ -1,11 +1,11 @@
 from users.serializers.seller import serialize_seller, serialize_seller_address
 from users.serializers.buyer import serialize_buyer, serialize_buyer_address
 from catalog.serializers.product import serialize_product
-from ..models.orderItem import OrderItemStatus, OrderItem
-from ..models.subOrder import SubOrder
+from ..models.orderItem import OrderItemStatus, OrderItem, OrderItemStatus
+from ..models.subOrder import SubOrder, SubOrderStatus
 from ..models.orderShipment import OrderShipment, OrderShipmentStatus
 from ..models.payments import BuyerPayment, SellerPayment
-from ..models.order import Order
+from ..models.order import Order, OrderStatus
 
 def parseOrderItem(orderItemQuerySet, orderItemParameters = {}):
 
@@ -20,8 +20,6 @@ def parseOrderItem(orderItemQuerySet, orderItemParameters = {}):
 def serializeOrderItem(orderItemEntry, orderItemParameters = {}):
 	orderItem = {}
 	orderItem["suborderID"] = orderItemEntry.suborder_id
-	orderItem["ordershipmentID"] = orderItemEntry.order_shipment_id
-	orderItem["sellerpaymentID"] = orderItemEntry.seller_payment_id
 	orderItem["orderitemID"] = orderItemEntry.id
 	orderItem["product"] = serialize_product(orderItemEntry.product)
 	orderItem["pieces"] = orderItemEntry.pieces
@@ -37,6 +35,19 @@ def serializeOrderItem(orderItemEntry, orderItemParameters = {}):
 	orderItem["remarks"] = orderItemEntry.remarks
 	orderItem["cancellation_remarks"] = orderItemEntry.cancellation_remarks
 	orderItem["cancellation_time"] = orderItemEntry.cancellation_time
+	
+	orderItem["status"] = {
+		"value": orderItemEntry.current_status,
+		"display_value":OrderItemStatus[orderItemEntry.current_status]["display_value"]
+	}
+
+	if orderItemEntry.order_shipment_id != None:
+		orderItem["ordershipmentID"] = orderItemEntry.order_shipment_id
+		orderItem["tracking_url"] = orderItemEntry.order_shipment.tracking_url
+
+	if orderItemEntry.seller_payment_id != None:
+		orderItem["sellerpaymentID"] = orderItemEntry.seller_payment_id
+
 	return orderItem
 
 def serializeSubOrder(subOrderEntry, subOrderParameters = {}):
@@ -60,9 +71,14 @@ def serializeSubOrder(subOrderEntry, subOrderParameters = {}):
 	subOrder["merchant_notified_time"] = subOrderEntry.merchant_notified_time
 	subOrder["completed_time"] = subOrderEntry.completed_time
 	subOrder["closed_time"] = subOrderEntry.closed_time
+	
+	subOrder["status"] = {
+		"value": subOrderEntry.suborder_status,
+		"display_value":SubOrderStatus[subOrderEntry.suborder_status]["display_value"]
+	}
 
 	sellerPaymentQuerySet = filterSellerPayment(subOrderParameters)
-	sellerPaymentQuerySet = sellerPaymentQuerySet.filter(suborder_id = subOrderEntry.id)
+	sellerPaymentQuerySet = sellerPaymentQuerySet.filter(suborder_id=subOrderEntry.id)
 	sellerPayments = []
 
 	for sellerPayment in sellerPaymentQuerySet:
@@ -72,7 +88,7 @@ def serializeSubOrder(subOrderEntry, subOrderParameters = {}):
 	subOrder["seller_payments"] = sellerPayments
 
 	orderShipmentQuerySet = filterOrderShipment(subOrderParameters)
-	orderShipmentQuerySet = orderShipmentQuerySet.filter(suborder_id = subOrderEntry.id)
+	orderShipmentQuerySet = orderShipmentQuerySet.filter(suborder_id=subOrderEntry.id)
 	orderShipments = []
 
 	for orderShipment in orderShipmentQuerySet:
@@ -82,7 +98,7 @@ def serializeSubOrder(subOrderEntry, subOrderParameters = {}):
 	subOrder["order_shipments"] = orderShipments
 
 	orderItemQuerySet = filterOrderItem(subOrderParameters)
-	orderItemQuerySet = orderItemQuerySet.filter(suborder_id = subOrderEntry.id)
+	orderItemQuerySet = orderItemQuerySet.filter(suborder_id=subOrderEntry.id)
 	orderItems = []
 
 	for orderItem in orderItemQuerySet:
@@ -156,6 +172,11 @@ def serializeOrder(orderEntry, orderParameters = {}):
 	order["created_at"]=orderEntry.created_at
 	order["updated_at"]=orderEntry.updated_at
 
+	order["status"] = {
+		"value": orderEntry.order_status,
+		"display_value":OrderStatus[orderEntry.order_status]["display_value"]
+	}
+
 	subOrderQuerySet = filterSubOrder(orderParameters)
 	subOrderQuerySet = subOrderQuerySet.filter(order_id = orderEntry.id)
 
@@ -218,42 +239,38 @@ def parseBuyerPayments(buyerPaymentQuerySet, buyerPaymentParameters = {}):
 	return buyerPayments
 
 def serializeOrderShipment(orderShipmentEntry, orderShipmentParameters = {}):
-	orderShipment = {
-		"suborderID":orderShipmentEntry.suborder_id,
-		"suborder_display_number":orderShipmentEntry.suborder.display_number,
-		"ordershipmentID": orderShipmentEntry.id,
-		"pickup_address": serialize_seller_address(orderShipmentEntry.pickup_address),
-		"drop_address": serialize_buyer_address(orderShipmentEntry.drop_address),
-		"invoice_number": orderShipmentEntry.invoice_number,
-		"invoice_date": orderShipmentEntry.invoice_date,
-		"logistics_partner": orderShipmentEntry.logistics_partner,
-		"waybill_number": orderShipmentEntry.waybill_number,
-		"packaged_weight": orderShipmentEntry.packaged_weight,
-		"packaged_length": orderShipmentEntry.packaged_length,
-		"packaged_breadth": orderShipmentEntry.packaged_breadth,
-		"packaged_height": orderShipmentEntry.packaged_height,
-		"cod_charge": orderShipmentEntry.cod_charge,
-		"shipping_charge": orderShipmentEntry.shipping_charge,
-		"remarks": orderShipmentEntry.remarks,
-		"tpl_manifested_time": orderShipmentEntry.tpl_manifested_time,
-		"tpl_in_transit_time": orderShipmentEntry.tpl_in_transit_time,
-		"tpl_stuck_in_transit_time": orderShipmentEntry.tpl_stuck_in_transit_time,
-		"delivered_time": orderShipmentEntry.delivered_time,
-		"rto_in_transit_time": orderShipmentEntry.rto_in_transit_time,
-		"rto_delivered_time":orderShipmentEntry.rto_delivered_time,
-		"sent_for_pickup_time":orderShipmentEntry.sent_for_pickup_time,
-		"lost_time":orderShipmentEntry.lost_time,
-		"tracking_url":orderShipmentEntry.tracking_url,
-		"rto_remarks": orderShipmentEntry.rto_remarks,
-		"created_at": orderShipmentEntry.created_at,
-		"updated_at": orderShipmentEntry.updated_at
-	}
+	orderShipment = {}
+	orderShipment["suborderID"] = orderShipmentEntry.suborder_id
+	orderShipment["suborder_display_number"] =orderShipmentEntry.suborder.display_number
+	orderShipment["ordershipmentID"] = orderShipmentEntry.id
+	orderShipment["pickup_address"] = serialize_seller_address(orderShipmentEntry.pickup_address)
+	orderShipment["drop_address"] = serialize_buyer_address(orderShipmentEntry.drop_address)
+	orderShipment["invoice_number"] = orderShipmentEntry.invoice_number
+	orderShipment["invoice_date"] = orderShipmentEntry.invoice_date
+	orderShipment["logistics_partner"] = orderShipmentEntry.logistics_partner
+	orderShipment["waybill_number"] = orderShipmentEntry.waybill_number
+	orderShipment["packaged_weight"] = orderShipmentEntry.packaged_weight
+	orderShipment["packaged_length"] = orderShipmentEntry.packaged_length
+	orderShipment["packaged_breadth"] = orderShipmentEntry.packaged_breadth
+	orderShipment["packaged_height"] = orderShipmentEntry.packaged_height
+	orderShipment["cod_charge"] = orderShipmentEntry.cod_charge
+	orderShipment["shipping_charge"] = orderShipmentEntry.shipping_charge
+	orderShipment["remarks"] = orderShipmentEntry.remarks
+	orderShipment["tpl_manifested_time"] = orderShipmentEntry.tpl_manifested_time
+	orderShipment["tpl_in_transit_time"] = orderShipmentEntry.tpl_in_transit_time
+	orderShipment["tpl_stuck_in_transit_time"] = orderShipmentEntry.tpl_stuck_in_transit_time
+	orderShipment["delivered_time"] = orderShipmentEntry.delivered_time
+	orderShipment["rto_in_transit_time"] = orderShipmentEntry.rto_in_transit_time
+	orderShipment["rto_delivered_time"] = orderShipmentEntry.rto_delivered_time
+	orderShipment["sent_for_pickup_time"] = orderShipmentEntry.sent_for_pickup_time
+	orderShipment["lost_time"] = orderShipmentEntry.lost_time
+	orderShipment["tracking_url"] =orderShipmentEntry.tracking_url
+	orderShipment["rto_remarks"] = orderShipmentEntry.rto_remarks
+	orderShipment["created_at"] = orderShipmentEntry.created_at
+	orderShipment["updated_at"] = orderShipmentEntry.updated_at
 
 	orderItemQuerySet = filterOrderItem(orderShipmentParameters)
-	orderItemQuerySet = orderItemQuerySet.filter(order_shipment_id = orderShipmentEntry.id)
-
-	if "orderItemStatusArr" in orderShipmentParameters:
-		orderItemQuerySet = orderItemQuerySet.filter(current_status__in=orderShipmentParameters["orderItemStatusArr"])
+	orderItemQuerySet = orderItemQuerySet.filter(order_shipment_id=orderShipmentEntry.id)
 		
 	orderItems = []
 
@@ -296,6 +313,9 @@ def filterOrderShipment(orderShipmentParameters):
 	if "orderShipmentStatusArr" in orderShipmentParameters:
 		orderShipments = orderShipments.filter(current_status__in=orderShipmentParameters["orderShipmentStatusArr"])
 
+	if "subOrderArr" in orderShipmentParameters:
+		orderShipments = orderShipments.filter(suborder_id__in=orderShipmentParameters["subOrderArr"])
+
 	if "sellersArr" in orderShipmentParameters:
 		orderShipments = orderShipments.filter(suborder__seller_id__in=orderShipmentParameters["sellersArr"])
 
@@ -307,11 +327,20 @@ def filterOrderItem(orderItemParameters):
 	if "orderItemArr" in orderItemParameters:
 		orderItems = orderItems.filter(id__in=orderItemParameters["orderItemArr"])
 
-	if "statusArr" in orderItemParameters:
-		orderItems = orderItems.filter(current_status__in=orderItemParameters["statusArr"])
+	if "orderItemStatusArr" in orderItemParameters:
+		orderItems = orderItems.filter(current_status__in=orderItemParameters["orderItemStatusArr"])
 
 	if "sellersArr" in orderItemParameters:
 		orderItems = orderItems.filter(suborder__seller_id__in=orderItemParameters["sellersArr"])
+
+	if "subOrderArr" in orderItemParameters:
+		orderItems = orderItems.filter(suborder_id__in=orderItemParameters["subOrderArr"])
+
+	if "orderArr" in orderItemParameters:
+		orderItems = orderItems.filter(suborder__order_id__in=orderItemParameters["orderArr"])
+
+	if "orderShipmentArr" in orderItemParameters:
+		orderItems = orderItems.filter(order_shipment_id__in=orderItemParameters["orderShipmentArr"])
 
 	return orderItems
 
@@ -360,6 +389,9 @@ def filterSubOrder(subOrderParameters):
 
 	if "sellersArr" in subOrderParameters:
 		subOrders = subOrders.filter(seller_id__in=subOrderParameters["sellersArr"])
+
+	if "orderArr" in subOrderParameters:
+		subOrders = subOrders.filter(order_id__in=subOrderParameters["orderArr"])
 
 	return subOrders
 

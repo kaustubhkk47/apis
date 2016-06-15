@@ -14,13 +14,13 @@ def get_buyer_details(request,buyersArr=[]):
 			buyers = Buyer.objects.filter(delete_status=False,id__in=buyersArr).select_related('buyerdetails')
 			closeDBConnection()
 
-
 		response = {
 			"buyers" : parse_buyer(buyers)
 		}
 
 		return customResponse("2XX", response)
 	except Exception as e:
+		print e
 		return customResponse("4XX", {"error": "Invalid request"})
 
 def post_new_buyer(request):
