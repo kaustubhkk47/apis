@@ -33,13 +33,13 @@ class SellerAdmin(admin.ModelAdmin):
 class SellerAddress(models.Model):
     seller = models.ForeignKey(Seller)
 
-    address = models.CharField(max_length=255, blank=True, null=False)
+    address_line = models.CharField(max_length=255, blank=True, null=False)
     landmark = models.CharField(max_length=50, blank=True)
-    city = models.CharField(max_length=50, blank=True)
-    state = models.CharField(max_length=50, blank=True)
-    country = models.CharField(max_length=50, blank=True, default="India")
+    city_name = models.CharField(max_length=50, blank=True)
+    state_name = models.CharField(max_length=50, blank=True)
+    country_name = models.CharField(max_length=50, blank=True, default="India")
     contact_number = models.CharField(max_length=11, blank=True)
-    pincode = models.CharField(max_length=6, blank=True)
+    pincode_number = models.CharField(max_length=6, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -127,19 +127,19 @@ def validateSellerData(seller, oldseller, isnew):
 def validateSellerAddressData(selleraddress, oldselleraddress):
 
     if not "address" in selleraddress or selleraddress["address"]==None:
-        selleraddress["address"] = oldselleraddress.address
+        selleraddress["address"] = oldselleraddress.address_line
     if not "landmark" in selleraddress or selleraddress["landmark"]==None:
         selleraddress["landmark"] = oldselleraddress.landmark
     if not "city" in selleraddress or selleraddress["city"]==None:
-        selleraddress["city"] = oldselleraddress.city
+        selleraddress["city"] = oldselleraddress.city_name
     if not "state" in selleraddress or selleraddress["state"]==None:
-        selleraddress["state"] = oldselleraddress.state
+        selleraddress["state"] = oldselleraddress.state_name
     if not "country" in selleraddress or selleraddress["country"]==None:
-        selleraddress["country"] = oldselleraddress.country
+        selleraddress["country"] = oldselleraddress.country_name
     if not "contact_number" in selleraddress or selleraddress["contact_number"]==None:
         selleraddress["contact_number"] = oldselleraddress.contact_number
     if not "pincode" in selleraddress or selleraddress["pincode"]==None:
-        selleraddress["pincode"] = oldselleraddress.pincode
+        selleraddress["pincode"] = oldselleraddress.pincode_number
 
 def validateSellerDetailsData(sellerdetails, oldsellerdetails):
     if not "vat_tin" in sellerdetails or sellerdetails["vat_tin"]==None:
@@ -199,13 +199,13 @@ def populateSellerDetailsData(sellerDetailsPtr,sellerdetails):
     sellerDetailsPtr.vat_tin = sellerdetails["vat_tin"]
 
 def populateSellerAddressData(sellerAddressPtr, selleraddress):
-    sellerAddressPtr.address = selleraddress["address"]
+    sellerAddressPtr.address_line = selleraddress["address"]
     sellerAddressPtr.landmark = selleraddress["landmark"]
-    sellerAddressPtr.city = selleraddress["city"]
-    sellerAddressPtr.state = selleraddress["state"]
-    sellerAddressPtr.country = selleraddress["country"]
+    sellerAddressPtr.city_name = selleraddress["city"]
+    sellerAddressPtr.state_name = selleraddress["state"]
+    sellerAddressPtr.country_name = selleraddress["country"]
     sellerAddressPtr.contact_number = selleraddress["contact_number"]
-    sellerAddressPtr.pincode = selleraddress["pincode"]
+    sellerAddressPtr.pincode_number = selleraddress["pincode"]
 
 def populateSellerBankDetailsData(sellerBankDetailsPtr,sellerbankdetails):
     sellerBankDetailsPtr.account_holders_name = sellerbankdetails["account_holders_name"]

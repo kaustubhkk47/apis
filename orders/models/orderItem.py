@@ -99,7 +99,7 @@ def validateOrderShipmentItemsData(orderItems, subOrderID):
 
         orderItemPtr = orderItemPtr[0]
 
-        if orderItemPtr.current_status == 4:
+        if orderItemPtr.current_status >= 4:
             return False
 
         if orderItemPtr.order_shipment != None:
@@ -183,21 +183,21 @@ def update_suborder_completion_status(subOrder):
 
 
 OrderItemStatus = {
-	0:"Placed",
-    1:"Confirmed",
-	2:"Merchant notified",
-    3:"Shipped",
-    4:"Cancelled",
-    5:"Sent for Pickup",
-    6:"Shipment created",
-    7:"3PL notified",
-    8:"3PL manifested",
-    9:"3PL in transit",
-    10:"3PL stuck in transit",
-    11:"Delivered",
-    12:"RTO in transit",
-    13:"RTO delivered",
-    14:"Lost"
+	0:{"display_value":"Placed"},
+    1:{"display_value":"Confirmed"},
+	2:{"display_value":"Merchant notified"},
+    3:{"display_value":"Shipped"},
+    4:{"display_value":"Cancelled"},
+    5:{"display_value":"Sent for Pickup"},
+    6:{"display_value":"Shipment created"},
+    7:{"display_value":"3PL notified"},
+    8:{"display_value":"3PL manifested"},
+    9:{"display_value":"3PL in transit"},
+    10:{"display_value":"3PL stuck in transit"},
+    11:{"display_value":"Delivered"},
+    12:{"display_value":"RTO in transit"},
+    13:{"display_value":"RTO delivered"},
+    14:{"display_value":"Lost"}
 }
 
 OrderItemCompletionStatus = [4, 11, 13, 14]

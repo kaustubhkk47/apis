@@ -36,18 +36,18 @@ def populateOrderData(orderPtr, order):
     orderPtr.retail_price = order["retail_price"]
     orderPtr.calculated_price = order["calculated_price"]
     orderPtr.edited_price = order["edited_price"]
-    orderPtr.final_price = order["edited_price"]
+    orderPtr.final_price = round(order["edited_price"])
     orderPtr.remarks = order["remarks"]
     orderPtr.order_status = 1
     orderPtr.save()
     orderPtr.display_number = "1" +"%06d" %(orderPtr.id,)
 
-orderStatus = {
-    0:"Placed",
-    1:"Confirmed",
-    2:"Partially Shipped",
-    3:"Shipped",
-    4:"Completed"
+OrderStatus = {
+    0:{"display_value":"Placed"},
+    1:{"display_value":"Confirmed"},
+    2:{"display_value":"Partially Shipped"},
+    3:{"display_value":"Shipped"},
+    4:{"display_value":"Completed"}
 }
 
 OrderPaymentStatus = {
