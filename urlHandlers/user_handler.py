@@ -24,11 +24,21 @@ def user_details(request):
 def buyer_details(request):
 
 	if request.method == "GET":
+
 		buyerID = request.GET.get("buyerID", "")
-		if buyerID == "":
+		accessToken = request.GET.get("access_token", "")
+		
+		tokenPayload = get_token_payload(accessToken, "buyerID")
+
+		isBuyer = 0
+		if "buyerID" in tokenPayload and tokenPayload["buyerID"]!=None:
+			buyersArr = [tokenPayload["buyerID"]]
+			isBuyer = 1
+		elif buyerID == "":
 			buyersArr = []
 		else:
 			buyersArr = [int(e) if e.isdigit() else e for e in buyerID.split(",")]
+
 		return buyer.get_buyer_details(request,buyersArr)
 	elif request.method == "POST":
 		return buyer.post_new_buyer(request)
@@ -96,7 +106,7 @@ def buyer_login(request):
 		password = request.POST.get('password', '')
 
 		if not mobile_number or not password:
-			return customResponse("4XX", {"error": "Either email or password was empty"})
+			return customResponse("4XX", {"error": "Either mobile number or password was empty"})
 
 		# if check_token(request)
 		try:
