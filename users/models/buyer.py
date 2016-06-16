@@ -1,6 +1,7 @@
 from django.db import models
 
 from catalog.models.category import Category
+from address.models.state import State
 
 #Make changes in model, validate, populate and serializer 
 
@@ -49,24 +50,27 @@ class BuyerDetails(models.Model):
 
     customer_type = models.CharField(max_length=20, blank=True)
     buying_capacity = models.CharField(max_length=20, blank=True)
-    purchase_duration = models.CharField(max_length=20, blank=True)
+
+    # in days
+    purchase_duration = models.IntegerField(blank=True, default=0)
     buys_from = models.CharField(max_length=20, blank=True)
-    purchasing_states = models.TextField(blank = True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
         return str(self.buyer.id) + " - " + self.buyer.name + " - " + self.buyer.company_name + " - " + self.buyer.mobile_number
+
 """
+
 class BuyerInterest(models.Model):
 
     buyer = models.ForeignKey(Buyer)
     category = models.ForeignKey(Category)
 
-    ## On a scale of 1 to 3
+    ## On a scale of 1 to 10
 
-    scale = models.PositiveIntegerField(default=2)
+    scale = models.PositiveIntegerField(default=5)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -74,7 +78,28 @@ class BuyerInterest(models.Model):
     def __unicode__(self):
         return str(self.buyer.id) + " - " + self.buyer.name + " - " + self.category.name
 
-#class BuyerType(models.Model):
+class BusinessType(models.Model):
+
+    business_type = models.CharField(max_length=30)
+    description = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return self.business_type
+
+class BuyerPurchasingState(models.Model):
+
+    buyer = models.ForeignKey(Buyer)
+    state = models.ForeignKey(State)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return str(self.buyer.id) + " - " + self.buyer.name + " - " + self.state.name
+
 """
 
 def validateBuyerData(buyer, oldbuyer, is_new):
@@ -114,8 +139,6 @@ def validateBuyerDetailsData(buyerdetails, oldbuyerdetails):
         buyerdetails["vat_tin"] = oldbuyerdetails.vat_tin
     if not "cst" in buyerdetails or buyerdetails["cst"]==None:
         buyerdetails["cst"] = oldbuyerdetails.cst
-    if not "buyer_interest" in buyerdetails or buyerdetails["buyer_interest"]==None:
-        buyerdetails["buyer_interest"] = oldbuyerdetails.buyer_interest
     if not "customer_type" in buyerdetails or buyerdetails["customer_type"]==None:
         buyerdetails["customer_type"] = oldbuyerdetails.customer_type
     if not "buying_capacity" in buyerdetails or buyerdetails["buying_capacity"]==None:
@@ -124,8 +147,6 @@ def validateBuyerDetailsData(buyerdetails, oldbuyerdetails):
         buyerdetails["purchase_duration"] = oldbuyerdetails.purchase_duration
     if not "buys_from" in buyerdetails or buyerdetails["buys_from"]==None:
         buyerdetails["buys_from"] = oldbuyerdetails.buys_from
-    if not "purchasing_states" in buyerdetails or buyerdetails["purchasing_states"]==None:
-        buyerdetails["purchasing_states"] = oldbuyerdetails.purchasing_states 
 
 
 def validateBuyerAddressData(buyeraddress, oldbuyeraddress):
@@ -158,12 +179,10 @@ def populateBuyer(buyerPtr, buyer):
     
 def populateBuyerDetails(buyerDetailsPtr, buyerdetails):
     buyerDetailsPtr.cst = buyerdetails["cst"]
-    buyerDetailsPtr.buyer_interest = buyerdetails["buyer_interest"]
     buyerDetailsPtr.customer_type = buyerdetails["customer_type"]
     buyerDetailsPtr.buying_capacity = buyerdetails["buying_capacity"]
     buyerDetailsPtr.purchase_duration = buyerdetails["purchase_duration"]
     buyerDetailsPtr.buys_from = buyerdetails["buys_from"]
-    buyerDetailsPtr.purchasing_states = buyerdetails["purchasing_states"]
     buyerDetailsPtr.vat_tin = buyerdetails["vat_tin"]
 
 def populateBuyerAddress(buyerAddressPtr, buyeraddress):

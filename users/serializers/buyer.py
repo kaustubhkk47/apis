@@ -29,7 +29,6 @@ def serialize_buyer(buyer_entry):
         buyer_details["customer_type"] = buyer_entry.buyerdetails.customer_type
         buyer_details["buying_capacity"] = buyer_entry.buyerdetails.buying_capacity
         buyer_details["buys_from"] = buyer_entry.buyerdetails.buys_from
-        buyer_details["purchasing_states"] = buyer_entry.buyerdetails.purchasing_states
 
         buyer["details"] = buyer_details
 
