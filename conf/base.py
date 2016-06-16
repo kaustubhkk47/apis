@@ -40,7 +40,8 @@ INSTALLED_APPS += [
     'catalog',
     'orders',
     'leads',
-    'address'
+    'address',
+    'logistics'
 ]
 
 MIDDLEWARE_CLASSES = [

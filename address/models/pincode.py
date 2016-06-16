@@ -11,4 +11,4 @@ class Pincode(models.Model):
 	state_name = models.CharField(max_length=50, blank=False)
 
 	def __unicode__(self):
-		return self.pincode
+		return str(self.id) + " - " + self.pincode + " - " + self.city_name + " - " + self.state_name
