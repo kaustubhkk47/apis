@@ -9,6 +9,7 @@ from .subOrder import *
 
 from scripts.utils import validate_date
 from decimal import Decimal
+import datetime
 
 
 class OrderShipment(models.Model):
@@ -114,6 +115,7 @@ def populateOrderShipment(OrderShipmentPtr, orderShipment):
     OrderShipmentPtr.rto_remarks = orderShipment["rto_remarks"]
     OrderShipmentPtr.tracking_url = "https://www.fedex.com/apps/fedextrack/?action=track&trackingnumber="+orderShipment["waybill_number"]+"&cntry_code=in"
     OrderShipmentPtr.current_status = 3
+    OrderShipmentPtr.tpl_manifested_time = datetime.datetime.now()
 
 OrderShipmentStatus = {
     0:{"display_value":"Sent for Pickup","display_time":"sent_for_pickup_time"},
@@ -137,7 +139,7 @@ def validateOrderShipmentStatus(status, current_status):
         return False
     if current_status == 4 and not(status == 5 or status == 6 or status == 7 or status == 9):
         return False
-    elif current_status == 5 and not(status == 6 or status == 7 or status == 9):
+    elif current_status == 5 and not(status == 4 or status == 6 or status == 7 or status == 9):
         return False
     elif current_status == 6:
         return False
