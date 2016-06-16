@@ -10,4 +10,4 @@ class City(models.Model):
 	state_name = models.CharField(max_length=50, blank=False)
 
 	def __unicode__(self):
-		return self.name
+		return str(self.id) + " - " + self.name + " - " + self.state_name 

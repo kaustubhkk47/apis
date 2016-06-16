@@ -20,7 +20,6 @@ def get_buyer_details(request,buyersArr=[]):
 
 		return customResponse("2XX", response)
 	except Exception as e:
-		print e
 		return customResponse("4XX", {"error": "Invalid request"})
 
 def post_new_buyer(request):
