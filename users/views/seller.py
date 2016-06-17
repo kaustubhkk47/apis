@@ -1,25 +1,23 @@
 from scripts.utils import *
 import json
 from ..models.seller import *
-from ..serializers.seller import parse_seller, serialize_seller
+from ..serializers.seller import parse_seller, serialize_seller, filterSeller
 
 from leads.models.sellerLeads import SellerLeads
 
 
 
-def get_seller_details(request,sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
+def get_seller_details(request,sellerParameters):
 	try:
-		if len(sellersArr)==0:
+		
+		sellers = filterSeller(sellerParameters)
 
-			sellers = Seller.objects.filter(delete_status=False).select_related('sellerdetails')
-			closeDBConnection()
-		else:
-			sellers = Seller.objects.filter(delete_status=False,id__in=sellersArr).select_related('sellerdetails')
-			closeDBConnection()
 
 		response = {
 			"sellers" : parse_seller(sellers)
 		}
+
+		closeDBConnection()
 
 		return customResponse("2XX", response)
 	except Exception as e:

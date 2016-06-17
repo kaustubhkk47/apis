@@ -6,7 +6,7 @@ import settings
 import os
 
 from django.core.mail import EmailMessage
-from django.template import Context
+#from django.template import Context
 from django.template.loader import get_template
 import pdfkit
 
@@ -66,8 +66,8 @@ def get_token_payload(access_token, userID):
 
 def create_email(mail_template_file,mail_dict,subject,from_email,to,attachment="",bcc=[]):
     mail_template = get_template(mail_template_file)   
-    mail_context = Context(mail_dict)
-    html_message = mail_template.render(mail_context)
+    #mail_context = Context(mail_dict)
+    html_message = mail_template.render(mail_dict)
         
     email = EmailMessage(subject=subject,body=html_message,from_email=from_email,to=to,bcc=bcc)
 

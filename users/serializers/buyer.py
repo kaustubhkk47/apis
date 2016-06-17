@@ -1,4 +1,4 @@
-from ..models.buyer import BuyerAddress, BuyerDetails
+from ..models.buyer import Buyer, BuyerAddress, BuyerDetails
 
 def serialize_buyer(buyer_entry):
 
@@ -26,9 +26,8 @@ def serialize_buyer(buyer_entry):
         buyer_details["detailsID"] = buyer_entry.buyerdetails.id
         buyer_details["vat_tin"] = buyer_entry.buyerdetails.vat_tin
         buyer_details["cst"] = buyer_entry.buyerdetails.cst
-        buyer_details["customer_type"] = buyer_entry.buyerdetails.customer_type
-        buyer_details["buying_capacity"] = buyer_entry.buyerdetails.buying_capacity
-        buyer_details["buys_from"] = buyer_entry.buyerdetails.buys_from
+        #buyer_details["customer_type"] = buyer_entry.buyerdetails.customer_type
+        #buyer_details["buying_capacity"] = buyer_entry.buyerdetails.buying_capacity
 
         buyer["details"] = buyer_details
 
@@ -67,5 +66,14 @@ def parse_buyer(buyers_queryset):
     for buyer in buyers_queryset:
         buyer_entry = serialize_buyer(buyer)
         buyers.append(buyer_entry)
+
+    return buyers
+
+def filterBuyer(buyerParameters):
+
+    buyers = Buyer.objects.filter(delete_status=False).select_related('buyerdetails')
+
+    if "buyersArr" in buyerParameters:
+        buyers = buyers.filter(id__in=buyerParameters["buyersArr"])
 
     return buyers

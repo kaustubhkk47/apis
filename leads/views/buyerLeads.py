@@ -9,20 +9,20 @@ from catalog.models.category import Category
 def get_buyer_leads(request, buyerLeadParameters):
 	try:
 		buyerLeads = BuyerLeads.objects.all().select_related('product','category','product__seller')
-
 		if "buyerLeadsArr" in buyerLeadParameters:
 			buyerLeads = buyerLeads.filter(id__in=buyerLeadParameters["buyerLeadsArr"])
 
 		if "statusArr" in buyerLeadParameters:
 			buyerLeads = buyerLeads.filter(status__in=buyerLeadParameters["statusArr"])
-
-		closeDBConnection()
 		body = parseBuyerLeads(buyerLeads)
 		statusCode = "2XX"
 		response = {"buyer_leads": body}
 	except Exception, e:
+		print e
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
+
+	closeDBConnection()
 	return customResponse(statusCode, response)
 
 def post_new_buyer_lead(request):

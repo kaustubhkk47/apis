@@ -46,6 +46,6 @@ def populateSellerLead(sellerleadPtr, sellerlead):
 	sellerleadPtr.comments = sellerlead["comments"]
 
 SellerLeadStatus = {
-	1:"New",
-	2:"Resolved"
+	0:{"display_value":"New"},
+	1:{"display_value":"Resolved"}
 }

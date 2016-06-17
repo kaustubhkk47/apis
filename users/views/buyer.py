@@ -2,21 +2,18 @@ from scripts.utils import customResponse, closeDBConnection, convert_keys_to_str
 import json
 
 from ..models.buyer import *
-from ..serializers.buyer import serialize_buyer, parse_buyer
+from ..serializers.buyer import serialize_buyer, parse_buyer, filterBuyer
 
 
-def get_buyer_details(request,buyersArr=[]):
+def get_buyer_details(request,buyerParameters):
 	try:
-		if len(buyersArr)==0:
-			buyers = Buyer.objects.filter(delete_status=False).select_related('buyerdetails')
-			closeDBConnection()
-		else:
-			buyers = Buyer.objects.filter(delete_status=False,id__in=buyersArr).select_related('buyerdetails')
-			closeDBConnection()
+		buyers = filterBuyer(buyerParameters)
 
 		response = {
 			"buyers" : parse_buyer(buyers)
 		}
+
+		closeDBConnection()
 
 		return customResponse("2XX", response)
 	except Exception as e:
@@ -53,7 +50,6 @@ def post_new_buyer(request):
 		newBuyer = Buyer()
 
 		populateBuyer(newBuyer, buyer)
-
 		newBuyer.save()
 
 		buyeraddress = buyer["address"]

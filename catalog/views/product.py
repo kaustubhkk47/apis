@@ -3,7 +3,7 @@ from scripts.utils import customResponse, closeDBConnection, convert_keys_to_str
 from ..models.category import Category
 from ..models.product import Product, validateProductData, ProductDetails, validateProductDetailsData, populateProductData, populateProductDetailsData
 from ..models.productLot import ProductLot, validateProductLotData, parseMinPricePerUnit, populateProductLotData
-from ..serializers.product import multiple_products_parser, serialize_product
+from ..serializers.product import multiple_products_parser, serialize_product, filterProducts
 from users.models.seller import Seller
 import json
 from django.template.defaultfilters import slugify
@@ -12,19 +12,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def get_product_details(request, productParameters):
     try:
-        products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related('seller', 'productdetails', 'category').order_by('-id')
-
-        if "categoriesArr" in productParameters:
-            products = products.filter(category_id__in=productParameters["categoriesArr"])
-
-        if "productsArr" in productParameters:
-            products = products.filter(id__in=productParameters["productsArr"])
-
-        if "sellerArr" in productParameters:
-            products = products.filter(seller_id__in=productParameters["sellerArr"])
-
-        if productParameters["isSeller"]==0 and productParameters["isInternalUser"]==0:
-            products = products.filter(verification=True,show_online=True,seller__show_online=True)
+        products = filterProducts(productParameters)
 
         if "pageNumber" in productParameters:
             paginator = Paginator(products, productParameters["productsperPage"])

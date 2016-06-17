@@ -2,10 +2,10 @@ from users.serializers.seller import serialize_seller, serialize_seller_address
 from users.serializers.buyer import serialize_buyer, serialize_buyer_address
 from catalog.serializers.product import serialize_product
 from ..models.orderItem import OrderItemStatus, OrderItem, OrderItemStatus
-from ..models.subOrder import SubOrder, SubOrderStatus
+from ..models.subOrder import SubOrder, SubOrderStatus, SubOrderPaymentStatus
 from ..models.orderShipment import OrderShipment, OrderShipmentStatus
-from ..models.payments import BuyerPayment, SellerPayment
-from ..models.order import Order, OrderStatus
+from ..models.payments import BuyerPayment, SellerPayment, BuyerPaymentStatus, BuyerPaymentMethod, SellerPaymentStatus, SellerPaymentMethod
+from ..models.order import Order, OrderStatus, OrderPaymentStatus
 
 def parseOrderItem(orderItemQuerySet, orderItemParameters = {}):
 
@@ -36,7 +36,7 @@ def serializeOrderItem(orderItemEntry, orderItemParameters = {}):
 	orderItem["cancellation_remarks"] = orderItemEntry.cancellation_remarks
 	orderItem["cancellation_time"] = orderItemEntry.cancellation_time
 	
-	orderItem["status"] = {
+	orderItem["order_item_status"] = {
 		"value": orderItemEntry.current_status,
 		"display_value":OrderItemStatus[orderItemEntry.current_status]["display_value"]
 	}
@@ -63,8 +63,7 @@ def serializeSubOrder(subOrderEntry, subOrderParameters = {}):
 	subOrder["cod_charge"] = subOrderEntry.cod_charge
 	subOrder["shipping_charge"] = subOrderEntry.shipping_charge
 	subOrder["final_price"] = subOrderEntry.final_price
-	subOrder["suborder_status"] = subOrderEntry.suborder_status
-	subOrder["suborder_payment_status"] = subOrderEntry.suborder_payment_status
+	
 	subOrder["display_number"] = subOrderEntry.display_number
 	subOrder["created_at"] = subOrderEntry.created_at
 	subOrder["updated_at"] = subOrderEntry.updated_at
@@ -72,9 +71,14 @@ def serializeSubOrder(subOrderEntry, subOrderParameters = {}):
 	subOrder["completed_time"] = subOrderEntry.completed_time
 	subOrder["closed_time"] = subOrderEntry.closed_time
 	
-	subOrder["status"] = {
+	subOrder["sub_order_status"] = {
 		"value": subOrderEntry.suborder_status,
 		"display_value":SubOrderStatus[subOrderEntry.suborder_status]["display_value"]
+	}
+
+	subOrder["sub_order_payment_status"] = {
+		"value": subOrderEntry.suborder_payment_status,
+		"display_value":SubOrderStatus[subOrderEntry.suborder_payment_status]["display_value"]
 	}
 
 	sellerPaymentQuerySet = filterSellerPayment(subOrderParameters)
@@ -132,15 +136,23 @@ def parseSellerPayments(sellerPaymentQuerySet, sellerPaymentParameters = {}):
 def serializeSellerPayment(SellerPaymentEntry, sellerPaymentParameters = {}):
 	sellerPayment = {}
 	sellerPayment["suborderID"] = SellerPaymentEntry.suborder_id
-	sellerPayment["sellerpaymentID"] = SellerPaymentEntry.id
-	sellerPayment["payment_status"] = SellerPaymentEntry.payment_status
-	sellerPayment["payment_method"] = SellerPaymentEntry.payment_method
+	sellerPayment["sellerpaymentID"] = SellerPaymentEntry.id	
 	sellerPayment["reference_number"] = SellerPaymentEntry.reference_number
 	sellerPayment["payment_time"] = SellerPaymentEntry.payment_time
 	sellerPayment["details"] = SellerPaymentEntry.details
 	sellerPayment["payment_value"] = SellerPaymentEntry.payment_value
 	sellerPayment["created_at"] = SellerPaymentEntry.created_at
 	sellerPayment["updated_at"] = SellerPaymentEntry.updated_at
+
+	sellerPayment["seller_payment_status"] = {
+		"value": SellerPaymentEntry.payment_status,
+		"display_value":SellerPaymentStatus[SellerPaymentEntry.payment_status]["display_value"]
+	}
+
+	sellerPayment["seller_payment_method"] = {
+		"value": SellerPaymentEntry.payment_method,
+		"display_value":SellerPaymentMethod[SellerPaymentEntry.payment_method]["display_value"]
+	}
 
 	orderItemQuerySet = filterOrderItem(sellerPaymentParameters)
 	orderItemQuerySet = orderItemQuerySet.filter(seller_payment_id = SellerPaymentEntry.id)
@@ -164,17 +176,20 @@ def serializeOrder(orderEntry, orderParameters = {}):
 	order["edited_price"]=orderEntry.edited_price
 	order["cod_charge"]=orderEntry.cod_charge
 	order["shipping_charge"]=orderEntry.shipping_charge
-	order["final_price"]=orderEntry.final_price
-	order["order_status"]=orderEntry.order_status
-	order["order_payment_status"]=orderEntry.order_payment_status
+	order["final_price"]=orderEntry.final_price	
 	order["display_number"]=orderEntry.display_number
 	order["remarks"]=orderEntry.remarks
 	order["created_at"]=orderEntry.created_at
 	order["updated_at"]=orderEntry.updated_at
 
-	order["status"] = {
+	order["order_status"] = {
 		"value": orderEntry.order_status,
 		"display_value":OrderStatus[orderEntry.order_status]["display_value"]
+	}
+
+	order["order_payment_status"]= {
+		"value": orderEntry.order_payment_status,
+		"display_value":OrderPaymentStatus[orderEntry.order_payment_status]["display_value"]
 	}
 
 	subOrderQuerySet = filterSubOrder(orderParameters)
@@ -214,14 +229,22 @@ def serializeBuyerPayment(BuyerPaymentEntry, buyerPaymentParameters= {}):
 	buyerPayment = {}
 	buyerPayment["orderID"] = BuyerPaymentEntry.order_id
 	buyerPayment["buyerpaymentID"] = BuyerPaymentEntry.id
-	buyerPayment["payment_status"] = BuyerPaymentEntry.payment_status
-	buyerPayment["payment_method"] = BuyerPaymentEntry.payment_method
 	buyerPayment["reference_number"] = BuyerPaymentEntry.reference_number
 	buyerPayment["payment_time"] = BuyerPaymentEntry.payment_time
 	buyerPayment["details"] = BuyerPaymentEntry.details
 	buyerPayment["payment_value"] = BuyerPaymentEntry.payment_value
 	buyerPayment["created_at"] = BuyerPaymentEntry.created_at
 	buyerPayment["updated_at"] = BuyerPaymentEntry.updated_at
+
+	buyerPayment["buyer_payment_status"] = {
+		"value": BuyerPaymentEntry.payment_status,
+		"display_value":BuyerPaymentStatus[BuyerPaymentEntry.payment_status]["display_value"]
+	}
+
+	buyerPayment["buyer_payment_method"] = {
+		"value": BuyerPaymentEntry.payment_method,
+		"display_value":BuyerPaymentMethod[BuyerPaymentEntry.payment_method]["display_value"]
+	}
 
 	if BuyerPaymentEntry.order_shipment != None:
 		buyerPayment["ordershipmentID"] = BuyerPaymentEntry.order_shipment.id
@@ -247,7 +270,7 @@ def serializeOrderShipment(orderShipmentEntry, orderShipmentParameters = {}):
 	orderShipment["drop_address"] = serialize_buyer_address(orderShipmentEntry.drop_address)
 	orderShipment["invoice_number"] = orderShipmentEntry.invoice_number
 	orderShipment["invoice_date"] = orderShipmentEntry.invoice_date
-	orderShipment["logistics_partner"] = orderShipmentEntry.logistics_partner
+	orderShipment["logistics_partner"] = orderShipmentEntry.logistics_partner_name
 	orderShipment["waybill_number"] = orderShipmentEntry.waybill_number
 	orderShipment["packaged_weight"] = orderShipmentEntry.packaged_weight
 	orderShipment["packaged_length"] = orderShipmentEntry.packaged_length
@@ -281,14 +304,14 @@ def serializeOrderShipment(orderShipmentEntry, orderShipmentParameters = {}):
 	orderShipment["order_items"] = orderItems
 	orderShipment["final_price"] = orderShipmentEntry.final_price
 
-	orderShipment["status"] = {
+	orderShipment["order_shipment_status"] = {
 		"value": orderShipmentEntry.current_status,
 		"display_value":OrderShipmentStatus[orderShipmentEntry.current_status]["display_value"]
 	}
 
 	try:
-		orderShipment["status"]["display_time"] = getattr(orderShipmentEntry,OrderShipmentStatus[orderShipmentEntry.current_status]["display_time"])
-		orderShipment["status"]["display_time_name"] = OrderShipmentStatus[orderShipmentEntry.current_status]["display_time"]
+		orderShipment["order_shipment_status"]["display_time"] = getattr(orderShipmentEntry,OrderShipmentStatus[orderShipmentEntry.current_status]["display_time"])
+		orderShipment["order_shipment_status"]["display_time_name"] = OrderShipmentStatus[orderShipmentEntry.current_status]["display_time"]
 	except Exception, e:
 		pass
 	
@@ -387,6 +410,9 @@ def filterSubOrder(subOrderParameters):
 	if "subOrderStatusArr" in subOrderParameters:
 		subOrders = subOrders.filter(suborder_status__in=subOrderParameters["subOrderStatusArr"])
 
+	if "subOrderPaymentStatusArr" in subOrderParameters:
+		subOrders = subOrders.filter(suborder_payment_status__in=subOrderParameters["subOrderPaymentStatusArr"])
+
 	if "sellersArr" in subOrderParameters:
 		subOrders = subOrders.filter(seller_id__in=subOrderParameters["sellersArr"])
 
@@ -403,6 +429,9 @@ def filterOrder(orderParameters):
 
 	if "orderStatusArr" in orderParameters:
 		orders = orders.filter(order_status__in=orderParameters["orderStatusArr"])
+
+	if "orderPaymentStatusArr" in orderParameters:
+		orders = orders.filter(order_payment_status__in=orderParameters["orderPaymentStatusArr"])
 
 	if "buyersArr" in orderParameters:
 		orders = orders.filter(buyer_id__in=orderParameters["buyersArr"])
