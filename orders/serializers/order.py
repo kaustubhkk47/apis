@@ -144,6 +144,8 @@ def serializeSellerPayment(SellerPaymentEntry, sellerPaymentParameters = {}):
 	sellerPayment["created_at"] = SellerPaymentEntry.created_at
 	sellerPayment["updated_at"] = SellerPaymentEntry.updated_at
 
+	sellerPayment["seller"] = serialize_seller(SellerPaymentEntry.suborder.seller)
+
 	sellerPayment["seller_payment_status"] = {
 		"value": SellerPaymentEntry.payment_status,
 		"display_value":SellerPaymentStatus[SellerPaymentEntry.payment_status]["display_value"]
@@ -235,6 +237,8 @@ def serializeBuyerPayment(BuyerPaymentEntry, buyerPaymentParameters= {}):
 	buyerPayment["payment_value"] = BuyerPaymentEntry.payment_value
 	buyerPayment["created_at"] = BuyerPaymentEntry.created_at
 	buyerPayment["updated_at"] = BuyerPaymentEntry.updated_at
+
+	buyerPayment["buyer"] = serialize_buyer(BuyerPaymentEntry.order.buyer)
 
 	buyerPayment["buyer_payment_status"] = {
 		"value": BuyerPaymentEntry.payment_status,
