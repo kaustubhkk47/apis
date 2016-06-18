@@ -6,6 +6,9 @@ from ..serializers.buyerLeads import *
 from catalog.models.product import Product
 from catalog.models.category import Category
 
+import logging
+log = logging.getLogger("django")
+
 def get_buyer_leads(request, buyerLeadParameters):
 	try:
 		buyerLeads = BuyerLeads.objects.all().select_related('product','category','product__seller')
@@ -18,7 +21,7 @@ def get_buyer_leads(request, buyerLeadParameters):
 		statusCode = "2XX"
 		response = {"buyer_leads": body}
 	except Exception, e:
-		print e
+		log.critical(e)
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
@@ -60,6 +63,7 @@ def post_new_buyer_lead(request):
 
 		newBuyerLead.save()
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -118,6 +122,7 @@ def update_buyer_lead(request):
 		buyerLeadPtr.save()
 
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to update buyer lead"})
 	else:

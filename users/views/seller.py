@@ -5,7 +5,8 @@ from ..serializers.seller import parse_seller, serialize_seller, filterSeller
 
 from leads.models.sellerLeads import SellerLeads
 
-
+import logging
+log = logging.getLogger("django")
 
 def get_seller_details(request,sellerParameters):
 	try:
@@ -21,6 +22,7 @@ def get_seller_details(request,sellerParameters):
 
 		return customResponse("2XX", response)
 	except Exception as e:
+		log.critical(e)
 		return customResponse("4XX", {"error": "Invalid request"})
 
 def post_new_seller(request):
@@ -83,6 +85,7 @@ def post_new_seller(request):
 			sellerLead.save()
 
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -181,6 +184,7 @@ def update_seller(request):
 			sellerBankDetailsPtr.save()
 
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "could not update"})
 	else:
@@ -208,6 +212,7 @@ def delete_seller(request):
 		sellerPtr.delete_status = True
 		sellerPtr.save()
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "could not delete"})
 	else:

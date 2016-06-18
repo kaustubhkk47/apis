@@ -10,6 +10,9 @@ from django.template.defaultfilters import slugify
 from decimal import Decimal
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+import logging
+log = logging.getLogger("django")
+
 def get_product_details(request, productParameters):
     try:
         products = filterProducts(productParameters)
@@ -30,6 +33,7 @@ def get_product_details(request, productParameters):
             
         statusCode = "2XX"
     except Exception as e:
+        log.critical(e)
         statusCode = "4XX"
         body = {"error": "Invalid product"}
 
@@ -94,6 +98,7 @@ def post_new_product(request):
         newProductDetails.save()
 
     except Exception as e:
+        log.critical(e)
         closeDBConnection()
         return customResponse("4XX", {"error": "unable to create entry in db"})
     else:
@@ -165,6 +170,7 @@ def update_product(request):
         
 
     except Exception as e:
+        log.critical(e)
         closeDBConnection()
         return customResponse("4XX", {"error": "could not update"})
     else:
@@ -192,6 +198,7 @@ def delete_product(request):
         productPtr.delete_status = True
         productPtr.save()
     except Exception as e:
+        log.critical(e)
         closeDBConnection()
         return customResponse("4XX", {"error": "could not delete"})
     else:

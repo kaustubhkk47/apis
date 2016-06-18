@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+from datetime import datetime
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -120,3 +121,10 @@ USE_TZ = True
 ## cores settings
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = False
+
+LOG_FILE_PATH = os.path.join(os.path.dirname(BASE_DIR),"logs")
+dt = datetime.now()
+DATE_TODAY = str(dt.year) + "-" + str("%02d" %(dt.month)) + "-" + str("%02d" %(dt.day)) + "-"
+
+if not os.path.exists(LOG_FILE_PATH):
+    os.makedirs(LOG_FILE_PATH)

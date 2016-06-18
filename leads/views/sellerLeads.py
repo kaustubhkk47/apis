@@ -4,6 +4,9 @@ import json
 from ..models.sellerLeads import *
 from ..serializers.sellerLeads import *
 
+import logging
+log = logging.getLogger("django")
+
 def get_seller_leads(request, sellerLeadParameters):
 	try:
 		sellerLeads = SellerLeads.objects.all()
@@ -19,6 +22,7 @@ def get_seller_leads(request, sellerLeadParameters):
 		statusCode = "2XX"
 		response = {"seller_leads": body}
 	except Exception, e:
+		log.critical(e)
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 	return customResponse(statusCode, response)
@@ -41,6 +45,7 @@ def post_new_seller_lead(request):
 
 		newSellerLead.save()
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -72,6 +77,7 @@ def update_seller_lead(request):
 		sellerLeadPtr.save()
 
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to update seller lead"})
 	else:
