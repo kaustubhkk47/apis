@@ -292,6 +292,16 @@ def post_new_buyer_payment(request):
 	if not len(buyerPayment) or not validateBuyerPaymentData(buyerPayment):
 		return customResponse("4XX", {"error": "Invalid data for buyer payment sent"})
 
+	if not "orderID" in buyerPayment or buyerPayment["orderID"]==None:
+		return customResponse("4XX", {"error": "Id for order not sent"})
+
+	OrderPtr = Order.objects.filter(id=int(buyerPayment["orderID"]))
+
+	if len(OrderPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for order sent"})
+
+	OrderPtr = OrderPtr[0]
+
 	if int(buyerPayment["payment_method"]) == 0:
 		if not "ordershipmentID" in buyerPayment or buyerPayment["ordershipmentID"]==None:
 			return customResponse("4XX", {"error": "Id for order shipment not sent"})
@@ -303,16 +313,8 @@ def post_new_buyer_payment(request):
 
 		OrderShipmentPtr = OrderShipmentPtr[0]
 
-
-	if not "orderID" in buyerPayment or buyerPayment["orderID"]==None:
-		return customResponse("4XX", {"error": "Id for order not sent"})
-
-	OrderPtr = Order.objects.filter(id=int(buyerPayment["orderID"]))
-
-	if len(OrderPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid id for order sent"})
-
-	OrderPtr = OrderPtr[0]
+		if OrderShipmentPtr.suborder.order_id != int(buyerPayment["orderID"]):
+			return customResponse("4XX", {"error": "Invalid id for order shipment sent"})
 
 	try:
 		newBuyerPayment = BuyerPayment(order=OrderPtr)

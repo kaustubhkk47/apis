@@ -5,6 +5,8 @@ ALLOWED_HOSTS = []
 
 CURRENT_ENVIRONMENT = 'dev'
 
+WKHTMLTOPDFPATH = '/usr/local/bin/wkhtmltopdf'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
