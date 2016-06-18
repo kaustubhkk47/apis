@@ -25,21 +25,29 @@ def buyer_details(request):
 
 	if request.method == "GET":
 
+		buyerParameters = {}
+
 		buyerID = request.GET.get("buyerID", "")
 		accessToken = request.GET.get("access_token", "")
 		
 		tokenPayload = get_token_payload(accessToken, "buyerID")
-
-		isBuyer = 0
+		buyerParameters["isBuyer"] = 0
 		if "buyerID" in tokenPayload and tokenPayload["buyerID"]!=None:
-			buyersArr = [tokenPayload["buyerID"]]
-			isBuyer = 1
-		elif buyerID == "":
-			buyersArr = []
-		else:
-			buyersArr = [int(e) if e.isdigit() else e for e in buyerID.split(",")]
+			buyerParameters["buyersArr"] = [tokenPayload["buyerID"]]
+			buyerParameters["isBuyer"] = 1
+		elif buyerID != "":
+			buyerParameters["buyersArr"] = [int(e) if e.isdigit() else e for e in buyerID.split(",")]
 
-		return buyer.get_buyer_details(request,buyersArr)
+		tokenPayload = get_token_payload(accessToken, "internaluserID")
+		buyerParameters["isInternalUser"] = 0
+		if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
+			buyerParameters["internalusersArr"] = [tokenPayload["internaluserID"]]
+			buyerParameters["isInternalUser"] = 1
+
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return buyer.get_buyer_details(request,buyerParameters)
 	elif request.method == "POST":
 		return buyer.post_new_buyer(request)
 	elif request.method == "PUT":
@@ -66,28 +74,30 @@ def buyer_address_details(request):
 def seller_details(request):
 
 	if request.method == "GET":
-		sellerID = request.GET.get("sellerID", "")
-
-		accessToken = request.GET.get("access_token", "")
-		tokenPayload = get_token_payload(accessToken, "sellerID")
-		isSeller = 0
 		
+		sellerParameters = {}
+
+		sellerID = request.GET.get("sellerID", "")
+		accessToken = request.GET.get("access_token", "")
+		
+		tokenPayload = get_token_payload(accessToken, "sellerID")
+		sellerParameters["isSeller"] = 0
 		if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
-			sellersArr = [tokenPayload["sellerID"]]
-			isSeller = 1
-		elif sellerID == "":
-			sellersArr = []
-		else:
-			sellersArr = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
+			sellerParameters["sellersArr"] = [tokenPayload["sellerID"]]
+			sellerParameters["isSeller"] = 1
+		elif sellerID != "":
+			sellerParameters["sellersArr"] = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
 
 		tokenPayload = get_token_payload(accessToken, "internaluserID")
-		isInternalUser = 0
-		internalusersArr = []
+		sellerParameters["isInternalUser"] = 0
 		if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
-			internalusersArr = [tokenPayload["internaluserID"]]
-			isInternalUser = 1
+			sellerParameters["internalusersArr"] = [tokenPayload["internaluserID"]]
+			sellerParameters["isInternalUser"] = 1
 
-		return seller.get_seller_details(request,sellersArr, isSeller,internalusersArr,isInternalUser)
+		if sellerParameters["isSeller"] == 0 and sellerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return seller.get_seller_details(request,sellerParameters)
 	elif request.method == "POST":
 		return seller.post_new_seller(request)
 	elif request.method == "PUT":

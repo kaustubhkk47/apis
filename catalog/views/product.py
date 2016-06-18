@@ -3,28 +3,19 @@ from scripts.utils import customResponse, closeDBConnection, convert_keys_to_str
 from ..models.category import Category
 from ..models.product import Product, validateProductData, ProductDetails, validateProductDetailsData, populateProductData, populateProductDetailsData
 from ..models.productLot import ProductLot, validateProductLotData, parseMinPricePerUnit, populateProductLotData
-from ..serializers.product import multiple_products_parser, serialize_product
+from ..serializers.product import multiple_products_parser, serialize_product, filterProducts
 from users.models.seller import Seller
 import json
 from django.template.defaultfilters import slugify
 from decimal import Decimal
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+import logging
+log = logging.getLogger("django")
+
 def get_product_details(request, productParameters):
     try:
-        products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related('seller', 'productdetails', 'category').order_by('-id')
-
-        if "categoriesArr" in productParameters:
-            products = products.filter(category_id__in=productParameters["categoriesArr"])
-
-        if "productsArr" in productParameters:
-            products = products.filter(id__in=productParameters["productsArr"])
-
-        if "sellerArr" in productParameters:
-            products = products.filter(seller_id__in=productParameters["sellerArr"])
-
-        if productParameters["isSeller"]==0 and productParameters["isInternalUser"]==0:
-            products = products.filter(verification=True,show_online=True,seller__show_online=True)
+        products = filterProducts(productParameters)
 
         if "pageNumber" in productParameters:
             paginator = Paginator(products, productParameters["productsperPage"])
@@ -42,6 +33,7 @@ def get_product_details(request, productParameters):
             
         statusCode = "2XX"
     except Exception as e:
+        log.critical(e)
         statusCode = "4XX"
         body = {"error": "Invalid product"}
 
@@ -106,6 +98,7 @@ def post_new_product(request):
         newProductDetails.save()
 
     except Exception as e:
+        log.critical(e)
         closeDBConnection()
         return customResponse("4XX", {"error": "unable to create entry in db"})
     else:
@@ -177,6 +170,7 @@ def update_product(request):
         
 
     except Exception as e:
+        log.critical(e)
         closeDBConnection()
         return customResponse("4XX", {"error": "could not update"})
     else:
@@ -204,6 +198,7 @@ def delete_product(request):
         productPtr.delete_status = True
         productPtr.save()
     except Exception as e:
+        log.critical(e)
         closeDBConnection()
         return customResponse("4XX", {"error": "could not delete"})
     else:

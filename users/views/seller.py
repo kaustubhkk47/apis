@@ -1,28 +1,28 @@
 from scripts.utils import *
 import json
 from ..models.seller import *
-from ..serializers.seller import parse_seller, serialize_seller
+from ..serializers.seller import parse_seller, serialize_seller, filterSeller
 
 from leads.models.sellerLeads import SellerLeads
 
+import logging
+log = logging.getLogger("django")
 
-
-def get_seller_details(request,sellersArr=[], isSeller=0,internalusersArr=[],isInternalUser=0):
+def get_seller_details(request,sellerParameters):
 	try:
-		if len(sellersArr)==0:
+		
+		sellers = filterSeller(sellerParameters)
 
-			sellers = Seller.objects.filter(delete_status=False).select_related('sellerdetails')
-			closeDBConnection()
-		else:
-			sellers = Seller.objects.filter(delete_status=False,id__in=sellersArr).select_related('sellerdetails')
-			closeDBConnection()
 
 		response = {
 			"sellers" : parse_seller(sellers)
 		}
 
+		closeDBConnection()
+
 		return customResponse("2XX", response)
 	except Exception as e:
+		log.critical(e)
 		return customResponse("4XX", {"error": "Invalid request"})
 
 def post_new_seller(request):
@@ -85,6 +85,7 @@ def post_new_seller(request):
 			sellerLead.save()
 
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -183,6 +184,7 @@ def update_seller(request):
 			sellerBankDetailsPtr.save()
 
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "could not update"})
 	else:
@@ -210,6 +212,7 @@ def delete_seller(request):
 		sellerPtr.delete_status = True
 		sellerPtr.save()
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "could not delete"})
 	else:

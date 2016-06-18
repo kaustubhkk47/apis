@@ -15,6 +15,9 @@ from decimal import Decimal
 import datetime
 import settings
 
+import logging
+log = logging.getLogger("django")
+
 def get_order_shipment_details(request, orderShipmentParameters):
 	try:
 
@@ -25,6 +28,7 @@ def get_order_shipment_details(request, orderShipmentParameters):
 		response = {"order_shipments": body}
 
 	except Exception as e:
+		log.critical(e)
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 	closeDBConnection()
@@ -39,6 +43,7 @@ def get_order_item_details(request, orderItemParameters):
 		response = {"order_items": body}
 
 	except Exception as e:
+		log.critical(e)
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
@@ -54,6 +59,7 @@ def get_seller_payment_details(request, sellerPaymentParameters):
 		response = {"seller_payments": body}
 
 	except Exception as e:
+		log.critical(e)
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
@@ -70,6 +76,7 @@ def get_buyer_payment_details(request, buyerPaymentParameters):
 		response = {"buyer_payments": body}
 
 	except Exception as e:
+		log.critical(e)
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
@@ -86,7 +93,7 @@ def get_suborder_details(request,subOrderParameters):
 		response = {"sub_orders": body}
 
 	except Exception as e:
-		print e
+		log.critical(e)
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
@@ -102,6 +109,7 @@ def get_order_details(request, orderParameters):
 		response = {"orders": body}
 
 	except Exception as e:
+		log.critical(e)
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 
@@ -251,7 +259,7 @@ def post_new_order_shipment(request):
 		manifest_dict["shipment"] = {
 			"waybill_number": newOrderShipment.waybill_number,
 			"shipping_amount": '{0:.0f}'.format(newOrderShipment.cod_charge + newOrderShipment.shipping_charge),
-			"logistics_partner": newOrderShipment.logistics_partner,
+			"logistics_partner": newOrderShipment.logistics_partner_name,
 			"invoice_number": newOrderShipment.invoice_number,
 			"final_price": '{0:.0f}'.format(newOrderShipment.final_price),
 			"amount_to_collect":'{0:.0f}'.format(float(newOrderShipment.cod_charge) + float(newOrderShipment.shipping_charge) + float(newOrderShipment.final_price)),
@@ -267,6 +275,7 @@ def post_new_order_shipment(request):
 		generate_pdf(template_file, manifest_dict, outputDirectory, outputFileName)
 
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -283,7 +292,17 @@ def post_new_buyer_payment(request):
 	if not len(buyerPayment) or not validateBuyerPaymentData(buyerPayment):
 		return customResponse("4XX", {"error": "Invalid data for buyer payment sent"})
 
-	if buyerPayment["payment_method"] == 0:
+	if not "orderID" in buyerPayment or buyerPayment["orderID"]==None:
+		return customResponse("4XX", {"error": "Id for order not sent"})
+
+	OrderPtr = Order.objects.filter(id=int(buyerPayment["orderID"]))
+
+	if len(OrderPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for order sent"})
+
+	OrderPtr = OrderPtr[0]
+
+	if int(buyerPayment["payment_method"]) == 0:
 		if not "ordershipmentID" in buyerPayment or buyerPayment["ordershipmentID"]==None:
 			return customResponse("4XX", {"error": "Id for order shipment not sent"})
 
@@ -294,16 +313,8 @@ def post_new_buyer_payment(request):
 
 		OrderShipmentPtr = OrderShipmentPtr[0]
 
-
-	if not "orderID" in buyerPayment or buyerPayment["orderID"]==None:
-		return customResponse("4XX", {"error": "Id for order not sent"})
-
-	OrderPtr = Order.objects.filter(id=int(buyerPayment["orderID"]))
-
-	if len(OrderPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid id for order sent"})
-
-	OrderPtr = OrderPtr[0]
+		if OrderShipmentPtr.suborder.order_id != int(buyerPayment["orderID"]):
+			return customResponse("4XX", {"error": "Invalid id for order shipment sent"})
 
 	try:
 		newBuyerPayment = BuyerPayment(order=OrderPtr)
@@ -318,6 +329,7 @@ def post_new_buyer_payment(request):
 		OrderPtr.save()
 		newBuyerPayment.save()
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -375,6 +387,7 @@ def post_new_seller_payment(request):
 		SubOrderPtr.save()
 
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -565,6 +578,7 @@ def post_new_order(request):
 			create_email(buyer_mail_template_file,buyer_mail_dict,buyer_subject,from_email,buyer_to,bcc=buyer_bcc)
 
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -627,6 +641,7 @@ def update_order_shipment(request):
 		orderShipmentPtr.current_status = status
 		orderShipmentPtr.save()
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "could not update"})
 	else:
@@ -672,6 +687,7 @@ def update_suborder(request):
 		subOrderPtr.suborder_status = status
 		subOrderPtr.save()
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "could not update"})
 	else:
@@ -726,6 +742,7 @@ def cancel_order_item(request):
 			orderItemPtr.order_shipment.save()
 		
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "could not update"})
 	else:

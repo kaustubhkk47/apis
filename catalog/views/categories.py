@@ -7,6 +7,9 @@ from ..serializers.category import categories_parser, serialize_categories
 from django.template.defaultfilters import slugify
 import json
 
+import logging
+log = logging.getLogger("django")
+
 def get_categories_details(request, categoriesParameters):
 	try:
 		categories = Category.objects.filter(delete_status=False)
@@ -18,6 +21,7 @@ def get_categories_details(request, categoriesParameters):
 		body = {"categories": categories_parser(categories)}
 
 	except Exception as e:
+		log.critical(e)
 		statusCode = "4XX"
 		body = {"error": "Invalid category"}
 		
@@ -42,6 +46,7 @@ def post_new_category(request):
 		newCategory.save()
 		 
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -76,6 +81,7 @@ def update_category(request):
 		categoryPtr.save()
 
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "could not update"})
 	else:
@@ -103,6 +109,7 @@ def delete_category(request):
 		categoryPtr.delete_status = True
 		categoryPtr.save()
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "could not delete"})
 	else:

@@ -4,6 +4,9 @@ import json
 from ..models.contactUsLead import ContactUsLead, validateContactUsLeadData, populateContactUsLead
 from ..serializers.contactUsLead import *
 
+import logging
+log = logging.getLogger("django")
+
 def get_contactus_leads(request,contactUsLeadParameters):
 	try:
 		contactUsLeads = ContactUsLead.objects.all()
@@ -19,6 +22,7 @@ def get_contactus_leads(request,contactUsLeadParameters):
 		statusCode = "2XX"
 		response = {"contactus_leads": body}
 	except Exception, e:
+		log.critical(e)
 		statusCode = "4XX"
 		response = {"error": "Invalid request"}
 	return customResponse(statusCode, response)
@@ -40,6 +44,7 @@ def post_new_contactus_lead(request):
 
 		newcontactUsLead.save()
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -86,6 +91,7 @@ def update_contactus_lead(request):
 		contactusLeadPtr.save()
 
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to update contactus lead"})
 	else:

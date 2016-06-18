@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib import admin
 from scripts.utils import validate_date
 
+from address.models.pincode import Pincode
+from .businessType import BusinessType
+
 #Make changes in model, validate, populate and serializer 
 
 class Seller(models.Model):
@@ -32,6 +35,7 @@ class SellerAdmin(admin.ModelAdmin):
 
 class SellerAddress(models.Model):
     seller = models.ForeignKey(Seller)
+    pincode = models.ForeignKey(Pincode, blank=True,null=True)
 
     address_line = models.CharField(max_length=255, blank=True, null=False)
     landmark = models.CharField(max_length=50, blank=True)
@@ -50,6 +54,7 @@ class SellerAddress(models.Model):
 class SellerDetails(models.Model):
 
     seller = models.OneToOneField(Seller)
+    seller_type = models.ForeignKey(BusinessType,blank=True, null=True)
 
     vat_tin = models.CharField(max_length=20, blank=True)
     cst = models.CharField(max_length=20, blank=True)
@@ -201,11 +206,19 @@ def populateSellerDetailsData(sellerDetailsPtr,sellerdetails):
 def populateSellerAddressData(sellerAddressPtr, selleraddress):
     sellerAddressPtr.address_line = selleraddress["address"]
     sellerAddressPtr.landmark = selleraddress["landmark"]
-    sellerAddressPtr.city_name = selleraddress["city"]
-    sellerAddressPtr.state_name = selleraddress["state"]
-    sellerAddressPtr.country_name = selleraddress["country"]
     sellerAddressPtr.contact_number = selleraddress["contact_number"]
     sellerAddressPtr.pincode_number = selleraddress["pincode"]
+
+    try:
+        pincode = Pincode.objects.get(pincode=selleraddress["pincode"])
+        sellerAddressPtr.pincode = pincode
+        sellerAddressPtr.city_name = pincode.city.name
+        sellerAddressPtr.state_name = pincode.city.state.name
+        sellerAddressPtr.country_name = pincode.city.state.country.name
+    except Exception as e:
+        sellerAddressPtr.city_name = selleraddress["city"]
+        sellerAddressPtr.state_name = selleraddress["state"]
+        sellerAddressPtr.country_name = selleraddress["country"]
 
 def populateSellerBankDetailsData(sellerBankDetailsPtr,sellerbankdetails):
     sellerBankDetailsPtr.account_holders_name = sellerbankdetails["account_holders_name"]

@@ -2,24 +2,23 @@ from scripts.utils import customResponse, closeDBConnection, convert_keys_to_str
 import json
 
 from ..models.buyer import *
-from ..serializers.buyer import serialize_buyer, parse_buyer
+from ..serializers.buyer import serialize_buyer, parse_buyer, filterBuyer
 
+import logging
+log = logging.getLogger("django")
 
-def get_buyer_details(request,buyersArr=[]):
+def get_buyer_details(request,buyerParameters):
 	try:
-		if len(buyersArr)==0:
-			buyers = Buyer.objects.filter(delete_status=False).select_related('buyerdetails')
-			closeDBConnection()
-		else:
-			buyers = Buyer.objects.filter(delete_status=False,id__in=buyersArr).select_related('buyerdetails')
-			closeDBConnection()
+		buyers = filterBuyer(buyerParameters)
 
 		response = {
 			"buyers" : parse_buyer(buyers)
 		}
+		closeDBConnection()
 
 		return customResponse("2XX", response)
 	except Exception as e:
+		log.critical(e)
 		return customResponse("4XX", {"error": "Invalid request"})
 
 def post_new_buyer(request):
@@ -53,7 +52,6 @@ def post_new_buyer(request):
 		newBuyer = Buyer()
 
 		populateBuyer(newBuyer, buyer)
-
 		newBuyer.save()
 
 		buyeraddress = buyer["address"]
@@ -68,6 +66,7 @@ def post_new_buyer(request):
 		newAddress.save()
 		 
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
@@ -137,6 +136,7 @@ def update_buyer(request):
 			buyerAddressPtr.save()
 
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "could not update"})
 	else:
@@ -164,6 +164,7 @@ def delete_buyer(request):
 		buyerPtr.delete_status = True
 		buyerPtr.save()
 	except Exception as e:
+		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "could not delete"})
 	else:

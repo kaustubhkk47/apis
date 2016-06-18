@@ -5,6 +5,9 @@ from ..models.seller import Seller, SellerAddress
 from ..serializers.buyer import parse_buyer
 from ..serializers.seller import parse_seller
 
+import logging
+log = logging.getLogger("django")
+
 def get_user_details(request):
 	try:
 		buyers = Buyer.objects.filter(delete_status=False).select_related('buyerdetails')
@@ -19,4 +22,5 @@ def get_user_details(request):
 
 		return customResponse("2XX", {"users": response})
 	except Exception as e:
+		log.critical(e)
 		return customResponse("4XX", {"error": "Invalid request"})

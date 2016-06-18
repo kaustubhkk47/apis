@@ -1,3 +1,5 @@
+from ..models.contactUsLead import ContactUsLeadStatus
+
 def serialize_contactus_lead(contactUslead_entry):
 
 	contactUsLead = {
@@ -5,10 +7,14 @@ def serialize_contactus_lead(contactUslead_entry):
 		"remarks" : contactUslead_entry.remarks,
 		"email" : contactUslead_entry.email,
 		"mobile_number" : contactUslead_entry.mobile_number,
-		"status" : contactUslead_entry.status,
 		"comments" : contactUslead_entry.comments,
 		"created_at" : contactUslead_entry.created_at,
 		"updated_at" : contactUslead_entry.updated_at
+	}
+
+	contactUsLead["status"] = {
+		"value": contactUslead_entry.status,
+		"display_value":ContactUsLeadStatus[contactUslead_entry.status]["display_value"]
 	}
 
 	return contactUsLead
