@@ -78,7 +78,7 @@ def serializeSubOrder(subOrderEntry, subOrderParameters = {}):
 
 	subOrder["sub_order_payment_status"] = {
 		"value": subOrderEntry.suborder_payment_status,
-		"display_value":SubOrderStatus[subOrderEntry.suborder_payment_status]["display_value"]
+		"display_value":SubOrderPaymentStatus[subOrderEntry.suborder_payment_status]["display_value"]
 	}
 
 	sellerPaymentQuerySet = filterSellerPayment(subOrderParameters)
@@ -295,6 +295,8 @@ def serializeOrderShipment(orderShipmentEntry, orderShipmentParameters = {}):
 	orderShipment["rto_remarks"] = orderShipmentEntry.rto_remarks
 	orderShipment["created_at"] = orderShipmentEntry.created_at
 	orderShipment["updated_at"] = orderShipmentEntry.updated_at
+
+	orderShipment["buyer"] = serialize_buyer(orderShipmentEntry.suborder.order.buyer)
 
 	orderItemQuerySet = filterOrderItem(orderShipmentParameters)
 	orderItemQuerySet = orderItemQuerySet.filter(order_shipment_id=orderShipmentEntry.id)
