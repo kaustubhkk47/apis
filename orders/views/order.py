@@ -292,7 +292,7 @@ def post_new_buyer_payment(request):
 	if not len(buyerPayment) or not validateBuyerPaymentData(buyerPayment):
 		return customResponse("4XX", {"error": "Invalid data for buyer payment sent"})
 
-	if buyerPayment["payment_method"] == 0:
+	if int(buyerPayment["payment_method"]) == 0:
 		if not "ordershipmentID" in buyerPayment or buyerPayment["ordershipmentID"]==None:
 			return customResponse("4XX", {"error": "Id for order shipment not sent"})
 
