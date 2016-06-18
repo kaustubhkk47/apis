@@ -1,3 +1,5 @@
+from ..models.sellerLeads import SellerLeadStatus
+
 def serialize_seller_lead(sellerlead_entry):
 
 	sellerLead = {
@@ -9,6 +11,11 @@ def serialize_seller_lead(sellerlead_entry):
 		"comments" : sellerlead_entry.comments,
 		"created_at" : sellerlead_entry.created_at,
 		"updated_at" : sellerlead_entry.updated_at
+	}
+
+	sellerLead["status"] = {
+		"value": sellerlead_entry.status,
+		"display_value":SellerLeadStatus[sellerlead_entry.status]["display_value"]
 	}
 
 	return sellerLead

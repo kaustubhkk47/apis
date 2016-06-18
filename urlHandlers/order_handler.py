@@ -115,9 +115,11 @@ def populateParameters(request):
 
 	orderID = request.GET.get("orderID", "")
 	orderStatus = request.GET.get("order_status", "")
+	orderPaymentStatus = request.GET.get("order_payment_status", "")
 
 	subOrderID = request.GET.get("suborderID", "")
 	subOrderStatus = request.GET.get("sub_order_status", "")
+	subOrderPaymentStatus = request.GET.get("sub_order_payment_status", "")
 
 	orderShipmentID = request.GET.get("ordershipmentID", "")
 	orderShipmentStatus = request.GET.get("order_shipment_status", "")
@@ -158,11 +160,15 @@ def populateParameters(request):
 		parameters["orderArr"] = [int(e) if e.isdigit() else e for e in orderID.split(",")]
 	if orderStatus != "":
 		parameters["orderStatusArr"] = [int(e) if e.isdigit() else e for e in orderStatus.split(",")]
+	if orderPaymentStatus != "":
+		parameters["orderPaymentStatusArr"] = [int(e) if e.isdigit() else e for e in orderPaymentStatus.split(",")]
 
 	if subOrderID != "":
 		parameters["subOrderArr"] = [int(e) if e.isdigit() else e for e in subOrderID.split(",")]
 	if subOrderStatus != "":
 		parameters["subOrderStatusArr"] = [int(e) if e.isdigit() else e for e in subOrderStatus.split(",")]
+	if subOrderPaymentStatus != "":
+		parameters["subOrderPaymentStatusArr"] = [int(e) if e.isdigit() else e for e in subOrderPaymentStatus.split(",")]
 	
 	if orderShipmentID != "":
 		parameters["orderShipmentArr"] = [int(e) if e.isdigit() else e for e in orderShipmentID.split(",")]

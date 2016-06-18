@@ -104,30 +104,30 @@ def populateSellerPayment(SellerPaymentPtr, sellerPayment):
 	SellerPaymentPtr.payment_status = 1
 
 SellerPaymentStatus = {
-	0:"Not Paid",
-	1:"Paid"
+	0:{"display_value":"Not Paid"},
+	1:{"display_value":"Paid"}
 }
 
 SellerPaymentMethod = {
-	0:"NEFT",
-	1:"IMPS",
-	2:"RTGS"
+	0:{"display_value":"NEFT"},
+	1:{"display_value":"IMPS"},
+	2:{"display_value":"RTGS"}
 }
 
 BuyerPaymentStatus = {
-	0:"Not Paid",
-	1:"Paid",
-	2:"Partially Paid"
+	0:{"display_value":"Not Paid"},
+	1:{"display_value":"Paid"},
+	2:{"display_value":"Partially Paid"}
 }
 
 BuyerPaymentMethod = {
-	0:"COD",
-	1:"NEFT",
-	2:"Demand Draft",
-	3:"Cash deposit",
-	4:"Cheque",
-	5:"Debit Card",
-	6:"Credit Card",
-	7:"Net Banking",
-	8:"Wallet"
+	0:{"display_value":"COD"},
+	1:{"display_value":"NEFT"},
+	2:{"display_value":"Demand Draft"},
+	3:{"display_value":"Cash deposit"},
+	4:{"display_value":"Cheque"},
+	5:{"display_value":"Debit Card"},
+	6:{"display_value":"Credit Card"},
+	7:{"display_value":"Net Banking"},
+	8:{"display_value":"Wallet"}
 }

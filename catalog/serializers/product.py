@@ -2,6 +2,7 @@ from decimal import Decimal
 import settings
 
 from ..models.productLot import ProductLot
+from ..models.product import Product
 from .category import serialize_categories
 from users.serializers.seller import serialize_seller
 import ast
@@ -120,4 +121,21 @@ def multiple_products_parser(productQuerySet):
 	for productsItem in productQuerySet:
 		product = serialize_product(productsItem)
 		products.append(product)
+	return products
+
+def filterProducts(productParameters):
+	products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related('seller', 'productdetails', 'category').order_by('-id')
+
+	if "categoriesArr" in productParameters:
+		products = products.filter(category_id__in=productParameters["categoriesArr"])
+
+	if "productsArr" in productParameters:
+		products = products.filter(id__in=productParameters["productsArr"])
+
+	if "sellerArr" in productParameters:
+		products = products.filter(seller_id__in=productParameters["sellerArr"])
+
+	if productParameters["isSeller"]==0 and productParameters["isInternalUser"]==0:
+		products = products.filter(verification=True,show_online=True,seller__show_online=True)
+
 	return products

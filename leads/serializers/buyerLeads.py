@@ -1,6 +1,8 @@
 from catalog.serializers.category import serialize_categories
 from catalog.serializers.product import serialize_product
 
+from ..models.buyerLeads import BuyerLeadStatus
+
 def serialize_buyer_lead(buyerlead_entry):
 
 	buyerLead = {
@@ -8,10 +10,14 @@ def serialize_buyer_lead(buyerlead_entry):
 		"name" : buyerlead_entry.name,
 		"email" : buyerlead_entry.email,
 		"mobile_number" : buyerlead_entry.mobile_number,
-		"status" : buyerlead_entry.status,
 		"comments" : buyerlead_entry.comments,
 		"created_at" : buyerlead_entry.created_at,
 		"updated_at" : buyerlead_entry.updated_at
+	}
+
+	buyerLead["status"] = {
+		"value": buyerlead_entry.status,
+		"display_value":BuyerLeadStatus[buyerlead_entry.status]["display_value"]
 	}
 
 	try:

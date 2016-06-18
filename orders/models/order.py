@@ -51,9 +51,9 @@ OrderStatus = {
 }
 
 OrderPaymentStatus = {
-    0:"Not Paid",
-    1:"Paid",
-    2:"Partially paid"
+    0:{"display_value":"Not Paid"},
+    1:{"display_value":"Paid"},
+    2:{"display_value":"Partially paid"}
 }
 
 ## Status: Placed, confirmed, shipped, delivered

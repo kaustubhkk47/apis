@@ -1,4 +1,4 @@
-from ..models.seller import SellerAddress, SellerBankDetails
+from ..models.seller import Seller, SellerAddress, SellerBankDetails
 
 def serialize_seller(seller_entry):
     
@@ -95,5 +95,14 @@ def parse_seller(seller_queryset):
     for seller in seller_queryset:
         seller_entry = serialize_seller(seller)
         sellers.append(seller_entry)
+
+    return sellers
+
+def filterSeller(sellerParameters):
+
+    sellers = Seller.objects.filter(delete_status=False).select_related('sellerdetails')
+
+    if "sellersArr" in sellerParameters:
+        sellers = sellers.filter(id__in=sellerParameters["sellersArr"])
 
     return sellers

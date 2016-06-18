@@ -11,6 +11,8 @@ from scripts.utils import validate_date
 from decimal import Decimal
 import datetime
 
+from logistics.models.logisticspartner import LogisticsPartner
+
 
 class OrderShipment(models.Model):
 
@@ -22,7 +24,8 @@ class OrderShipment(models.Model):
     invoice_number = models.CharField(max_length=50, blank=True)
     invoice_date = models.DateTimeField(blank=True, null=True)
 
-    logistics_partner = models.CharField(max_length=50, blank=True,null=True)
+    #logistics_partner = models.ForeignKey(LogisticsPartner, blank=True, null =True)
+    logistics_partner_name = models.CharField(max_length=50, blank=True,null=True)
     waybill_number = models.CharField(max_length=50, blank=True,null=True)
 
     packaged_weight = models.DecimalField(max_digits=10, decimal_places=2,blank=True,null=True)
@@ -71,8 +74,6 @@ def validateOrderShipmentData(orderShipment):
         orderShipment["invoice_number"] = ""
     if not "invoice_date" in orderShipment or orderShipment["invoice_date"]==None or not validate_date(orderShipment["invoice_date"]):
         flag = False
-    if not "logistics_partner" in orderShipment or orderShipment["logistics_partner"]==None:
-        orderShipment["logistics_partner"] = "Fedex"
     if not "waybill_number" in orderShipment or orderShipment["waybill_number"]==None:
         orderShipment["waybill_number"] = ""
     if not "packaged_weight" in orderShipment or orderShipment["packaged_weight"]==None:
@@ -103,7 +104,9 @@ def validateOrderShipmentData(orderShipment):
 def populateOrderShipment(OrderShipmentPtr, orderShipment):
     OrderShipmentPtr.invoice_number = orderShipment["invoice_number"]
     OrderShipmentPtr.invoice_date = orderShipment["invoice_date"]
-    OrderShipmentPtr.logistics_partner = orderShipment["logistics_partner"]
+    OrderShipmentPtr.logistics_partner_name = "Fedex"
+    #logistics_partner = LogisticsPartner.objects.get(id=1)
+    #OrderShipmentPtr.logistics_partner = logistics_partner
     OrderShipmentPtr.waybill_number = orderShipment["waybill_number"]
     OrderShipmentPtr.packaged_weight = Decimal(orderShipment["packaged_weight"])
     OrderShipmentPtr.packaged_length = Decimal(orderShipment["packaged_length"])
