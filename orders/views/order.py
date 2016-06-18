@@ -259,7 +259,7 @@ def post_new_order_shipment(request):
 		manifest_dict["shipment"] = {
 			"waybill_number": newOrderShipment.waybill_number,
 			"shipping_amount": '{0:.0f}'.format(newOrderShipment.cod_charge + newOrderShipment.shipping_charge),
-			"logistics_partner": newOrderShipment.logistics_partner,
+			"logistics_partner": newOrderShipment.logistics_partner_name,
 			"invoice_number": newOrderShipment.invoice_number,
 			"final_price": '{0:.0f}'.format(newOrderShipment.final_price),
 			"amount_to_collect":'{0:.0f}'.format(float(newOrderShipment.cod_charge) + float(newOrderShipment.shipping_charge) + float(newOrderShipment.final_price)),
