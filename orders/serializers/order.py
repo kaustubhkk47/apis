@@ -297,6 +297,7 @@ def serializeOrderShipment(orderShipmentEntry, orderShipmentParameters = {}):
 	orderShipment["updated_at"] = orderShipmentEntry.updated_at
 
 	orderShipment["buyer"] = serialize_buyer(orderShipmentEntry.suborder.order.buyer)
+	orderShipment["seller"] = serialize_seller(orderShipmentEntry.suborder.seller)
 
 	orderItemQuerySet = filterOrderItem(orderShipmentParameters)
 	orderItemQuerySet = orderItemQuerySet.filter(order_shipment_id=orderShipmentEntry.id)
