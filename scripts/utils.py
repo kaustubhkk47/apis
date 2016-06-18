@@ -79,8 +79,8 @@ def create_email(mail_template_file,mail_dict,subject,from_email,to,attachment="
 
 def generate_pdf(template_src, context_dict, output_directory, output_file_name):
     template = get_template(template_src)
-    context = Context(context_dict)
-    html  = template.render(context)
+    #context = Context(context_dict)
+    html  = template.render(context_dict)
 
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
