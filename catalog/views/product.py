@@ -1,9 +1,9 @@
 from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string
 
 from ..models.category import Category
-from ..models.product import Product, validateProductData, ProductDetails, validateProductDetailsData, populateProductData, populateProductDetailsData
+from ..models.product import Product, validateProductData, ProductDetails, validateProductDetailsData, populateProductData, populateProductDetailsData, filterProducts
 from ..models.productLot import ProductLot, validateProductLotData, parseMinPricePerUnit, populateProductLotData
-from ..serializers.product import multiple_products_parser, serialize_product, filterProducts
+from ..serializers.product import multiple_products_parser, serialize_product
 from users.models.seller import Seller
 import json
 from django.template.defaultfilters import slugify

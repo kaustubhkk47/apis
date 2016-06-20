@@ -1,6 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
 
-from orders.views import order
+from orders.views import order, orderItem, orderShipment, payments, subOrder
 from scripts.utils import customResponse, get_token_payload
 import jwt as JsonWebToken
 
@@ -14,11 +14,11 @@ def order_shipment_details(request):
 		if orderShipmentParameters["isSeller"] == 0 and orderShipmentParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return order.get_order_shipment_details(request,orderShipmentParameters)
+		return orderShipment.get_order_shipment_details(request,orderShipmentParameters)
 	elif request.method == "POST":
-		return order.post_new_order_shipment(request)
+		return orderShipment.post_new_order_shipment(request)
 	elif request.method == "PUT":
-		return order.update_order_shipment(request)
+		return orderShipment.update_order_shipment(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -32,9 +32,9 @@ def suborder_details(request):
 		if subOrderParameters["isSeller"] == 0 and subOrderParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return order.get_suborder_details(request,subOrderParameters)
-	elif request.method == "PUT":
-		return order.update_suborder(request)
+		return subOrder.get_suborder_details(request,subOrderParameters)
+	#elif request.method == "PUT":
+	#	return subOrder.update_suborder(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -64,9 +64,9 @@ def order_item_details(request):
 		if orderItemParameters["isSeller"] == 0 and orderItemParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return order.get_order_item_details(request,orderItemParameters)
+		return orderItem.get_order_item_details(request,orderItemParameters)
 	elif request.method == "DELETE":
-		return order.cancel_order_item(request)
+		return orderItem.cancel_order_item(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -80,9 +80,9 @@ def buyer_payment_details(request):
 		if buyerPaymentParameters["isBuyer"] == 0 and buyerPaymentParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return order.get_buyer_payment_details(request,buyerPaymentParameters)
+		return payments.get_buyer_payment_details(request,buyerPaymentParameters)
 	elif request.method == "POST":
-		return order.post_new_buyer_payment(request)
+		return payments.post_new_buyer_payment(request)
 
 
 	return customResponse("4XX", {"error": "Invalid request"})
@@ -97,9 +97,9 @@ def seller_payment_details(request):
 		if sellerPaymentParameters["isSeller"] == 0 and sellerPaymentParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return order.get_seller_payment_details(request,sellerPaymentParameters)
+		return payments.get_seller_payment_details(request,sellerPaymentParameters)
 	elif request.method == "POST":
-		return order.post_new_seller_payment(request)
+		return payments.post_new_seller_payment(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 

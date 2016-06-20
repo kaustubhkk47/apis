@@ -3,9 +3,10 @@ from django.db import models
 from users.models.seller import *
 from users.models.internalUser import *
 from users.models.buyer import *
-from .subOrder import *
-from .orderShipment import *
-from .order import *
+from .subOrder import SubOrder
+from .orderShipment import OrderShipment
+from .order import Order
+from .orderItem import OrderItem
 
 from scripts.utils import validate_date_time
 from decimal import Decimal
@@ -102,6 +103,67 @@ def populateSellerPayment(SellerPaymentPtr, sellerPayment):
 	SellerPaymentPtr.payment_time = sellerPayment["payment_time"]
 	SellerPaymentPtr.payment_value = Decimal(sellerPayment["payment_value"])
 	SellerPaymentPtr.payment_status = 1
+
+def filterSellerPayment(sellerPaymentParameters):
+	sellerPayments = SellerPayment.objects.all()
+
+	if "sellerPaymentArr" in sellerPaymentParameters:
+		sellerPayments = sellerPayments.filter(id__in=sellerPaymentParameters["sellerPaymentArr"])
+
+	if "sellerPaymentStatusArr" in sellerPaymentParameters:
+		sellerPayments = sellerPayments.filter(payment_status__in=sellerPaymentParameters["sellerPaymentStatusArr"])
+
+	if "sellersArr" in sellerPaymentParameters:
+		sellerPayments = sellerPayments.filter(suborder__seller_id__in=sellerPaymentParameters["sellersArr"])
+
+	if "subOrderArr" in sellerPaymentParameters:
+		sellerPayments = sellerPayments.filter(suborder_id__in=sellerPaymentParameters["subOrderArr"])
+
+	return sellerPayments
+
+def filterBuyerPayment(buyerPaymentParameters):
+	buyerPayments = BuyerPayment.objects.all()
+
+	if "buyerPaymentArr" in buyerPaymentParameters:
+		buyerPayments = buyerPayments.filter(id__in=buyerPaymentParameters["buyerPaymentArr"])
+
+	if "buyerPaymentStatusArr" in buyerPaymentParameters:
+		buyerPayments = buyerPayments.filter(payment_status__in=buyerPaymentParameters["buyerPaymentStatusArr"])
+
+	if "buyersArr" in buyerPaymentParameters:
+		buyerPayments = buyerPayments.filter(order__buyer_id__in=buyerPaymentParameters["buyersArr"])
+
+	if "orderArr" in buyerPaymentParameters:
+		buyerPayments = buyerPayments.filter(order_id__in=buyerPaymentParameters["orderArr"])
+
+	return buyerPayments
+
+def validateSellerPaymentItemsData(orderItems, subOrderID):
+
+	if len(orderItems) == 0:
+		return False
+
+	for orderItem in orderItems:
+
+		if not "orderitemID" in orderItem or orderItem["orderitemID"]==None:
+			return False
+
+		orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))
+		if len(orderItemPtr) == 0:
+			return False
+
+		orderItemPtr = orderItemPtr[0]
+
+		if orderItemPtr.current_status == 4:
+			return False
+
+		if orderItemPtr.seller_payment != None:
+			return False
+
+		if orderItemPtr.suborder_id != subOrderID:
+			return False
+
+	return True
 
 SellerPaymentStatus = {
 	0:{"display_value":"Not Paid"},

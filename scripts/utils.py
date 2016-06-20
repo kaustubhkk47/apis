@@ -43,6 +43,13 @@ def validate_date_time(date_text):
 
     return True
 
+def validate_integer(x):
+    try:
+        x = int(x)
+    except Exception, e:
+        return False
+    return True
+
 def check_token_validity(access_token):
     if not access_token:
         ## log the exception into db

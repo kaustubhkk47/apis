@@ -1,7 +1,12 @@
 from django.db import models
 
-from users.models.buyer import *
-#from users.models.seller import *
+from users.models.buyer import Buyer
+from catalog.models.product import Product
+from catalog.models.productLot import getCalculatedPricePerPiece
+from .orderItem import OrderItem, OrderItemCompletionStatus
+
+from decimal import Decimal
+import math
 
 class Order(models.Model):
 
@@ -41,6 +46,64 @@ def populateOrderData(orderPtr, order):
     orderPtr.order_status = 1
     orderPtr.save()
     orderPtr.display_number = "1" +"%06d" %(orderPtr.id,)
+
+def filterOrder(orderParameters):
+    orders = Order.objects.all().select_related('buyer')
+        
+    if "orderArr" in orderParameters:
+        orders = orders.filter(id__in=orderParameters["orderArr"])
+
+    if "orderStatusArr" in orderParameters:
+        orders = orders.filter(order_status__in=orderParameters["orderStatusArr"])
+
+    if "orderPaymentStatusArr" in orderParameters:
+        orders = orders.filter(order_payment_status__in=orderParameters["orderPaymentStatusArr"])
+
+    if "buyersArr" in orderParameters:
+        orders = orders.filter(buyer_id__in=orderParameters["buyersArr"])
+
+    return orders
+
+def validateOrderProductsData(orderProducts):
+
+    flag = True
+
+    for orderProduct in orderProducts:
+        if not "productID" in orderProduct or orderProduct["productID"]==None:
+            flag = False
+
+        productPtr = Product.objects.filter(id=int(orderProduct["productID"]))
+        if len(productPtr) == 0:
+            return False
+
+        productPtr = productPtr[0]
+
+        if not "pieces" in orderProduct or orderProduct["pieces"]==None:
+            flag = False
+        if not "edited_price_per_piece" in orderProduct or orderProduct["edited_price_per_piece"]==None:
+            flag = False
+        if not "remarks" in orderProduct or orderProduct["remarks"]==None:
+            orderProduct["remarks"] = ""
+
+        orderProduct["retail_price_per_piece"] = productPtr.price_per_unit
+        orderProduct["lot_size"] = productPtr.lot_size
+
+        if flag == True:
+            orderProduct["final_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
+            orderProduct["lots"] = int(math.ceil(float(orderProduct["pieces"])/productPtr.lot_size))
+            orderProduct["calculated_price_per_piece"] = getCalculatedPricePerPiece(int(orderProduct["productID"]),orderProduct["lots"])
+
+    return flag
+
+def update_order_completion_status(order):
+
+    orderItemQuerySet = OrderItem.objects.filter(suborder__order_id = order.id)
+    for orderItem in orderItemQuerySet:
+        if orderItem.current_status not in OrderItemCompletionStatus:
+            return
+
+    order.order_status = 3
+    order.save()
 
 OrderStatus = {
     0:{"display_value":"Placed"},
