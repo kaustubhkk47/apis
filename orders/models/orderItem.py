@@ -1,21 +1,18 @@
 from django.db import models
 
-from catalog.models.product import *
 from catalog.models.productLot import *
-from .order import *
-from .subOrder import *
-from .orderShipment import *
-from .payments import BuyerPayment
-from .payments import SellerPayment
+#from .subOrder import SubOrder
+#from .orderShipment import OrderShipment
+#from .payments import SellerPayment
 
 from catalog.models.product import Product
 
 class OrderItem(models.Model):
 
-    suborder = models.ForeignKey(SubOrder)
+    suborder = models.ForeignKey('orders.SubOrder')
     product = models.ForeignKey(Product)
-    order_shipment = models.ForeignKey(OrderShipment,null=True,blank=True)
-    seller_payment = models.ForeignKey(SellerPayment,null=True,blank=True)
+    order_shipment = models.ForeignKey('orders.OrderShipment',null=True,blank=True)
+    seller_payment = models.ForeignKey('orders.SellerPayment',null=True,blank=True)
 
     pieces = models.PositiveIntegerField(default=0)
     lots = models.PositiveIntegerField(default=0)
@@ -42,37 +39,6 @@ class OrderItem(models.Model):
     def __unicode__(self):
         return str(self.id) + " - " + self.suborder.display_number + " - Price: " + str(self.final_price) + "-" + self.product.display_name + " - " + self.product.seller.name
 
-def validateOrderProductsData(orderProducts):
-
-    flag = True
-
-    for orderProduct in orderProducts:
-        if not "productID" in orderProduct or orderProduct["productID"]==None:
-            flag = False
-
-        productPtr = Product.objects.filter(id=int(orderProduct["productID"]))
-        if len(productPtr) == 0:
-            return False
-
-        productPtr = productPtr[0]
-
-        if not "pieces" in orderProduct or orderProduct["pieces"]==None:
-            flag = False
-        if not "edited_price_per_piece" in orderProduct or orderProduct["edited_price_per_piece"]==None:
-            flag = False
-        if not "remarks" in orderProduct or orderProduct["remarks"]==None:
-            orderProduct["remarks"] = ""
-
-        orderProduct["retail_price_per_piece"] = productPtr.price_per_unit
-        orderProduct["lot_size"] = productPtr.lot_size
-
-        if flag == True:
-            orderProduct["final_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
-            orderProduct["lots"] = int(math.ceil(float(orderProduct["pieces"])/productPtr.lot_size))
-            orderProduct["calculated_price_per_piece"] = getCalculatedPricePerPiece(int(orderProduct["productID"]),orderProduct["lots"])
-
-    return flag
-
 def populateOrderItemData(OrderItemPtr, orderItem):
     OrderItemPtr.pieces = int(orderItem["pieces"])
     OrderItemPtr.lots = orderItem["lots"]
@@ -83,47 +49,6 @@ def populateOrderItemData(OrderItemPtr, orderItem):
     OrderItemPtr.lot_size = int(orderItem["lot_size"])
     OrderItemPtr.remarks = orderItem["remarks"]
     OrderItemPtr.current_status = 1
-
-def validateOrderShipmentItemsData(orderItems, subOrderID):
-
-    flag = True
-
-    for orderItem in orderItems:
-
-        if not "orderitemID" in orderItem or orderItem["orderitemID"]==None:
-            flag = False
-
-        orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))
-        if len(orderItemPtr) == 0:
-            return False
-
-        orderItemPtr = orderItemPtr[0]
-
-        if orderItemPtr.current_status >= 4:
-            return False
-
-        if orderItemPtr.order_shipment != None:
-            return False
-
-        if orderItemPtr.suborder_id != subOrderID:
-            return False
-
-    return flag
-
-def validateSellerPaymentItemsData(orderItems):
-
-    flag = True
-
-    for orderItem in orderItems:
-
-        if not "orderitemID" in orderItem or orderItem["orderitemID"]==None:
-            flag = False
-
-        orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))
-        if len(orderItemPtr) == 0:
-            return False
-
-    return flag
 
 def validateOrderItemStatus(status, current_status):
     if current_status == 0 and not (status == 1 or status == 10):
@@ -161,25 +86,28 @@ def update_order_item_status(orderShipmentID, status):
         orderItem.current_status = status
         orderItem.save()
 
-def update_order_completion_status(order):
+def filterOrderItem(orderItemParameters):
+    orderItems = OrderItem.objects.all().select_related('product')
+        
+    if "orderItemArr" in orderItemParameters:
+        orderItems = orderItems.filter(id__in=orderItemParameters["orderItemArr"])
 
-    orderItemQuerySet = OrderItem.objects.filter(suborder__order_id = order.id)
-    for orderItem in orderItemQuerySet:
-        if orderItem.current_status not in OrderItemCompletionStatus:
-            return
+    if "orderItemStatusArr" in orderItemParameters:
+        orderItems = orderItems.filter(current_status__in=orderItemParameters["orderItemStatusArr"])
 
-    order.order_status = 3
-    order.save()
+    if "sellersArr" in orderItemParameters:
+        orderItems = orderItems.filter(suborder__seller_id__in=orderItemParameters["sellersArr"])
 
-def update_suborder_completion_status(subOrder):
+    if "subOrderArr" in orderItemParameters:
+        orderItems = orderItems.filter(suborder_id__in=orderItemParameters["subOrderArr"])
 
-    orderItemQuerySet = OrderItem.objects.filter(suborder_id = subOrder.id)
-    for orderItem in orderItemQuerySet:
-        if orderItem.current_status not in OrderItemCompletionStatus:
-            return
+    if "orderArr" in orderItemParameters:
+        orderItems = orderItems.filter(suborder__order_id__in=orderItemParameters["orderArr"])
 
-    subOrder.suborder_status = 4
-    subOrder.save()
+    if "orderShipmentArr" in orderItemParameters:
+        orderItems = orderItems.filter(order_shipment_id__in=orderItemParameters["orderShipmentArr"])
+
+    return orderItems
 
 
 OrderItemStatus = {

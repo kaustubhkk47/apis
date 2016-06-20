@@ -2,7 +2,7 @@ from scripts.utils import customResponse, closeDBConnection, convert_keys_to_str
 import json
 
 from ..models.buyer import *
-from ..serializers.buyer import serialize_buyer, parse_buyer, filterBuyer
+from ..serializers.buyer import serialize_buyer, parse_buyer
 
 import logging
 log = logging.getLogger("django")

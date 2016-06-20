@@ -208,6 +208,15 @@ def populateBuyerAddress(buyerAddressPtr, buyeraddress):
         buyerAddressPtr.state_name = buyeraddress["state"]
         buyerAddressPtr.country_name = buyeraddress["country"]
 
+def filterBuyer(buyerParameters):
+
+    buyers = Buyer.objects.filter(delete_status=False).select_related('buyerdetails')
+
+    if "buyersArr" in buyerParameters:
+        buyers = buyers.filter(id__in=buyerParameters["buyersArr"])
+
+    return buyers
+
 def buyerEmailExists(email):
     buyerPtr = Buyer.objects.filter(email=email)
 

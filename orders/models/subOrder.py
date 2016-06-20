@@ -1,13 +1,14 @@
 from django.db import models
 
-from users.models.seller import *
-from .order import *
+from users.models.seller import Seller
+#from orders.models.order import Order
+from orders.models.orderItem import OrderItem, OrderItemCompletionStatus
 
 import datetime
 
 class SubOrder(models.Model):
 
-    order = models.ForeignKey(Order)
+    order = models.ForeignKey('orders.Order')
     seller = models.ForeignKey(Seller)
 
     product_count = models.PositiveIntegerField(default=1)
@@ -66,6 +67,36 @@ def validateSubOrderStatus(status, current_status):
         return False
 
     return True
+
+def filterSubOrder(subOrderParameters):
+    subOrders = SubOrder.objects.all().select_related('seller','order__buyer')
+        
+    if "subOrderArr" in subOrderParameters:
+        subOrders = subOrders.filter(id__in=subOrderParameters["subOrderArr"])
+
+    if "subOrderStatusArr" in subOrderParameters:
+        subOrders = subOrders.filter(suborder_status__in=subOrderParameters["subOrderStatusArr"])
+
+    if "subOrderPaymentStatusArr" in subOrderParameters:
+        subOrders = subOrders.filter(suborder_payment_status__in=subOrderParameters["subOrderPaymentStatusArr"])
+
+    if "sellersArr" in subOrderParameters:
+        subOrders = subOrders.filter(seller_id__in=subOrderParameters["sellersArr"])
+
+    if "orderArr" in subOrderParameters:
+        subOrders = subOrders.filter(order_id__in=subOrderParameters["orderArr"])
+
+    return subOrders
+
+def update_suborder_completion_status(subOrder):
+
+    orderItemQuerySet = OrderItem.objects.filter(suborder_id = subOrder.id)
+    for orderItem in orderItemQuerySet:
+        if orderItem.current_status not in OrderItemCompletionStatus:
+            return
+
+    subOrder.suborder_status = 4
+    subOrder.save()
 
 SubOrderStatus = {
     0:{"display_value":"Unconfirmed"},
