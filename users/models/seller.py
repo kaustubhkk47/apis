@@ -229,6 +229,15 @@ def populateSellerBankDetailsData(sellerBankDetailsPtr,sellerbankdetails):
     sellerBankDetailsPtr.branch_city = sellerbankdetails["branch_city"]
     sellerBankDetailsPtr.branch_pincode = sellerbankdetails["branch_pincode"]
 
+def filterSeller(sellerParameters):
+
+    sellers = Seller.objects.filter(delete_status=False).select_related('sellerdetails')
+
+    if "sellersArr" in sellerParameters:
+        sellers = sellers.filter(id__in=sellerParameters["sellersArr"])
+
+    return sellers
+
 def sellerEmailExists(email):
     sellerPtr = Seller.objects.filter(email=email)
 
@@ -244,3 +253,4 @@ def sellerMobileNumberExists(mobileNumber):
         return True
 
     return False
+

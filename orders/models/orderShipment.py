@@ -1,11 +1,10 @@
 from django.db import models
 
-from users.models.buyer import *
-from users.models.seller import *
+from users.models.buyer import BuyerAddress
+from users.models.seller import SellerAddress
 
-from .order import *
-from .orderItem import *
-from .subOrder import *
+from .orderItem import OrderItem
+#from .subOrder import SubOrder
 
 from scripts.utils import validate_date
 from decimal import Decimal
@@ -16,7 +15,7 @@ from logistics.models.logisticspartner import LogisticsPartner
 
 class OrderShipment(models.Model):
 
-    suborder = models.ForeignKey(SubOrder)
+    suborder = models.ForeignKey('orders.SubOrder')
 
     pickup_address = models.ForeignKey(SellerAddress)
     drop_address = models.ForeignKey(BuyerAddress)
@@ -24,7 +23,7 @@ class OrderShipment(models.Model):
     invoice_number = models.CharField(max_length=50, blank=True)
     invoice_date = models.DateTimeField(blank=True, null=True)
 
-    #logistics_partner = models.ForeignKey(LogisticsPartner, blank=True, null =True)
+    logistics_partner = models.ForeignKey(LogisticsPartner, blank=True, null =True)
     logistics_partner_name = models.CharField(max_length=50, blank=True,null=True)
     waybill_number = models.CharField(max_length=50, blank=True,null=True)
 
@@ -99,14 +98,12 @@ def validateOrderShipmentData(orderShipment):
     
     return flag
 
-
-
 def populateOrderShipment(OrderShipmentPtr, orderShipment):
     OrderShipmentPtr.invoice_number = orderShipment["invoice_number"]
     OrderShipmentPtr.invoice_date = orderShipment["invoice_date"]
     OrderShipmentPtr.logistics_partner_name = "Fedex"
-    #logistics_partner = LogisticsPartner.objects.get(id=1)
-    #OrderShipmentPtr.logistics_partner = logistics_partner
+    logistics_partner = LogisticsPartner.objects.get(id=1)
+    OrderShipmentPtr.logistics_partner = logistics_partner
     OrderShipmentPtr.waybill_number = orderShipment["waybill_number"]
     OrderShipmentPtr.packaged_weight = Decimal(orderShipment["packaged_weight"])
     OrderShipmentPtr.packaged_length = Decimal(orderShipment["packaged_length"])
@@ -119,6 +116,47 @@ def populateOrderShipment(OrderShipmentPtr, orderShipment):
     OrderShipmentPtr.tracking_url = "https://www.fedex.com/apps/fedextrack/?action=track&trackingnumber="+orderShipment["waybill_number"]+"&cntry_code=in"
     OrderShipmentPtr.current_status = 3
     OrderShipmentPtr.tpl_manifested_time = datetime.datetime.now()
+
+def filterOrderShipment(orderShipmentParameters):
+    orderShipments = OrderShipment.objects.all().select_related('suborder','pickup_address','drop_address')
+        
+    if "orderShipmentArr" in orderShipmentParameters:
+        orderShipments = orderShipments.filter(id__in=orderShipmentParameters["orderShipmentArr"])
+
+    if "orderShipmentStatusArr" in orderShipmentParameters:
+        orderShipments = orderShipments.filter(current_status__in=orderShipmentParameters["orderShipmentStatusArr"])
+
+    if "subOrderArr" in orderShipmentParameters:
+        orderShipments = orderShipments.filter(suborder_id__in=orderShipmentParameters["subOrderArr"])
+
+    if "sellersArr" in orderShipmentParameters:
+        orderShipments = orderShipments.filter(suborder__seller_id__in=orderShipmentParameters["sellersArr"])
+
+    return orderShipments
+
+def validateOrderShipmentItemsData(orderItems, subOrderID):
+
+    for orderItem in orderItems:
+
+        if not "orderitemID" in orderItem or orderItem["orderitemID"]==None:
+            return False
+
+        orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))
+        if len(orderItemPtr) == 0:
+            return False
+
+        orderItemPtr = orderItemPtr[0]
+
+        if orderItemPtr.current_status >= 4:
+            return False
+
+        if orderItemPtr.order_shipment != None:
+            return False
+
+        if orderItemPtr.suborder_id != subOrderID:
+            return False
+
+    return True
 
 OrderShipmentStatus = {
     0:{"display_value":"Sent for Pickup","display_time":"sent_for_pickup_time"},

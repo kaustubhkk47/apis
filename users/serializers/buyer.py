@@ -1,4 +1,4 @@
-from ..models.buyer import Buyer, BuyerAddress, BuyerDetails
+from ..models.buyer import Buyer, BuyerAddress, BuyerDetails, filterBuyer
 
 def serialize_buyer(buyer_entry):
 
@@ -66,14 +66,5 @@ def parse_buyer(buyers_queryset):
     for buyer in buyers_queryset:
         buyer_entry = serialize_buyer(buyer)
         buyers.append(buyer_entry)
-
-    return buyers
-
-def filterBuyer(buyerParameters):
-
-    buyers = Buyer.objects.filter(delete_status=False).select_related('buyerdetails')
-
-    if "buyersArr" in buyerParameters:
-        buyers = buyers.filter(id__in=buyerParameters["buyersArr"])
 
     return buyers

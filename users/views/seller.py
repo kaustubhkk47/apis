@@ -1,7 +1,7 @@
 from scripts.utils import *
 import json
 from ..models.seller import *
-from ..serializers.seller import parse_seller, serialize_seller, filterSeller
+from ..serializers.seller import parse_seller, serialize_seller
 
 from leads.models.sellerLeads import SellerLeads
 
