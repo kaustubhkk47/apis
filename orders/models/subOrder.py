@@ -5,6 +5,7 @@ from users.models.seller import Seller
 from orders.models.orderItem import OrderItem, OrderItemCompletionStatus
 
 import datetime
+from decimal import Decimal
 
 class SubOrder(models.Model):
 
@@ -40,10 +41,10 @@ class SubOrder(models.Model):
 
 def populateSubOrderData(subOrderPtr, subOrder,orderID):
     
-    subOrderPtr.product_count = subOrder["product_count"]
-    subOrderPtr.retail_price = subOrder["retail_price"]
-    subOrderPtr.calculated_price = subOrder["calculated_price"]
-    subOrderPtr.edited_price = subOrder["edited_price"]
+    subOrderPtr.product_count = int(subOrder["product_count"])
+    subOrderPtr.retail_price = Decimal(subOrder["retail_price"])
+    subOrderPtr.calculated_price = Decimal(subOrder["calculated_price"])
+    subOrderPtr.edited_price = Decimal(subOrder["edited_price"])
     subOrderPtr.final_price = round(subOrder["edited_price"])
     subOrderPtr.suborder_status = 1
     subOrderPtr.confirmed_time = datetime.datetime.now()

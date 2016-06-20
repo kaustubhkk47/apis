@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib import admin
-from scripts.utils import validate_date
+from scripts.utils import validate_date, validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer
 
 from address.models.pincode import Pincode
 from .businessType import BusinessType
@@ -100,24 +100,24 @@ def validateSellerData(seller, oldseller, isnew):
         seller["name"] = oldseller.name
     if not "company_name" in seller or seller["company_name"]==None:
         seller["company_name"] = oldseller.company_name
-    if not "mobile_number" in seller or seller["mobile_number"]==None:
+    if not "mobile_number" in seller or seller["mobile_number"]==None or not validate_mobile_number(seller["mobile_number"]):
         flag = 1
         seller["mobile_number"] = oldseller.mobile_number
-    if not "email" in seller or seller["email"]==None:
+    if not "email" in seller or seller["email"]==None or not validate_email(seller["email"]):
         seller["email"] = oldseller.email
     if not "password" in seller or seller["password"]==None:
         seller["password"] = oldseller.password
     if not "alternate_phone_number" in seller or seller["alternate_phone_number"]==None:
         seller["alternate_phone_number"] = oldseller.alternate_phone_number
-    if not "mobile_verification" in seller or seller["mobile_verification"]==None:
+    if not "mobile_verification" in seller or seller["mobile_verification"]==None or not validate_bool(seller["mobile_verification"]):
         seller["mobile_verification"] = oldseller.mobile_verification
-    if not "email_verification" in seller or seller["email_verification"]==None:
+    if not "email_verification" in seller or seller["email_verification"]==None or not validate_bool(seller["email_verification"]):
         seller["email_verification"] = oldseller.email_verification
     if not "company_profile" in seller or seller["company_profile"]==None:
         seller["company_profile"] = oldseller.company_profile
     if not "seller_conditions" in seller or seller["seller_conditions"]==None:
         seller["seller_conditions"] = oldseller.seller_conditions
-    if not "show_online" in seller or seller["show_online"]==None:
+    if not "show_online" in seller or seller["show_online"]==None or not validate_bool(seller["show_online"]):
         seller["show_online"] = oldseller.show_online
     if not "concerned_person" in seller or seller["concerned_person"]==None:
         seller["concerned_person"] = oldseller.concerned_person
@@ -143,7 +143,7 @@ def validateSellerAddressData(selleraddress, oldselleraddress):
         selleraddress["country"] = oldselleraddress.country_name
     if not "contact_number" in selleraddress or selleraddress["contact_number"]==None:
         selleraddress["contact_number"] = oldselleraddress.contact_number
-    if not "pincode" in selleraddress or selleraddress["pincode"]==None:
+    if not "pincode" in selleraddress or selleraddress["pincode"]==None or not validate_pincode(selleraddress["pincode"]):
         selleraddress["pincode"] = oldselleraddress.pincode_number
 
 def validateSellerDetailsData(sellerdetails, oldsellerdetails):
@@ -157,9 +157,9 @@ def validateSellerDetailsData(sellerdetails, oldsellerdetails):
         sellerdetails["name_on_pan"] = oldsellerdetails.name_on_pan
     if not "dob_on_pan" in sellerdetails or sellerdetails["dob_on_pan"]==None or not validate_date(sellerdetails["dob_on_pan"]):
         sellerdetails["dob_on_pan"] = oldsellerdetails.dob_on_pan
-    if not "pan_verification" in sellerdetails or sellerdetails["pan_verification"]==None:
+    if not "pan_verification" in sellerdetails or sellerdetails["pan_verification"]==None or not validate_bool(sellerdetails["pan_verification"]):
         sellerdetails["pan_verification"] = oldsellerdetails.pan_verification
-    if not "tin_verification" in sellerdetails or sellerdetails["tin_verification"]==None:
+    if not "tin_verification" in sellerdetails or sellerdetails["tin_verification"]==None or not validate_bool(sellerdetails["tin_verification"]):
         sellerdetails["tin_verification"] = oldsellerdetails.tin_verification
 
 def validateSellerBankdetailsData(sellerbankdetails, oldsellerbankdetails):
@@ -190,7 +190,7 @@ def populateSellerData(sellerPtr, seller):
     sellerPtr.email_verification = bool(seller["email_verification"])
     sellerPtr.company_profile = seller["company_profile"]
     sellerPtr.seller_conditions = seller["seller_conditions"]
-    sellerPtr.show_online = seller["show_online"]
+    sellerPtr.show_online = bool(seller["show_online"])
     sellerPtr.concerned_person = seller["concerned_person"]
     sellerPtr.concerned_person_number = seller["concerned_person_number"]
 
@@ -218,7 +218,7 @@ def populateSellerAddressData(sellerAddressPtr, selleraddress):
     except Exception as e:
         sellerAddressPtr.city_name = selleraddress["city"]
         sellerAddressPtr.state_name = selleraddress["state"]
-        sellerAddressPtr.country_name = selleraddress["country"]
+        sellerAddressPtr.country_name = "India"
 
 def populateSellerBankDetailsData(sellerBankDetailsPtr,sellerbankdetails):
     sellerBankDetailsPtr.account_holders_name = sellerbankdetails["account_holders_name"]

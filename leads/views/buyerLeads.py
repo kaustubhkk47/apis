@@ -43,8 +43,8 @@ def post_new_buyer_lead(request):
 
 		populateBuyerLead(newBuyerLead, buyerLead)
 
-		if "productID" in buyerLead and buyerLead["productID"]!=None:
-			productPtr = Product.objects.filter(id=buyerLead["productID"])
+		if "productID" in buyerLead and buyerLead["productID"]!=None and validate_integer(buyerLead["productID"]):
+			productPtr = Product.objects.filter(id=int(buyerLead["productID"]))
 
 			if len(productPtr) == 0:
 				return customResponse("4XX", {"error": "invalid product id sent"})
@@ -52,8 +52,8 @@ def post_new_buyer_lead(request):
 			productPtr = productPtr[0]
 			newBuyerLead.product = productPtr
 
-		if "categoryID" in buyerLead and buyerLead["categoryID"]!=None:
-			categoryPtr = Category.objects.filter(id=buyerLead["categoryID"])
+		if "categoryID" in buyerLead and buyerLead["categoryID"]!=None and validate_integer(buyerLead["categoryID"]):
+			categoryPtr = Category.objects.filter(id=int(buyerLead["categoryID"]))
 
 			if len(categoryPtr) == 0:
 				return customResponse("4XX", {"error": "invalid category id sent"})
@@ -69,7 +69,7 @@ def post_new_buyer_lead(request):
 	else:
 		
 
-		if("email" in buyerLead and buyerLead["email"]):
+		if("email" in buyerLead and buyerLead["email"] and validate_email(buyerLead["email"])):
 			mail_template_file = "leads/buyer_lead.html"
 			mail_dict = {}
 			subject = "We at Wholdus have received your request"
@@ -104,7 +104,7 @@ def update_buyer_lead(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyerLead) or not "buyerleadID" in buyerLead or buyerLead["buyerleadID"]==None:
+	if not len(buyerLead) or not "buyerleadID" in buyerLead or buyerLead["buyerleadID"]==None or not validate_integer(buyerLead["buyerleadID"]):
 		return customResponse("4XX", {"error": "Id for buyer lead not sent"})
 
 	buyerLeadPtr = BuyerLeads.objects.filter(id=int(buyerLead["buyerleadID"]))

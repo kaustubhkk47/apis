@@ -59,7 +59,7 @@ def update_seller_lead(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(sellerLead) or not "sellerleadID" in sellerLead or sellerLead["sellerleadID"]==None:
+	if not len(sellerLead) or not "sellerleadID" in sellerLead or sellerLead["sellerleadID"]==None or not validate_integer(sellerLead["sellerleadID"]):
 		return customResponse("4XX", {"error": "Id for seller lead not sent"})
 
 	sellerLeadPtr = SellerLeads.objects.filter(id=int(sellerLead["sellerleadID"]))

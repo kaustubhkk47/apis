@@ -7,6 +7,7 @@ from decimal import Decimal
 import datetime
 import math
 
+from scripts.utils import validate_integer, validate_number, validate_bool
 #Make changes in model, validate, populate and serializer 
 #Also make changes in upload script
 
@@ -95,32 +96,32 @@ def validateProductData(product, oldproduct, is_new):
     if not "name" in product or product["name"]==None:
         flag = 1
         product["name"] = oldproduct.name
-    if not "price_per_unit" in product or product["price_per_unit"]==None:
+    if not "price_per_unit" in product or product["price_per_unit"]==None or not validate_number(product["price_per_unit"]):
         flag = 1
         product["price_per_unit"] = oldproduct.price_per_unit
     if not "unit" in product or product["unit"]==None:
         product["unit"] = oldproduct.unit
-    if not "tax" in product or product["tax"]==None:
+    if not "tax" in product or product["tax"]==None or not validate_number(product["tax"]):
         product["tax"] = oldproduct.tax
-    if not "min_price_per_unit" in product or product["min_price_per_unit"]==None:
+    if not "min_price_per_unit" in product or product["min_price_per_unit"]==None or not validate_number(product["min_price_per_unit"]):
         product["min_price_per_unit"] = oldproduct.min_price_per_unit
-    if not "lot_size" in product or product["lot_size"]==None:
+    if not "lot_size" in product or product["lot_size"]==None or not validate_integer(product["lot_size"]):
         flag = 1
         product["lot_size"] = oldproduct.lot_size
-    if not "price_per_lot" in product or product["price_per_lot"]==None:
+    if not "price_per_lot" in product or product["price_per_lot"]==None or not validate_number(product["price_per_lot"]):
         flag = 1
         product["price_per_lot"] = oldproduct.price_per_lot
-    if not "verification" in product or product["verification"]==None:
+    if not "verification" in product or product["verification"]==None or not validate_bool(product["verification"]):
         product["verification"] = oldproduct.verification
-    if not "show_online" in product or product["show_online"]==None:
+    if not "show_online" in product or product["show_online"]==None or not validate_bool(product["show_online"]):
         product["show_online"] = oldproduct.show_online
     if not "slug" in product or product["slug"]==None:
         product["slug"] = oldproduct.slug
     if not "display_name" in product or product["display_name"]==None:
         product["display_name"] = oldproduct.display_name
-    if not "is_catalog" in product or product["is_catalog"]==None:
+    if not "is_catalog" in product or product["is_catalog"]==None or not validate_bool(product["is_catalog"]):
         product["is_catalog"] = oldproduct.is_catalog
-    if not "delete_status" in product or product["delete_status"]==None:
+    if not "delete_status" in product or product["delete_status"]==None or not validate_bool(product["delete_status"]):
         product["delete_status"] = oldproduct.delete_status
         
     if is_new == 1 and flag == 1:
@@ -173,13 +174,13 @@ def validateProductDetailsData(productdetails, oldproductdetails):
         productdetails["manufactured_city"] = oldproductdetails.manufactured_city
     if not "lot_description" in productdetails or productdetails["lot_description"]==None:
         productdetails["lot_description"] = oldproductdetails.lot_description
-    if not "weight_per_unit" in productdetails or productdetails["weight_per_unit"]==None:
+    if not "weight_per_unit" in productdetails or productdetails["weight_per_unit"]==None or not validate_number(productdetails["weight_per_unit"]):
         productdetails["weight_per_unit"] = oldproductdetails.weight_per_unit
     if not "sample_type" in productdetails or productdetails["sample_type"]==None:
         productdetails["sample_type"] = oldproductdetails.sample_type
     if not "sample_description" in productdetails or productdetails["sample_description"]==None:
         productdetails["sample_description"] = oldproductdetails.sample_description
-    if not "sample_price" in productdetails or productdetails["sample_price"]==None:
+    if not "sample_price" in productdetails or productdetails["sample_price"]==None or not validate_number(productdetails["sample_price"]):
         productdetails["sample_price"] = oldproductdetails.sample_price
 
 def populateProductData(productPtr, product):
@@ -194,8 +195,8 @@ def populateProductData(productPtr, product):
     productPtr.show_online = bool(product["show_online"])
     productPtr.slug = slugify(product["name"])
     productPtr.display_name = product["display_name"]
-    productPtr.is_catalog = product["is_catalog"]
-    productPtr.delete_status = product["delete_status"]
+    productPtr.is_catalog = bool(product["is_catalog"])
+    productPtr.delete_status = bool(product["delete_status"])
     if "image_count" in product and product["image_count"]!=None:
         nowtime = datetime.datetime.now()
         productPtr.image_path = "media/productimages/" + str(productPtr.seller.id) + "/" + nowtime.strftime('%Y%m%d%H%M%S') + "/"

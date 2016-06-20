@@ -3,6 +3,8 @@ from django.db import models
 from catalog.models.product import Product
 from catalog.models.category import Category
 
+from scripts.utils import validate_bool
+
 class BuyerLeads(models.Model):
 
 	product = models.ForeignKey(Product, blank = True, null=True)
@@ -33,7 +35,7 @@ def validateBuyerLeadData(buyerlead, oldbuyerlead, is_new):
 		buyerlead["mobile_number"] = oldbuyerlead.mobile_number
 	if not "email" in buyerlead or buyerlead["email"]==None:
 		buyerlead["email"] = oldbuyerlead.email
-	if not "status" in buyerlead or buyerlead["status"]==None:
+	if not "status" in buyerlead or buyerlead["status"]==None or not validate_bool(buyerlead["status"]):
 		buyerlead["status"] = oldbuyerlead.status
 	if not "comments" in buyerlead or buyerlead["comments"]==None:
 		buyerlead["comments"] = oldbuyerlead.comments
@@ -47,7 +49,7 @@ def populateBuyerLead(buyerleadPtr, buyerlead):
 	buyerleadPtr.name = buyerlead["name"]
 	buyerleadPtr.email = buyerlead["email"]
 	buyerleadPtr.mobile_number = buyerlead["mobile_number"]
-	buyerleadPtr.status = int(buyerlead["status"])
+	buyerleadPtr.status = bool(buyerlead["status"])
 	buyerleadPtr.comments = buyerlead["comments"]
 
 BuyerLeadStatus = {

@@ -36,7 +36,7 @@ def post_new_order(request):
 	if not len(order):
 		return customResponse("4XX", {"error": "Invalid data for order sent"})
 
-	if not "buyerID" in order or order["buyerID"]==None:
+	if not "buyerID" in order or order["buyerID"]==None or not validate_integer(order["buyerID"]):
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
 	buyerPtr = Buyer.objects.filter(id=int(order["buyerID"]))
@@ -68,7 +68,7 @@ def post_new_order(request):
 
 	for orderProduct in orderProducts:
 		
-		productPtr = Product.objects.filter(id=orderProduct["productID"]).select_related('seller')
+		productPtr = Product.objects.filter(id=int(orderProduct["productID"])).select_related('seller')
 		productPtr = productPtr[0]
 
 		seller = productPtr.seller
@@ -160,7 +160,7 @@ def post_new_order(request):
 
 			for orderItem in subOrder["order_products"]:
 
-				productPtr = Product.objects.filter(id=orderItem["productID"])
+				productPtr = Product.objects.filter(id=int(orderItem["productID"]))
 				productPtr = productPtr[0]
 
 				newOrderItem = OrderItem(suborder=newSubOrder,product=productPtr)

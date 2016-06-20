@@ -29,7 +29,7 @@ def cancel_order_item(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(orderItem) or not "orderitemID" in orderItem or orderItem["orderitemID"]==None:
+	if not len(orderItem) or not "orderitemID" in orderItem or orderItem["orderitemID"]==None or not validate_integer(orderItem["orderitemID"]):
 		return customResponse("4XX", {"error": "Id for order item not sent"})
 
 	orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"])).select_related('suborder', 'suborder__order')

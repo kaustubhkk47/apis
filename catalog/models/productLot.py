@@ -3,6 +3,8 @@ from django.db import models
 from catalog.models.product import Product
 from decimal import Decimal
 
+from scripts.utils import validate_number, validate_integer, validate_bool
+
 class ProductLot(models.Model):
     product = models.ForeignKey(Product)
 
@@ -21,11 +23,11 @@ def validateProductLotData(product_lots):
 	flag = 1
 	for i in range(len(product_lots)):
 		product_lot = product_lots[i]
-		if not "lot_size_from" in product_lot or product_lot["lot_size_from"]==None:
+		if not "lot_size_from" in product_lot or product_lot["lot_size_from"]==None or not validate_integer(product_lot["lot_size_from"]):
 			flag = 0
-		if not "lot_size_to" in product_lot or product_lot["lot_size_to"]==None:
+		if not "lot_size_to" in product_lot or product_lot["lot_size_to"]==None or not validate_integer(product_lot["lot_size_to"]):
 			flag = 0
-		if not "price_per_unit" in product_lot or product_lot["price_per_unit"]==None:
+		if not "price_per_unit" in product_lot or product_lot["price_per_unit"]==None or not validate_number(product_lot["price_per_unit"]):
 			flag = 0
 
 	return flag

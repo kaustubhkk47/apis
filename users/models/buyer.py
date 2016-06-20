@@ -1,5 +1,7 @@
 from django.db import models
 
+from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer
+
 from catalog.models.category import Category
 from address.models.state import State
 from address.models.pincode import Pincode
@@ -114,18 +116,18 @@ def validateBuyerData(buyer, oldbuyer, is_new):
     if not "company_name" in buyer or buyer["company_name"]==None:
         flag = 1
         buyer["company_name"] = oldbuyer.company_name
-    if not "mobile_number" in buyer or buyer["mobile_number"]==None:
+    if not "mobile_number" in buyer or buyer["mobile_number"]==None or not validate_mobile_number(buyer["mobile_number"]):
         flag = 1
         buyer["mobile_number"] = oldbuyer.mobile_number
-    if not "email" in buyer or buyer["email"]==None:
+    if not "email" in buyer or buyer["email"]==None or not validate_email(buyer["email"]):
         buyer["email"] = oldbuyer.email
     if not "password" in buyer or buyer["password"]==None:
         buyer["password"] = oldbuyer.password
     if not "alternate_phone_number" in buyer or buyer["alternate_phone_number"]==None:
         buyer["alternate_phone_number"] = oldbuyer.alternate_phone_number
-    if not "mobile_verification" in buyer or buyer["mobile_verification"]==None:
+    if not "mobile_verification" in buyer or buyer["mobile_verification"]==None or not validate_bool(buyer["mobile_verification"]):
         buyer["mobile_verification"] = oldbuyer.mobile_verification
-    if not "email_verification" in buyer or buyer["email_verification"]==None:
+    if not "email_verification" in buyer or buyer["email_verification"]==None  or not validate_bool(buyer["email_verification"]):
         buyer["email_verification"] = oldbuyer.email_verification
     if not "gender" in buyer or buyer["gender"]:
         buyer["gender"] = oldbuyer.gender
@@ -146,11 +148,11 @@ def validateBuyerDetailsData(buyerdetails, oldbuyerdetails):
         buyerdetails["vat_tin"] = oldbuyerdetails.vat_tin
     if not "cst" in buyerdetails or buyerdetails["cst"]==None:
         buyerdetails["cst"] = oldbuyerdetails.cst
-    if not "customer_type" in buyerdetails or buyerdetails["customer_type"]==None:
+    if not "customer_type" in buyerdetails or buyerdetails["customer_type"]==None or not validate_buyer_customer_type(buyerdetails["customer_type"]):
         buyerdetails["customer_type"] = oldbuyerdetails.customer_type
-    if not "buying_capacity" in buyerdetails or buyerdetails["buying_capacity"]==None:
+    if not "buying_capacity" in buyerdetails or buyerdetails["buying_capacity"]==None  or not validate_integer(buyerdetails["purchase_duration"]):
         buyerdetails["buying_capacity"] = oldbuyerdetails.buying_capacity
-    if not "purchase_duration" in buyerdetails or buyerdetails["purchase_duration"]==None:
+    if not "purchase_duration" in buyerdetails or buyerdetails["purchase_duration"]==None or not validate_integer(buyerdetails["purchase_duration"]):
         buyerdetails["purchase_duration"] = oldbuyerdetails.purchase_duration
 
 
@@ -168,7 +170,7 @@ def validateBuyerAddressData(buyeraddress, oldbuyeraddress):
         buyeraddress["country"] = oldbuyeraddress.country_name
     if not "contact_number" in buyeraddress or buyeraddress["contact_number"]==None:
         buyeraddress["contact_number"] = oldbuyeraddress.contact_number
-    if not "pincode" in buyeraddress or buyeraddress["pincode"]==None:
+    if not "pincode" in buyeraddress or buyeraddress["pincode"]==None or not validate_pincode(buyeraddress["pincode"]):
         buyeraddress["pincode"] = oldbuyeraddress.pincode_number
 
 def populateBuyer(buyerPtr, buyer):
@@ -185,9 +187,9 @@ def populateBuyer(buyerPtr, buyer):
     
 def populateBuyerDetails(buyerDetailsPtr, buyerdetails):
     buyerDetailsPtr.cst = buyerdetails["cst"]
-    #buyerDetailsPtr.customer_type = buyerdetails["customer_type"]
-    #buyerDetailsPtr.buying_capacity = buyerdetails["buying_capacity"]
-    #buyerDetailsPtr.purchase_duration = buyerdetails["purchase_duration"]
+    buyerDetailsPtr.customer_type = int(buyerdetails["customer_type"])
+    buyerDetailsPtr.buying_capacity = int(buyerdetails["buying_capacity"])
+    buyerDetailsPtr.purchase_duration = int(buyerdetails["purchase_duration"])
     buyerDetailsPtr.vat_tin = buyerdetails["vat_tin"]
 
 def populateBuyerAddress(buyerAddressPtr, buyeraddress):
@@ -206,7 +208,7 @@ def populateBuyerAddress(buyerAddressPtr, buyeraddress):
     except Exception as e:
         buyerAddressPtr.city_name = buyeraddress["city"]
         buyerAddressPtr.state_name = buyeraddress["state"]
-        buyerAddressPtr.country_name = buyeraddress["country"]
+        buyerAddressPtr.country_name = "India"
 
 def filterBuyer(buyerParameters):
 
@@ -238,3 +240,10 @@ BuyerCustomerType = {
     1:{"display_value":"Premium"},
     2:{"display_value":"Average and Premium"}
 }
+
+BuyerCustomerTypeValues = [0,1,2]
+
+def validate_buyer_customer_type(x):
+    if not validate_integer(x) or not (int(x) in BuyerCustomerTypeValues):
+        return False
+    return True
