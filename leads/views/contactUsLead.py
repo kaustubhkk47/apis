@@ -50,7 +50,7 @@ def post_new_contactus_lead(request):
 	else:
 		closeDBConnection()
 
-		if("email" in contactUsLead and contactUsLead["email"]):
+		if("email" in contactUsLead and contactUsLead["email"] and validate_email(contactUsLead["email"])):
 			mail_template_file = "leads/contactus_lead.html"
 			mail_dict = {}
 			mail_dict["email"] = contactUsLead["email"]
@@ -73,7 +73,7 @@ def update_contactus_lead(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(contactusLead) or not "contactusleadID" in contactusLead or contactusLead["contactusleadID"]==None:
+	if not len(contactusLead) or not "contactusleadID" in contactusLead or contactusLead["contactusleadID"]==None or not validate_integer(contactusLead["contactusleadID"]):
 		return customResponse("4XX", {"error": "Id for contactus lead not sent"})
 
 	contactusLeadPtr = ContactUsLead.objects.filter(id=int(contactusLead["contactusleadID"]))

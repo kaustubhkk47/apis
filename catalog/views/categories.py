@@ -1,4 +1,4 @@
-from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string
+from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_integer
 
 from ..models.category import Category, validateCategoryData, populateCategoryData
 from ..models.product import Product
@@ -61,7 +61,7 @@ def update_category(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(category) or not "categoryID" in category or category["categoryID"]==None:
+	if not len(category) or not "categoryID" in category or category["categoryID"]==None or not validate_integer(category["categoryID"]):
 		return customResponse("4XX", {"error": "Id for category not sent"})
 
 	categoryPtr = Category.objects.filter(id=int(category["categoryID"]))
@@ -95,7 +95,7 @@ def delete_category(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(category) or not "categoryID" in category or category["categoryID"]==None:
+	if not len(category) or not "categoryID" in category or category["categoryID"]==None or not validate_integer(category["categoryID"]):
 		return customResponse("4XX", {"error": "Id for category not sent"})
 
 	categoryPtr = Category.objects.filter(id=int(category["categoryID"]))

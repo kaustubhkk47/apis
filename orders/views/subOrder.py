@@ -31,10 +31,10 @@ def update_suborder(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(subOrder) or not "suborderID" in subOrder or subOrder["suborderID"]==None:
+	if not len(subOrder) or not "suborderID" in subOrder or subOrder["suborderID"]==None or not validate_integer(subOrder["suborderID"]):
 		return customResponse("4XX", {"error": "Id for suborder not sent"})
 
-	if not "status" in subOrder or subOrder["status"]==None:
+	if not "status" in subOrder or subOrder["status"]==None or not validate_integer(subOrder["status"]):
 		return customResponse("4XX", {"error": "Current status not sent"})
 
 	status = int(subOrder["status"])

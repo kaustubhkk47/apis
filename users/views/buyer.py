@@ -1,4 +1,4 @@
-from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string
+from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_integer, validate_bool
 import json
 
 from ..models.buyer import *
@@ -80,7 +80,7 @@ def update_buyer(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer) or not "buyerID" in buyer or buyer["buyerID"]==None:
+	if not len(buyer) or not "buyerID" in buyer or buyer["buyerID"]==None or not validate_integer(buyer["buyerID"]):
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
 	buyerPtr = Buyer.objects.filter(id=int(buyer["buyerID"])).select_related('buyerdetails')
@@ -115,7 +115,7 @@ def update_buyer(request):
 		if "address" in buyer and buyer["address"]!=None:
 			addressSent = 1
 			buyeraddress = buyer["address"]
-			if not "addressID" in buyeraddress or not buyeraddress["addressID"]:
+			if not "addressID" in buyeraddress or not buyeraddress["addressID"] or not validate_integer(buyeraddress["addressID"]):
 				return customResponse("4XX", {"error": "Address id not sent"})
 			buyerAddressPtr = BuyerAddress.objects.filter(id = int(buyeraddress["addressID"]))
 
@@ -150,7 +150,7 @@ def delete_buyer(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer) or not "buyerID" in buyer or not buyer["buyerID"]:
+	if not len(buyer) or not "buyerID" in buyer or not buyer["buyerID"] or not validate_integer(buyer["buyerID"]):
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
 	buyerPtr = Buyer.objects.filter(id=int(buyer["buyerID"]))

@@ -4,6 +4,7 @@ import datetime
 import jwt as JsonWebToken
 import settings
 import os
+import re
 
 from django.core.mail import EmailMessage
 #from django.template import Context
@@ -47,6 +48,35 @@ def validate_integer(x):
     try:
         x = int(x)
     except Exception, e:
+        return False
+    return True
+
+def validate_number(x):
+    try:
+        x = float(x)
+    except Exception, e:
+        return False
+    return True
+
+def validate_mobile_number(x):
+    if len(x) != 10:
+        return False
+    if not (x[0] == '9' or x[0] == '8' or x[0] == '7'):
+        return False
+    return True
+
+def validate_email(x):
+    if not re.match(r"[^@]+@[^@]+\.[^@]+", x):
+        return False
+    return True
+
+def validate_bool(x):
+    if not validate_integer(x) or not (int(x)==1 or int(x)==0):
+        return False
+    return True
+
+def validate_pincode(x):
+    if not validate_integer(x) or not len(x) == 6:
         return False
     return True
 

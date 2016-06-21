@@ -41,7 +41,7 @@ class OrderItem(models.Model):
 
 def populateOrderItemData(OrderItemPtr, orderItem):
     OrderItemPtr.pieces = int(orderItem["pieces"])
-    OrderItemPtr.lots = orderItem["lots"]
+    OrderItemPtr.lots = int(orderItem["lots"])
     OrderItemPtr.retail_price_per_piece = Decimal(orderItem["retail_price_per_piece"])
     OrderItemPtr.calculated_price_per_piece = Decimal(orderItem["calculated_price_per_piece"])
     OrderItemPtr.edited_price_per_piece = Decimal(orderItem["edited_price_per_piece"])

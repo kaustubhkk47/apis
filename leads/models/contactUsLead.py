@@ -1,5 +1,7 @@
 from django.db import models
 
+from scripts.utils import validate_bool
+
 class ContactUsLead(models.Model):
 
 	email = models.EmailField(max_length=255, blank=True)
@@ -25,7 +27,7 @@ def validateContactUsLeadData(contactUsLead, oldcontactUsLead, is_new):
 		contactUsLead["mobile_number"] = oldcontactUsLead.mobile_number
 	if not "email" in contactUsLead or contactUsLead["email"]==None:
 		contactUsLead["email"] = oldcontactUsLead.email
-	if not "status" in contactUsLead or contactUsLead["status"]==None:
+	if not "status" in contactUsLead or contactUsLead["status"]==None or not validate_bool(contactUsLead["status"]):
 		contactUsLead["status"] = oldcontactUsLead.status
 	if not "comments" in contactUsLead or contactUsLead["comments"]==None:
 		contactUsLead["comments"] = oldcontactUsLead.comments
@@ -39,7 +41,7 @@ def populateContactUsLead(contactUsLeadPtr, contactUsLead):
 	contactUsLeadPtr.remarks = contactUsLead["remarks"]
 	contactUsLeadPtr.email = contactUsLead["email"]
 	contactUsLeadPtr.mobile_number = contactUsLead["mobile_number"]
-	contactUsLeadPtr.status = int(contactUsLead["status"])
+	contactUsLeadPtr.status = bool(contactUsLead["status"])
 	contactUsLeadPtr.comments = contactUsLead["comments"]
 
 ContactUsLeadStatus = {
