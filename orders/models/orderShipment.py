@@ -4,9 +4,8 @@ from users.models.buyer import BuyerAddress
 from users.models.seller import SellerAddress
 
 from .orderItem import OrderItem
-#from .subOrder import SubOrder
 
-from scripts.utils import validate_date
+from scripts.utils import validate_date, validate_number, validate_bool, validate_integer
 from decimal import Decimal
 import datetime
 
@@ -75,17 +74,17 @@ def validateOrderShipmentData(orderShipment):
         flag = False
     if not "waybill_number" in orderShipment or orderShipment["waybill_number"]==None:
         orderShipment["waybill_number"] = ""
-    if not "packaged_weight" in orderShipment or orderShipment["packaged_weight"]==None:
+    if not "packaged_weight" in orderShipment or orderShipment["packaged_weight"]==None or not validate_number(orderShipment["packaged_weight"]):
         flag = False
-    if not "packaged_length" in orderShipment or orderShipment["packaged_length"]==None:
+    if not "packaged_length" in orderShipment or orderShipment["packaged_length"]==None or not validate_number(orderShipment["packaged_length"]):
         flag = False
-    if not "packaged_breadth" in orderShipment or orderShipment["packaged_breadth"]==None:
+    if not "packaged_breadth" in orderShipment or orderShipment["packaged_breadth"]==None or not validate_number(orderShipment["packaged_breadth"]):
         flag = False
-    if not "packaged_height" in orderShipment or orderShipment["packaged_height"]==None:
+    if not "packaged_height" in orderShipment or orderShipment["packaged_height"]==None or not validate_number(orderShipment["packaged_height"]):
         flag = False
-    if not "cod_charge" in orderShipment or orderShipment["cod_charge"]==None:
+    if not "cod_charge" in orderShipment or orderShipment["cod_charge"]==None or not validate_number(orderShipment["cod_charge"]):
         flag = False
-    if not "shipping_charge" in orderShipment or orderShipment["shipping_charge"]==None:
+    if not "shipping_charge" in orderShipment or orderShipment["shipping_charge"]==None or not validate_number(orderShipment["shipping_charge"]):
         flag = False
     if not "remarks" in orderShipment or orderShipment["remarks"]==None:
         orderShipment["remarks"] = ""
@@ -93,7 +92,7 @@ def validateOrderShipmentData(orderShipment):
         orderShipment["rto_remarks"] = ""
     if not "tracking_url" in orderShipment or orderShipment["tracking_url"]==None:
         orderShipment["tracking_url"] = ""
-    if not "all_items" in orderShipment or orderShipment["all_items"]==None:
+    if not "all_items" in orderShipment or orderShipment["all_items"]==None or not validate_bool(orderShipment["all_items"]):
         flag = False
     
     return flag
@@ -138,7 +137,7 @@ def validateOrderShipmentItemsData(orderItems, subOrderID):
 
     for orderItem in orderItems:
 
-        if not "orderitemID" in orderItem or orderItem["orderitemID"]==None:
+        if not "orderitemID" in orderItem or orderItem["orderitemID"]==None or not validate_integer(orderItem["orderitemID"]):
             return False
 
         orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))

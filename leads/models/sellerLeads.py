@@ -1,5 +1,5 @@
 from django.db import models
-
+from scripts.utils import validate_bool
 
 class SellerLeads(models.Model):
 
@@ -28,7 +28,7 @@ def validateSellerLeadData(sellerlead, oldsellerlead, is_new):
 		sellerlead["mobile_number"] = oldsellerlead.mobile_number
 	if not "email" in sellerlead or sellerlead["email"]==None:
 		sellerlead["email"] = oldsellerlead.email
-	if not "status" in sellerlead or sellerlead["status"]==None:
+	if not "status" in sellerlead or sellerlead["status"]==None or not validate_bool(sellerlead["status"]):
 		sellerlead["status"] = oldsellerlead.status
 	if not "comments" in sellerlead or sellerlead["comments"]==None:
 		sellerlead["comments"] = oldsellerlead.comments
@@ -42,7 +42,7 @@ def populateSellerLead(sellerleadPtr, sellerlead):
 	sellerleadPtr.company_name = sellerlead["company_name"]
 	sellerleadPtr.email = sellerlead["email"]
 	sellerleadPtr.mobile_number = sellerlead["mobile_number"]
-	sellerleadPtr.status = int(sellerlead["status"])
+	sellerleadPtr.status = bool(sellerlead["status"])
 	sellerleadPtr.comments = sellerlead["comments"]
 
 SellerLeadStatus = {

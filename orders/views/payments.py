@@ -53,7 +53,7 @@ def post_new_buyer_payment(request):
 	if not len(buyerPayment) or not validateBuyerPaymentData(buyerPayment):
 		return customResponse("4XX", {"error": "Invalid data for buyer payment sent"})
 
-	if not "orderID" in buyerPayment or buyerPayment["orderID"]==None:
+	if not "orderID" in buyerPayment or buyerPayment["orderID"]==None or not validate_integer(buyerPayment["orderID"]):
 		return customResponse("4XX", {"error": "Id for order not sent"})
 
 	OrderPtr = Order.objects.filter(id=int(buyerPayment["orderID"]))
@@ -64,7 +64,7 @@ def post_new_buyer_payment(request):
 	OrderPtr = OrderPtr[0]
 
 	if int(buyerPayment["payment_method"]) == 0:
-		if not "ordershipmentID" in buyerPayment or buyerPayment["ordershipmentID"]==None:
+		if not "ordershipmentID" in buyerPayment or buyerPayment["ordershipmentID"]==None or not validate_integer(buyerPayment["ordershipmentID"]):
 			return customResponse("4XX", {"error": "Id for order shipment not sent"})
 
 		OrderShipmentPtr = OrderShipment.objects.filter(id=int(buyerPayment["ordershipmentID"]))
@@ -83,7 +83,7 @@ def post_new_buyer_payment(request):
 		if int(buyerPayment["payment_method"]) == 0:
 			newBuyerPayment.order_shipment = OrderShipmentPtr
 
-		if int(buyerPayment["fully_paid"]) == 1:
+		if bool(buyerPayment["fully_paid"]) == 1:
 			OrderPtr.order_payment_status = 1
 		else:
 			OrderPtr.order_payment_status = 2
@@ -107,7 +107,7 @@ def post_new_seller_payment(request):
 	if not len(sellerPayment) or not validateSellerPaymentData(sellerPayment):
 		return customResponse("4XX", {"error": "Invalid data for seller payment sent"})
 
-	if not "suborderID" in sellerPayment or sellerPayment["suborderID"]==None:
+	if not "suborderID" in sellerPayment or sellerPayment["suborderID"]==None or not validate_integer(sellerPayment["suborderID"]):
 		return customResponse("4XX", {"error": "Id for suborder not sent"})
 
 	SubOrderPtr = SubOrder.objects.filter(id=int(sellerPayment["suborderID"]))
@@ -117,7 +117,7 @@ def post_new_seller_payment(request):
 
 	SubOrderPtr = SubOrderPtr[0]
 
-	if sellerPayment["fully_paid"] == 0:
+	if bool(sellerPayment["fully_paid"]) == 0:
 		if not "order_items" in sellerPayment or sellerPayment["order_items"]==None:
 			return customResponse("4XX", {"error": "Order items in order shipment not sent"})
 
@@ -129,7 +129,7 @@ def post_new_seller_payment(request):
 		populateSellerPayment(newSellerPayment, sellerPayment)
 		newSellerPayment.save()
 
-		if sellerPayment["fully_paid"] == 1:
+		if bool(sellerPayment["fully_paid"]) == 1:
 			SubOrderPtr.suborder_payment_status = 1
 
 			orderItemQuerySet = OrderItem.objects.filter(suborder_id = SubOrderPtr.id).exclude(current_status = 4)

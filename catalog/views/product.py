@@ -1,4 +1,4 @@
-from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string
+from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_integer
 
 from ..models.category import Category
 from ..models.product import Product, validateProductData, ProductDetails, validateProductDetailsData, populateProductData, populateProductDetailsData, filterProducts
@@ -51,7 +51,7 @@ def post_new_product(request):
     if not len(product) or not validateProductData(product, Product(), 1):
         return customResponse("4XX", {"error": "Invalid data for product sent"})
 
-    if not "sellerID" in product or product["sellerID"]==None:
+    if not "sellerID" in product or product["sellerID"]==None or not validate_integer(product["sellerID"]):
         return customResponse("4XX", {"error": "Seller id for product not sent"})
 
     sellerPtr = Seller.objects.filter(id=int(product["sellerID"]))
@@ -59,7 +59,7 @@ def post_new_product(request):
         return customResponse("4XX", {"error": "Invalid id for seller sent"})
     sellerPtr = sellerPtr[0]
 
-    if not "categoryID" in product or product["categoryID"]==None:
+    if not "categoryID" in product or product["categoryID"]==None or not validate_integer(product["categoryID"]):
         return customResponse("4XX", {"error": "Category id for product not sent"})
 
     categoryPtr = Category.objects.filter(id=int(product["categoryID"]))
@@ -112,7 +112,7 @@ def update_product(request):
     except Exception as e:
         return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-    if not len(product) or not "productID" in product or product["productID"]==None:
+    if not len(product) or not "productID" in product or product["productID"]==None or not validate_integer(product["productID"]):
         return customResponse("4XX", {"error": "Id for product not sent"})
 
     productPtr = Product.objects.filter(id=int(product["productID"])).select_related('productdetails')
@@ -168,7 +168,6 @@ def update_product(request):
         if detailsPresent == 0:
             newProductDetails.save()
         
-
     except Exception as e:
         log.critical(e)
         closeDBConnection()
@@ -184,7 +183,7 @@ def delete_product(request):
     except Exception as e:
         return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-    if not len(product) or not "productID" in product or product["productID"]==None:
+    if not len(product) or not "productID" in product or product["productID"]==None or not validate_integer(product["productID"]):
         return customResponse("4XX", {"error": "Id for product not sent"})
 
     productPtr = Product.objects.filter(id=int(product["productID"]))

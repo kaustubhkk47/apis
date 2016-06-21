@@ -8,7 +8,7 @@ from .orderShipment import OrderShipment
 from .order import Order
 from .orderItem import OrderItem
 
-from scripts.utils import validate_date_time
+from scripts.utils import validate_date_time, validate_integer, validate_number, validate_bool
 from decimal import Decimal
 
 class BuyerPayment(models.Model):
@@ -56,7 +56,7 @@ class SellerPayment(models.Model):
 
 def validateBuyerPaymentData(buyerPayment):
 
-	if not "payment_method" in buyerPayment or buyerPayment["payment_method"]==None:
+	if not "payment_method" in buyerPayment or buyerPayment["payment_method"]==None or not validate_integer(buyerPayment["payment_method"]):
 		return False
 	if not "reference_number" in buyerPayment or buyerPayment["reference_number"]==None:
 		return False
@@ -64,9 +64,9 @@ def validateBuyerPaymentData(buyerPayment):
 		buyerPayment["details"] = ""
 	if not "payment_time" in buyerPayment or buyerPayment["payment_time"]==None or not validate_date_time(buyerPayment["payment_time"]):
 		return False
-	if not "payment_value" in buyerPayment or buyerPayment["payment_value"]==None:
+	if not "payment_value" in buyerPayment or buyerPayment["payment_value"]==None or not validate_number(buyerPayment["payment_value"]):
 		return False
-	if not "fully_paid" in buyerPayment or buyerPayment["fully_paid"]==None:
+	if not "fully_paid" in buyerPayment or buyerPayment["fully_paid"]==None or not validate_bool(buyerPayment["fully_paid"]):
 		return False
 
 	return True
@@ -81,7 +81,7 @@ def populateBuyerPayment(BuyerPaymentPtr, buyerPayment):
 
 def validateSellerPaymentData(sellerPayment):
 
-	if not "payment_method" in sellerPayment or sellerPayment["payment_method"]==None:
+	if not "payment_method" in sellerPayment or sellerPayment["payment_method"]==None or not validate_integer(sellerPayment["payment_method"]):
 		return False
 	if not "reference_number" in sellerPayment or sellerPayment["reference_number"]==None:
 		return False
@@ -89,9 +89,9 @@ def validateSellerPaymentData(sellerPayment):
 		sellerPayment["details"] = ""
 	if not "payment_time" in sellerPayment or sellerPayment["payment_time"]==None or not validate_date_time(sellerPayment["payment_time"]):
 		return False
-	if not "payment_value" in sellerPayment or sellerPayment["payment_value"]==None:
+	if not "payment_value" in sellerPayment or sellerPayment["payment_value"]==None or not validate_number(sellerPayment["payment_value"]):
 		return False
-	if not "fully_paid" in sellerPayment or sellerPayment["fully_paid"]==None:
+	if not "fully_paid" in sellerPayment or sellerPayment["fully_paid"]==None or not validate_bool(sellerPayment["fully_paid"]):
 		return False
 
 	return True
@@ -145,7 +145,7 @@ def validateSellerPaymentItemsData(orderItems, subOrderID):
 
 	for orderItem in orderItems:
 
-		if not "orderitemID" in orderItem or orderItem["orderitemID"]==None:
+		if not "orderitemID" in orderItem or orderItem["orderitemID"]==None or not validate_integer(orderItem["orderitemID"]):
 			return False
 
 		orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))

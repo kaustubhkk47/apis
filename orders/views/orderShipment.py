@@ -40,7 +40,7 @@ def post_new_order_shipment(request):
 	if not len(orderShipment) or not validateOrderShipmentData(orderShipment):
 		return customResponse("4XX", {"error": "Invalid data for order shipment sent"})
 
-	if not "suborderID" in orderShipment or orderShipment["suborderID"]==None:
+	if not "suborderID" in orderShipment or orderShipment["suborderID"]==None or not validate_integer(orderShipment["suborderID"]):
 		return customResponse("4XX", {"error": "Id for sub order not sent"})
 
 	subOrderPtr = SubOrder.objects.filter(id=int(orderShipment["suborderID"])).select_related('order')
@@ -56,7 +56,7 @@ def post_new_order_shipment(request):
 	buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=subOrderPtr.order.buyer_id)
 	buyerAddressPtr = buyerAddressPtr[0]
 
-	if (int(orderShipment["all_items"]) == 0):
+	if (bool(orderShipment["all_items"]) == 0):
 		if not "order_items" in orderShipment or orderShipment["order_items"]==None:
 			return customResponse("4XX", {"error": "Order items in order shipment not sent"})
 
@@ -72,7 +72,7 @@ def post_new_order_shipment(request):
 
 		allOrderItems = OrderItem.objects.filter(id__in=sentOrderItems)
 
-	elif (orderShipment["all_items"] == 1):
+	elif (bool(orderShipment["all_items"]) == 1):
 		allOrderItems = OrderItem.objects.filter(suborder_id= subOrderPtr.id, current_status__in=[0,1,2,3])
 		if len(allOrderItems) == 0:
 			return customResponse("4XX", {"error": "No order items left to ship"})
@@ -203,10 +203,10 @@ def update_order_shipment(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(orderShipment) or not "ordershipmentID" in orderShipment or orderShipment["ordershipmentID"]==None:
+	if not len(orderShipment) or not "ordershipmentID" in orderShipment or orderShipment["ordershipmentID"]==None or not validate_integer(orderShipment["ordershipmentID"]):
 		return customResponse("4XX", {"error": "Id for order shipment not sent"})
 
-	if not "status" in orderShipment or orderShipment["status"]==None:
+	if not "status" in orderShipment or orderShipment["status"]==None or not validate_integer(orderShipment["status"]):
 		return customResponse("4XX", {"error": "Current status not sent"})
 
 	status = int(orderShipment["status"])

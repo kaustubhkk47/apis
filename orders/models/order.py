@@ -8,6 +8,8 @@ from .orderItem import OrderItem, OrderItemCompletionStatus
 from decimal import Decimal
 import math
 
+from scripts.utils import validate_integer, validate_number
+
 class Order(models.Model):
 
     buyer = models.ForeignKey(Buyer)
@@ -37,10 +39,10 @@ class Order(models.Model):
         return str(self.id) + " - " + str(self.display_number) + " - " + self.buyer.name + " - Price: " + str(self.final_price)
 
 def populateOrderData(orderPtr, order):
-    orderPtr.product_count = order["product_count"]
-    orderPtr.retail_price = order["retail_price"]
-    orderPtr.calculated_price = order["calculated_price"]
-    orderPtr.edited_price = order["edited_price"]
+    orderPtr.product_count = int(order["product_count"])
+    orderPtr.retail_price = Decimal(order["retail_price"])
+    orderPtr.calculated_price = Decimal(order["calculated_price"])
+    orderPtr.edited_price = Decimal(order["edited_price"])
     orderPtr.final_price = round(order["edited_price"])
     orderPtr.remarks = order["remarks"]
     orderPtr.order_status = 1
@@ -66,11 +68,9 @@ def filterOrder(orderParameters):
 
 def validateOrderProductsData(orderProducts):
 
-    flag = True
-
     for orderProduct in orderProducts:
-        if not "productID" in orderProduct or orderProduct["productID"]==None:
-            flag = False
+        if not "productID" in orderProduct or orderProduct["productID"]==None or not validate_integer(orderProduct["productID"]):
+            return False
 
         productPtr = Product.objects.filter(id=int(orderProduct["productID"]))
         if len(productPtr) == 0:
@@ -78,22 +78,21 @@ def validateOrderProductsData(orderProducts):
 
         productPtr = productPtr[0]
 
-        if not "pieces" in orderProduct or orderProduct["pieces"]==None:
-            flag = False
-        if not "edited_price_per_piece" in orderProduct or orderProduct["edited_price_per_piece"]==None:
-            flag = False
+        if not "pieces" in orderProduct or orderProduct["pieces"]==None or not validate_integer(orderProduct["pieces"]):
+            return False
+        if not "edited_price_per_piece" in orderProduct or orderProduct["edited_price_per_piece"]==None or not validate_number(orderProduct["edited_price_per_piece"]):
+            return False
         if not "remarks" in orderProduct or orderProduct["remarks"]==None:
             orderProduct["remarks"] = ""
 
         orderProduct["retail_price_per_piece"] = productPtr.price_per_unit
         orderProduct["lot_size"] = productPtr.lot_size
 
-        if flag == True:
-            orderProduct["final_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
-            orderProduct["lots"] = int(math.ceil(float(orderProduct["pieces"])/productPtr.lot_size))
-            orderProduct["calculated_price_per_piece"] = getCalculatedPricePerPiece(int(orderProduct["productID"]),orderProduct["lots"])
+        orderProduct["final_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
+        orderProduct["lots"] = int(math.ceil(float(orderProduct["pieces"])/productPtr.lot_size))
+        orderProduct["calculated_price_per_piece"] = getCalculatedPricePerPiece(int(orderProduct["productID"]),orderProduct["lots"])
 
-    return flag
+    return True
 
 def update_order_completion_status(order):
 
