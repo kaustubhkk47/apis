@@ -14,7 +14,7 @@ class Buyer(models.Model):
     name = models.CharField(max_length=200, blank=True)
     company_name = models.CharField(max_length=200, blank=True)
     mobile_number = models.CharField(max_length=11, blank=False, db_index=True)
-    email = models.EmailField(max_length=255, blank=True)
+    email = models.EmailField(max_length=255, blank=True, null = True)
     password = models.CharField(max_length=255, blank=True)
     alternate_phone_number = models.CharField(max_length=11, blank=True)
     mobile_verification = models.BooleanField(default=False)
@@ -121,6 +121,8 @@ def validateBuyerData(buyer, oldbuyer, is_new):
         buyer["mobile_number"] = oldbuyer.mobile_number
     if not "email" in buyer or buyer["email"]==None or not validate_email(buyer["email"]):
         buyer["email"] = oldbuyer.email
+        if is_new == 1:
+            buyer["email"] = None
     if not "password" in buyer or buyer["password"]==None:
         buyer["password"] = oldbuyer.password
     if not "alternate_phone_number" in buyer or buyer["alternate_phone_number"]==None:
