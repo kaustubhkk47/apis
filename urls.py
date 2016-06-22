@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from urlHandlers import catalog_handler, user_handler, order_handler, lead_handler
+from urlHandlers import catalog_handler, user_handler, order_handler, lead_handler, address_handler
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -39,10 +39,17 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-    url(r'^users/$', user_handler.user_details),
+    url(r'^users/$', user_handler.user_details)
+]
+
+urlpatterns += [
     url(r'^users/buyer/$', user_handler.buyer_details),
     url(r'^users/buyer/login/$', user_handler.buyer_login),
     url(r'^users/buyer/address/$', user_handler.buyer_address_details),
+    url(r'^users/buyer/buyerinterest/$', user_handler.buyer_interest_details)
+]
+
+urlpatterns += [
     url(r'^users/seller/$', user_handler.seller_details),
     url(r'^users/seller/login/$', user_handler.seller_login),
     url(r'^users/internaluser/login/$', user_handler.internaluser_login)
@@ -52,6 +59,10 @@ urlpatterns += [
     url(r'^leads/buyer/$', lead_handler.buyer_leads),
     url(r'^leads/seller/$', lead_handler.seller_leads),
     url(r'^leads/contactus/$', lead_handler.contactus_leads)
+]
+
+urlpatterns += [
+    url(r'^address/state/$', address_handler.state_details)
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

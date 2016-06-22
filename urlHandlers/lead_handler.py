@@ -1,5 +1,5 @@
 from django.views.decorators.csrf import csrf_exempt
-from scripts.utils import customResponse, get_token_payload
+from scripts.utils import customResponse, get_token_payload, getArrFromString
 from leads.views import buyerLeads,contactUsLead, sellerLeads
 
 @csrf_exempt
@@ -20,10 +20,10 @@ def buyer_leads(request):
 			buyerLeadParameters["isInternalUser"] = 1
 
 		if status != "":
-			buyerLeadParameters["statusArr"] = [int(e) if e.isdigit() else e for e in status.split(",")]
+			buyerLeadParameters["statusArr"] = getArrFromString(status)
 
 		if buyerLeadID != "":
-			buyerLeadParameters["buyerLeadsArr"] = [int(e) if e.isdigit() else e for e in buyerLeadID.split(",")]
+			buyerLeadParameters["buyerLeadsArr"] = getArrFromString(buyerLeadID)
 
 		return buyerLeads.get_buyer_leads(request,buyerLeadParameters)
 	if request.method == "POST":
@@ -51,10 +51,10 @@ def seller_leads(request):
 			sellerLeadParameters["isInternalUser"] = 1
 
 		if status != "":
-			sellerLeadParameters["statusArr"] = [int(e) if e.isdigit() else e for e in status.split(",")]
+			sellerLeadParameters["statusArr"] = getArrFromString(status)
 
 		if sellerLeadID != "":
-			sellerLeadParameters["sellerLeadsArr"] = [int(e) if e.isdigit() else e for e in sellerLeadID.split(",")]
+			sellerLeadParameters["sellerLeadsArr"] = getArrFromString(sellerLeadID)
 
 		return sellerLeads.get_seller_leads(request,sellerLeadParameters)
 	elif request.method == "POST":
@@ -82,10 +82,10 @@ def contactus_leads(request):
 			contactUsLeadParameters["isInternalUser"] = 1
 
 		if status != "":
-			contactUsLeadParameters["statusArr"] = [int(e) if e.isdigit() else e for e in status.split(",")]
+			contactUsLeadParameters["statusArr"] = getArrFromString(status)
 
 		if contactUsLeadID != "":
-			contactUsLeadParameters["contactUsLeadsArr"] = [int(e) if e.isdigit() else e for e in contactUsLeadID.split(",")]
+			contactUsLeadParameters["contactUsLeadsArr"] = getArrFromString(contactUsLeadID)
 		return contactUsLead.get_contactus_leads(request,contactUsLeadParameters)
 	if request.method == "POST":
 		return contactUsLead.post_new_contactus_lead(request)

@@ -9,6 +9,7 @@ admin.site.register(Buyer)
 admin.site.register(BuyerAddress)
 admin.site.register(BuyerDetails)
 admin.site.register(BuyerInterest)
+admin.site.register(BuyerInterestHistory)
 admin.site.register(BuyerPurchasingState)
 admin.site.register(BuyerBuysFrom)
 
