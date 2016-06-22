@@ -31,7 +31,7 @@ def post_new_buyer(request):
 	if not len(buyer) or not validateBuyerData(buyer, Buyer(), 1):
 		return customResponse("4XX", {"error": "Invalid data for buyer sent"})
 
-	if buyerEmailExists(buyer["email"]):
+	if buyer["email"] != None and buyerEmailExists(buyer["email"]):
 		return customResponse("4XX", {"error": "buyer email already exists"})
 
 	if buyerMobileNumberExists(buyer["mobile_number"]):
