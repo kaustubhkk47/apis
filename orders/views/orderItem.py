@@ -5,14 +5,25 @@ log = logging.getLogger("django")
 from ..models.orderItem import filterOrderItem, OrderItem
 from ..serializers.orderItem import parseOrderItem
 import datetime
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def get_order_item_details(request, orderItemParameters):
 	try:
 
 		orderItems = filterOrderItem(orderItemParameters)
-		body = parseOrderItem(orderItems,orderItemParameters)
+
 		statusCode = "2XX"
-		response = {"order_items": body}
+
+		paginator = Paginator(orderItems, orderItemParameters["itemsPerPage"])
+
+		try:
+			pageItems = paginator.page(orderItemParameters["pageNumber"])
+		except Exception as e:
+			pageItems = []
+
+		body = parseOrderItem(pageItems,orderItemParameters)
+		statusCode = "2XX"
+		response = {"order_items": body,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":orderItemParameters["pageNumber"], "items_per_page":orderItemParameters["itemsPerPage"]}
 
 	except Exception as e:
 		log.critical(e)

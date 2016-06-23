@@ -13,7 +13,7 @@ def get_buyer_details(request,buyerParameters):
 		buyers = filterBuyer(buyerParameters)
 
 		response = {
-			"buyers" : parse_buyer(buyers)
+			"buyers" : parse_buyer(buyers, buyerParameters)
 		}
 		closeDBConnection()
 
@@ -26,10 +26,8 @@ def get_buyer_interest_details(request,buyerParameters):
 	try:
 		buyerInterests = filterBuyerInterest(buyerParameters)
 
-		print len(buyerInterests)
-
 		response = {
-			"buyer_interests" : parse_buyer_interest(buyerInterests)
+			"buyer_interests" : parse_buyer_interest(buyerInterests, buyerParameters)
 		}
 		closeDBConnection()
 

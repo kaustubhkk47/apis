@@ -37,8 +37,17 @@ def product_details(request):
 		productID = request.GET.get("productID", "")
 		categoryID = request.GET.get("categoryID", "")
 		sellerID = request.GET.get("sellerID", "")
-		pageNumber = request.GET.get("page_number", 0)
-		productsperPage = request.GET.get("items_per_page", 6)
+		try:
+			pageNumber = int(request.GET.get("page_number", 0))
+			productsperPage = int(request.GET.get("items_per_page", 10))
+		except Exception as e:
+			pageNumber = 1
+			productsperPage = 10
+
+		if not pageNumber > 0 or not productsperPage > 0:
+			pageNumber = 1
+			productsperPage = 10
+			
 		accessToken = request.GET.get("access_token", "")
 
 		if productID != "":
@@ -61,9 +70,8 @@ def product_details(request):
 			productParameters["internalusersArr"] = [tokenPayload["internaluserID"]]
 			productParameters["isInternalUser"] = 1
 
-		if pageNumber > 0:
-			productParameters["pageNumber"] = pageNumber
-			productParameters["productsperPage"] = productsperPage
+		productParameters["pageNumber"] = pageNumber
+		productParameters["itemsPerPage"] = productsperPage
 
 		return product.get_product_details(request,productParameters)
 	elif request.method == "POST":

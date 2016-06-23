@@ -3,7 +3,7 @@ from users.serializers.buyer import serialize_buyer, serialize_buyer_address
 from ..models.orderShipment import OrderShipmentStatus
 
 from ..models.orderItem import filterOrderItem
-from .orderItem import serializeOrderItem
+from .orderItem import serializeOrderItem, parseOrderItem
 
 def serializeOrderShipment(orderShipmentEntry, orderShipmentParameters = {}):
 	orderShipment = {}
@@ -41,14 +41,8 @@ def serializeOrderShipment(orderShipmentEntry, orderShipmentParameters = {}):
 
 	orderItemQuerySet = filterOrderItem(orderShipmentParameters)
 	orderItemQuerySet = orderItemQuerySet.filter(order_shipment_id=orderShipmentEntry.id)
+	orderShipment["order_items"] = parseOrderItem(orderItemQuerySet,orderShipmentParameters)
 		
-	orderItems = []
-
-	for orderItem in orderItemQuerySet:
-		orderItemEntry = serializeOrderItem(orderItem)
-		orderItems.append(orderItemEntry)
-
-	orderShipment["order_items"] = orderItems
 	orderShipment["final_price"] = orderShipmentEntry.final_price
 
 	orderShipment["order_shipment_status"] = {

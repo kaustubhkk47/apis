@@ -2,8 +2,8 @@ from users.serializers.buyer import serialize_buyer
 from ..models.order import OrderStatus, OrderPaymentStatus
 from ..models.subOrder import filterSubOrder
 from ..models.payments import filterBuyerPayment
-from .subOrder import serializeSubOrder
-from .payments import serializeBuyerPayment
+from .subOrder import serializeSubOrder, parseSubOrders
+from .payments import serializeBuyerPayment, parseBuyerPayments
 
 def serializeOrder(orderEntry, orderParameters = {}):
 	order = {}
@@ -33,24 +33,11 @@ def serializeOrder(orderEntry, orderParameters = {}):
 
 	subOrderQuerySet = filterSubOrder(orderParameters)
 	subOrderQuerySet = subOrderQuerySet.filter(order_id = orderEntry.id)
-
-	subOrders = []
-
-	for subOrder in subOrderQuerySet:
-		subOrderEntry = serializeSubOrder(subOrder)
-		subOrders.append(subOrderEntry)
-
-	order["sub_orders"] = subOrders
+	order["sub_orders"] = parseSubOrders(subOrderQuerySet,orderParameters)
 
 	buyerPaymentQuerySet = filterBuyerPayment(orderParameters)
 	buyerPaymentQuerySet = buyerPaymentQuerySet.filter(order_id = orderEntry.id)
-	buyerPayments = []
-
-	for buyerPayment in buyerPaymentQuerySet:
-		buyerPaymentEntry = serializeBuyerPayment(buyerPayment)
-		buyerPayments.append(buyerPaymentEntry)
-
-	order["buyer_payments"] = buyerPayments
+	order["buyer_payments"] = parseBuyerPayments(buyerPaymentQuerySet,orderParameters)
 	
 	return order
 

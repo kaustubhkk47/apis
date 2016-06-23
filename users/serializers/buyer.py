@@ -1,11 +1,10 @@
-from ..models.buyer import Buyer, BuyerAddress, BuyerDetails, filterBuyer
+from ..models.buyer import Buyer, BuyerAddress, BuyerDetails, filterBuyer, filterBuyerInterest
 from catalog.serializers.category import serialize_categories
 
-def serialize_buyer(buyer_entry):
+def serialize_buyer(buyer_entry, buyerParameters = {}):
 
     buyer_addresses_queryset = BuyerAddress.objects.filter(buyer_id = buyer_entry.id)
-
-    buyer_addresses = serialize_buyer_addresses(buyer_addresses_queryset)
+    buyer_addresses = parse_buyer_address(buyer_addresses_queryset)
 
     buyer = {
         "buyerID" : buyer_entry.id,
@@ -33,10 +32,14 @@ def serialize_buyer(buyer_entry):
 
         buyer["details"] = buyer_details
 
+    buyerInterestQuerySet = filterBuyerInterest(buyerParameters)
+    buyerInterestQuerySet = buyerInterestQuerySet.filter(buyer_id = buyer_entry.id)
+    buyer["buyer_interests"] = parse_buyer_interest(buyerInterestQuerySet,buyerParameters)
+
     return buyer
 
 
-def serialize_buyer_addresses(buyer_addresses_queryset):
+def parse_buyer_address(buyer_addresses_queryset, buyerParameters = {}):
 
     buyer_addresses =[]
 
@@ -47,7 +50,7 @@ def serialize_buyer_addresses(buyer_addresses_queryset):
 
     return buyer_addresses
 
-def serialize_buyer_address(buyer_address):
+def serialize_buyer_address(buyer_address, buyerParameters = {}):
     buyer_address_entry = {
         "addressID" : buyer_address.id,
         "address" : buyer_address.address_line,
@@ -61,28 +64,28 @@ def serialize_buyer_address(buyer_address):
     }
     return buyer_address_entry
 
-def parse_buyer(buyers_queryset):
+def parse_buyer(buyers_queryset, buyerParameters = {}):
 
     buyers = []
 
     for buyer in buyers_queryset:
-        buyer_entry = serialize_buyer(buyer)
+        buyer_entry = serialize_buyer(buyer, buyerParameters)
         buyers.append(buyer_entry)
 
     return buyers
 
 
-def parse_buyer_interest(buyer_interests_queryset):
+def parse_buyer_interest(buyer_interests_queryset, buyerParameters = {}):
 
     buyer_interests = []
 
     for buyer_interest in buyer_interests_queryset:
-        buyer_interest_entry = serialize_buyer_interest(buyer_interest)
+        buyer_interest_entry = serialize_buyer_interest(buyer_interest, buyerParameters)
         buyer_interests.append(buyer_interest_entry)
 
     return buyer_interests
 
-def serialize_buyer_interest(buyer_interest_entry):
+def serialize_buyer_interest(buyer_interest_entry, buyerParameters = {}):
 
     buyer_interest = {}
 

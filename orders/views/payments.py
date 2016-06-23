@@ -9,14 +9,22 @@ from ..models.subOrder import SubOrder
 from ..models.orderShipment import OrderShipment
 from ..models.payments import BuyerPayment, SellerPayment, filterSellerPayment, filterBuyerPayment, validateBuyerPaymentData, validateSellerPaymentData, populateBuyerPayment, populateSellerPayment, validateSellerPaymentItemsData
 from ..serializers.payments import parseSellerPayments, parseBuyerPayments, serializeBuyerPayment, serializeSellerPayment
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def get_seller_payment_details(request, sellerPaymentParameters):
 	try:
 		sellerPayments = filterSellerPayment(sellerPaymentParameters)
 
-		body = parseSellerPayments(sellerPayments,sellerPaymentParameters)
+		paginator = Paginator(sellerPayments, sellerPaymentParameters["itemsPerPage"])
+
+		try:
+			pageItems = paginator.page(sellerPaymentParameters["pageNumber"])
+		except Exception as e:
+			pageItems = []
+
+		body = parseSellerPayments(pageItems,sellerPaymentParameters)
 		statusCode = "2XX"
-		response = {"seller_payments": body}
+		response = {"seller_payments": body,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":sellerPaymentParameters["pageNumber"], "items_per_page":sellerPaymentParameters["itemsPerPage"]}
 
 	except Exception as e:
 		log.critical(e)
@@ -31,9 +39,17 @@ def get_buyer_payment_details(request, buyerPaymentParameters):
 
 		buyerPayments = filterBuyerPayment(buyerPaymentParameters)
 		
-		body = parseBuyerPayments(buyerPayments,buyerPaymentParameters)
+		paginator = Paginator(buyerPayments, buyerPaymentParameters["itemsPerPage"])
+
+		try:
+			pageItems = paginator.page(buyerPaymentParameters["pageNumber"])
+		except Exception as e:
+			pageItems = []
+
+		body = parseBuyerPayments(pageItems,buyerPaymentParameters)
 		statusCode = "2XX"
-		response = {"buyer_payments": body}
+		response = {"buyer_payments": body,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":buyerPaymentParameters["pageNumber"], "items_per_page":buyerPaymentParameters["itemsPerPage"]}
+
 
 	except Exception as e:
 		log.critical(e)

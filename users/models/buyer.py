@@ -150,7 +150,6 @@ def validateBuyerData(buyer, oldbuyer, is_new):
         flag = 1
         buyer["name"] = oldbuyer.name
     if not "company_name" in buyer or buyer["company_name"]==None:
-        flag = 1
         buyer["company_name"] = oldbuyer.company_name
     if not "mobile_number" in buyer or buyer["mobile_number"]==None or not validate_mobile_number(buyer["mobile_number"]):
         flag = 1
