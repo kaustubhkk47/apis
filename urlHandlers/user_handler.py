@@ -1,7 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 
 from users.views import user, buyer, seller
-from scripts.utils import customResponse, get_token_payload
+from scripts.utils import customResponse, get_token_payload, getArrFromString
 from users.models.buyer import *
 from users.serializers.buyer import *
 from users.models.seller import *
@@ -25,24 +25,7 @@ def buyer_details(request):
 
 	if request.method == "GET":
 
-		buyerParameters = {}
-
-		buyerID = request.GET.get("buyerID", "")
-		accessToken = request.GET.get("access_token", "")
-		
-		tokenPayload = get_token_payload(accessToken, "buyerID")
-		buyerParameters["isBuyer"] = 0
-		if "buyerID" in tokenPayload and tokenPayload["buyerID"]!=None:
-			buyerParameters["buyersArr"] = [tokenPayload["buyerID"]]
-			buyerParameters["isBuyer"] = 1
-		elif buyerID != "":
-			buyerParameters["buyersArr"] = [int(e) if e.isdigit() else e for e in buyerID.split(",")]
-
-		tokenPayload = get_token_payload(accessToken, "internaluserID")
-		buyerParameters["isInternalUser"] = 0
-		if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
-			buyerParameters["internalusersArr"] = [tokenPayload["internaluserID"]]
-			buyerParameters["isInternalUser"] = 1
+		buyerParameters = getBuyerParameters(request)
 
 		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -56,6 +39,54 @@ def buyer_details(request):
 		return buyer.delete_buyer(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
+def buyer_interest_details(request):
+
+	if request.method == "GET":
+
+		buyerParameters = getBuyerParameters(request)
+
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return buyer.get_buyer_interest_details(request,buyerParameters)
+	elif request.method == "POST":
+		return buyer.post_new_buyer_interest(request)
+	elif request.method == "PUT":
+		return buyer.update_buyer_interest(request)
+	elif request.method == "DELETE":
+		return buyer.delete_buyer_interest(request)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+def getBuyerParameters(request):
+
+	buyerParameters = {}
+
+	buyerID = request.GET.get("buyerID", "")
+	accessToken = request.GET.get("access_token", "")
+
+	buyerInterestID = request.GET.get("buyerinterestID", "")
+		
+	tokenPayload = get_token_payload(accessToken, "buyerID")
+	buyerParameters["isBuyer"] = 0
+	if "buyerID" in tokenPayload and tokenPayload["buyerID"]!=None:
+		buyerParameters["buyersArr"] = [tokenPayload["buyerID"]]
+		buyerParameters["isBuyer"] = 1
+	elif buyerID != "":
+		buyerParameters["buyersArr"] = getArrFromString(buyerID)
+
+	tokenPayload = get_token_payload(accessToken, "internaluserID")
+	buyerParameters["isInternalUser"] = 0
+	if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
+		buyerParameters["internalusersArr"] = [tokenPayload["internaluserID"]]
+		buyerParameters["isInternalUser"] = 1
+
+	if buyerInterestID != "":
+		buyerParameters["buyerInterestArr"] = getArrFromString(buyerInterestID)
+
+	return buyerParameters
 
 @csrf_exempt
 def buyer_address_details(request):
@@ -86,7 +117,7 @@ def seller_details(request):
 			sellerParameters["sellersArr"] = [tokenPayload["sellerID"]]
 			sellerParameters["isSeller"] = 1
 		elif sellerID != "":
-			sellerParameters["sellersArr"] = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
+			sellerParameters["sellersArr"] = getArrFromString(sellerID)
 
 		tokenPayload = get_token_payload(accessToken, "internaluserID")
 		sellerParameters["isInternalUser"] = 0

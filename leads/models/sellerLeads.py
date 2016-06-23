@@ -13,8 +13,11 @@ class SellerLeads(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	class Meta:
+		ordering = ["-id"]
+
 	def __unicode__(self):
-		return self.mobile_number + " - " + self.company_name + " - " + self.email
+		return str(self.id) + " - " + self.mobile_number + " - " + self.company_name + " - " + self.email
 
 def validateSellerLeadData(sellerlead, oldsellerlead, is_new):
 

@@ -2,7 +2,8 @@ from scripts.utils import customResponse, closeDBConnection, convert_keys_to_str
 import json
 
 from ..models.buyer import *
-from ..serializers.buyer import serialize_buyer, parse_buyer
+from catalog.models.category import Category
+from ..serializers.buyer import *
 
 import logging
 log = logging.getLogger("django")
@@ -21,6 +22,22 @@ def get_buyer_details(request,buyerParameters):
 		log.critical(e)
 		return customResponse("4XX", {"error": "Invalid request"})
 
+def get_buyer_interest_details(request,buyerParameters):
+	try:
+		buyerInterests = filterBuyerInterest(buyerParameters)
+
+		print len(buyerInterests)
+
+		response = {
+			"buyer_interests" : parse_buyer_interest(buyerInterests)
+		}
+		closeDBConnection()
+
+		return customResponse("2XX", response)
+	except Exception as e:
+		log.critical(e)
+		return customResponse("4XX", {"error": "Invalid request"})
+
 def post_new_buyer(request):
 	try:
 		requestbody = request.body.decode("utf-8")
@@ -31,7 +48,7 @@ def post_new_buyer(request):
 	if not len(buyer) or not validateBuyerData(buyer, Buyer(), 1):
 		return customResponse("4XX", {"error": "Invalid data for buyer sent"})
 
-	if buyerEmailExists(buyer["email"]):
+	if buyer["email"] != None and buyerEmailExists(buyer["email"]):
 		return customResponse("4XX", {"error": "buyer email already exists"})
 
 	if buyerMobileNumberExists(buyer["mobile_number"]):
@@ -45,10 +62,9 @@ def post_new_buyer(request):
 	if not "details" in buyer or buyer["details"]==None:
 		buyer["details"] = {}
 
+	validateBuyerDetailsData(buyer["details"], BuyerDetails(), 1)
+
 	try:
-
-		validateBuyerDetailsData(buyer["details"], BuyerDetails())
-
 		newBuyer = Buyer()
 
 		populateBuyer(newBuyer, buyer)
@@ -72,6 +88,118 @@ def post_new_buyer(request):
 	else:
 		closeDBConnection()
 		return customResponse("2XX", {"buyer" : serialize_buyer(newBuyer)})
+
+def post_new_buyer_interest(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_interest = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_interest) or not "buyerID" in buyer_interest or buyer_interest["buyerID"]==None or not validate_integer(buyer_interest["buyerID"]):
+		return customResponse("4XX", {"error": "Id for buyer not sent"})
+
+	buyerPtr = Buyer.objects.filter(id=int(buyer_interest["buyerID"]))
+
+	if len(buyerPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
+
+	buyerPtr = buyerPtr[0]
+
+	if not "categoryID" in buyer_interest or buyer_interest["categoryID"]==None or not validate_integer(buyer_interest["categoryID"]):
+		return customResponse("4XX", {"error": "Id for category not sent"})
+
+	categoryPtr = Category.objects.filter(id=int(buyer_interest["categoryID"]))
+
+	if len(categoryPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for category sent"})
+
+	categoryPtr = categoryPtr[0]
+
+	if not validateBuyerInterestData(buyer_interest, BuyerInterest(), 1):
+		return customResponse("4XX", {"error": "Invalid data for buyer interest sent"})
+
+	try:
+		newBuyerInterest = BuyerInterest(buyer=buyerPtr,category=categoryPtr)
+		populateBuyerInterest(newBuyerInterest, buyer_interest)
+		newBuyerInterest.save()
+
+		newBuyerInterestHistory = BuyerInterestHistory(buyer_interest=newBuyerInterest)
+		populateBuyerInterest(newBuyerInterestHistory, buyer_interest)
+		newBuyerInterestHistory.save()
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to create entry in db"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer" : serialize_buyer_interest(newBuyerInterest)})
+
+def update_buyer_interest(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_interest = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_interest) or not "buyerinterestID" in buyer_interest or buyer_interest["buyerinterestID"]==None or not validate_integer(buyer_interest["buyerinterestID"]):
+		return customResponse("4XX", {"error": "Id for buyer interest not sent"})
+
+	buyerInterestPtr = BuyerInterest.objects.filter(id=int(buyer_interest["buyerinterestID"]))
+
+	if len(buyerInterestPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id interest for buyer sent"})
+
+	buyerInterestPtr = buyerInterestPtr[0]
+
+	if not validateBuyerInterestData(buyer_interest, BuyerInterest(), 0):
+		return customResponse("4XX", {"error": "Invalid data for buyer interest sent"})
+
+	try:
+		
+		populateBuyerInterest(buyerInterestPtr, buyer_interest)
+		buyerInterestPtr.save()
+
+		newBuyerInterestHistory = BuyerInterestHistory(buyer_interest=buyerInterestPtr)
+		populateBuyerInterest(newBuyerInterestHistory, buyer_interest)
+		newBuyerInterestHistory.save()
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to update"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer" : serialize_buyer_interest(buyerInterestPtr)})
+
+def delete_buyer_interest(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_interest = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_interest) or not "buyerinterestID" in buyer_interest or buyer_interest["buyerinterestID"]==None or not validate_integer(buyer_interest["buyerinterestID"]):
+		return customResponse("4XX", {"error": "Id for buyer interest not sent"})
+
+	buyerInterestPtr = BuyerInterest.objects.filter(id=int(buyer_interest["buyerinterestID"]))
+
+	if len(buyerInterestPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for buyer interest sent"})
+
+	buyerInterestPtr = buyerInterestPtr[0]
+
+	try:
+		buyerInterestPtr.delete_status = True
+		buyerInterestPtr.save()
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "could not delete"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer": "buyer interest deleted"})
 
 def update_buyer(request):
 	try:
@@ -104,7 +232,7 @@ def update_buyer(request):
 			detailsSent = 1
 			buyerdetails = buyer["details"]
 			if hasattr(buyerPtr, "buyerdetails"):
-				validateBuyerDetailsData(buyerdetails, buyerPtr.buyerdetails)
+				validateBuyerDetailsData(buyerdetails, buyerPtr.buyerdetails, 0)
 				populateBuyerDetails(buyerPtr.buyerdetails, buyerdetails)	
 			else:
 				detailsPresent = 0
@@ -123,6 +251,10 @@ def update_buyer(request):
 				return customResponse("4XX", {"error": "Invalid address id sent"})
 
 			buyerAddressPtr = buyerAddressPtr[0]
+
+			if(buyerAddressPtr.buyer_id != buyerPtr.id):
+				return customResponse("4XX", {"error": "Address id for incorrect buyer sent"})
+				
 			validateBuyerAddressData(buyeraddress, buyerAddressPtr)
 			populateBuyerAddress(buyerAddressPtr, buyeraddress)
 
