@@ -1,7 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 
 from orders.views import order, orderItem, orderShipment, payments, subOrder
-from scripts.utils import customResponse, get_token_payload
+from scripts.utils import customResponse, get_token_payload, getArrFromString
 import jwt as JsonWebToken
 
 @csrf_exempt
@@ -140,7 +140,7 @@ def populateParameters(request):
 		parameters["sellersArr"] = [tokenPayload["sellerID"]]
 		parameters["isSeller"] = 1
 	elif sellerID != "":
-		parameters["sellersArr"] = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
+		parameters["sellersArr"] = getArrFromString(sellerID)
 	
 	tokenPayload = get_token_payload(accessToken, "buyerID")
 	parameters["isBuyer"] = 0
@@ -148,7 +148,7 @@ def populateParameters(request):
 		parameters["buyersArr"] = [tokenPayload["buyerID"]]
 		parameters["isBuyer"] = 1
 	elif buyerID != "":
-		parameters["buyersArr"] = [int(e) if e.isdigit() else e for e in buyerID.split(",")]
+		parameters["buyersArr"] = getArrFromString(buyerID)
 
 	tokenPayload = get_token_payload(accessToken, "internaluserID")
 	parameters["isInternalUser"] = 0
@@ -157,37 +157,37 @@ def populateParameters(request):
 		parameters["isInternalUser"] = 1
 
 	if orderID != "":
-		parameters["orderArr"] = [int(e) if e.isdigit() else e for e in orderID.split(",")]
+		parameters["orderArr"] = getArrFromString(orderID)
 	if orderStatus != "":
-		parameters["orderStatusArr"] = [int(e) if e.isdigit() else e for e in orderStatus.split(",")]
+		parameters["orderStatusArr"] = getArrFromString(orderStatus)
 	if orderPaymentStatus != "":
-		parameters["orderPaymentStatusArr"] = [int(e) if e.isdigit() else e for e in orderPaymentStatus.split(",")]
+		parameters["orderPaymentStatusArr"] = getArrFromString(orderPaymentStatus)
 
 	if subOrderID != "":
-		parameters["subOrderArr"] = [int(e) if e.isdigit() else e for e in subOrderID.split(",")]
+		parameters["subOrderArr"] = getArrFromString(subOrderID)
 	if subOrderStatus != "":
-		parameters["subOrderStatusArr"] = [int(e) if e.isdigit() else e for e in subOrderStatus.split(",")]
+		parameters["subOrderStatusArr"] = getArrFromString(subOrderStatus)
 	if subOrderPaymentStatus != "":
-		parameters["subOrderPaymentStatusArr"] = [int(e) if e.isdigit() else e for e in subOrderPaymentStatus.split(",")]
+		parameters["subOrderPaymentStatusArr"] = getArrFromString(subOrderPaymentStatus)
 	
 	if orderShipmentID != "":
-		parameters["orderShipmentArr"] = [int(e) if e.isdigit() else e for e in orderShipmentID.split(",")]
+		parameters["orderShipmentArr"] = getArrFromString(orderShipmentID)
 	if orderShipmentStatus != "":
-		parameters["orderShipmentStatusArr"] = [int(e) if e.isdigit() else e for e in orderShipmentStatus.split(",")]
+		parameters["orderShipmentStatusArr"] = getArrFromString(orderShipmentStatus)
 	
 	if orderItemID != "":
-		parameters["orderItemArr"] = [int(e) if e.isdigit() else e for e in orderItemID.split(",")]
+		parameters["orderItemArr"] = getArrFromString(orderItemID)
 	if orderItemStatus != "":
-		parameters["orderItemStatusArr"] = [int(e) if e.isdigit() else e for e in orderItemStatus.split(",")]
+		parameters["orderItemStatusArr"] = getArrFromString(orderItemStatus)
 
 	if buyerPaymentID != "":
-		parameters["buyerPaymentArr"] = [int(e) if e.isdigit() else e for e in buyerPaymentID.split(",")]
+		parameters["buyerPaymentArr"] = getArrFromString(buyerPaymentID)
 	if buyerPaymentStatus != "":
-		parameters["buyerPaymentStatusArr"] = [int(e) if e.isdigit() else e for e in buyerPaymentStatus.split(",")]
+		parameters["buyerPaymentStatusArr"] = getArrFromString(buyerPaymentStatus)
 
 	if sellerPaymentID != "":
-		parameters["sellerPaymentArr"] = [int(e) if e.isdigit() else e for e in sellerPaymentID.split(",")]
+		parameters["sellerPaymentArr"] = getArrFromString(sellerPaymentID)
 	if sellerPaymentStatus != "":
-		parameters["sellerPaymentStatusArr"] = [int(e) if e.isdigit() else e for e in sellerPaymentStatus.split(",")]	
+		parameters["sellerPaymentStatusArr"] = getArrFromString(sellerPaymentStatus)	
 
 	return parameters

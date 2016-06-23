@@ -1,6 +1,6 @@
 from django.db import models
 
-from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer
+from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number
 
 from catalog.models.category import Category
 from address.models.state import State
@@ -8,13 +8,15 @@ from address.models.pincode import Pincode
 
 from .businessType import BusinessType
 
+from decimal import Decimal
+
 #Make changes in model, validate, populate and serializer 
 
 class Buyer(models.Model):
     name = models.CharField(max_length=200, blank=True)
     company_name = models.CharField(max_length=200, blank=True)
     mobile_number = models.CharField(max_length=11, blank=False, db_index=True)
-    email = models.EmailField(max_length=255, blank=True)
+    email = models.EmailField(max_length=255, blank=True, null = True)
     password = models.CharField(max_length=255, blank=True)
     alternate_phone_number = models.CharField(max_length=11, blank=True)
     mobile_verification = models.BooleanField(default=False)
@@ -78,11 +80,45 @@ class BuyerInterest(models.Model):
     ## On a scale of 1 to 10
     scale = models.PositiveIntegerField(default=5)
 
+    price_filter_applied = models.BooleanField(default=False)
+    min_price_per_unit = models.DecimalField(max_digits=10, decimal_places=0, blank=True, default=0)
+    max_price_per_unit = models.DecimalField(max_digits=10, decimal_places=0, blank=True, default=0)
+
+    fabric_filter_text = models.TextField(blank=True)
+
+    productid_filter_text =  models.TextField(blank=True) 
+
+    is_active = models.BooleanField(default=True)
+
+    delete_status = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
-        return str(self.buyer.id) + " - " + self.buyer.name + " - " + self.category.name
+        return str(self.id) + " - " + str(self.buyer.id) + " - " + self.buyer.name + " - " + self.category.name
+
+class BuyerInterestHistory(models.Model):
+
+    buyer_interest = models.ForeignKey(BuyerInterest)
+
+    scale = models.PositiveIntegerField(default=5)
+
+    price_filter_applied = models.BooleanField(default=False)
+    min_price_per_unit = models.DecimalField(max_digits=10, decimal_places=0, blank=True, default=0)
+    max_price_per_unit = models.DecimalField(max_digits=10, decimal_places=0, blank=True, default=0)
+
+    fabric_filter_text = models.TextField(blank=True)
+
+    productid_filter_text =  models.TextField(blank=True)
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return str(self.id) + " - " + str(self.buyer_interest.id)
 
 class BuyerPurchasingState(models.Model):
 
@@ -121,6 +157,8 @@ def validateBuyerData(buyer, oldbuyer, is_new):
         buyer["mobile_number"] = oldbuyer.mobile_number
     if not "email" in buyer or buyer["email"]==None or not validate_email(buyer["email"]):
         buyer["email"] = oldbuyer.email
+        if is_new == 1:
+            buyer["email"] = None
     if not "password" in buyer or buyer["password"]==None:
         buyer["password"] = oldbuyer.password
     if not "alternate_phone_number" in buyer or buyer["alternate_phone_number"]==None:
@@ -141,8 +179,43 @@ def validateBuyerData(buyer, oldbuyer, is_new):
         return False
 
     return True
+
+def validateBuyerInterestData(buyer_interest, old_buyer_interest, is_new):
+
+    flag = 0
+
+    if not "scale" in buyer_interest or buyer_interest["scale"]==None or not validate_buyer_interest_scale(buyer_interest["scale"]):
+        buyer_interest["scale"] = old_buyer_interest.scale
+    if not "min_price_per_unit" in buyer_interest or buyer_interest["min_price_per_unit"]==None or not validate_number(buyer_interest["min_price_per_unit"]) or not float(buyer_interest["min_price_per_unit"]) > 0:
+        buyer_interest["min_price_per_unit"] = old_buyer_interest.min_price_per_unit
+    if not "max_price_per_unit" in buyer_interest or buyer_interest["max_price_per_unit"]==None or not validate_number(buyer_interest["max_price_per_unit"]) or not float(buyer_interest["max_price_per_unit"]) > 0:
+        buyer_interest["max_price_per_unit"] = old_buyer_interest.max_price_per_unit
+    if not "fabric_filter_text" in buyer_interest or buyer_interest["fabric_filter_text"]==None:
+        buyer_interest["fabric_filter_text"] = old_buyer_interest.fabric_filter_text
+    if not "productid_filter_text" in buyer_interest or buyer_interest["productid_filter_text"]==None:
+        buyer_interest["productid_filter_text"] = old_buyer_interest.productid_filter_text
+    if not "is_active" in buyer_interest or buyer_interest["is_active"]==None or not validate_bool(buyer_interest["is_active"]):
+        buyer_interest["is_active"] = old_buyer_interest.is_active
+
+
+    if float(buyer_interest["max_price_per_unit"]) > float(buyer_interest["min_price_per_unit"]):
+        buyer_interest["price_filter_applied"] = True
+    else:
+        buyer_interest["price_filter_applied"] = False
+        buyer_interest["min_price_per_unit"] = 0.0
+        buyer_interest["max_price_per_unit"] = 0.0
+
+    if is_new == 1 and flag == 1:
+        return False
+
+    return True
+
+def validate_buyer_interest_scale(x):
+    if not validate_integer(x) or not (0<=int(x)<=10):
+        return False
+    return True
     
-def validateBuyerDetailsData(buyerdetails, oldbuyerdetails):
+def validateBuyerDetailsData(buyerdetails, oldbuyerdetails, is_new):
 
     if not "vat_tin" in buyerdetails or buyerdetails["vat_tin"]==None:
         buyerdetails["vat_tin"] = oldbuyerdetails.vat_tin
@@ -150,11 +223,10 @@ def validateBuyerDetailsData(buyerdetails, oldbuyerdetails):
         buyerdetails["cst"] = oldbuyerdetails.cst
     if not "customer_type" in buyerdetails or buyerdetails["customer_type"]==None or not validate_buyer_customer_type(buyerdetails["customer_type"]):
         buyerdetails["customer_type"] = oldbuyerdetails.customer_type
-    if not "buying_capacity" in buyerdetails or buyerdetails["buying_capacity"]==None  or not validate_integer(buyerdetails["purchase_duration"]):
+    if not "buying_capacity" in buyerdetails or buyerdetails["buying_capacity"]==None  or not validate_integer(buyerdetails["buying_capacity"]):
         buyerdetails["buying_capacity"] = oldbuyerdetails.buying_capacity
     if not "purchase_duration" in buyerdetails or buyerdetails["purchase_duration"]==None or not validate_integer(buyerdetails["purchase_duration"]):
         buyerdetails["purchase_duration"] = oldbuyerdetails.purchase_duration
-
 
 def validateBuyerAddressData(buyeraddress, oldbuyeraddress):
 
@@ -184,7 +256,16 @@ def populateBuyer(buyerPtr, buyer):
     buyerPtr.email_verification = bool(buyer["email_verification"])
     buyerPtr.gender = buyer["gender"]
     buyerPtr.password = buyer["password"]
-    
+
+def populateBuyerInterest(buyerInterestPtr, buyerInterest):
+    buyerInterestPtr.scale = int(buyerInterest["scale"])
+    buyerInterestPtr.min_price_per_unit = Decimal(buyerInterest["min_price_per_unit"])
+    buyerInterestPtr.max_price_per_unit = Decimal(buyerInterest["max_price_per_unit"])
+    buyerInterestPtr.price_filter_applied = bool(buyerInterest["price_filter_applied"])
+    buyerInterestPtr.fabric_filter_text = buyerInterest["fabric_filter_text"]
+    buyerInterestPtr.productid_filter_text = buyerInterest["productid_filter_text"]
+    buyerInterestPtr.is_active = bool(buyerInterest["is_active"])
+
 def populateBuyerDetails(buyerDetailsPtr, buyerdetails):
     buyerDetailsPtr.cst = buyerdetails["cst"]
     buyerDetailsPtr.customer_type = int(buyerdetails["customer_type"])
@@ -219,6 +300,18 @@ def filterBuyer(buyerParameters):
 
     return buyers
 
+def filterBuyerInterest(buyerParameters):
+
+    buyersInterest = BuyerInterest.objects.filter(delete_status=False,buyer__delete_status=False)
+
+    if "buyersArr" in buyerParameters:
+        buyersInterest = buyersInterest.filter(buyer_id__in=buyerParameters["buyersArr"])
+
+    if "buyerInterestArr" in buyerParameters:
+        buyersInterest = buyersInterest.filter(id__in=buyerParameters["buyerInterestArr"])
+
+    return buyersInterest
+
 def buyerEmailExists(email):
     buyerPtr = Buyer.objects.filter(email=email)
 
@@ -236,12 +329,12 @@ def buyerMobileNumberExists(mobileNumber):
     return False
 
 BuyerCustomerType = {
-    0:{"display_value":"Average"},
-    1:{"display_value":"Premium"},
-    2:{"display_value":"Average and Premium"}
+    1:{"display_value":"Average"},
+    2:{"display_value":"Premium"},
+    3:{"display_value":"Average and Premium"}
 }
 
-BuyerCustomerTypeValues = [0,1,2]
+BuyerCustomerTypeValues = [1,2,3]
 
 def validate_buyer_customer_type(x):
     if not validate_integer(x) or not (int(x) in BuyerCustomerTypeValues):

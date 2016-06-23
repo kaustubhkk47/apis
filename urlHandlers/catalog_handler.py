@@ -2,7 +2,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from catalog.views import categories
 from catalog.views import product
-from scripts.utils import customResponse, get_token_payload
+from scripts.utils import customResponse, get_token_payload, getArrFromString
 import jwt as JsonWebToken
 
 @csrf_exempt
@@ -14,7 +14,7 @@ def categories_details(request):
 
 		categoryID = request.GET.get("categoryID", "")
 		if categoryID != "":
-			categoriesParameters["categoriesArr"] = [int(e) if e.isdigit() else e for e in categoryID.split(",")]
+			categoriesParameters["categoriesArr"] = getArrFromString(categoryID)
 
 		return categories.get_categories_details(request,categoriesParameters)
 	elif request.method == "POST":
@@ -42,10 +42,10 @@ def product_details(request):
 		accessToken = request.GET.get("access_token", "")
 
 		if productID != "":
-			productParameters["productsArr"] = [int(e) if e.isdigit() else e for e in productID.split(",")]
+			productParameters["productsArr"] = getArrFromString(productID)
 
 		if categoryID != "":
-			productParameters["categoriesArr"] = [int(e) if e.isdigit() else e for e in categoryID.split(",")]
+			productParameters["categoriesArr"] = getArrFromString(categoryID)
 		
 		tokenPayload = get_token_payload(accessToken, "sellerID")
 		productParameters["isSeller"] = 0		
@@ -53,7 +53,7 @@ def product_details(request):
 			productParameters["isSeller"] = 1
 			productParameters["sellerArr"] = [tokenPayload["sellerID"]]
 		elif sellerID != "":
-			productParameters["sellerArr"] = [int(e) if e.isdigit() else e for e in sellerID.split(",")]
+			productParameters["sellerArr"] = getArrFromString(sellerID)
 
 		tokenPayload = get_token_payload(accessToken, "internaluserID")
 		productParameters["isInternalUser"] = 0

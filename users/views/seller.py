@@ -153,6 +153,10 @@ def update_seller(request):
 				return customResponse("4XX", {"error": "Invalid address id sent"})
 
 			sellerAddressPtr = sellerAddressPtr[0]
+
+			if(sellerAddressPtr.seller_id != sellerPtr.id):
+				return customResponse("4XX", {"error": "Address id for incorrect seller sent"})
+
 			validateSellerAddressData(selleraddress, sellerAddressPtr)
 			populateSellerAddressData(sellerAddressPtr, selleraddress)
 			
@@ -168,6 +172,10 @@ def update_seller(request):
 				return customResponse("4XX", {"error": "Invalid bankdetails id sent"})
 
 			sellerBankDetailsPtr = sellerBankDetailsPtr[0]
+
+			if(sellerBankDetailsPtr.seller_id != sellerPtr.id):
+				return customResponse("4XX", {"error": "Bank details id for incorrect seller sent"})
+
 			validateSellerBankdetailsData(sellerbankdetails, sellerBankDetailsPtr)
 			populateSellerBankDetailsData(sellerBankDetailsPtr,sellerbankdetails)
 

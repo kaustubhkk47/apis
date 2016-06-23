@@ -38,6 +38,8 @@ class Product(models.Model):
 
     display_name = models.TextField()
 
+    new_in_product_matrix = models.BooleanField(default=True)
+
     delete_status = models.BooleanField(default=False)
     is_catalog = models.BooleanField(default=False)
 
