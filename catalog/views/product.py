@@ -8,7 +8,7 @@ from users.models.seller import Seller
 import json
 from django.template.defaultfilters import slugify
 from decimal import Decimal
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator
 
 import logging
 log = logging.getLogger("django")

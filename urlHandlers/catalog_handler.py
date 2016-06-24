@@ -38,7 +38,7 @@ def product_details(request):
 		categoryID = request.GET.get("categoryID", "")
 		sellerID = request.GET.get("sellerID", "")
 		try:
-			pageNumber = int(request.GET.get("page_number", 0))
+			pageNumber = int(request.GET.get("page_number", 1))
 			productsperPage = int(request.GET.get("items_per_page", 10))
 		except Exception as e:
 			pageNumber = 1

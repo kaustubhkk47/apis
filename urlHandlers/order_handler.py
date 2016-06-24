@@ -191,7 +191,7 @@ def populateParameters(request):
 		parameters["sellerPaymentStatusArr"] = getArrFromString(sellerPaymentStatus)
 
 	try:
-		pageNumber = int(request.GET.get("page_number", 0))
+		pageNumber = int(request.GET.get("page_number", 1))
 		itemsPerPage = int(request.GET.get("items_per_page", 10))
 	except Exception as e:
 		pageNumber = 1

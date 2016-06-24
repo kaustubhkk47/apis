@@ -1,5 +1,6 @@
 from ..models.buyer import Buyer, BuyerAddress, BuyerDetails, filterBuyer, filterBuyerInterest
 from catalog.serializers.category import serialize_categories
+from catalog.serializers.product import serialize_product
 
 def serialize_buyer(buyer_entry, buyerParameters = {}):
 
@@ -103,3 +104,32 @@ def serialize_buyer_interest(buyer_interest_entry, buyerParameters = {}):
     buyer_interest["category"] = serialize_categories(buyer_interest_entry.category)
 
     return buyer_interest
+
+def parse_buyer_product(buyer_products_queryset, buyerParameters = {}):
+
+    buyer_products = []
+
+    for buyer_product in buyer_products_queryset:
+        buyer_product_entry = serialize_buyer_product(buyer_product, buyerParameters)
+        buyer_products.append(buyer_product_entry)
+
+    return buyer_products
+
+def serialize_buyer_product(buyer_product_entry, buyerParameters = {}):
+
+    buyer_product = {}
+
+    buyer_product["buyerproductID"] = buyer_product_entry.id
+    if hasattr(buyer_product_entry,"buyer_interest"):
+        buyer_product["buyerinterestID"] = buyer_product_entry.buyer_interest_id
+    buyer_product["is_active"] = buyer_product_entry.is_active
+    buyer_product["shortlisted"] = buyer_product_entry.shortlisted
+    buyer_product["disliked"] = buyer_product_entry.disliked
+    buyer_product["shortlisted_time"] = buyer_product_entry.shortlisted_time
+    buyer_product["disliked_time"] = buyer_product_entry.disliked_time
+    buyer_product["created_at"] = buyer_product_entry.created_at
+    buyer_product["updated_at"] = buyer_product_entry.updated_at
+    
+    buyer_product["product"] = serialize_product(buyer_product_entry.product)
+
+    return buyer_product
