@@ -188,6 +188,20 @@ def populateParameters(request):
 	if sellerPaymentID != "":
 		parameters["sellerPaymentArr"] = getArrFromString(sellerPaymentID)
 	if sellerPaymentStatus != "":
-		parameters["sellerPaymentStatusArr"] = getArrFromString(sellerPaymentStatus)	
+		parameters["sellerPaymentStatusArr"] = getArrFromString(sellerPaymentStatus)
+
+	try:
+		pageNumber = int(request.GET.get("page_number", 1))
+		itemsPerPage = int(request.GET.get("items_per_page", 10))
+	except Exception as e:
+		pageNumber = 1
+		itemsPerPage = 10
+
+	if not pageNumber > 0 or not itemsPerPage > 0:
+		pageNumber = 1
+		itemsPerPage = 10
+
+	parameters["pageNumber"] = pageNumber
+	parameters["itemsPerPage"] = itemsPerPage
 
 	return parameters

@@ -2,7 +2,7 @@ from users.serializers.seller import serialize_seller
 from users.serializers.buyer import serialize_buyer
 from ..models.payments import BuyerPaymentStatus, BuyerPaymentMethod, SellerPaymentStatus, SellerPaymentMethod
 from ..models.orderItem import filterOrderItem
-from .orderItem import serializeOrderItem
+from .orderItem import serializeOrderItem, parseOrderItem
 
 def parseSellerPayments(sellerPaymentQuerySet, sellerPaymentParameters = {}):
 
@@ -40,13 +40,7 @@ def serializeSellerPayment(SellerPaymentEntry, sellerPaymentParameters = {}):
 
 	orderItemQuerySet = filterOrderItem(sellerPaymentParameters)
 	orderItemQuerySet = orderItemQuerySet.filter(seller_payment_id = SellerPaymentEntry.id)
-	orderItems = []
-
-	for orderItem in orderItemQuerySet:
-		orderItemEntry = serializeOrderItem(orderItem)
-		orderItems.append(orderItemEntry)
-
-	sellerPayment["order_items"] = orderItems
+	sellerPayment["order_items"] = parseOrderItem(orderItemQuerySet, sellerPaymentParameters)
 
 	return sellerPayment
 

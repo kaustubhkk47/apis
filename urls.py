@@ -46,7 +46,8 @@ urlpatterns += [
     url(r'^users/buyer/$', user_handler.buyer_details),
     url(r'^users/buyer/login/$', user_handler.buyer_login),
     url(r'^users/buyer/address/$', user_handler.buyer_address_details),
-    url(r'^users/buyer/buyerinterest/$', user_handler.buyer_interest_details)
+    url(r'^users/buyer/buyerinterest/$', user_handler.buyer_interest_details),
+    url(r'^users/buyer/buyerproducts/$', user_handler.buyer_product_details)
 ]
 
 urlpatterns += [

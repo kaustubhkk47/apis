@@ -8,7 +8,7 @@ from users.models.seller import Seller
 import json
 from django.template.defaultfilters import slugify
 from decimal import Decimal
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator
 
 import logging
 log = logging.getLogger("django")
@@ -17,19 +17,15 @@ def get_product_details(request, productParameters):
     try:
         products = filterProducts(productParameters)
 
-        if "pageNumber" in productParameters:
-            paginator = Paginator(products, productParameters["productsperPage"])
-            try:
-                pageProducts = paginator.page(productParameters["pageNumber"])
-            except PageNotAnInteger:
-                pageProducts = []
-            except EmptyPage:
-                pageProducts = []
-            response = multiple_products_parser(pageProducts)
-            body = {"products": response,"total_products":paginator.count, "total_pages":paginator.num_pages, "page_number":productParameters["pageNumber"]}
-        else:
-            response = multiple_products_parser(products)
-            body = {"products": response}
+        paginator = Paginator(products, productParameters["itemsPerPage"])
+
+        try:
+            pageProducts = paginator.page(productParameters["pageNumber"])
+        except Exception as e:
+            pageProducts = []
+
+        response = multiple_products_parser(pageProducts)
+        body = {"products": response,"total_products":paginator.count, "total_pages":paginator.num_pages, "page_number":productParameters["pageNumber"], "items_per_page":productParameters["itemsPerPage"]}
             
         statusCode = "2XX"
     except Exception as e:

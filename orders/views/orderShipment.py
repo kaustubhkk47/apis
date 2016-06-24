@@ -13,15 +13,25 @@ from users.models.seller import SellerAddress
 from users.serializers.seller import serialize_seller_address
 from users.serializers.buyer import serialize_buyer_address
 import settings
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def get_order_shipment_details(request, orderShipmentParameters):
 	try:
 
 		orderShipments = filterOrderShipment(orderShipmentParameters)
 		
-		body = parseOrderShipments(orderShipments, orderShipmentParameters)
 		statusCode = "2XX"
-		response = {"order_shipments": body}
+
+		paginator = Paginator(orderShipments, orderShipmentParameters["itemsPerPage"])
+
+		try:
+			pageItems = paginator.page(orderShipmentParameters["pageNumber"])
+		except Exception as e:
+			pageItems = []
+
+		body = parseOrderShipments(pageItems,orderShipmentParameters)
+		statusCode = "2XX"
+		response = {"order_shipments": body,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":orderShipmentParameters["pageNumber"], "items_per_page":orderShipmentParameters["itemsPerPage"]}
 
 	except Exception as e:
 		log.critical(e)

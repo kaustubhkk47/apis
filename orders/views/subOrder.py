@@ -6,15 +6,24 @@ log = logging.getLogger("django")
 from ..models.subOrder import SubOrder, filterSubOrder, validateSubOrderStatus
 from ..models.orderItem import OrderItem
 from ..serializers.subOrder import parseSubOrders
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def get_suborder_details(request,subOrderParameters):
 	try:
 		
 		subOrders = filterSubOrder(subOrderParameters)
 
-		body = parseSubOrders(subOrders,subOrderParameters)
+		paginator = Paginator(subOrders, subOrderParameters["itemsPerPage"])
+
+		try:
+			pageItems = paginator.page(subOrderParameters["pageNumber"])
+		except Exception as e:
+			pageItems = []
+
+		body = parseSubOrders(pageItems,subOrderParameters)
 		statusCode = "2XX"
-		response = {"sub_orders": body}
+		response = {"sub_orders": body,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":subOrderParameters["pageNumber"], "items_per_page":subOrderParameters["itemsPerPage"]}
+
 
 	except Exception as e:
 		log.critical(e)

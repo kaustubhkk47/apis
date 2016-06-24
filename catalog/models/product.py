@@ -1,6 +1,6 @@
 from django.db import models
 
-from users.models import Seller
+#from users.models import Seller
 from .category import Category
 from django.template.defaultfilters import slugify
 from decimal import Decimal
@@ -12,7 +12,7 @@ from scripts.utils import validate_integer, validate_number, validate_bool
 #Also make changes in upload script
 
 class Product(models.Model):
-    seller = models.ForeignKey(Seller)
+    seller = models.ForeignKey('users.Seller')
     category = models.ForeignKey(Category)
 
     name = models.CharField(max_length=255, blank=False)

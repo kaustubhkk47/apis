@@ -10,13 +10,22 @@ from ..models.orderItem import OrderItem, populateOrderItemData
 from ..serializers.order import parseOrders, serializeOrder
 from users.serializers.buyer import serialize_buyer_address
 from decimal import Decimal
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def get_order_details(request, orderParameters):
 	try:
 		orders = filterOrder(orderParameters)
-		body = parseOrders(orders,orderParameters)
+
+		paginator = Paginator(orders, orderParameters["itemsPerPage"])
+
+		try:
+			pageItems = paginator.page(orderParameters["pageNumber"])
+		except Exception as e:
+			pageItems = []
+
+		body = parseOrders(pageItems,orderParameters)
 		statusCode = "2XX"
-		response = {"orders": body}
+		response = {"orders": body,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":orderParameters["pageNumber"], "items_per_page":orderParameters["itemsPerPage"]}
 
 	except Exception as e:
 		log.critical(e)

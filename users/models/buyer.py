@@ -3,6 +3,7 @@ from django.db import models
 from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number
 
 from catalog.models.category import Category
+from catalog.models.product import Product
 from address.models.state import State
 from address.models.pincode import Pincode
 
@@ -142,6 +143,29 @@ class BuyerBuysFrom(models.Model):
     def __unicode__(self):
         return str(self.buyer.id) + " - " + self.buyer.name + " - " + self.business_type.name
 
+class BuyerProducts(models.Model):
+
+    buyer = models.ForeignKey(Buyer)
+    product = models.ForeignKey(Product)
+    buyer_interest = models.ForeignKey(BuyerInterest, null = True, blank = True)
+
+    is_active = models.BooleanField(default=True)
+
+    shortlisted = models.BooleanField(default=False)
+    disliked = models.BooleanField(default=False)
+
+    shortlisted_time = models.DateTimeField(null=True, blank=True)
+    disliked_time = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-product__id"]
+
+    def __unicode__(self):
+        return str(self.id) + " - " +  str(self.buyer.id) + " - " + self.buyer.name + " - " + str(self.product.id)
+
 def validateBuyerData(buyer, oldbuyer, is_new):
 
     flag = 0
@@ -150,7 +174,6 @@ def validateBuyerData(buyer, oldbuyer, is_new):
         flag = 1
         buyer["name"] = oldbuyer.name
     if not "company_name" in buyer or buyer["company_name"]==None:
-        flag = 1
         buyer["company_name"] = oldbuyer.company_name
     if not "mobile_number" in buyer or buyer["mobile_number"]==None or not validate_mobile_number(buyer["mobile_number"]):
         flag = 1
@@ -311,6 +334,16 @@ def filterBuyerInterest(buyerParameters):
         buyersInterest = buyersInterest.filter(id__in=buyerParameters["buyerInterestArr"])
 
     return buyersInterest
+
+def filterBuyerProducts(buyerParameters):
+
+    buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
+
+    buyerProducts = buyerProducts.filter(is_active=buyerParameters["is_active"])
+    buyerProducts = buyerProducts.filter(shortlisted=buyerParameters["shortlisted"])
+    buyerProducts = buyerProducts.filter(disliked=buyerParameters["disliked"])
+
+    return buyerProducts
 
 def buyerEmailExists(email):
     buyerPtr = Buyer.objects.filter(email=email)
