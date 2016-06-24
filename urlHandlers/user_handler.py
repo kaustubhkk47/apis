@@ -60,6 +60,65 @@ def buyer_interest_details(request):
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
+@csrf_exempt
+def buyer_product_details(request):
+
+	if request.method == "GET":
+
+		buyerParameters = getBuyerProductParameters(request)
+
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return buyer.get_buyer_product_details(request,buyerParameters)
+	elif request.method == "POST":
+		return buyer.post_new_buyer_product(request)
+	#elif request.method == "PUT":
+	#	return buyer.update_buyer_interest(request)
+	#elif request.method == "DELETE":
+	#	return buyer.delete_buyer_interest(request)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+def getBuyerProductParameters(request):
+
+	buyerParameters = getBuyerParameters(request)
+	try:
+		isActive = bool(request.GET.get("is_active", True))
+	except Exception as e:
+		isActive = True
+
+	try:
+		shortlisted = bool(request.GET.get("is_shortlisted", False))
+	except Exception as e:
+		shortlisted = False
+
+	try:
+		disliked = bool(request.GET.get("is_disliked", False))
+	except Exception as e:
+		disliked = False
+
+	buyerParameters["is_active"] = isActive
+	buyerParameters["shortlisted"] = shortlisted
+	buyerParameters["disliked"] = disliked
+
+	try:
+		pageNumber = int(request.GET.get("page_number", 1))
+		itemsPerPage = int(request.GET.get("items_per_page", 1))
+	except Exception as e:
+		pageNumber = 1
+		itemsPerPage = 1
+
+	if not pageNumber > 0 or not itemsPerPage > 0:
+		pageNumber = 1
+		itemsPerPage = 1
+
+	buyerParameters["pageNumber"] = pageNumber
+	buyerParameters["itemsPerPage"] = itemsPerPage
+
+	return buyerParameters
+
+
 def getBuyerParameters(request):
 
 	buyerParameters = {}

@@ -1,19 +1,23 @@
-from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_integer, validate_bool
+from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_integer, validate_bool, getArrFromString
 import json
 
 from ..models.buyer import *
 from catalog.models.category import Category
+from catalog.models.product import Product
 from ..serializers.buyer import *
+from django.core.paginator import Paginator
 
 import logging
 log = logging.getLogger("django")
+
+from pandas import DataFrame
 
 def get_buyer_details(request,buyerParameters):
 	try:
 		buyers = filterBuyer(buyerParameters)
 
 		response = {
-			"buyers" : parse_buyer(buyers)
+			"buyers" : parse_buyer(buyers, buyerParameters)
 		}
 		closeDBConnection()
 
@@ -26,10 +30,8 @@ def get_buyer_interest_details(request,buyerParameters):
 	try:
 		buyerInterests = filterBuyerInterest(buyerParameters)
 
-		print len(buyerInterests)
-
 		response = {
-			"buyer_interests" : parse_buyer_interest(buyerInterests)
+			"buyer_interests" : parse_buyer_interest(buyerInterests, buyerParameters)
 		}
 		closeDBConnection()
 
@@ -37,6 +39,29 @@ def get_buyer_interest_details(request,buyerParameters):
 	except Exception as e:
 		log.critical(e)
 		return customResponse("4XX", {"error": "Invalid request"})
+
+def get_buyer_product_details(request, buyerParameters):
+	try:
+		buyerProducts = filterBuyerProducts(buyerParameters)
+
+		paginator = Paginator(buyerProducts, buyerParameters["itemsPerPage"])
+
+		try:
+			pageItems = paginator.page(buyerParameters["pageNumber"])
+		except Exception as e:
+			pageItems = []
+
+		body = parse_buyer_product(pageItems,buyerParameters)
+		statusCode = "2XX"
+		response = {"buyer_products": body,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":buyerParameters["pageNumber"], "items_per_page":buyerParameters["itemsPerPage"]}
+
+	except Exception as e:
+		log.critical(e)
+		statusCode = "4XX"
+		response = {"error": "Invalid request"}
+
+	closeDBConnection()
+	return customResponse(statusCode, response)
 
 def post_new_buyer(request):
 	try:
@@ -135,6 +160,76 @@ def post_new_buyer_interest(request):
 	else:
 		closeDBConnection()
 		return customResponse("2XX", {"buyer" : serialize_buyer_interest(newBuyerInterest)})
+
+def post_new_buyer_product(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_product = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_product) or not "buyerID" in buyer_product or buyer_product["buyerID"]==None or not validate_integer(buyer_product["buyerID"]):
+		return customResponse("4XX", {"error": "Id for buyer not sent"})
+
+	buyerPtr = Buyer.objects.filter(id=int(buyer_product["buyerID"]))
+
+	if len(buyerPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
+
+	buyerPtr = buyerPtr[0]
+
+	if not "productID" in buyer_product or buyer_product["productID"]==None:
+		return customResponse("4XX", {"error": "Id for product not sent"})
+
+	productIDs = getArrFromString(buyer_product["productID"])
+
+	productPtr = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False, verification=True,show_online=True,seller__show_online=True, id__in=productIDs)
+
+	if len(productPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid ids for products sent"})
+
+	buyerProductsPtr = BuyerProducts.objects.filter(buyer_id = int(buyer_product["buyerID"]), shortlisted=False, disliked=False)
+
+	if len(buyerProductsPtr) > 0:
+
+		productsToAdd = DataFrame(list(productPtr.values('id')))
+
+		productAgainstBuyer = DataFrame(list(buyerProductsPtr.values('product_id')))
+
+		innerFrame = productsToAdd[(productsToAdd.id.isin(productAgainstBuyer.product_id))]
+
+		#innerFrame = merge(productsToAdd, productAgainstBuyer, how="inner", left_on="id", right_on="product_id", sort=False)
+
+		buyerProductsPresent = innerFrame["id"].tolist()
+
+		leftOnlyFrame = productsToAdd[(~productsToAdd.id.isin(innerFrame.id))]
+
+		buyerProductsNotPresent = leftOnlyFrame["id"].tolist()
+
+		
+	else:
+		buyerProductsPresent = []
+		buyerProductsNotPresent = productIDs
+
+	buyerProductsToCreate = []
+
+	for product_id in buyerProductsNotPresent:
+		buyerProduct = BuyerProducts(buyer=buyerPtr, product_id=product_id, buyer_interest=None)
+		buyerProductsToCreate.append(buyerProduct)
+
+	try:
+		
+		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
+
+		BuyerProducts.objects.filter(id__in=buyerProductsPresent).update(is_active=True)
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to create entry in db"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer_product":"successfully added"})
 
 def update_buyer_interest(request):
 	try:

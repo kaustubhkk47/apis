@@ -4,9 +4,9 @@ from ..models.subOrder import SubOrderStatus, SubOrderPaymentStatus
 from ..models.orderItem import filterOrderItem
 from ..models.orderShipment import filterOrderShipment
 from ..models.payments import filterSellerPayment
-from .orderItem import serializeOrderItem
-from .orderShipment import serializeOrderShipment
-from .payments import serializeSellerPayment
+from .orderItem import serializeOrderItem, parseOrderItem
+from .orderShipment import serializeOrderShipment, parseOrderShipments
+from .payments import serializeSellerPayment, parseSellerPayments
 
 def serializeSubOrder(subOrderEntry, subOrderParameters = {}):
 	subOrder = {}
@@ -41,33 +41,15 @@ def serializeSubOrder(subOrderEntry, subOrderParameters = {}):
 
 	sellerPaymentQuerySet = filterSellerPayment(subOrderParameters)
 	sellerPaymentQuerySet = sellerPaymentQuerySet.filter(suborder_id=subOrderEntry.id)
-	sellerPayments = []
-
-	for sellerPayment in sellerPaymentQuerySet:
-		sellerPaymentEntry = serializeSellerPayment(sellerPayment)
-		sellerPayments.append(sellerPaymentEntry)
-
-	subOrder["seller_payments"] = sellerPayments
+	subOrder["seller_payments"] = parseSellerPayments(sellerPaymentQuerySet, subOrderParameters)
 
 	orderShipmentQuerySet = filterOrderShipment(subOrderParameters)
 	orderShipmentQuerySet = orderShipmentQuerySet.filter(suborder_id=subOrderEntry.id)
-	orderShipments = []
-
-	for orderShipment in orderShipmentQuerySet:
-		orderShipmentEntry = serializeOrderShipment(orderShipment)
-		orderShipments.append(orderShipmentEntry)
-
-	subOrder["order_shipments"] = orderShipments
+	subOrder["order_shipments"] = parseOrderShipments(orderShipmentQuerySet, subOrderParameters)
 
 	orderItemQuerySet = filterOrderItem(subOrderParameters)
 	orderItemQuerySet = orderItemQuerySet.filter(suborder_id=subOrderEntry.id)
-	orderItems = []
-
-	for orderItem in orderItemQuerySet:
-		orderItemEntry = serializeOrderItem(orderItem)
-		orderItems.append(orderItemEntry)
-
-	subOrder["order_items"] = orderItems
+	subOrder["order_items"] = parseOrderItem(orderItemQuerySet, subOrderParameters)
 		
 	return subOrder
 
