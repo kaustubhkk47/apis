@@ -44,7 +44,7 @@ def populateContactUsLead(contactUsLeadPtr, contactUsLead):
 	contactUsLeadPtr.remarks = contactUsLead["remarks"]
 	contactUsLeadPtr.email = contactUsLead["email"]
 	contactUsLeadPtr.mobile_number = contactUsLead["mobile_number"]
-	contactUsLeadPtr.status = bool(contactUsLead["status"])
+	contactUsLeadPtr.status = int(contactUsLead["status"])
 	contactUsLeadPtr.comments = contactUsLead["comments"]
 
 ContactUsLeadStatus = {

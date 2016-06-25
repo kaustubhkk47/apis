@@ -1,7 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 
 from users.views import user, buyer, seller
-from scripts.utils import customResponse, get_token_payload, getArrFromString
+from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool
 from users.models.buyer import *
 from users.serializers.buyer import *
 from users.models.seller import *
@@ -73,8 +73,8 @@ def buyer_product_details(request):
 		return buyer.get_buyer_product_details(request,buyerParameters)
 	elif request.method == "POST":
 		return buyer.post_new_buyer_product(request)
-	#elif request.method == "PUT":
-	#	return buyer.update_buyer_interest(request)
+	elif request.method == "PUT":
+		return buyer.update_buyer_interest(request)
 	#elif request.method == "DELETE":
 	#	return buyer.delete_buyer_interest(request)
 
@@ -83,24 +83,19 @@ def buyer_product_details(request):
 def getBuyerProductParameters(request):
 
 	buyerParameters = getBuyerParameters(request)
-	try:
-		isActive = bool(request.GET.get("is_active", True))
-	except Exception as e:
-		isActive = True
 
-	try:
-		shortlisted = bool(request.GET.get("is_shortlisted", False))
-	except Exception as e:
-		shortlisted = False
+	isActive = request.GET.get("is_active", None)
+	shortlisted = request.GET.get("is_shortlisted", None)
+	disliked = request.GET.get("is_disliked", None)
 
-	try:
-		disliked = bool(request.GET.get("is_disliked", False))
-	except Exception as e:
-		disliked = False
+	print isActive
 
-	buyerParameters["is_active"] = isActive
-	buyerParameters["shortlisted"] = shortlisted
-	buyerParameters["disliked"] = disliked
+	if validate_bool(isActive):
+		buyerParameters["is_active"] = int(isActive)
+	if validate_bool(shortlisted):
+		buyerParameters["shortlisted"] = int(shortlisted)
+	if validate_bool(disliked):
+		buyerParameters["disliked"] = int(disliked)
 
 	try:
 		pageNumber = int(request.GET.get("page_number", 1))

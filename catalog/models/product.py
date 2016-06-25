@@ -193,12 +193,12 @@ def populateProductData(productPtr, product):
     productPtr.min_price_per_unit = Decimal(product["min_price_per_unit"])
     productPtr.lot_size = int(product["lot_size"])
     productPtr.price_per_lot = Decimal(product["price_per_lot"])
-    productPtr.verification = bool(product["verification"])
-    productPtr.show_online = bool(product["show_online"])
+    productPtr.verification = int(product["verification"])
+    productPtr.show_online = int(product["show_online"])
     productPtr.slug = slugify(product["name"])
     productPtr.display_name = product["display_name"]
-    productPtr.is_catalog = bool(product["is_catalog"])
-    productPtr.delete_status = bool(product["delete_status"])
+    productPtr.is_catalog = int(product["is_catalog"])
+    productPtr.delete_status = int(product["delete_status"])
     if "image_count" in product and product["image_count"]!=None:
         nowtime = datetime.datetime.now()
         productPtr.image_path = "media/productimages/" + str(productPtr.seller.id) + "/" + nowtime.strftime('%Y%m%d%H%M%S') + "/"

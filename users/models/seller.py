@@ -186,11 +186,11 @@ def populateSellerData(sellerPtr, seller):
     sellerPtr.email = seller["email"]
     sellerPtr.password = seller["password"]
     sellerPtr.alternate_phone_number = seller["alternate_phone_number"]
-    sellerPtr.mobile_verification = bool(seller["mobile_verification"])
-    sellerPtr.email_verification = bool(seller["email_verification"])
+    sellerPtr.mobile_verification = int(seller["mobile_verification"])
+    sellerPtr.email_verification = int(seller["email_verification"])
     sellerPtr.company_profile = seller["company_profile"]
     sellerPtr.seller_conditions = seller["seller_conditions"]
-    sellerPtr.show_online = bool(seller["show_online"])
+    sellerPtr.show_online = int(seller["show_online"])
     sellerPtr.concerned_person = seller["concerned_person"]
     sellerPtr.concerned_person_number = seller["concerned_person_number"]
 
@@ -199,8 +199,8 @@ def populateSellerDetailsData(sellerDetailsPtr,sellerdetails):
     sellerDetailsPtr.pan = sellerdetails["pan"]
     sellerDetailsPtr.name_on_pan = sellerdetails["name_on_pan"]
     sellerDetailsPtr.dob_on_pan = sellerdetails["dob_on_pan"]
-    sellerDetailsPtr.pan_verification = bool(sellerdetails["pan_verification"])
-    sellerDetailsPtr.tin_verification = bool(sellerdetails["tin_verification"])
+    sellerDetailsPtr.pan_verification = int(sellerdetails["pan_verification"])
+    sellerDetailsPtr.tin_verification = int(sellerdetails["tin_verification"])
     sellerDetailsPtr.vat_tin = sellerdetails["vat_tin"]
 
 def populateSellerAddressData(sellerAddressPtr, selleraddress):

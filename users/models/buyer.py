@@ -275,8 +275,8 @@ def populateBuyer(buyerPtr, buyer):
     buyerPtr.email = buyer["email"]
     buyerPtr.password = buyer["password"]
     buyerPtr.alternate_phone_number = buyer["alternate_phone_number"]
-    buyerPtr.mobile_verification = bool(buyer["mobile_verification"])
-    buyerPtr.email_verification = bool(buyer["email_verification"])
+    buyerPtr.mobile_verification = int(buyer["mobile_verification"])
+    buyerPtr.email_verification = int(buyer["email_verification"])
     buyerPtr.gender = buyer["gender"]
     buyerPtr.password = buyer["password"]
 
@@ -284,10 +284,10 @@ def populateBuyerInterest(buyerInterestPtr, buyerInterest):
     buyerInterestPtr.scale = int(buyerInterest["scale"])
     buyerInterestPtr.min_price_per_unit = Decimal(buyerInterest["min_price_per_unit"])
     buyerInterestPtr.max_price_per_unit = Decimal(buyerInterest["max_price_per_unit"])
-    buyerInterestPtr.price_filter_applied = bool(buyerInterest["price_filter_applied"])
+    buyerInterestPtr.price_filter_applied = int(buyerInterest["price_filter_applied"])
     buyerInterestPtr.fabric_filter_text = buyerInterest["fabric_filter_text"]
     buyerInterestPtr.productid_filter_text = buyerInterest["productid_filter_text"]
-    buyerInterestPtr.is_active = bool(buyerInterest["is_active"])
+    buyerInterestPtr.is_active = int(buyerInterest["is_active"])
 
 def populateBuyerDetails(buyerDetailsPtr, buyerdetails):
     buyerDetailsPtr.cst = buyerdetails["cst"]
@@ -339,9 +339,12 @@ def filterBuyerProducts(buyerParameters):
 
     buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
 
-    buyerProducts = buyerProducts.filter(is_active=buyerParameters["is_active"])
-    buyerProducts = buyerProducts.filter(shortlisted=buyerParameters["shortlisted"])
-    buyerProducts = buyerProducts.filter(disliked=buyerParameters["disliked"])
+    if "is_active" in buyerParameters:
+        buyerProducts = buyerProducts.filter(is_active=buyerParameters["is_active"])
+    if "shortlisted" in buyerParameters:  
+        buyerProducts = buyerProducts.filter(shortlisted=buyerParameters["shortlisted"])
+    if "disliked" in buyerParameters:
+        buyerProducts = buyerProducts.filter(disliked=buyerParameters["disliked"])
 
     return buyerProducts
 
