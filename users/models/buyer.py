@@ -10,6 +10,7 @@ from address.models.pincode import Pincode
 from .businessType import BusinessType
 
 from decimal import Decimal
+import datetime
 
 #Make changes in model, validate, populate and serializer 
 
@@ -233,6 +234,39 @@ def validateBuyerInterestData(buyer_interest, old_buyer_interest, is_new):
 
     return True
 
+def validateBuyerProductData(buyer_product, old_buyer_product, is_new):
+
+    flag = 0
+
+    if not "is_active" in buyer_product or buyer_product["is_active"]==None or not validate_bool(buyer_product["is_active"]):
+        buyer_product["is_active"] = old_buyer_product.is_active
+
+    if not "shortlisted" in buyer_product or buyer_product["shortlisted"]==None or not validate_bool(buyer_product["shortlisted"]):
+        buyer_product["shortlisted"] = old_buyer_product.shortlisted
+        buyer_product["shortlisted_time"] = old_buyer_product.shortlisted_time
+    elif int(buyer_product["shortlisted"]) != int(old_buyer_product.shortlisted):
+        if int(buyer_product["shortlisted"]) ==1:
+            buyer_product["shortlisted_time"] =datetime.datetime.now()
+        else:
+            buyer_product["shortlisted_time"] = old_buyer_product.shortlisted_time
+    else:
+        buyer_product["shortlisted"] = old_buyer_product.shortlisted
+        buyer_product["shortlisted_time"] = old_buyer_product.shortlisted_time
+
+    if not "disliked" in buyer_product or buyer_product["disliked"]==None or not validate_bool(buyer_product["disliked"]):
+        buyer_product["disliked"] = old_buyer_product.disliked
+        buyer_product["disliked_time"] = old_buyer_product.disliked_time
+    elif int(buyer_product["disliked"]) != int(old_buyer_product.disliked):
+        if int(buyer_product["disliked"]) ==1:
+            buyer_product["disliked_time"] =datetime.datetime.now()
+        else:
+            buyer_product["disliked_time"] = old_buyer_product.disliked_time
+    else:
+        buyer_product["disliked"] = old_buyer_product.disliked
+        buyer_product["disliked_time"] = old_buyer_product.disliked_time
+
+    return True
+
 def validate_buyer_interest_scale(x):
     if not validate_integer(x) or not (0<=int(x)<=10):
         return False
@@ -295,6 +329,13 @@ def populateBuyerDetails(buyerDetailsPtr, buyerdetails):
     buyerDetailsPtr.buying_capacity = int(buyerdetails["buying_capacity"])
     buyerDetailsPtr.purchase_duration = int(buyerdetails["purchase_duration"])
     buyerDetailsPtr.vat_tin = buyerdetails["vat_tin"]
+
+def populateBuyerProduct(buyerProductPtr, buyerproduct):
+    buyerProductPtr.is_active = int(buyerproduct["is_active"])
+    buyerProductPtr.shortlisted = int(buyerproduct["shortlisted"])
+    buyerProductPtr.shortlisted_time = buyerproduct["shortlisted_time"]
+    buyerProductPtr.disliked = int(buyerproduct["disliked"])
+    buyerProductPtr.disliked_time = buyerproduct["disliked_time"]
 
 def populateBuyerAddress(buyerAddressPtr, buyeraddress):
     buyerAddressPtr.address_line = buyeraddress["address"]

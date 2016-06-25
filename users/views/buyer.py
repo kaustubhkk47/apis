@@ -248,7 +248,7 @@ def update_buyer_interest(request):
 
 	buyerInterestPtr = buyerInterestPtr[0]
 
-	if not validateBuyerInterestData(buyer_interest, BuyerInterest(), 0):
+	if not validateBuyerInterestData(buyer_interest, buyerInterestPtr, 0):
 		return customResponse("4XX", {"error": "Invalid data for buyer interest sent"})
 
 	try:
@@ -267,6 +267,39 @@ def update_buyer_interest(request):
 	else:
 		closeDBConnection()
 		return customResponse("2XX", {"buyer" : serialize_buyer_interest(buyerInterestPtr)})
+
+def update_buyer_product(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_product = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_product) or not "buyerproductID" in buyer_product or buyer_product["buyerproductID"]==None or not validate_integer(buyer_product["buyerproductID"]):
+		return customResponse("4XX", {"error": "Id for buyer product not sent"})
+
+	buyerProductPtr = BuyerProducts.objects.filter(id=int(buyer_product["buyerproductID"]))
+
+	if len(buyerProductPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id product for buyer sent"})
+
+	buyerProductPtr = buyerProductPtr[0]
+
+	if not validateBuyerProductData(buyer_product, buyerProductPtr, 0):
+		return customResponse("4XX", {"error": "Invalid data for buyer product sent"})
+
+	try:
+		
+		populateBuyerProduct(buyerProductPtr, buyer_product)
+		buyerProductPtr.save()
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to update"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer" : serialize_buyer_product(buyerProductPtr)})
 
 def delete_buyer_interest(request):
 	try:

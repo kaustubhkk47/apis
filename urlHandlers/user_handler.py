@@ -74,7 +74,7 @@ def buyer_product_details(request):
 	elif request.method == "POST":
 		return buyer.post_new_buyer_product(request)
 	elif request.method == "PUT":
-		return buyer.update_buyer_interest(request)
+		return buyer.update_buyer_product(request)
 	#elif request.method == "DELETE":
 	#	return buyer.delete_buyer_interest(request)
 
@@ -85,10 +85,8 @@ def getBuyerProductParameters(request):
 	buyerParameters = getBuyerParameters(request)
 
 	isActive = request.GET.get("is_active", None)
-	shortlisted = request.GET.get("is_shortlisted", None)
-	disliked = request.GET.get("is_disliked", None)
-
-	print isActive
+	shortlisted = request.GET.get("shortlisted", None)
+	disliked = request.GET.get("disliked", None)
 
 	if validate_bool(isActive):
 		buyerParameters["is_active"] = int(isActive)
