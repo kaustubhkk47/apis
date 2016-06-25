@@ -387,6 +387,9 @@ def filterBuyerProducts(buyerParameters):
     if "disliked" in buyerParameters:
         buyerProducts = buyerProducts.filter(disliked=buyerParameters["disliked"])
 
+    if "buyersArr" in buyerParameters:
+        buyerProducts = buyerProducts.filter(buyer_id__in=buyerParameters["buyersArr"])
+
     return buyerProducts
 
 def buyerEmailExists(email):
