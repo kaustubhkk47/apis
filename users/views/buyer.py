@@ -159,7 +159,7 @@ def post_new_buyer_interest(request):
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"buyer" : serialize_buyer_interest(newBuyerInterest)})
+		return customResponse("2XX", {"buyer_interest" : serialize_buyer_interest(newBuyerInterest)})
 
 def post_new_buyer_product(request):
 	try:
@@ -285,13 +285,32 @@ def update_buyer_product(request):
 
 	buyerProductPtr = buyerProductPtr[0]
 
-	if not validateBuyerProductData(buyer_product, buyerProductPtr, 0):
+	buyer_product_populator = {}
+
+	if not validateBuyerProductData(buyer_product, buyerProductPtr, 0, buyer_product_populator):
 		return customResponse("4XX", {"error": "Invalid data for buyer product sent"})
 
 	try:
 		
-		populateBuyerProduct(buyerProductPtr, buyer_product)
+		populateBuyerProduct(buyerProductPtr, buyer_product_populator)
 		buyerProductPtr.save()
+
+		if "response_code" in buyer_product_populator:
+			newBuyerProductResponseHistory = BuyerProductResponseHistory(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id,buyer_product_id=buyerProductPtr.id)
+			populateBuyerProductResponseHistory(newBuyerProductResponseHistory,buyer_product_populator)
+			newBuyerProductResponseHistory.save()
+
+			if buyer_product_populator["response_code"] == 1 or  buyer_product_populator["response_code"] == 2:
+				newBuyerProductResponse = BuyerProductResponse(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id,buyer_product_id=buyerProductPtr.id)
+				populateBuyerProductResponse(newBuyerProductResponse, buyer_product_populator)
+				newBuyerProductResponse.save()
+			elif buyer_product_populator["response_code"] == 3:
+				try:
+					BuyerProductResponsePtr = BuyerProductResponse.objects.get(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id)
+					BuyerProductResponsePtr.response_code = 1
+					BuyerProductResponsePtr.save()
+				except Exception as e:
+					pass
 
 	except Exception as e:
 		log.critical(e)

@@ -100,7 +100,7 @@ def validateSellerData(seller, oldseller, isnew):
         seller["name"] = oldseller.name
     if not "company_name" in seller or seller["company_name"]==None:
         seller["company_name"] = oldseller.company_name
-    if not "mobile_number" in seller or seller["mobile_number"]==None or not validate_mobile_number(seller["mobile_number"]):
+    if not "mobile_number" in seller or seller["mobile_number"]==None or not validate_mobile_number(str(seller["mobile_number"])):
         flag = 1
         seller["mobile_number"] = oldseller.mobile_number
     if not "email" in seller or seller["email"]==None or not validate_email(seller["email"]):
@@ -182,7 +182,7 @@ def validateSellerBankdetailsData(sellerbankdetails, oldsellerbankdetails):
 def populateSellerData(sellerPtr, seller):
     sellerPtr.name = seller["name"]
     sellerPtr.company_name = seller["company_name"]
-    sellerPtr.mobile_number = seller["mobile_number"]
+    sellerPtr.mobile_number = str(seller["mobile_number"])
     sellerPtr.email = seller["email"]
     sellerPtr.password = seller["password"]
     sellerPtr.alternate_phone_number = seller["alternate_phone_number"]
@@ -253,4 +253,3 @@ def sellerMobileNumberExists(mobileNumber):
         return True
 
     return False
-

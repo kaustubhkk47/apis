@@ -11,6 +11,8 @@ admin.site.register(BuyerDetails)
 admin.site.register(BuyerInterest)
 admin.site.register(BuyerInterestHistory)
 admin.site.register(BuyerProducts)
+admin.site.register(BuyerProductResponse)
+admin.site.register(BuyerProductResponseHistory)
 admin.site.register(BuyerPurchasingState)
 admin.site.register(BuyerBuysFrom)
 

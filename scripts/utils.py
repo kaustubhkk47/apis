@@ -62,6 +62,7 @@ def validate_number(x):
     return True
 
 def validate_mobile_number(x):
+    x = str(x)
     if len(x) != 10:
         return False
     if not (x[0] == '9' or x[0] == '8' or x[0] == '7'):
