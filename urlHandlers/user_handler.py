@@ -85,22 +85,20 @@ def getBuyerProductParameters(request):
 	buyerParameters = getBuyerParameters(request)
 
 	isActive = request.GET.get("is_active", None)
-	shortlisted = request.GET.get("shortlisted", None)
-	disliked = request.GET.get("disliked", None)
 	responded = request.GET.get("responded", None)
 	buyerProductID = request.GET.get("buyerproductID", "")
+	productID = request.GET.get("productID", "")
 
 	if validate_bool(isActive):
 		buyerParameters["is_active"] = int(isActive)
-	if validate_bool(shortlisted):
-		buyerParameters["shortlisted"] = int(shortlisted)
-	if validate_bool(disliked):
-		buyerParameters["disliked"] = int(disliked)
 	if validate_bool(responded):
 		buyerParameters["responded"] = int(responded)
 
 	if buyerProductID != "":
 		buyerParameters["buyerProductsArr"] = getArrFromString(buyerProductID)
+
+	if productID != "":
+		buyerParameters["productsArr"] = getArrFromString(productID)
 
 	try:
 		pageNumber = int(request.GET.get("page_number", 1))

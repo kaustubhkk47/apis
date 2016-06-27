@@ -141,6 +141,11 @@ def post_new_buyer_interest(request):
 
 	categoryPtr = categoryPtr[0]
 
+	BuyerInterestPtr = BuyerInterest.objects.filter(buyer_id=buyerPtr.id,category_id=categoryPtr.id)
+
+	if len(BuyerInterestPtr)>0:
+		return customResponse("4XX", {"error": "Buyer interest for category already exists"})
+
 	if not validateBuyerInterestData(buyer_interest, BuyerInterest(), 1):
 		return customResponse("4XX", {"error": "Invalid data for buyer interest sent"})
 
@@ -188,7 +193,7 @@ def post_new_buyer_product(request):
 	if len(productPtr) == 0:
 		return customResponse("4XX", {"error": "Invalid ids for products sent"})
 
-	buyerProductsPtr = BuyerProducts.objects.filter(buyer_id = int(buyer_product["buyerID"]), shortlisted=False, disliked=False)
+	buyerProductsPtr = BuyerProducts.objects.filter(buyer_id = int(buyer_product["buyerID"]))
 
 	if len(buyerProductsPtr) > 0:
 
@@ -306,9 +311,11 @@ def update_buyer_product(request):
 				newBuyerProductResponse.save()
 			elif buyer_product_populator["response_code"] == 3:
 				try:
-					BuyerProductResponsePtr = BuyerProductResponse.objects.get(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id)
-					BuyerProductResponsePtr.response_code = 1
-					BuyerProductResponsePtr.save()
+					BuyerProductResponsePtr = BuyerProductResponse.objects.filter(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id)
+					if len(BuyerProductResponsePtr) > 0:
+						BuyerProductResponsePtr = BuyerProductResponsePtr[0]
+						BuyerProductResponsePtr.response_code = 1
+						BuyerProductResponsePtr.save()
 				except Exception as e:
 					pass
 
@@ -318,7 +325,7 @@ def update_buyer_product(request):
 		return customResponse("4XX", {"error": "unable to update"})
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"buyer" : serialize_buyer_product(buyerProductPtr)})
+		return customResponse("2XX", {"buyer_products" : serialize_buyer_product(buyerProductPtr)})
 
 def delete_buyer_interest(request):
 	try:

@@ -152,10 +152,7 @@ class BuyerProducts(models.Model):
 
     is_active = models.BooleanField(default=True)
 
-    shortlisted = models.BooleanField(default=False)
-    disliked = models.BooleanField(default=False)
-
-    responded = models.BooleanField(default=False)
+    responded = models.IntegerField(default=0)
 
     shortlisted_time = models.DateTimeField(null=True, blank=True)
     disliked_time = models.DateTimeField(null=True, blank=True)
@@ -182,7 +179,7 @@ class BuyerProductResponse(models.Model):
     def __unicode__(self):
         return str(self.id)
 
-BuyerProductResponseHistoryCodes = {
+BuyerProductResponseCodes = {
     1:{"display_value":"Shortlisted"},
     2:{"display_value":"Disliked"}
 }
@@ -275,32 +272,30 @@ def validateBuyerInterestData(buyer_interest, old_buyer_interest, is_new):
     return True
 
 def validateBuyerProductData(buyer_product, old_buyer_product, is_new, buyer_product_populator):
+
+    if old_buyer_product.responded == 1:
+        return False
     
     if "is_active" in buyer_product and buyer_product["is_active"] != None and validate_bool(buyer_product["is_active"]):
-        if int(buyer_product["is_active"]) != int(old_buyer_product.is_active):
+        if int(buyer_product["is_active"]) != int(old_buyer_product.is_active) and old_buyer_product.responded == 0:
             buyer_product_populator["is_active"] = int(buyer_product["is_active"])
             return True
 
-    if old_buyer_product.shortlisted == 1:
+    if old_buyer_product.is_active == 0:
         return False
 
-    if "shortlisted" in buyer_product and buyer_product["shortlisted"] != None and validate_bool(buyer_product["shortlisted"]):
-        if int(old_buyer_product.shortlisted) == 0  and int(buyer_product["shortlisted"]) == 1:
+    if "responded" in buyer_product and buyer_product["responded"] != None and validate_integer(buyer_product["responded"]):
+        if int(buyer_product["responded"]) == 1:
             buyer_product_populator["shortlisted_time"] = datetime.datetime.now()
-            buyer_product_populator["shortlisted"] = 1
             buyer_product_populator["responded"] = 1
-            if int(old_buyer_product.disliked) == 1:
-                buyer_product_populator["disliked"] = 0
+            if int(old_buyer_product.responded) == 2:
                 buyer_product_populator["response_code"] = 3
             else:
                 buyer_product_populator["response_code"] = 1
             return True
-
-    if "disliked" in buyer_product and buyer_product["disliked"] != None and validate_bool(buyer_product["disliked"]):
-        if int(old_buyer_product.disliked) == 0  and int(buyer_product["disliked"]) == 1 :
+        elif int(buyer_product["responded"]) == 2 and old_buyer_product.responded == 0:
             buyer_product_populator["disliked_time"] = datetime.datetime.now()
-            buyer_product_populator["disliked"] = 1
-            buyer_product_populator["responded"] = 1
+            buyer_product_populator["responded"] = 2
             buyer_product_populator["response_code"] = 2
             return True
 
@@ -311,13 +306,9 @@ def populateBuyerProduct(buyerProductPtr, buyerproduct):
     if "is_active" in buyerproduct:
         buyerProductPtr.is_active = int(buyerproduct["is_active"])
     if "responded" in buyerproduct:
-        buyerProductPtr.responded = int(buyerproduct["responded"])
-    if "shortlisted" in buyerproduct:
-        buyerProductPtr.shortlisted = int(buyerproduct["shortlisted"])
+        buyerProductPtr.responded = int(buyerproduct["responded"])    
     if "shortlisted_time" in buyerproduct:
-        buyerProductPtr.shortlisted_time = buyerproduct["shortlisted_time"]
-    if "disliked" in buyerproduct:
-        buyerProductPtr.disliked = int(buyerproduct["disliked"])
+        buyerProductPtr.shortlisted_time = buyerproduct["shortlisted_time"]    
     if "disliked_time" in buyerproduct:
         buyerProductPtr.disliked_time = buyerproduct["disliked_time"]
 
@@ -435,10 +426,7 @@ def filterBuyerProducts(buyerParameters):
 
     if "is_active" in buyerParameters:
         buyerProducts = buyerProducts.filter(is_active=buyerParameters["is_active"])
-    if "shortlisted" in buyerParameters:  
-        buyerProducts = buyerProducts.filter(shortlisted=buyerParameters["shortlisted"])
-    if "disliked" in buyerParameters:
-        buyerProducts = buyerProducts.filter(disliked=buyerParameters["disliked"])
+    
     if "responded" in buyerParameters:
         buyerProducts = buyerProducts.filter(responded= buyerParameters["responded"])
 
@@ -447,6 +435,9 @@ def filterBuyerProducts(buyerParameters):
 
     if "buyerProductsArr" in buyerParameters:
         buyerProducts = buyerProducts.filter(id__in=buyerParameters["buyerProductsArr"])
+
+    if "productsArr" in buyerParameters:
+        buyerProducts = buyerProducts.filter(product_id__in=buyerParameters["productsArr"])
 
     return buyerProducts
 
