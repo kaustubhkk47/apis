@@ -434,16 +434,16 @@ def filterBuyerProducts(buyerParameters):
     buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
 
     if "is_active" in buyerParameters:
-        buyerProducts = buyerProducts.filter(is_active=int(buyerParameters["is_active"]))
+        buyerProducts = buyerProducts.filter(is_active=buyerParameters["is_active"])
     if "shortlisted" in buyerParameters:  
-        buyerProducts = buyerProducts.filter(shortlisted=int(buyerParameters["shortlisted"]))
+        buyerProducts = buyerProducts.filter(shortlisted=buyerParameters["shortlisted"])
     if "disliked" in buyerParameters:
-        buyerProducts = buyerProducts.filter(disliked=int(buyerParameters["disliked"]))
+        buyerProducts = buyerProducts.filter(disliked=buyerParameters["disliked"])
     if "responded" in buyerParameters:
-        buyerProducts = buyerProducts.filter(responded=int(buyerParameters["responded"]))
+        buyerProducts = buyerProducts.filter(responded= buyerParameters["responded"])
 
     if "buyersArr" in buyerParameters:
-        buyerProducts = buyerProducts.filter(buyer_id__in=int(buyerParameters["buyersArr"]))
+        buyerProducts = buyerProducts.filter(buyer_id__in=buyerParameters["buyersArr"])
 
     if "buyerProductsArr" in buyerParameters:
         buyerProducts = buyerProducts.filter(id__in=buyerParameters["buyerProductsArr"])
