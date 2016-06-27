@@ -1,7 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 
 from users.views import user, buyer, seller
-from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool
+from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool, validate_integer
 from users.models.buyer import *
 from users.serializers.buyer import *
 from users.models.seller import *
@@ -91,7 +91,7 @@ def getBuyerProductParameters(request):
 
 	if validate_bool(isActive):
 		buyerParameters["is_active"] = int(isActive)
-	if validate_bool(responded):
+	if validate_integer(responded):
 		buyerParameters["responded"] = int(responded)
 
 	if buyerProductID != "":
