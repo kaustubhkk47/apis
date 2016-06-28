@@ -1,6 +1,6 @@
 from django.db import models
 
-from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number
+from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString
 
 from catalog.models.category import Category
 from catalog.models.product import Product
@@ -11,6 +11,11 @@ from .businessType import BusinessType
 
 from decimal import Decimal
 import datetime
+
+import operator
+from django.db.models import Q
+
+from pandas import DataFrame
 
 #Make changes in model, validate, populate and serializer 
 
@@ -77,7 +82,7 @@ class BuyerDetails(models.Model):
 class BuyerInterest(models.Model):
 
     buyer = models.ForeignKey(Buyer)
-    category = models.ForeignKey(Category)
+    category = models.ForeignKey(Category,blank=True,null=True)
 
     ## On a scale of 1 to 10
     scale = models.PositiveIntegerField(default=5)
@@ -159,6 +164,8 @@ class BuyerProducts(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    delete_status = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-product__id"]
@@ -247,9 +254,9 @@ def validateBuyerInterestData(buyer_interest, old_buyer_interest, is_new):
 
     if not "scale" in buyer_interest or buyer_interest["scale"]==None or not validate_buyer_interest_scale(buyer_interest["scale"]):
         buyer_interest["scale"] = old_buyer_interest.scale
-    if not "min_price_per_unit" in buyer_interest or buyer_interest["min_price_per_unit"]==None or not validate_number(buyer_interest["min_price_per_unit"]) or not float(buyer_interest["min_price_per_unit"]) > 0:
+    if not "min_price_per_unit" in buyer_interest or buyer_interest["min_price_per_unit"]==None or not validate_number(buyer_interest["min_price_per_unit"]) or not float(buyer_interest["min_price_per_unit"]) >= 0:
         buyer_interest["min_price_per_unit"] = old_buyer_interest.min_price_per_unit
-    if not "max_price_per_unit" in buyer_interest or buyer_interest["max_price_per_unit"]==None or not validate_number(buyer_interest["max_price_per_unit"]) or not float(buyer_interest["max_price_per_unit"]) > 0:
+    if not "max_price_per_unit" in buyer_interest or buyer_interest["max_price_per_unit"]==None or not validate_number(buyer_interest["max_price_per_unit"]) or not float(buyer_interest["max_price_per_unit"]) >= 0:
         buyer_interest["max_price_per_unit"] = old_buyer_interest.max_price_per_unit
     if not "fabric_filter_text" in buyer_interest or buyer_interest["fabric_filter_text"]==None:
         buyer_interest["fabric_filter_text"] = old_buyer_interest.fabric_filter_text
@@ -422,7 +429,7 @@ def filterBuyerInterest(buyerParameters):
 
 def filterBuyerProducts(buyerParameters):
 
-    buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
+    buyerProducts = BuyerProducts.objects.filter(delete_status=False,buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
 
     if "is_active" in buyerParameters:
         buyerProducts = buyerProducts.filter(is_active=buyerParameters["is_active"])
@@ -440,6 +447,56 @@ def filterBuyerProducts(buyerParameters):
         buyerProducts = buyerProducts.filter(product_id__in=buyerParameters["productsArr"])
 
     return buyerProducts
+
+def filterBuyerInterestProducts(BuyerInterestPtr):
+    productPtr = Product.objects.filter(delete_status=False, verification=True,show_online=True,seller__delete_status=False, seller__show_online=True, category__delete_status=False)
+
+    if BuyerInterestPtr.price_filter_applied == True:
+        productPtr = productPtr.filter(min_price_per_unit__range=(BuyerInterestPtr.min_price_per_unit,BuyerInterestPtr.max_price_per_unit))
+
+    if BuyerInterestPtr.category_id != None:
+        productPtr = productPtr.filter(category_id = BuyerInterestPtr.category_id)
+
+    if BuyerInterestPtr.fabric_filter_text != None and BuyerInterestPtr.fabric_filter_text != "":
+        fabricArr = getStrArrFromString(BuyerInterestPtr.fabric_filter_text)
+        query = reduce(operator.or_, (Q(productdetails__fabric_gsm__contains = item) for item in fabricArr))
+        productPtr = productPtr.filter(query)
+
+    if BuyerInterestPtr.productid_filter_text!= None and BuyerInterestPtr.productid_filter_text != "":
+        productIDs = getArrFromString(BuyerInterestPtr.productid_filter_text)
+        productPtr = productPtr.filter(id__in=productIDs)
+
+    return productPtr
+
+def getIntersectingProducts(leftPtr, rightPtr):
+    leftList = []
+    innerList = []
+    rightList = []
+
+    if len(rightPtr) > 0 and len(leftPtr) > 0:
+
+        productsToAdd = DataFrame(list(leftPtr.values('id')))
+
+        productAgainstBuyer = DataFrame(list(rightPtr.values('product_id')))
+
+        innerFrame = productsToAdd[(productsToAdd.id.isin(productAgainstBuyer.product_id))]
+
+        #innerFrame = merge(productsToAdd, productAgainstBuyer, how="inner", left_on="id", right_on="product_id", sort=False)
+
+        innerList = innerFrame["id"].tolist()
+
+        leftOnlyFrame = productsToAdd[(~productsToAdd.id.isin(innerFrame.id))]
+
+        rightOnlyFrame = productAgainstBuyer[(~productAgainstBuyer.product_id.isin(innerFrame.id))]
+
+        leftList = leftOnlyFrame["id"].tolist()
+        rightList = rightOnlyFrame["product_id"].tolist()
+    elif len(rightPtr) > 0 and len(leftPtr) == 0:
+        rightList = [int(e) for e in list(rightPtr.values_list('product_id',flat=True))]
+    elif len(rightPtr) == 0 and len(leftPtr) > 0:
+        leftList = [int(e) for e in list(leftPtr.values_list('id',flat=True))]
+
+    return [leftList, innerList, rightList]
 
 def buyerEmailExists(email):
     buyerPtr = Buyer.objects.filter(email=email)

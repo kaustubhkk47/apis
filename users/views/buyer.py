@@ -10,7 +10,7 @@ from django.core.paginator import Paginator
 import logging
 log = logging.getLogger("django")
 
-from pandas import DataFrame
+
 
 def get_buyer_details(request,buyerParameters):
 	try:
@@ -158,6 +158,22 @@ def post_new_buyer_interest(request):
 		populateBuyerInterest(newBuyerInterestHistory, buyer_interest)
 		newBuyerInterestHistory.save()
 
+		productPtr = filterBuyerInterestProducts(newBuyerInterest)
+
+		buyerProductPtr = BuyerProducts.objects.filter(buyer_id = buyerPtr.id)
+
+		intersectingProducts = getIntersectingProducts(productPtr, buyerProductPtr)
+
+		buyerProductsToCreate = []
+
+		for product_id in intersectingProducts[0]:
+			buyerProduct = BuyerProducts(buyer=buyerPtr, product_id=product_id, buyer_interest=newBuyerInterest)
+			buyerProductsToCreate.append(buyerProduct)
+
+		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
+
+		BuyerProducts.objects.filter(product_id__in=intersectingProducts[1],buyer_id=buyerPtr.id).update(buyer_interest=newBuyerInterest,delete_status=False)
+
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
@@ -195,30 +211,11 @@ def post_new_buyer_product(request):
 
 	buyerProductsPtr = BuyerProducts.objects.filter(buyer_id = int(buyer_product["buyerID"]))
 
-	if len(buyerProductsPtr) > 0:
-
-		productsToAdd = DataFrame(list(productPtr.values('id')))
-
-		productAgainstBuyer = DataFrame(list(buyerProductsPtr.values('product_id')))
-
-		innerFrame = productsToAdd[(productsToAdd.id.isin(productAgainstBuyer.product_id))]
-
-		#innerFrame = merge(productsToAdd, productAgainstBuyer, how="inner", left_on="id", right_on="product_id", sort=False)
-
-		buyerProductsPresent = innerFrame["id"].tolist()
-
-		leftOnlyFrame = productsToAdd[(~productsToAdd.id.isin(innerFrame.id))]
-
-		buyerProductsNotPresent = leftOnlyFrame["id"].tolist()
-
-		
-	else:
-		buyerProductsPresent = []
-		buyerProductsNotPresent = productIDs
+	intersectingProducts = getIntersectingProducts(productPtr, buyerProductsPtr)
 
 	buyerProductsToCreate = []
 
-	for product_id in buyerProductsNotPresent:
+	for product_id in intersectingProducts[0]:
 		buyerProduct = BuyerProducts(buyer=buyerPtr, product_id=product_id, buyer_interest=None)
 		buyerProductsToCreate.append(buyerProduct)
 
@@ -226,7 +223,7 @@ def post_new_buyer_product(request):
 		
 		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
 
-		BuyerProducts.objects.filter(id__in=buyerProductsPresent).update(is_active=True)
+		BuyerProducts.objects.filter(product_id__in=intersectingProducts[1],buyer_id=buyerPtr.id).update(is_active=True,delete_status=False)
 
 	except Exception as e:
 		log.critical(e)
@@ -256,6 +253,10 @@ def update_buyer_interest(request):
 	if not validateBuyerInterestData(buyer_interest, buyerInterestPtr, 0):
 		return customResponse("4XX", {"error": "Invalid data for buyer interest sent"})
 
+	buyerProductPtr = BuyerProducts.objects.filter(buyer_interest_id = buyerInterestPtr.id)
+
+	forceEvaluation = len(buyerProductPtr)
+
 	try:
 		
 		populateBuyerInterest(buyerInterestPtr, buyer_interest)
@@ -264,6 +265,22 @@ def update_buyer_interest(request):
 		newBuyerInterestHistory = BuyerInterestHistory(buyer_interest=buyerInterestPtr)
 		populateBuyerInterest(newBuyerInterestHistory, buyer_interest)
 		newBuyerInterestHistory.save()
+
+		productPtr = filterBuyerInterestProducts(buyerInterestPtr)
+
+		intersectingProducts = getIntersectingProducts(productPtr, buyerProductPtr)
+
+		buyerProductsToCreate = []
+
+		for product_id in intersectingProducts[0]:
+			buyerProduct = BuyerProducts(buyer_id=buyerInterestPtr.buyer_id, product_id=product_id, buyer_interest=buyerInterestPtr)
+			buyerProductsToCreate.append(buyerProduct)
+
+		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
+
+		BuyerProducts.objects.filter(product_id__in=intersectingProducts[1],buyer_id=buyerInterestPtr.buyer_id).update(buyer_interest=buyerInterestPtr,delete_status=False)
+
+		BuyerProducts.objects.filter(product_id__in=intersectingProducts[2],buyer_id=buyerInterestPtr.buyer_id).update(delete_status=True)
 
 	except Exception as e:
 		log.critical(e)

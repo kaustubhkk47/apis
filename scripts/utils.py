@@ -54,6 +54,9 @@ def validate_integer(x):
 def getArrFromString(strArr):
     return [int(e) for e in strArr.split(",") if validate_integer(e)]
 
+def getStrArrFromString(strArr):
+    return [str(e) for e in strArr.split(",")]
+
 def validate_number(x):
     try:
         x = float(x)
