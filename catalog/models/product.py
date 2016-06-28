@@ -255,6 +255,10 @@ def filterProducts(productParameters):
         query = reduce(operator.or_, (Q(productdetails__fabric_gsm__icontains = item) for item in productParameters["fabricArr"]))
         products = products.filter(query)
 
+    if "colourArr" in productParameters:
+        query = reduce(operator.or_, (Q(productdetails__colours__icontains = item) for item in productParameters["colourArr"]))
+        products = products.filter(query)
+
     if "price_filter_applied" in productParameters:
         products = products.filter(min_price_per_unit__range=(productParameters["min_price_per_unit"],productParameters["max_price_per_unit"]))
 

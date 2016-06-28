@@ -38,6 +38,7 @@ def product_details(request):
 		categoryID = request.GET.get("categoryID", "")
 		sellerID = request.GET.get("sellerID", "")
 		fabric = request.GET.get("fabric", "")
+		colour = request.GET.get("colour", "")
 		min_price_per_unit = request.GET.get("min_price_per_unit", "")
 		max_price_per_unit = request.GET.get("max_price_per_unit", "")
 
@@ -62,6 +63,9 @@ def product_details(request):
 
 		if fabric != "":
 			productParameters["fabricArr"] = getStrArrFromString(fabric)
+
+		if colour != "":
+			productParameters["colourArr"] = getStrArrFromString(colour)
 
 		if validate_number(min_price_per_unit) and validate_number(max_price_per_unit) and float(min_price_per_unit) >= 0 and float(max_price_per_unit) > float(min_price_per_unit):
 			productParameters["price_filter_applied"] = True
