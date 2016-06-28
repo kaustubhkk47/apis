@@ -41,6 +41,20 @@ def buyer_details(request):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
+def buyer_shared_product_id_details(request):
+
+	if request.method == "GET":
+
+		buyerParameters = getBuyerParameters(request)
+
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return buyer.get_buyer_shared_product_id_details(request,buyerParameters)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
 def buyer_interest_details(request):
 
 	if request.method == "GET":
@@ -89,6 +103,7 @@ def getBuyerProductParameters(request):
 	buyerProductID = request.GET.get("buyerproductID", "")
 	buyerInterestID = request.GET.get("buyerinterestID", "")
 	productID = request.GET.get("productID", "")
+	buyersharedproductID = request.GET.get("buyersharedproductID", "")
 
 	if validate_bool(isActive):
 		buyerParameters["is_active"] = int(isActive)
@@ -103,6 +118,9 @@ def getBuyerProductParameters(request):
 
 	if productID != "":
 		buyerParameters["productsArr"] = getArrFromString(productID)
+
+	if buyersharedproductID != "" and validate_integer(buyersharedproductID):
+		buyerParameters["buyersharedproductID"] = int(buyersharedproductID)
 
 	try:
 		pageNumber = int(request.GET.get("page_number", 1))

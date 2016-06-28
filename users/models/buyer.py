@@ -173,6 +173,19 @@ class BuyerProducts(models.Model):
     def __unicode__(self):
         return str(self.id) + " - " +  str(self.buyer.id) + " - " + self.buyer.name + " - " + str(self.product.id)
 
+class BuyerSharedProductID(models.Model):
+
+    buyer = models.ForeignKey(Buyer)
+    productid_filter_text =  models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    delete_status = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return str(self.id)
+
 class BuyerProductResponse(models.Model):
     buyer = models.ForeignKey(Buyer)
     product = models.ForeignKey(Product)
@@ -415,6 +428,15 @@ def filterBuyer(buyerParameters):
 
     return buyers
 
+def filterBuyerSharedProductID(buyerParameters):
+
+    buyerSharedProductID = BuyerSharedProductID.objects.filter(delete_status=False)
+
+    if "buyersArr" in buyerParameters:
+        buyerSharedProductID = buyerSharedProductID.filter(buyer_id__in=buyerParameters["buyersArr"])
+
+    return buyerSharedProductID
+
 def filterBuyerInterest(buyerParameters):
 
     buyersInterest = BuyerInterest.objects.filter(delete_status=False,buyer__delete_status=False)
@@ -448,6 +470,14 @@ def filterBuyerProducts(buyerParameters):
 
     if "buyerInterestArr" in buyerParameters:
         buyerProducts = buyerProducts.filter(buyer_interest_id__in=buyerParameters["buyerInterestArr"])
+
+    if "buyersharedproductID" in buyerParameters:
+        buyerSharedProductIDPtr = BuyerSharedProductID.objects.filter(id=int(buyerParameters["buyersharedproductID"]))
+        if len(buyerSharedProductIDPtr) > 0:
+            productIds =  getArrFromString(buyerSharedProductIDPtr[0].productid_filter_text)
+        else:
+            productIds = []
+        buyerProducts = buyerProducts.filter(product_id__in=productIds)
 
     if "productsArr" in buyerParameters:
         buyerProducts = buyerProducts.filter(product_id__in=buyerParameters["productsArr"])

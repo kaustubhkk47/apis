@@ -75,6 +75,27 @@ def parse_buyer(buyers_queryset, buyerParameters = {}):
 
     return buyers
 
+def parse_buyer_shared_product_id(buyers_queryset, buyerParameters = {}):
+
+    buyers = []
+
+    for buyer in buyers_queryset:
+        buyer_entry = serialize_buyer_shared_product_id(buyer, buyerParameters)
+        buyers.append(buyer_entry)
+
+    return buyers
+
+def serialize_buyer_shared_product_id(buyer_shared_product_id_entry, buyerParameters = {}):
+    buyer_shared_product_id = {}
+
+    buyer_shared_product_id["buyerID"] = buyer_shared_product_id_entry.buyer_id
+    buyer_shared_product_id["productID"] = buyer_shared_product_id_entry.productid_filter_text
+    buyer_shared_product_id["created_at"] = buyer_shared_product_id_entry.created_at
+    buyer_shared_product_id["updated_at"] = buyer_shared_product_id_entry.updated_at
+    buyer_shared_product_id["delete_status"] = buyer_shared_product_id_entry.delete_status
+
+    return buyer_shared_product_id
+
 
 def parse_buyer_interest(buyer_interests_queryset, buyerParameters = {}):
 

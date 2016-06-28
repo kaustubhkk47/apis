@@ -26,6 +26,20 @@ def get_buyer_details(request,buyerParameters):
 		log.critical(e)
 		return customResponse("4XX", {"error": "Invalid request"})
 
+def get_buyer_shared_product_id_details(request,buyerParameters):
+	try:
+		buyerSharedProductID = filterBuyerSharedProductID(buyerParameters)
+
+		response = {
+			"buyer_shared_product_id" : parse_buyer_shared_product_id(buyerSharedProductID, buyerParameters)
+		}
+		closeDBConnection()
+
+		return customResponse("2XX", response)
+	except Exception as e:
+		log.critical(e)
+		return customResponse("4XX", {"error": "Invalid request"})
+
 def get_buyer_interest_details(request,buyerParameters):
 	try:
 		buyerInterests = filterBuyerInterest(buyerParameters)
@@ -220,6 +234,9 @@ def post_new_buyer_product(request):
 		buyerProductsToCreate.append(buyerProduct)
 
 	try:
+
+		newBuyerSharedProductID = BuyerSharedProductID(buyer=buyerPtr, productid_filter_text=buyer_product["productID"])
+		newBuyerSharedProductID.save()
 		
 		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
 
