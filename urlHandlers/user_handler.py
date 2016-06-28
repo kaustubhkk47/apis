@@ -87,6 +87,7 @@ def getBuyerProductParameters(request):
 	isActive = request.GET.get("is_active", None)
 	responded = request.GET.get("responded", None)
 	buyerProductID = request.GET.get("buyerproductID", "")
+	buyerInterestID = request.GET.get("buyerinterestID", "")
 	productID = request.GET.get("productID", "")
 
 	if validate_bool(isActive):
@@ -96,6 +97,9 @@ def getBuyerProductParameters(request):
 
 	if buyerProductID != "":
 		buyerParameters["buyerProductsArr"] = getArrFromString(buyerProductID)
+
+	if buyerInterestID != "":
+		buyerParameters["buyerInterestArr"] = getArrFromString(buyerInterestID)
 
 	if productID != "":
 		buyerParameters["productsArr"] = getArrFromString(productID)

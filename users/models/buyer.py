@@ -443,6 +443,9 @@ def filterBuyerProducts(buyerParameters):
     if "buyerProductsArr" in buyerParameters:
         buyerProducts = buyerProducts.filter(id__in=buyerParameters["buyerProductsArr"])
 
+    if "buyerInterestArr" in buyerParameters:
+        buyerProducts = buyerProducts.filter(buyer_interest_id__in=buyerParameters["buyerInterestArr"])
+
     if "productsArr" in buyerParameters:
         buyerProducts = buyerProducts.filter(product_id__in=buyerParameters["productsArr"])
 
