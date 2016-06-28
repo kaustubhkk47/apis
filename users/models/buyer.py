@@ -431,6 +431,9 @@ def filterBuyerProducts(buyerParameters):
 
     buyerProducts = BuyerProducts.objects.filter(delete_status=False,buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
 
+    query = reduce(operator.or_, (Q(buyer_interest__is_active = item) for item in [None,True]))
+    buyerProducts = buyerProducts.filter(query)
+
     if "is_active" in buyerParameters:
         buyerProducts = buyerProducts.filter(is_active=buyerParameters["is_active"])
     
@@ -462,7 +465,7 @@ def filterBuyerInterestProducts(BuyerInterestPtr):
 
     if BuyerInterestPtr.fabric_filter_text != None and BuyerInterestPtr.fabric_filter_text != "":
         fabricArr = getStrArrFromString(BuyerInterestPtr.fabric_filter_text)
-        query = reduce(operator.or_, (Q(productdetails__fabric_gsm__contains = item) for item in fabricArr))
+        query = reduce(operator.or_, (Q(productdetails__fabric_gsm__icontains = item) for item in fabricArr))
         productPtr = productPtr.filter(query)
 
     if BuyerInterestPtr.productid_filter_text!= None and BuyerInterestPtr.productid_filter_text != "":
