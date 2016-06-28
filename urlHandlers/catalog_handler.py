@@ -2,7 +2,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from catalog.views import categories
 from catalog.views import product
-from scripts.utils import customResponse, get_token_payload, getArrFromString
+from scripts.utils import customResponse, get_token_payload, getArrFromString, getStrArrFromString, validate_number
 import jwt as JsonWebToken
 
 @csrf_exempt
@@ -37,6 +37,10 @@ def product_details(request):
 		productID = request.GET.get("productID", "")
 		categoryID = request.GET.get("categoryID", "")
 		sellerID = request.GET.get("sellerID", "")
+		fabric = request.GET.get("fabric", "")
+		min_price_per_unit = request.GET.get("min_price_per_unit", "")
+		max_price_per_unit = request.GET.get("max_price_per_unit", "")
+
 		try:
 			pageNumber = int(request.GET.get("page_number", 1))
 			productsperPage = int(request.GET.get("items_per_page", 10))
@@ -55,6 +59,14 @@ def product_details(request):
 
 		if categoryID != "":
 			productParameters["categoriesArr"] = getArrFromString(categoryID)
+
+		if fabric != "":
+			productParameters["fabricArr"] = getStrArrFromString(fabric)
+
+		if validate_number(min_price_per_unit) and validate_number(max_price_per_unit) and float(min_price_per_unit) >= 0 and float(max_price_per_unit) > float(min_price_per_unit):
+			productParameters["price_filter_applied"] = True
+			productParameters["min_price_per_unit"] = float(min_price_per_unit)
+			productParameters["max_price_per_unit"] = float(max_price_per_unit)
 		
 		tokenPayload = get_token_payload(accessToken, "sellerID")
 		productParameters["isSeller"] = 0		

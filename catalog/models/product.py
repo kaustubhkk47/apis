@@ -8,6 +8,9 @@ import datetime
 import math
 
 from scripts.utils import validate_integer, validate_number, validate_bool
+
+import operator
+from django.db.models import Q
 #Make changes in model, validate, populate and serializer 
 #Also make changes in upload script
 
@@ -247,6 +250,13 @@ def filterProducts(productParameters):
 
     if "sellerArr" in productParameters:
         products = products.filter(seller_id__in=productParameters["sellerArr"])
+
+    if "fabricArr" in productParameters:
+        query = reduce(operator.or_, (Q(productdetails__fabric_gsm__icontains = item) for item in productParameters["fabricArr"]))
+        products = products.filter(query)
+
+    if "price_filter_applied" in productParameters:
+        products = products.filter(min_price_per_unit__range=(productParameters["min_price_per_unit"],productParameters["max_price_per_unit"]))
 
     if productParameters["isSeller"]==0 and productParameters["isInternalUser"]==0:
         products = products.filter(verification=True,show_online=True,seller__show_online=True)
