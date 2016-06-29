@@ -435,6 +435,9 @@ def filterBuyerSharedProductID(buyerParameters):
     if "buyersArr" in buyerParameters:
         buyerSharedProductID = buyerSharedProductID.filter(buyer_id__in=buyerParameters["buyersArr"])
 
+    if "buyersharedproductID" in buyerParameters:
+        buyerSharedProductID = buyerSharedProductID.filter(id=buyerParameters["buyersharedproductID"])
+
     return buyerSharedProductID
 
 def filterBuyerInterest(buyerParameters):

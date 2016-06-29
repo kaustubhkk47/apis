@@ -5,6 +5,8 @@ import jwt as JsonWebToken
 import settings
 import os
 import re
+import csv
+from django.http import HttpResponse
 
 from django.core.mail import EmailMessage
 #from django.template import Context
@@ -138,3 +140,16 @@ def generate_pdf(template_src, context_dict, output_directory, output_file_name)
     config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDFPATH)
 
     pdfkit.from_string(html, filename, options=options, configuration=config)
+
+def generateProductFile(products, filename):
+
+    contentString = "attachment; filename=" + filename
+    response = HttpResponse(content_type='text/plain')
+    response['Content-Disposition'] = contentString
+
+    writer = csv.writer(response)
+
+    for i in products:
+        writer.writerow(str(i))
+
+    return response

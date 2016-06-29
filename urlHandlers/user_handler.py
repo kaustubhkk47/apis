@@ -103,8 +103,7 @@ def getBuyerProductParameters(request):
 	buyerProductID = request.GET.get("buyerproductID", "")
 	buyerInterestID = request.GET.get("buyerinterestID", "")
 	productID = request.GET.get("productID", "")
-	buyersharedproductID = request.GET.get("buyersharedproductID", "")
-
+	
 	if validate_bool(isActive):
 		buyerParameters["is_active"] = int(isActive)
 	if validate_integer(responded):
@@ -118,9 +117,6 @@ def getBuyerProductParameters(request):
 
 	if productID != "":
 		buyerParameters["productsArr"] = getArrFromString(productID)
-
-	if buyersharedproductID != "" and validate_integer(buyersharedproductID):
-		buyerParameters["buyersharedproductID"] = int(buyersharedproductID)
 
 	try:
 		pageNumber = int(request.GET.get("page_number", 1))
@@ -147,6 +143,7 @@ def getBuyerParameters(request):
 	accessToken = request.GET.get("access_token", "")
 
 	buyerInterestID = request.GET.get("buyerinterestID", "")
+	buyersharedproductID = request.GET.get("buyersharedproductID", "")
 		
 	tokenPayload = get_token_payload(accessToken, "buyerID")
 	buyerParameters["isBuyer"] = 0
@@ -164,6 +161,9 @@ def getBuyerParameters(request):
 
 	if buyerInterestID != "":
 		buyerParameters["buyerInterestArr"] = getArrFromString(buyerInterestID)
+
+	if buyersharedproductID != "" and validate_integer(buyersharedproductID):
+		buyerParameters["buyersharedproductID"] = int(buyersharedproductID)
 
 	return buyerParameters
 
