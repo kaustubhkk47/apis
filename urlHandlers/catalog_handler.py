@@ -51,9 +51,6 @@ def product_file(request):
 
 		productParameters = getProductParameters(request)
 
-		if productParameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
-
 		return product.get_product_file(request,productParameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})

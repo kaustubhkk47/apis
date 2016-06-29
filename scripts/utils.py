@@ -149,7 +149,6 @@ def generateProductFile(products, filename):
 
     writer = csv.writer(response)
 
-    for i in products:
-        writer.writerow(str(i))
+    writer.writerows([[str(e)] for e in products])
 
     return response

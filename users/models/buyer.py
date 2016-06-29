@@ -378,12 +378,11 @@ def populateBuyer(buyerPtr, buyer):
     buyerPtr.company_name = buyer["company_name"]
     buyerPtr.mobile_number = buyer["mobile_number"]
     buyerPtr.email = buyer["email"]
-    buyerPtr.password = buyer["password"]
+    buyerPtr.password = buyer["mobile_number"]
     buyerPtr.alternate_phone_number = buyer["alternate_phone_number"]
     buyerPtr.mobile_verification = int(buyer["mobile_verification"])
     buyerPtr.email_verification = int(buyer["email_verification"])
     buyerPtr.gender = buyer["gender"]
-    buyerPtr.password = buyer["password"]
 
 def populateBuyerInterest(buyerInterestPtr, buyerInterest):
     buyerInterestPtr.scale = int(buyerInterest["scale"])
