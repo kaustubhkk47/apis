@@ -88,6 +88,7 @@ def parse_buyer_shared_product_id(buyers_queryset, buyerParameters = {}):
 def serialize_buyer_shared_product_id(buyer_shared_product_id_entry, buyerParameters = {}):
     buyer_shared_product_id = {}
 
+    buyer_shared_product_id["buyersharedproductID"] = buyer_shared_product_id_entry.id
     buyer_shared_product_id["buyerID"] = buyer_shared_product_id_entry.buyer_id
     buyer_shared_product_id["productID"] = buyer_shared_product_id_entry.productid_filter_text
     buyer_shared_product_id["created_at"] = buyer_shared_product_id_entry.created_at
