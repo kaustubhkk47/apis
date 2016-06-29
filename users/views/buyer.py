@@ -387,6 +387,35 @@ def delete_buyer_interest(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer": "buyer interest deleted"})
 
+
+def delete_buyer_shared_product_id(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_shared_product_id = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_shared_product_id) or not "buyersharedproductID" in buyer_shared_product_id or buyer_shared_product_id["buyersharedproductID"]==None or not validate_integer(buyer_shared_product_id["buyersharedproductID"]):
+		return customResponse("4XX", {"error": "Id for buyer shared_product_id not sent"})
+
+	buyerSharedProductIDPtr = BuyerSharedProductID.objects.filter(id=int(buyer_shared_product_id["buyersharedproductID"]))
+
+	if len(buyerSharedProductIDPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for buyer shared_product_id sent"})
+
+	buyerSharedProductIDPtr = buyerSharedProductIDPtr[0]
+
+	try:
+		buyerSharedProductIDPtr.delete_status = True
+		buyerSharedProductIDPtr.save()
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "could not delete"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer": "buyer shared_product_id deleted"})
+
 def update_buyer(request):
 	try:
 		requestbody = request.body.decode("utf-8")

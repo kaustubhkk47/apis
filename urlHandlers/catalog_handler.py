@@ -79,16 +79,16 @@ def getProductParameters(request):
 			
 	accessToken = request.GET.get("access_token", "")
 
-	if productID != "":
+	if productID != "" and productID != None:
 		productParameters["productsArr"] = getArrFromString(productID)
 
-	if categoryID != "":
+	if categoryID != "" and categoryID != None:
 		productParameters["categoriesArr"] = getArrFromString(categoryID)
 
-	if fabric != "":
+	if fabric != "" and fabric != None:
 		productParameters["fabricArr"] = getStrArrFromString(fabric)
 
-	if colour != "":
+	if colour != "" and colour != None:
 		productParameters["colourArr"] = getStrArrFromString(colour)
 
 	if validate_number(min_price_per_unit) and validate_number(max_price_per_unit) and float(min_price_per_unit) >= 0 and float(max_price_per_unit) > float(min_price_per_unit):

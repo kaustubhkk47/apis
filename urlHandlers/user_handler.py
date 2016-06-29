@@ -51,6 +51,8 @@ def buyer_shared_product_id_details(request):
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return buyer.get_buyer_shared_product_id_details(request,buyerParameters)
+	elif request.method == "DELETE":
+		return buyer.delete_buyer_shared_product_id(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 

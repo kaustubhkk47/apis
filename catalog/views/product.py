@@ -56,10 +56,10 @@ def get_product_file(request, productParameters):
             filename += "fabric-" + arrToFilename(productParameters["fabricArr"]) + "_"
 
         if "colourArr" in productParameters:
-            filename += "fabric-" + arrToFilename(productParameters["colourArr"]) + "_"
+            filename += "colour-" + arrToFilename(productParameters["colourArr"]) + "_"
 
         if "price_filter_applied" in productParameters:
-            filename += "pricerange-" + str(productParameters["min_price_per_unit"]) +"to" + str(productParameters["min_price_per_unit"]) + "_"
+            filename += "pricerange-" + str(productParameters["min_price_per_unit"]) +"to" + str(productParameters["max_price_per_unit"]) + "_"
 
         filename = filename[0:len(filename)-1]
 
