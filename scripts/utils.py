@@ -152,3 +152,12 @@ def generateProductFile(products, filename):
     writer.writerows([[str(e)] for e in products])
 
     return response
+
+def arrToFilename(arr):
+    x = ""
+    for a in arr:
+        x += str(a) + "-"
+
+    x = x[0:len(x)-1]
+
+    return x

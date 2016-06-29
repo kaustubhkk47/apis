@@ -1,4 +1,4 @@
-from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_integer, generateProductFile
+from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_integer, generateProductFile,arrToFilename
 
 from ..models.category import Category
 from ..models.product import Product, validateProductData, ProductDetails, validateProductDetailsData, populateProductData, populateProductDetailsData, filterProducts
@@ -47,16 +47,16 @@ def get_product_file(request, productParameters):
         filename = "productfile_"
 
         if "categoriesArr" in productParameters:
-            filename += "categories-" + str(productParameters["categoriesArr"]) + "_"
+            filename += "categories-" + arrToFilename(productParameters["categoriesArr"]) + "_"
 
         if "sellerArr" in productParameters:
-            filename += "seller-" + str(productParameters["sellerArr"]) + "_"
+            filename += "seller-" + arrToFilename(productParameters["sellerArr"]) + "_"
 
         if "fabricArr" in productParameters:
-            filename += "fabric-" + str(productParameters["fabricArr"]) + "_"
+            filename += "fabric-" + arrToFilename(productParameters["fabricArr"]) + "_"
 
         if "colourArr" in productParameters:
-            filename += "fabric-" + str(productParameters["colourArr"]) + "_"
+            filename += "fabric-" + arrToFilename(productParameters["colourArr"]) + "_"
 
         if "price_filter_applied" in productParameters:
             filename += "pricerange-" + str(productParameters["min_price_per_unit"]) +"to" + str(productParameters["min_price_per_unit"]) + "_"
