@@ -36,6 +36,19 @@ def get_product_details(request, productParameters):
     closeDBConnection()
     return customResponse(statusCode, body)
 
+def get_product_file(request, productParameters):
+    
+    try:
+        products = filterProducts(productParameters)
+        products = products.filter(verification=True,show_online=True,seller__show_online=True)
+
+    except Exception as e:
+        log.critical(e)
+        statusCode = "4XX"
+        body = {"error": "Invalid product"}
+
+    closeDBConnection()
+    return customResponse(statusCode, body)
 
 def post_new_product(request):
     try:

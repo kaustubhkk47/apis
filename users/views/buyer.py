@@ -10,8 +10,6 @@ from django.core.paginator import Paginator
 import logging
 log = logging.getLogger("django")
 
-
-
 def get_buyer_details(request,buyerParameters):
 	try:
 		buyers = filterBuyer(buyerParameters)
