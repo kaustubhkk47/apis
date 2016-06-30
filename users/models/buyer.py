@@ -1,6 +1,6 @@
 from django.db import models
 
-from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number
+from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString
 
 from catalog.models.category import Category
 from catalog.models.product import Product
@@ -10,6 +10,12 @@ from address.models.pincode import Pincode
 from .businessType import BusinessType
 
 from decimal import Decimal
+import datetime
+
+import operator
+from django.db.models import Q
+
+from pandas import DataFrame
 
 #Make changes in model, validate, populate and serializer 
 
@@ -76,7 +82,7 @@ class BuyerDetails(models.Model):
 class BuyerInterest(models.Model):
 
     buyer = models.ForeignKey(Buyer)
-    category = models.ForeignKey(Category)
+    category = models.ForeignKey(Category,blank=True,null=True)
 
     ## On a scale of 1 to 10
     scale = models.PositiveIntegerField(default=5)
@@ -151,8 +157,7 @@ class BuyerProducts(models.Model):
 
     is_active = models.BooleanField(default=True)
 
-    shortlisted = models.BooleanField(default=False)
-    disliked = models.BooleanField(default=False)
+    responded = models.IntegerField(default=0)
 
     shortlisted_time = models.DateTimeField(null=True, blank=True)
     disliked_time = models.DateTimeField(null=True, blank=True)
@@ -160,11 +165,64 @@ class BuyerProducts(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    delete_status = models.BooleanField(default=False)
+
     class Meta:
         ordering = ["-product__id"]
 
     def __unicode__(self):
         return str(self.id) + " - " +  str(self.buyer.id) + " - " + self.buyer.name + " - " + str(self.product.id)
+
+class BuyerSharedProductID(models.Model):
+
+    buyer = models.ForeignKey(Buyer)
+    productid_filter_text =  models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    delete_status = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return str(self.id)
+
+class BuyerProductResponse(models.Model):
+    buyer = models.ForeignKey(Buyer)
+    product = models.ForeignKey(Product)
+    buyer_product = models.ForeignKey(BuyerProducts, null = True, blank = True)
+
+    response_code = models.IntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return str(self.id)
+
+BuyerProductResponseCodes = {
+    1:{"display_value":"Shortlisted"},
+    2:{"display_value":"Disliked"}
+}
+
+class BuyerProductResponseHistory(models.Model):
+
+    buyer = models.ForeignKey(Buyer)
+    product = models.ForeignKey(Product)
+    buyer_product = models.ForeignKey(BuyerProducts, null = True, blank = True)
+
+    response_code = models.IntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return str(self.id)
+
+BuyerProductResponseHistoryCodes = {
+    1:{"display_value":"Shortlisted"},
+    2:{"display_value":"Disliked"},
+    3:{"display_value":"Dislike to shortlist"}
+}
 
 def validateBuyerData(buyer, oldbuyer, is_new):
 
@@ -209,9 +267,9 @@ def validateBuyerInterestData(buyer_interest, old_buyer_interest, is_new):
 
     if not "scale" in buyer_interest or buyer_interest["scale"]==None or not validate_buyer_interest_scale(buyer_interest["scale"]):
         buyer_interest["scale"] = old_buyer_interest.scale
-    if not "min_price_per_unit" in buyer_interest or buyer_interest["min_price_per_unit"]==None or not validate_number(buyer_interest["min_price_per_unit"]) or not float(buyer_interest["min_price_per_unit"]) > 0:
+    if not "min_price_per_unit" in buyer_interest or buyer_interest["min_price_per_unit"]==None or not validate_number(buyer_interest["min_price_per_unit"]) or not float(buyer_interest["min_price_per_unit"]) >= 0:
         buyer_interest["min_price_per_unit"] = old_buyer_interest.min_price_per_unit
-    if not "max_price_per_unit" in buyer_interest or buyer_interest["max_price_per_unit"]==None or not validate_number(buyer_interest["max_price_per_unit"]) or not float(buyer_interest["max_price_per_unit"]) > 0:
+    if not "max_price_per_unit" in buyer_interest or buyer_interest["max_price_per_unit"]==None or not validate_number(buyer_interest["max_price_per_unit"]) or not float(buyer_interest["max_price_per_unit"]) >= 0:
         buyer_interest["max_price_per_unit"] = old_buyer_interest.max_price_per_unit
     if not "fabric_filter_text" in buyer_interest or buyer_interest["fabric_filter_text"]==None:
         buyer_interest["fabric_filter_text"] = old_buyer_interest.fabric_filter_text
@@ -232,6 +290,53 @@ def validateBuyerInterestData(buyer_interest, old_buyer_interest, is_new):
         return False
 
     return True
+
+def validateBuyerProductData(buyer_product, old_buyer_product, is_new, buyer_product_populator):
+
+    if old_buyer_product.responded == 1:
+        return False
+    
+    if "is_active" in buyer_product and buyer_product["is_active"] != None and validate_bool(buyer_product["is_active"]):
+        if int(buyer_product["is_active"]) != int(old_buyer_product.is_active) and old_buyer_product.responded == 0:
+            buyer_product_populator["is_active"] = int(buyer_product["is_active"])
+            return True
+
+    if old_buyer_product.is_active == 0:
+        return False
+
+    if "responded" in buyer_product and buyer_product["responded"] != None and validate_integer(buyer_product["responded"]):
+        if int(buyer_product["responded"]) == 1:
+            buyer_product_populator["shortlisted_time"] = datetime.datetime.now()
+            buyer_product_populator["responded"] = 1
+            if int(old_buyer_product.responded) == 2:
+                buyer_product_populator["response_code"] = 3
+            else:
+                buyer_product_populator["response_code"] = 1
+            return True
+        elif int(buyer_product["responded"]) == 2 and old_buyer_product.responded == 0:
+            buyer_product_populator["disliked_time"] = datetime.datetime.now()
+            buyer_product_populator["responded"] = 2
+            buyer_product_populator["response_code"] = 2
+            return True
+
+    return False
+
+def populateBuyerProduct(buyerProductPtr, buyerproduct):
+
+    if "is_active" in buyerproduct:
+        buyerProductPtr.is_active = int(buyerproduct["is_active"])
+    if "responded" in buyerproduct:
+        buyerProductPtr.responded = int(buyerproduct["responded"])    
+    if "shortlisted_time" in buyerproduct:
+        buyerProductPtr.shortlisted_time = buyerproduct["shortlisted_time"]    
+    if "disliked_time" in buyerproduct:
+        buyerProductPtr.disliked_time = buyerproduct["disliked_time"]
+
+def populateBuyerProductResponseHistory(buyerProductResponsePtr,buyerProductResponse):
+    buyerProductResponsePtr.response_code = int(buyerProductResponse["response_code"])
+
+def populateBuyerProductResponse(buyerProductResponsePtr,buyerProductResponse):
+    buyerProductResponsePtr.response_code = int(buyerProductResponse["response_code"])
 
 def validate_buyer_interest_scale(x):
     if not validate_integer(x) or not (0<=int(x)<=10):
@@ -273,21 +378,20 @@ def populateBuyer(buyerPtr, buyer):
     buyerPtr.company_name = buyer["company_name"]
     buyerPtr.mobile_number = buyer["mobile_number"]
     buyerPtr.email = buyer["email"]
-    buyerPtr.password = buyer["password"]
+    buyerPtr.password = buyer["mobile_number"]
     buyerPtr.alternate_phone_number = buyer["alternate_phone_number"]
-    buyerPtr.mobile_verification = bool(buyer["mobile_verification"])
-    buyerPtr.email_verification = bool(buyer["email_verification"])
+    buyerPtr.mobile_verification = int(buyer["mobile_verification"])
+    buyerPtr.email_verification = int(buyer["email_verification"])
     buyerPtr.gender = buyer["gender"]
-    buyerPtr.password = buyer["password"]
 
 def populateBuyerInterest(buyerInterestPtr, buyerInterest):
     buyerInterestPtr.scale = int(buyerInterest["scale"])
     buyerInterestPtr.min_price_per_unit = Decimal(buyerInterest["min_price_per_unit"])
     buyerInterestPtr.max_price_per_unit = Decimal(buyerInterest["max_price_per_unit"])
-    buyerInterestPtr.price_filter_applied = bool(buyerInterest["price_filter_applied"])
+    buyerInterestPtr.price_filter_applied = int(buyerInterest["price_filter_applied"])
     buyerInterestPtr.fabric_filter_text = buyerInterest["fabric_filter_text"]
     buyerInterestPtr.productid_filter_text = buyerInterest["productid_filter_text"]
-    buyerInterestPtr.is_active = bool(buyerInterest["is_active"])
+    buyerInterestPtr.is_active = int(buyerInterest["is_active"])
 
 def populateBuyerDetails(buyerDetailsPtr, buyerdetails):
     buyerDetailsPtr.cst = buyerdetails["cst"]
@@ -323,6 +427,18 @@ def filterBuyer(buyerParameters):
 
     return buyers
 
+def filterBuyerSharedProductID(buyerParameters):
+
+    buyerSharedProductID = BuyerSharedProductID.objects.filter(delete_status=False)
+
+    if "buyersArr" in buyerParameters:
+        buyerSharedProductID = buyerSharedProductID.filter(buyer_id__in=buyerParameters["buyersArr"])
+
+    if "buyersharedproductID" in buyerParameters:
+        buyerSharedProductID = buyerSharedProductID.filter(id=buyerParameters["buyersharedproductID"])
+
+    return buyerSharedProductID
+
 def filterBuyerInterest(buyerParameters):
 
     buyersInterest = BuyerInterest.objects.filter(delete_status=False,buyer__delete_status=False)
@@ -337,13 +453,88 @@ def filterBuyerInterest(buyerParameters):
 
 def filterBuyerProducts(buyerParameters):
 
-    buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
+    buyerProducts = BuyerProducts.objects.filter(delete_status=False,buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
 
-    buyerProducts = buyerProducts.filter(is_active=buyerParameters["is_active"])
-    buyerProducts = buyerProducts.filter(shortlisted=buyerParameters["shortlisted"])
-    buyerProducts = buyerProducts.filter(disliked=buyerParameters["disliked"])
+    query = reduce(operator.or_, (Q(buyer_interest__is_active = item) for item in [None,True]))
+    buyerProducts = buyerProducts.filter(query)
+
+    if "is_active" in buyerParameters:
+        buyerProducts = buyerProducts.filter(is_active=buyerParameters["is_active"])
+    
+    if "responded" in buyerParameters:
+        buyerProducts = buyerProducts.filter(responded= buyerParameters["responded"])
+
+    if "buyersArr" in buyerParameters:
+        buyerProducts = buyerProducts.filter(buyer_id__in=buyerParameters["buyersArr"])
+
+    if "buyerProductsArr" in buyerParameters:
+        buyerProducts = buyerProducts.filter(id__in=buyerParameters["buyerProductsArr"])
+
+    if "buyerInterestArr" in buyerParameters:
+        buyerProducts = buyerProducts.filter(buyer_interest_id__in=buyerParameters["buyerInterestArr"])
+
+    if "buyersharedproductID" in buyerParameters:
+        buyerSharedProductIDPtr = BuyerSharedProductID.objects.filter(id=int(buyerParameters["buyersharedproductID"]))
+        if len(buyerSharedProductIDPtr) > 0:
+            productIds =  getArrFromString(buyerSharedProductIDPtr[0].productid_filter_text)
+        else:
+            productIds = []
+        buyerProducts = buyerProducts.filter(product_id__in=productIds)
+
+    if "productsArr" in buyerParameters:
+        buyerProducts = buyerProducts.filter(product_id__in=buyerParameters["productsArr"])
 
     return buyerProducts
+
+def filterBuyerInterestProducts(BuyerInterestPtr):
+    productPtr = Product.objects.filter(delete_status=False, verification=True,show_online=True,seller__delete_status=False, seller__show_online=True, category__delete_status=False)
+
+    if BuyerInterestPtr.price_filter_applied == True:
+        productPtr = productPtr.filter(min_price_per_unit__range=(BuyerInterestPtr.min_price_per_unit,BuyerInterestPtr.max_price_per_unit))
+
+    if BuyerInterestPtr.category_id != None:
+        productPtr = productPtr.filter(category_id = BuyerInterestPtr.category_id)
+
+    if BuyerInterestPtr.fabric_filter_text != None and BuyerInterestPtr.fabric_filter_text != "":
+        fabricArr = getStrArrFromString(BuyerInterestPtr.fabric_filter_text)
+        query = reduce(operator.or_, (Q(productdetails__fabric_gsm__icontains = item) for item in fabricArr))
+        productPtr = productPtr.filter(query)
+
+    if BuyerInterestPtr.productid_filter_text!= None and BuyerInterestPtr.productid_filter_text != "":
+        productIDs = getArrFromString(BuyerInterestPtr.productid_filter_text)
+        productPtr = productPtr.filter(id__in=productIDs)
+
+    return productPtr
+
+def getIntersectingProducts(leftPtr, rightPtr):
+    leftList = []
+    innerList = []
+    rightList = []
+
+    if len(rightPtr) > 0 and len(leftPtr) > 0:
+
+        productsToAdd = DataFrame(list(leftPtr.values('id')))
+
+        productAgainstBuyer = DataFrame(list(rightPtr.values('product_id')))
+
+        innerFrame = productsToAdd[(productsToAdd.id.isin(productAgainstBuyer.product_id))]
+
+        #innerFrame = merge(productsToAdd, productAgainstBuyer, how="inner", left_on="id", right_on="product_id", sort=False)
+
+        innerList = innerFrame["id"].tolist()
+
+        leftOnlyFrame = productsToAdd[(~productsToAdd.id.isin(innerFrame.id))]
+
+        rightOnlyFrame = productAgainstBuyer[(~productAgainstBuyer.product_id.isin(innerFrame.id))]
+
+        leftList = leftOnlyFrame["id"].tolist()
+        rightList = rightOnlyFrame["product_id"].tolist()
+    elif len(rightPtr) > 0 and len(leftPtr) == 0:
+        rightList = [int(e) for e in list(rightPtr.values_list('product_id',flat=True))]
+    elif len(rightPtr) == 0 and len(leftPtr) > 0:
+        leftList = [int(e) for e in list(leftPtr.values_list('id',flat=True))]
+
+    return [leftList, innerList, rightList]
 
 def buyerEmailExists(email):
     buyerPtr = Buyer.objects.filter(email=email)

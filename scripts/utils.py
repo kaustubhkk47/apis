@@ -5,6 +5,8 @@ import jwt as JsonWebToken
 import settings
 import os
 import re
+import csv
+from django.http import HttpResponse
 
 from django.core.mail import EmailMessage
 #from django.template import Context
@@ -54,6 +56,9 @@ def validate_integer(x):
 def getArrFromString(strArr):
     return [int(e) for e in strArr.split(",") if validate_integer(e)]
 
+def getStrArrFromString(strArr):
+    return [str(e) for e in strArr.split(",")]
+
 def validate_number(x):
     try:
         x = float(x)
@@ -62,6 +67,7 @@ def validate_number(x):
     return True
 
 def validate_mobile_number(x):
+    x = str(x)
     if len(x) != 10:
         return False
     if not (x[0] == '9' or x[0] == '8' or x[0] == '7'):
@@ -134,3 +140,24 @@ def generate_pdf(template_src, context_dict, output_directory, output_file_name)
     config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDFPATH)
 
     pdfkit.from_string(html, filename, options=options, configuration=config)
+
+def generateProductFile(products, filename):
+
+    contentString = "attachment; filename=" + filename
+    response = HttpResponse(content_type='text/plain')
+    response['Content-Disposition'] = contentString
+
+    writer = csv.writer(response)
+
+    writer.writerows([[str(e)] for e in products])
+
+    return response
+
+def arrToFilename(arr):
+    x = ""
+    for a in arr:
+        x += str(a) + "-"
+
+    x = x[0:len(x)-1]
+
+    return x
