@@ -47,7 +47,7 @@ def product_details(request):
 		if not pageNumber > 0 or not productsperPage > 0:
 			pageNumber = 1
 			productsperPage = 10
-			
+
 		accessToken = request.GET.get("access_token", "")
 
 		if productID != "":
@@ -55,9 +55,9 @@ def product_details(request):
 
 		if categoryID != "":
 			productParameters["categoriesArr"] = getArrFromString(categoryID)
-		
+
 		tokenPayload = get_token_payload(accessToken, "sellerID")
-		productParameters["isSeller"] = 0		
+		productParameters["isSeller"] = 0
 		if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
 			productParameters["isSeller"] = 1
 			productParameters["sellerArr"] = [tokenPayload["sellerID"]]
