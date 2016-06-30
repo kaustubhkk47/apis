@@ -1,7 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 
 from users.views import user, buyer, seller
-from scripts.utils import customResponse, get_token_payload, getArrFromString
+from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool, validate_integer
 from users.models.buyer import *
 from users.serializers.buyer import *
 from users.models.seller import *
@@ -41,6 +41,22 @@ def buyer_details(request):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
+def buyer_shared_product_id_details(request):
+
+	if request.method == "GET":
+
+		buyerParameters = getBuyerParameters(request)
+
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return buyer.get_buyer_shared_product_id_details(request,buyerParameters)
+	elif request.method == "DELETE":
+		return buyer.delete_buyer_shared_product_id(request)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
 def buyer_interest_details(request):
 
 	if request.method == "GET":
@@ -73,8 +89,8 @@ def buyer_product_details(request):
 		return buyer.get_buyer_product_details(request,buyerParameters)
 	elif request.method == "POST":
 		return buyer.post_new_buyer_product(request)
-	#elif request.method == "PUT":
-	#	return buyer.update_buyer_interest(request)
+	elif request.method == "PUT":
+		return buyer.update_buyer_product(request)
 	#elif request.method == "DELETE":
 	#	return buyer.delete_buyer_interest(request)
 
@@ -83,24 +99,26 @@ def buyer_product_details(request):
 def getBuyerProductParameters(request):
 
 	buyerParameters = getBuyerParameters(request)
-	try:
-		isActive = bool(request.GET.get("is_active", True))
-	except Exception as e:
-		isActive = True
 
-	try:
-		shortlisted = bool(request.GET.get("is_shortlisted", False))
-	except Exception as e:
-		shortlisted = False
+	isActive = request.GET.get("is_active", None)
+	responded = request.GET.get("responded", None)
+	buyerProductID = request.GET.get("buyerproductID", "")
+	buyerInterestID = request.GET.get("buyerinterestID", "")
+	productID = request.GET.get("productID", "")
+	
+	if validate_bool(isActive):
+		buyerParameters["is_active"] = int(isActive)
+	if validate_integer(responded):
+		buyerParameters["responded"] = int(responded)
 
-	try:
-		disliked = bool(request.GET.get("is_disliked", False))
-	except Exception as e:
-		disliked = False
+	if buyerProductID != "":
+		buyerParameters["buyerProductsArr"] = getArrFromString(buyerProductID)
 
-	buyerParameters["is_active"] = isActive
-	buyerParameters["shortlisted"] = shortlisted
-	buyerParameters["disliked"] = disliked
+	if buyerInterestID != "":
+		buyerParameters["buyerInterestArr"] = getArrFromString(buyerInterestID)
+
+	if productID != "":
+		buyerParameters["productsArr"] = getArrFromString(productID)
 
 	try:
 		pageNumber = int(request.GET.get("page_number", 1))
@@ -127,6 +145,7 @@ def getBuyerParameters(request):
 	accessToken = request.GET.get("access_token", "")
 
 	buyerInterestID = request.GET.get("buyerinterestID", "")
+	buyersharedproductID = request.GET.get("buyersharedproductID", "")
 		
 	tokenPayload = get_token_payload(accessToken, "buyerID")
 	buyerParameters["isBuyer"] = 0
@@ -144,6 +163,9 @@ def getBuyerParameters(request):
 
 	if buyerInterestID != "":
 		buyerParameters["buyerInterestArr"] = getArrFromString(buyerInterestID)
+
+	if buyersharedproductID != "" and validate_integer(buyersharedproductID):
+		buyerParameters["buyersharedproductID"] = int(buyersharedproductID)
 
 	return buyerParameters
 

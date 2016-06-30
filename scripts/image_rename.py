@@ -69,9 +69,9 @@ def start_rename_images_with_filenames(wb):
 			break
 		else:		
 			count = 0
-			catalogNumber = removeSpecialChars(catalogNumber)
+			catalogNumber = removeSpecialChars(catalogNumber).lower()
 			for i in range(len(cleanFileList)):
-				fileName = cleanFileList[i]
+				fileName = cleanFileList[i].lower()
 				if catalogNumber in fileName:
 					filePath = os.path.join(inputFolderName,fileList[i])
 					if (os.path.isfile(filePath)):

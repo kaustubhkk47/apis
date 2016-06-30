@@ -81,10 +81,7 @@ def validateOrderItemStatus(status, current_status):
 
 def update_order_item_status(orderShipmentID, status):
 
-    orderItemQuerySet = OrderItem.objects.filter(order_shipment_id =orderShipmentID)
-    for orderItem in orderItemQuerySet:
-        orderItem.current_status = status
-        orderItem.save()
+    orderItemQuerySet = OrderItem.objects.filter(order_shipment_id =orderShipmentID).update(current_status = status)
 
 def filterOrderItem(orderItemParameters):
     orderItems = OrderItem.objects.all().select_related('product')

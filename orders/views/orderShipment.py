@@ -66,7 +66,7 @@ def post_new_order_shipment(request):
 	buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=subOrderPtr.order.buyer_id)
 	buyerAddressPtr = buyerAddressPtr[0]
 
-	if (bool(orderShipment["all_items"]) == 0):
+	if (int(orderShipment["all_items"]) == 0):
 		if not "order_items" in orderShipment or orderShipment["order_items"]==None:
 			return customResponse("4XX", {"error": "Order items in order shipment not sent"})
 
@@ -82,7 +82,7 @@ def post_new_order_shipment(request):
 
 		allOrderItems = OrderItem.objects.filter(id__in=sentOrderItems)
 
-	elif (bool(orderShipment["all_items"]) == 1):
+	elif (int(orderShipment["all_items"]) == 1):
 		allOrderItems = OrderItem.objects.filter(suborder_id= subOrderPtr.id, current_status__in=[0,1,2,3])
 		if len(allOrderItems) == 0:
 			return customResponse("4XX", {"error": "No order items left to ship"})

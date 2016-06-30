@@ -100,7 +100,7 @@ def validateSellerData(seller, oldseller, isnew):
         seller["name"] = oldseller.name
     if not "company_name" in seller or seller["company_name"]==None:
         seller["company_name"] = oldseller.company_name
-    if not "mobile_number" in seller or seller["mobile_number"]==None or not validate_mobile_number(seller["mobile_number"]):
+    if not "mobile_number" in seller or seller["mobile_number"]==None or not validate_mobile_number(str(seller["mobile_number"])):
         flag = 1
         seller["mobile_number"] = oldseller.mobile_number
     if not "email" in seller or seller["email"]==None or not validate_email(seller["email"]):
@@ -182,15 +182,15 @@ def validateSellerBankdetailsData(sellerbankdetails, oldsellerbankdetails):
 def populateSellerData(sellerPtr, seller):
     sellerPtr.name = seller["name"]
     sellerPtr.company_name = seller["company_name"]
-    sellerPtr.mobile_number = seller["mobile_number"]
+    sellerPtr.mobile_number = str(seller["mobile_number"])
     sellerPtr.email = seller["email"]
     sellerPtr.password = seller["password"]
     sellerPtr.alternate_phone_number = seller["alternate_phone_number"]
-    sellerPtr.mobile_verification = bool(seller["mobile_verification"])
-    sellerPtr.email_verification = bool(seller["email_verification"])
+    sellerPtr.mobile_verification = int(seller["mobile_verification"])
+    sellerPtr.email_verification = int(seller["email_verification"])
     sellerPtr.company_profile = seller["company_profile"]
     sellerPtr.seller_conditions = seller["seller_conditions"]
-    sellerPtr.show_online = bool(seller["show_online"])
+    sellerPtr.show_online = int(seller["show_online"])
     sellerPtr.concerned_person = seller["concerned_person"]
     sellerPtr.concerned_person_number = seller["concerned_person_number"]
 
@@ -199,8 +199,8 @@ def populateSellerDetailsData(sellerDetailsPtr,sellerdetails):
     sellerDetailsPtr.pan = sellerdetails["pan"]
     sellerDetailsPtr.name_on_pan = sellerdetails["name_on_pan"]
     sellerDetailsPtr.dob_on_pan = sellerdetails["dob_on_pan"]
-    sellerDetailsPtr.pan_verification = bool(sellerdetails["pan_verification"])
-    sellerDetailsPtr.tin_verification = bool(sellerdetails["tin_verification"])
+    sellerDetailsPtr.pan_verification = int(sellerdetails["pan_verification"])
+    sellerDetailsPtr.tin_verification = int(sellerdetails["tin_verification"])
     sellerDetailsPtr.vat_tin = sellerdetails["vat_tin"]
 
 def populateSellerAddressData(sellerAddressPtr, selleraddress):
@@ -253,4 +253,3 @@ def sellerMobileNumberExists(mobileNumber):
         return True
 
     return False
-
