@@ -10,14 +10,26 @@ from django.core.paginator import Paginator
 import logging
 log = logging.getLogger("django")
 
-from pandas import DataFrame
-
 def get_buyer_details(request,buyerParameters):
 	try:
 		buyers = filterBuyer(buyerParameters)
 
 		response = {
 			"buyers" : parse_buyer(buyers, buyerParameters)
+		}
+		closeDBConnection()
+
+		return customResponse("2XX", response)
+	except Exception as e:
+		log.critical(e)
+		return customResponse("4XX", {"error": "Invalid request"})
+
+def get_buyer_shared_product_id_details(request,buyerParameters):
+	try:
+		buyerSharedProductID = filterBuyerSharedProductID(buyerParameters)
+
+		response = {
+			"buyer_shared_product_id" : parse_buyer_shared_product_id(buyerSharedProductID, buyerParameters)
 		}
 		closeDBConnection()
 
@@ -141,6 +153,11 @@ def post_new_buyer_interest(request):
 
 	categoryPtr = categoryPtr[0]
 
+	BuyerInterestPtr = BuyerInterest.objects.filter(buyer_id=buyerPtr.id,category_id=categoryPtr.id)
+
+	if len(BuyerInterestPtr)>0:
+		return customResponse("4XX", {"error": "Buyer interest for category already exists"})
+
 	if not validateBuyerInterestData(buyer_interest, BuyerInterest(), 1):
 		return customResponse("4XX", {"error": "Invalid data for buyer interest sent"})
 
@@ -153,13 +170,29 @@ def post_new_buyer_interest(request):
 		populateBuyerInterest(newBuyerInterestHistory, buyer_interest)
 		newBuyerInterestHistory.save()
 
+		productPtr = filterBuyerInterestProducts(newBuyerInterest)
+
+		buyerProductPtr = BuyerProducts.objects.filter(buyer_id = buyerPtr.id)
+
+		intersectingProducts = getIntersectingProducts(productPtr, buyerProductPtr)
+
+		buyerProductsToCreate = []
+
+		for product_id in intersectingProducts[0]:
+			buyerProduct = BuyerProducts(buyer=buyerPtr, product_id=product_id, buyer_interest=newBuyerInterest)
+			buyerProductsToCreate.append(buyerProduct)
+
+		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
+
+		BuyerProducts.objects.filter(product_id__in=intersectingProducts[1],buyer_id=buyerPtr.id).update(buyer_interest=newBuyerInterest,delete_status=False)
+
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"buyer" : serialize_buyer_interest(newBuyerInterest)})
+		return customResponse("2XX", {"buyer_interest" : serialize_buyer_interest(newBuyerInterest)})
 
 def post_new_buyer_product(request):
 	try:
@@ -188,40 +221,24 @@ def post_new_buyer_product(request):
 	if len(productPtr) == 0:
 		return customResponse("4XX", {"error": "Invalid ids for products sent"})
 
-	buyerProductsPtr = BuyerProducts.objects.filter(buyer_id = int(buyer_product["buyerID"]), shortlisted=False, disliked=False)
+	buyerProductsPtr = BuyerProducts.objects.filter(buyer_id = int(buyer_product["buyerID"]))
 
-	if len(buyerProductsPtr) > 0:
-
-		productsToAdd = DataFrame(list(productPtr.values('id')))
-
-		productAgainstBuyer = DataFrame(list(buyerProductsPtr.values('product_id')))
-
-		innerFrame = productsToAdd[(productsToAdd.id.isin(productAgainstBuyer.product_id))]
-
-		#innerFrame = merge(productsToAdd, productAgainstBuyer, how="inner", left_on="id", right_on="product_id", sort=False)
-
-		buyerProductsPresent = innerFrame["id"].tolist()
-
-		leftOnlyFrame = productsToAdd[(~productsToAdd.id.isin(innerFrame.id))]
-
-		buyerProductsNotPresent = leftOnlyFrame["id"].tolist()
-
-		
-	else:
-		buyerProductsPresent = []
-		buyerProductsNotPresent = productIDs
+	intersectingProducts = getIntersectingProducts(productPtr, buyerProductsPtr)
 
 	buyerProductsToCreate = []
 
-	for product_id in buyerProductsNotPresent:
+	for product_id in intersectingProducts[0]:
 		buyerProduct = BuyerProducts(buyer=buyerPtr, product_id=product_id, buyer_interest=None)
 		buyerProductsToCreate.append(buyerProduct)
 
 	try:
+
+		newBuyerSharedProductID = BuyerSharedProductID(buyer=buyerPtr, productid_filter_text=buyer_product["productID"])
+		newBuyerSharedProductID.save()
 		
 		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
 
-		BuyerProducts.objects.filter(id__in=buyerProductsPresent).update(is_active=True)
+		BuyerProducts.objects.filter(product_id__in=intersectingProducts[1],buyer_id=buyerPtr.id).update(is_active=True,delete_status=False)
 
 	except Exception as e:
 		log.critical(e)
@@ -248,8 +265,12 @@ def update_buyer_interest(request):
 
 	buyerInterestPtr = buyerInterestPtr[0]
 
-	if not validateBuyerInterestData(buyer_interest, BuyerInterest(), 0):
+	if not validateBuyerInterestData(buyer_interest, buyerInterestPtr, 0):
 		return customResponse("4XX", {"error": "Invalid data for buyer interest sent"})
+
+	buyerProductPtr = BuyerProducts.objects.filter(buyer_interest_id = buyerInterestPtr.id)
+
+	forceEvaluation = len(buyerProductPtr)
 
 	try:
 		
@@ -260,6 +281,22 @@ def update_buyer_interest(request):
 		populateBuyerInterest(newBuyerInterestHistory, buyer_interest)
 		newBuyerInterestHistory.save()
 
+		productPtr = filterBuyerInterestProducts(buyerInterestPtr)
+
+		intersectingProducts = getIntersectingProducts(productPtr, buyerProductPtr)
+
+		buyerProductsToCreate = []
+
+		for product_id in intersectingProducts[0]:
+			buyerProduct = BuyerProducts(buyer_id=buyerInterestPtr.buyer_id, product_id=product_id, buyer_interest=buyerInterestPtr)
+			buyerProductsToCreate.append(buyerProduct)
+
+		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
+
+		BuyerProducts.objects.filter(product_id__in=intersectingProducts[1],buyer_id=buyerInterestPtr.buyer_id).update(buyer_interest=buyerInterestPtr,delete_status=False)
+
+		BuyerProducts.objects.filter(product_id__in=intersectingProducts[2],buyer_id=buyerInterestPtr.buyer_id).update(delete_status=True)
+
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
@@ -267,6 +304,60 @@ def update_buyer_interest(request):
 	else:
 		closeDBConnection()
 		return customResponse("2XX", {"buyer" : serialize_buyer_interest(buyerInterestPtr)})
+
+def update_buyer_product(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_product = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_product) or not "buyerproductID" in buyer_product or buyer_product["buyerproductID"]==None or not validate_integer(buyer_product["buyerproductID"]):
+		return customResponse("4XX", {"error": "Id for buyer product not sent"})
+
+	buyerProductPtr = BuyerProducts.objects.filter(id=int(buyer_product["buyerproductID"]))
+
+	if len(buyerProductPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id product for buyer sent"})
+
+	buyerProductPtr = buyerProductPtr[0]
+
+	buyer_product_populator = {}
+
+	if not validateBuyerProductData(buyer_product, buyerProductPtr, 0, buyer_product_populator):
+		return customResponse("4XX", {"error": "Invalid data for buyer product sent"})
+
+	try:
+		
+		populateBuyerProduct(buyerProductPtr, buyer_product_populator)
+		buyerProductPtr.save()
+
+		if "response_code" in buyer_product_populator:
+			newBuyerProductResponseHistory = BuyerProductResponseHistory(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id,buyer_product_id=buyerProductPtr.id)
+			populateBuyerProductResponseHistory(newBuyerProductResponseHistory,buyer_product_populator)
+			newBuyerProductResponseHistory.save()
+
+			if buyer_product_populator["response_code"] == 1 or  buyer_product_populator["response_code"] == 2:
+				newBuyerProductResponse = BuyerProductResponse(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id,buyer_product_id=buyerProductPtr.id)
+				populateBuyerProductResponse(newBuyerProductResponse, buyer_product_populator)
+				newBuyerProductResponse.save()
+			elif buyer_product_populator["response_code"] == 3:
+				try:
+					BuyerProductResponsePtr = BuyerProductResponse.objects.filter(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id)
+					if len(BuyerProductResponsePtr) > 0:
+						BuyerProductResponsePtr = BuyerProductResponsePtr[0]
+						BuyerProductResponsePtr.response_code = 1
+						BuyerProductResponsePtr.save()
+				except Exception as e:
+					pass
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to update"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer_products" : serialize_buyer_product(buyerProductPtr)})
 
 def delete_buyer_interest(request):
 	try:
@@ -295,6 +386,35 @@ def delete_buyer_interest(request):
 	else:
 		closeDBConnection()
 		return customResponse("2XX", {"buyer": "buyer interest deleted"})
+
+
+def delete_buyer_shared_product_id(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_shared_product_id = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_shared_product_id) or not "buyersharedproductID" in buyer_shared_product_id or buyer_shared_product_id["buyersharedproductID"]==None or not validate_integer(buyer_shared_product_id["buyersharedproductID"]):
+		return customResponse("4XX", {"error": "Id for buyer shared_product_id not sent"})
+
+	buyerSharedProductIDPtr = BuyerSharedProductID.objects.filter(id=int(buyer_shared_product_id["buyersharedproductID"]))
+
+	if len(buyerSharedProductIDPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for buyer shared_product_id sent"})
+
+	buyerSharedProductIDPtr = buyerSharedProductIDPtr[0]
+
+	try:
+		buyerSharedProductIDPtr.delete_status = True
+		buyerSharedProductIDPtr.save()
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "could not delete"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer": "buyer shared_product_id deleted"})
 
 def update_buyer(request):
 	try:

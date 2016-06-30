@@ -26,7 +26,8 @@ urlpatterns = [
 
 urlpatterns += [
     url(r'^category/$', catalog_handler.categories_details),
-    url(r'^products/$', catalog_handler.product_details)
+    url(r'^products/$', catalog_handler.product_details),
+    url(r'^products/generatefile/$', catalog_handler.product_file)
 ]
 
 urlpatterns += [
@@ -47,7 +48,8 @@ urlpatterns += [
     url(r'^users/buyer/login/$', user_handler.buyer_login),
     url(r'^users/buyer/address/$', user_handler.buyer_address_details),
     url(r'^users/buyer/buyerinterest/$', user_handler.buyer_interest_details),
-    url(r'^users/buyer/buyerproducts/$', user_handler.buyer_product_details)
+    url(r'^users/buyer/buyerproducts/$', user_handler.buyer_product_details),
+    url(r'^users/buyer/buyersharedproductid/$', user_handler.buyer_shared_product_id_details)
 ]
 
 urlpatterns += [

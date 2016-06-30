@@ -45,7 +45,7 @@ def populateSellerLead(sellerleadPtr, sellerlead):
 	sellerleadPtr.company_name = sellerlead["company_name"]
 	sellerleadPtr.email = sellerlead["email"]
 	sellerleadPtr.mobile_number = sellerlead["mobile_number"]
-	sellerleadPtr.status = bool(sellerlead["status"])
+	sellerleadPtr.status = int(sellerlead["status"])
 	sellerleadPtr.comments = sellerlead["comments"]
 
 SellerLeadStatus = {

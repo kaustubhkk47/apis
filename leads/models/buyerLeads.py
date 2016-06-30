@@ -52,7 +52,7 @@ def populateBuyerLead(buyerleadPtr, buyerlead):
 	buyerleadPtr.name = buyerlead["name"]
 	buyerleadPtr.email = buyerlead["email"]
 	buyerleadPtr.mobile_number = buyerlead["mobile_number"]
-	buyerleadPtr.status = bool(buyerlead["status"])
+	buyerleadPtr.status = int(buyerlead["status"])
 	buyerleadPtr.comments = buyerlead["comments"]
 
 BuyerLeadStatus = {

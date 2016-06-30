@@ -109,7 +109,7 @@ SubOrderStatus = {
 }
 
 SubOrderPaymentStatus = {
-    0:{"display_value":"Paid"},
-    1:{"display_value":"Not Paid"},
+    0:{"display_value":"Not Paid"},
+    1:{"display_value":"Paid"},
     2:{"display_value":"Partially paid"}
 }
