@@ -1,7 +1,7 @@
-from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_integer, generateProductFile,arrToFilename
+from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_integer, generateProductFile, generateProductCatalog, generate_pdf
 
 from ..models.category import Category
-from ..models.product import Product, validateProductData, ProductDetails, validateProductDetailsData, populateProductData, populateProductDetailsData, filterProducts
+from ..models.product import Product, validateProductData, ProductDetails, validateProductDetailsData, populateProductData, populateProductDetailsData, filterProducts, getProductFileName
 from ..models.productLot import ProductLot, validateProductLotData, parseMinPricePerUnit, populateProductLotData
 from ..serializers.product import multiple_products_parser, serialize_product
 from users.models.seller import Seller
@@ -44,28 +44,33 @@ def get_product_file(request, productParameters):
 
         products = products.values_list('id',flat=True)
 
-        filename = "productfile_"
-
-        if "categoriesArr" in productParameters:
-            filename += "categories-" + arrToFilename(productParameters["categoriesArr"]) + "_"
-
-        if "sellerArr" in productParameters:
-            filename += "seller-" + arrToFilename(productParameters["sellerArr"]) + "_"
-
-        if "fabricArr" in productParameters:
-            filename += "fabric-" + arrToFilename(productParameters["fabricArr"]) + "_"
-
-        if "colourArr" in productParameters:
-            filename += "colour-" + arrToFilename(productParameters["colourArr"]) + "_"
-
-        if "price_filter_applied" in productParameters:
-            filename += "pricerange-" + str(productParameters["min_price_per_unit"]) +"to" + str(productParameters["max_price_per_unit"]) + "_"
-
-        filename = filename[0:len(filename)-1]
-
-        filename += ".txt"
+        filename = getProductFileName("productfile_", ".txt",productParameters)
 
         return generateProductFile(products, filename)
+
+    except Exception as e:
+        log.critical(e)
+        statusCode = "4XX"
+        body = {"error": "Invalid product"}
+
+        closeDBConnection()
+        return customResponse(statusCode, body)
+
+def get_product_catalog(request, productParameters):
+    
+    try:
+        products = filterProducts(productParameters)
+        products = products.filter(verification=True,show_online=True,seller__show_online=True)
+
+        products = {"products":multiple_products_parser(products)}
+
+        filename = getProductFileName("productcatalog_", ".pdf",productParameters)
+
+        #generate_pdf("product/product_catalog.html",products,"/home/kaustubh/Desktop/NewStartUp/Code/websiteProject/","hello.pdf")
+
+        #return customResponse("2XX", {"error": "Invalid data sent in request"})
+
+        return generateProductCatalog(products, filename)
 
     except Exception as e:
         log.critical(e)

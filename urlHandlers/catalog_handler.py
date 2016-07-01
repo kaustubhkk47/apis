@@ -55,6 +55,17 @@ def product_file(request):
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
+@csrf_exempt
+def product_catalog(request):
+
+	if request.method == "GET":
+
+		productParameters = getProductParameters(request)
+
+		return product.get_product_catalog(request,productParameters)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
 def getProductParameters(request):
 	productParameters = {}
 
