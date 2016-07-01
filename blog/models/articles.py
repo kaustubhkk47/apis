@@ -6,8 +6,14 @@ class Post(models.Model):
     slug = models.CharField(max_length=255, blank=True)
     content = models.TextField(blank=False, null=False)
 
+    show_online = models.BooleanField(default=True)
+    delete_status = models.BooleanField(default=False)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-id']
 
     def __unicode__(self):
         return str(self.id) + '-' + self.title + '-' + self.author.name
