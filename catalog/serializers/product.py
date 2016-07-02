@@ -44,11 +44,16 @@ def serialize_product(productsItem):
 	product["is_catalog"] = productsItem.is_catalog
 	product["delete_status"] = productsItem.delete_status
 
+	productLink = "http://www.wholdus.com/" + productsItem.category.slug + "-" + str(productsItem.category_id) + "/" +productsItem.slug +"-" + str(productsItem.id)
+	product["absolute_path"] = productLink
+
+	product["margin"] = '{0:.1f}'.format((float(productsItem.price_per_unit) - float(productsItem.min_price_per_unit))/float(productsItem.price_per_unit)*100)
+
 	image ={}
 
 	image["image_path"] = productsItem.image_path
 	image["image_name"] = productsItem.image_name
-	
+		
 	image_numbers = str(productsItem.image_numbers)
 	
 	try:
@@ -60,6 +65,9 @@ def serialize_product(productsItem):
 
 	for i in range(len(image_numbers)):
 		image_numers_arr.append(image_numbers[i+1])
+
+	imageLink = "http://api.wholdus.com/" + productsItem.image_path + "700x700/" + productsItem.image_name + "-1.jpg"
+	image["absolute_path"] = imageLink
 
 	image["image_numbers"] = image_numers_arr
 	image["image_count"] = len(image_numbers)

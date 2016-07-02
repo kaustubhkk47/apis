@@ -7,7 +7,7 @@ from decimal import Decimal
 import datetime
 import math
 
-from scripts.utils import validate_integer, validate_number, validate_bool
+from scripts.utils import validate_integer, validate_number, validate_bool, arrToFilename
 
 import operator
 from django.db.models import Q
@@ -266,3 +266,26 @@ def filterProducts(productParameters):
         products = products.filter(verification=True,show_online=True,seller__show_online=True)
 
     return products
+
+def getProductFileName(filename, extension, productParameters):
+
+    if "categoriesArr" in productParameters:
+        filename += "categories-" + arrToFilename(productParameters["categoriesArr"]) + "_"
+
+    if "sellerArr" in productParameters:
+        filename += "seller-" + arrToFilename(productParameters["sellerArr"]) + "_"
+
+    if "fabricArr" in productParameters:
+        filename += "fabric-" + arrToFilename(productParameters["fabricArr"]) + "_"
+
+    if "colourArr" in productParameters:
+        filename += "colour-" + arrToFilename(productParameters["colourArr"]) + "_"
+
+    if "price_filter_applied" in productParameters:
+        filename += "pricerange-" + str(productParameters["min_price_per_unit"]) +"to" + str(productParameters["max_price_per_unit"]) + "_"
+
+    filename = filename[0:len(filename)-1]
+
+    filename += extension
+
+    return filename

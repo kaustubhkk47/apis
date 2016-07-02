@@ -35,6 +35,7 @@ def serializeOrderShipment(orderShipmentEntry, orderShipmentParameters = {}):
 	orderShipment["rto_remarks"] = orderShipmentEntry.rto_remarks
 	orderShipment["created_at"] = orderShipmentEntry.created_at
 	orderShipment["updated_at"] = orderShipmentEntry.updated_at
+	orderShipment["manifest_link"] = orderShipmentEntry.manifest_link
 
 	orderShipment["buyer"] = serialize_buyer(orderShipmentEntry.suborder.order.buyer)
 	orderShipment["seller"] = serialize_seller(orderShipmentEntry.suborder.seller)

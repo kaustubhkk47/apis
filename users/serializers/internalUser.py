@@ -2,6 +2,7 @@ from ..models.internalUser import *
 
 def serialize_internaluser(internaluser_entry):
 	internaluser = {
+		"internaluserID":internaluser_entry.id,
 		"name":internaluser_entry.name,
 		"email":internaluser_entry.email,
 		"mobile_number":internaluser_entry.mobile_number,
