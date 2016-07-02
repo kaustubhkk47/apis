@@ -125,7 +125,6 @@ def create_email(mail_template_file,mail_dict,subject,from_email,to,attachment="
 
 def generate_pdf(template_src, context_dict, output_directory, output_file_name):
     template = get_template(template_src)
-    #context = Context(context_dict)
     html  = template.render(context_dict)
 
     if not os.path.exists(output_directory):
@@ -134,12 +133,47 @@ def generate_pdf(template_src, context_dict, output_directory, output_file_name)
     filename = output_directory + output_file_name
 
     options = {
-    'quiet': ''
+    'quiet': '',
+    'margin-top': '0in',
+    'margin-right': '0in',
+    'margin-bottom': '0in',
+    'margin-left': '0in',
+    'no-outline': None,
     }
 
     config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDFPATH)
 
     pdfkit.from_string(html, filename, options=options, configuration=config)
+
+def generateProductCatalog(products, filename):
+
+    template_src = 'product/product_catalog.html'
+
+    template = get_template(template_src)
+
+    html  = template.render(products)
+
+    options = {
+    'quiet': '',
+    'margin-top': '0in',
+    'margin-right': '0in',
+    'margin-bottom': '0in',
+    'margin-left': '0in',
+    'no-outline': None,
+    }
+
+    config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDFPATH)
+
+    contentString = "attachment; filename=" + filename
+
+    pdf = pdfkit.PDFKit(html, "string", options=options,configuration=config).to_pdf()
+
+    response = HttpResponse(pdf)
+    response['Content-Type'] = 'application/pdf'
+    response['Content-disposition'] = contentString
+
+    return response
+    
 
 def generateProductFile(products, filename):
 

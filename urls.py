@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from urlHandlers import catalog_handler, user_handler, order_handler, lead_handler, address_handler
+from urlHandlers import catalog_handler, user_handler, order_handler, lead_handler, address_handler, blog_handler
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -27,7 +27,8 @@ urlpatterns = [
 urlpatterns += [
     url(r'^category/$', catalog_handler.categories_details),
     url(r'^products/$', catalog_handler.product_details),
-    url(r'^products/generatefile/$', catalog_handler.product_file)
+    url(r'^products/generatefile/$', catalog_handler.product_file),
+    url(r'^products/generatecatalog/$', catalog_handler.product_catalog)
 ]
 
 urlpatterns += [
@@ -66,6 +67,10 @@ urlpatterns += [
 
 urlpatterns += [
     url(r'^address/state/$', address_handler.state_details)
+]
+
+urlpatterns += [
+    url(r'^blog/articles/$', blog_handler.article_details)
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
