@@ -11,5 +11,8 @@ class InternalUser(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    linkedin_profile_link = models.TextField(blank=True,null=True)
+    facebook_profile_link = models.TextField(blank=True,null=True)
+
     def __unicode__(self):
         return str(self.id) + " - " + self.name

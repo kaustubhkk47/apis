@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html style= "width: 1200px; font-family:sans-serif; text-align:center; min-height:1712px; padding:0px; margin: 0px">
+<html style= "width: 1200px; font-family:sans-serif; text-align:center; min-height:1712px; padding:0px; margin: 0px; background-color:#512da8">
 
 {%include "product/catalog_cover.html"%}
 
@@ -151,16 +151,16 @@
 <div style="width:1220px; background-color:#673AB7;height: 20px; padding:0px 50px 0px 50 px">
 </div>
 
-<div style="width:100%; min-height:1450px">
+<div style="width:1220px; min-height:1450px; background-color:white">
 
 	<div style="font-size: 2.5em; padding: 60px 50px 0px 50px">
-		{{product.display_name}}
+		{{product.name}}
 	</div>
 
 	<hr style="margin-top: 40px; margin-left: 40px">
 
 	<div style="width:100%; margin-top:20px; padding: 40px 50px 0px 50px; height: 700px">			
-		<img href="{{product.absolute_path}}" src="{{product.image.absolute_path}}" height="700px" width="auto" />	
+		<img src="{{product.image.absolute_path}}" height="700px" width="auto" />	
 	</div>
 
 	<hr style="margin-top: 50px; margin-left: 40px">

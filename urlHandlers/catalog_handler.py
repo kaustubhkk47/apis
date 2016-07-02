@@ -79,16 +79,19 @@ def getProductParameters(request):
 
 	try:
 		pageNumber = int(request.GET.get("page_number", 1))
-		productsperPage = int(request.GET.get("items_per_page", 10))
+		itemsPerPage = int(request.GET.get("items_per_page", 10))
 	except Exception as e:
 		pageNumber = 1
-		productsperPage = 10
+		itemsPerPage = 10
 
-	if not pageNumber > 0 or not productsperPage > 0:
+	if not pageNumber > 0 or not itemsPerPage > 0:
 		pageNumber = 1
-		productsperPage = 10
+		itemsPerPage = 10
 
-	accessToken = request.GET.get("access_token", "")
+	productParameters["pageNumber"] = pageNumber
+	productParameters["itemsPerPage"] = itemsPerPage
+
+	
 
 	if productID != "" and productID != None:
 		productParameters["productsArr"] = getArrFromString(productID)
@@ -107,6 +110,8 @@ def getProductParameters(request):
 		productParameters["min_price_per_unit"] = float(min_price_per_unit)
 		productParameters["max_price_per_unit"] = float(max_price_per_unit)
 
+	accessToken = request.GET.get("access_token", "")
+
 	tokenPayload = get_token_payload(accessToken, "sellerID")
 	productParameters["isSeller"] = 0
 	if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
@@ -121,7 +126,6 @@ def getProductParameters(request):
 		productParameters["internalusersArr"] = [tokenPayload["internaluserID"]]
 		productParameters["isInternalUser"] = 1
 
-	productParameters["pageNumber"] = pageNumber
-	productParameters["itemsPerPage"] = productsperPage
+	
 
 	return productParameters
