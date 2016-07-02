@@ -66,10 +66,6 @@ def get_product_catalog(request, productParameters):
 
         filename = getProductFileName("productcatalog_", ".pdf",productParameters)
 
-        #generate_pdf("product/product_catalog.html",products,"/home/kaustubh/Desktop/NewStartUp/Code/websiteProject/","hello.pdf")
-
-        #return customResponse("2XX", {"error": "Invalid data sent in request"})
-
         return generateProductCatalog(products, filename)
 
     except Exception as e:
