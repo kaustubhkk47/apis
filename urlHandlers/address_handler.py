@@ -8,15 +8,13 @@ def state_details(request):
 
 	if request.method == "GET":
 
-		stateParameters = populateParameters(request)
+		parameters = populateAddressParameters(request)
 
-		return state.get_state_details(request,stateParameters)
+		return state.get_state_details(request,parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
 
-def populateParameters(request):
-
-	parameters = {}
+def populateAddressParameters(request, parameters = {}):
 
 	return parameters
