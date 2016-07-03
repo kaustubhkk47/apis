@@ -40,9 +40,10 @@ def serializeOrderShipment(orderShipmentEntry, orderShipmentParameters = {}):
 	orderShipment["buyer"] = serialize_buyer(orderShipmentEntry.suborder.order.buyer)
 	orderShipment["seller"] = serialize_seller(orderShipmentEntry.suborder.seller)
 
-	orderItemQuerySet = filterOrderItem(orderShipmentParameters)
-	orderItemQuerySet = orderItemQuerySet.filter(order_shipment_id=orderShipmentEntry.id)
-	orderShipment["order_items"] = parseOrderItem(orderItemQuerySet,orderShipmentParameters)
+	if "order_item_details" in orderShipmentParameters and orderShipmentParameters["order_item_details"] ==1:
+		orderItemQuerySet = filterOrderItem(orderShipmentParameters)
+		orderItemQuerySet = orderItemQuerySet.filter(order_shipment_id=orderShipmentEntry.id)
+		orderShipment["order_items"] = parseOrderItem(orderItemQuerySet,orderShipmentParameters)
 		
 	orderShipment["final_price"] = orderShipmentEntry.final_price
 

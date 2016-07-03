@@ -1,8 +1,10 @@
 from django.views.decorators.csrf import csrf_exempt
 
-from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool
+from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool, getPaginationParameters
 
 from blog.views import article
+
+from .user_handler import populateInternalUserIDParameters
 
 @csrf_exempt
 def article_details(request):
@@ -21,20 +23,11 @@ def article_details(request):
     
     return customResponse('4XX', {"error": "Invalid request"})
 
-def getArticleParameters(request):
-
-    parameters = {}
+def getArticleParameters(request, parameters = {}):
 
     articleID = request.GET.get("articleID", "")
     if articleID != "" and articleID != None:
         parameters["articlesArr"] = getArrFromString(articleID)
-
-    accessToken = request.GET.get("access_token", "")
-    tokenPayload = get_token_payload(accessToken, "internaluserID")
-    parameters["isInternalUser"] = 0
-    if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
-        parameters["internalusersArr"] = [tokenPayload["internaluserID"]]
-        parameters["isInternalUser"] = 1
 
     showOnline = request.GET.get("show_online", None)
     if validate_bool(showOnline):
@@ -52,17 +45,8 @@ def getArticleParameters(request):
     else:
         parameters["internal_user_details"] = 0
 
-    try:
-        pageNumber = int(request.GET.get("page_number", 1))
-        itemsPerPage = int(request.GET.get("items_per_page", 10))
-    except Exception as e:
-        pageNumber = 1
-        itemsPerPage = 10
+    parameters = populateInternalUserIDParameters(request, parameters)
 
-    if not pageNumber > 0 or not itemsPerPage > 0:
-        pageNumber = 1
-        itemsPerPage = 10
-    parameters["pageNumber"] = pageNumber
-    parameters["itemsPerPage"] = itemsPerPage
+    parameters = getPaginationParameters(request, parameters)
 
     return parameters

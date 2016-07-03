@@ -31,13 +31,15 @@ def serializeOrder(orderEntry, orderParameters = {}):
 		"display_value":OrderPaymentStatus[orderEntry.order_payment_status]["display_value"]
 	}
 
-	subOrderQuerySet = filterSubOrder(orderParameters)
-	subOrderQuerySet = subOrderQuerySet.filter(order_id = orderEntry.id)
-	order["sub_orders"] = parseSubOrders(subOrderQuerySet,orderParameters)
+	if "sub_order_details" in orderParameters and orderParameters["sub_order_details"] ==1:
+		subOrderQuerySet = filterSubOrder(orderParameters)
+		subOrderQuerySet = subOrderQuerySet.filter(order_id = orderEntry.id)
+		order["sub_orders"] = parseSubOrders(subOrderQuerySet,orderParameters)
 
-	buyerPaymentQuerySet = filterBuyerPayment(orderParameters)
-	buyerPaymentQuerySet = buyerPaymentQuerySet.filter(order_id = orderEntry.id)
-	order["buyer_payments"] = parseBuyerPayments(buyerPaymentQuerySet,orderParameters)
+	if "buyer_payment_details" in orderParameters and orderParameters["buyer_payment_details"] ==1:
+		buyerPaymentQuerySet = filterBuyerPayment(orderParameters)
+		buyerPaymentQuerySet = buyerPaymentQuerySet.filter(order_id = orderEntry.id)
+		order["buyer_payments"] = parseBuyerPayments(buyerPaymentQuerySet,orderParameters)
 	
 	return order
 

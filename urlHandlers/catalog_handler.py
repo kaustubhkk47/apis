@@ -2,8 +2,10 @@ from django.views.decorators.csrf import csrf_exempt
 
 from catalog.views import categories
 from catalog.views import product
-from scripts.utils import customResponse, get_token_payload, getArrFromString, getStrArrFromString, validate_number
+from scripts.utils import customResponse, get_token_payload, getArrFromString, getStrArrFromString, validate_number, getPaginationParameters
 import jwt as JsonWebToken
+
+from .user_handler import populateSellerIDParameters, populateInternalUserIDParameters
 
 @csrf_exempt
 def categories_details(request):
@@ -32,7 +34,7 @@ def product_details(request):
 
 	if request.method == "GET":
 
-		productParameters = getProductParameters(request)
+		productParameters = populateProductParameters(request)
 
 		return product.get_product_details(request,productParameters)
 	elif request.method == "POST":
@@ -49,7 +51,7 @@ def product_file(request):
 
 	if request.method == "GET":
 
-		productParameters = getProductParameters(request)
+		productParameters = populateProductParameters(request)
 
 		return product.get_product_file(request,productParameters)
 
@@ -60,72 +62,65 @@ def product_catalog(request):
 
 	if request.method == "GET":
 
-		productParameters = getProductParameters(request)
+		productParameters = populateProductParameters(request)
 
 		return product.get_product_catalog(request,productParameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
-def getProductParameters(request):
-	productParameters = {}
+def populateProductParameters(request):
+	parameters = {}
 
 	productID = request.GET.get("productID", "")
 	categoryID = request.GET.get("categoryID", "")
-	sellerID = request.GET.get("sellerID", "")
 	fabric = request.GET.get("fabric", "")
 	colour = request.GET.get("colour", "")
 	min_price_per_unit = request.GET.get("min_price_per_unit", "")
 	max_price_per_unit = request.GET.get("max_price_per_unit", "")
 
-	try:
-		pageNumber = int(request.GET.get("page_number", 1))
-		itemsPerPage = int(request.GET.get("items_per_page", 10))
-	except Exception as e:
-		pageNumber = 1
-		itemsPerPage = 10
-
-	if not pageNumber > 0 or not itemsPerPage > 0:
-		pageNumber = 1
-		itemsPerPage = 10
-
-	productParameters["pageNumber"] = pageNumber
-	productParameters["itemsPerPage"] = itemsPerPage
-
-	
+	parameters = getPaginationParameters(request, parameters, 10)
 
 	if productID != "" and productID != None:
-		productParameters["productsArr"] = getArrFromString(productID)
+		parameters["productsArr"] = getArrFromString(productID)
 
 	if categoryID != "" and categoryID != None:
-		productParameters["categoriesArr"] = getArrFromString(categoryID)
+		parameters["categoriesArr"] = getArrFromString(categoryID)
 
 	if fabric != "" and fabric != None:
-		productParameters["fabricArr"] = getStrArrFromString(fabric)
+		parameters["fabricArr"] = getStrArrFromString(fabric)
 
 	if colour != "" and colour != None:
-		productParameters["colourArr"] = getStrArrFromString(colour)
+		parameters["colourArr"] = getStrArrFromString(colour)
 
 	if validate_number(min_price_per_unit) and validate_number(max_price_per_unit) and float(min_price_per_unit) >= 0 and float(max_price_per_unit) > float(min_price_per_unit):
-		productParameters["price_filter_applied"] = True
-		productParameters["min_price_per_unit"] = float(min_price_per_unit)
-		productParameters["max_price_per_unit"] = float(max_price_per_unit)
+		parameters["price_filter_applied"] = True
+		parameters["min_price_per_unit"] = float(min_price_per_unit)
+		parameters["max_price_per_unit"] = float(max_price_per_unit)
 
-	accessToken = request.GET.get("access_token", "")
+	parameters = populateSellerIDParameters(request, parameters)
 
-	tokenPayload = get_token_payload(accessToken, "sellerID")
-	productParameters["isSeller"] = 0
-	if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
-		productParameters["isSeller"] = 1
-		productParameters["sellerArr"] = [tokenPayload["sellerID"]]
-	elif sellerID != "":
-		productParameters["sellerArr"] = getArrFromString(sellerID)
+	parameters = populateInternalUserIDParameters(request, parameters)
 
-	tokenPayload = get_token_payload(accessToken, "internaluserID")
-	productParameters["isInternalUser"] = 0
-	if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
-		productParameters["internalusersArr"] = [tokenPayload["internaluserID"]]
-		productParameters["isInternalUser"] = 1
+	return parameters
 
-	
+def populateProductDetailsParameters(request, parameters = {}):
 
-	return productParameters
+	productDetails = request.GET.get("product_details", None)
+	if validate_bool(productDetails):
+		parameters["product_details"] = int(productDetails)
+	else:
+		parameters["product_details"] = 1
+
+	productDetailsDetails = request.GET.get("product_details_details", None)
+	if validate_bool(productDetailsDetails):
+		parameters["product_details_details"] = int(productDetailsDetails)
+	else:
+		parameters["product_details_details"] = 1
+
+	productLotDetails = request.GET.get("product_lot_details", None)
+	if validate_bool(productLotDetails):
+		parameters["product_lot_details"] = int(productLotDetails)
+	else:
+		parameters["product_lot_details"] = 1
+
+	return parameters
