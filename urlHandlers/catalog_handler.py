@@ -47,6 +47,24 @@ def product_details(request):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
+def product_colour_details(request):
+
+	if request.method == "GET":
+
+		return product.get_product_colour_details(request)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
+def product_fabric_details(request):
+
+	if request.method == "GET":
+
+		return product.get_product_fabric_details(request)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
 def product_file(request):
 
 	if request.method == "GET":

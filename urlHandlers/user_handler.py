@@ -140,6 +140,10 @@ def populateBuyerParameters(request, parameters = {}):
 	if buyersharedproductID != "" and validate_integer(buyersharedproductID):
 		parameters["buyersharedproductID"] = int(buyersharedproductID)
 
+	whatsappSharingActive = request.GET.get("whatsapp_sharing_active", None)
+	if validate_bool(whatsappSharingActive):
+		parameters["whatsapp_sharing_active"] = int(whatsappSharingActive)
+
 	return parameters
 
 def populateBuyerDetailsParameters(request, parameters = {}):
