@@ -195,3 +195,21 @@ def arrToFilename(arr):
     x = x[0:len(x)-1]
 
     return x
+
+def getPaginationParameters(request, parameters={}, defaultItemsPerPage = 10):
+
+    try:
+        pageNumber = int(request.GET.get("page_number", 1))
+        itemsPerPage = int(request.GET.get("items_per_page", defaultItemsPerPage))
+    except Exception as e:
+        pageNumber = 1
+        itemsPerPage = defaultItemsPerPage
+
+    if not pageNumber > 0 or not itemsPerPage > 0:
+        pageNumber = 1
+        itemsPerPage = defaultItemsPerPage
+
+    parameters["pageNumber"] = pageNumber
+    parameters["itemsPerPage"] = itemsPerPage
+
+    return parameters

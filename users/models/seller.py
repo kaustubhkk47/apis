@@ -202,6 +202,7 @@ def populateSellerDetailsData(sellerDetailsPtr,sellerdetails):
     sellerDetailsPtr.pan_verification = int(sellerdetails["pan_verification"])
     sellerDetailsPtr.tin_verification = int(sellerdetails["tin_verification"])
     sellerDetailsPtr.vat_tin = sellerdetails["vat_tin"]
+    sellerDetailsPtr.seller_type_id = 1
 
 def populateSellerAddressData(sellerAddressPtr, selleraddress):
     sellerAddressPtr.address_line = selleraddress["address"]

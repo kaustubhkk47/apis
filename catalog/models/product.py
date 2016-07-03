@@ -239,7 +239,7 @@ def populateProductDetailsData(productDetailsPtr, productdetails):
     productDetailsPtr.sample_description = productdetails["sample_description"]
     productDetailsPtr.sample_price = Decimal(productdetails["sample_price"])
 
-def filterProducts(productParameters):
+def filterProducts(productParameters = {}):
     products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related('seller', 'productdetails', 'category').order_by('-id')
 
     if "categoriesArr" in productParameters:

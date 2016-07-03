@@ -23,6 +23,7 @@ class Buyer(models.Model):
     name = models.CharField(max_length=200, blank=True)
     company_name = models.CharField(max_length=200, blank=True)
     mobile_number = models.CharField(max_length=11, blank=False, db_index=True)
+    whatsapp_number = models.CharField(max_length=11, blank=True, null = True)
     email = models.EmailField(max_length=255, blank=True, null = True)
     password = models.CharField(max_length=255, blank=True)
     alternate_phone_number = models.CharField(max_length=11, blank=True)
@@ -35,6 +36,8 @@ class Buyer(models.Model):
 
     blocked = models.BooleanField(default=False)
     delete_status = models.BooleanField(default=False)
+    whatsapp_sharing_active = models.BooleanField(default=True)
+    whatsapp_contact_name = models.CharField(max_length=200, blank=True)
 
     def __unicode__(self):
         return str(self.id) + " - " + self.name + " - " + self.company_name + " - " + self.mobile_number
@@ -250,11 +253,20 @@ def validateBuyerData(buyer, oldbuyer, is_new):
         buyer["email_verification"] = oldbuyer.email_verification
     if not "gender" in buyer or buyer["gender"]:
         buyer["gender"] = oldbuyer.gender
+    if not "whatsapp_number" in buyer or buyer["whatsapp_number"]:
+        if oldbuyer.whatsapp_number==None or oldbuyer.whatsapp_number=="":
+            buyer["whatsapp_number"] = buyer["mobile_number"]
+        else:
+            buyer["whatsapp_number"] = oldbuyer.whatsapp_number
+    if not "whatsapp_sharing_active" in buyer or buyer["whatsapp_sharing_active"]==None  or not validate_bool(buyer["whatsapp_sharing_active"]):
+        buyer["whatsapp_sharing_active"] = oldbuyer.whatsapp_sharing_active
     if not "password" in buyer or buyer["password"]:
         if is_new == 1:
             buyer["password"] = buyer["mobile_number"]
         else:
             buyer["password"] = oldbuyer.password
+
+    buyer["whatsapp_contact_name"] = "Wholdus " + buyer["name"]
 
     if is_new == 1 and flag == 1:
         return False
@@ -375,15 +387,18 @@ def validateBuyerAddressData(buyeraddress, oldbuyeraddress):
 
 def populateBuyer(buyerPtr, buyer):
     buyerPtr.name = buyer["name"]
+    buyerPtr.whatsapp_contact_name = buyer["whatsapp_contact_name"]
     buyerPtr.company_name = buyer["company_name"]
     buyerPtr.mobile_number = buyer["mobile_number"]
+    buyerPtr.whatsapp_number = buyer["whatsapp_number"]
     buyerPtr.email = buyer["email"]
     buyerPtr.password = buyer["mobile_number"]
     buyerPtr.alternate_phone_number = buyer["alternate_phone_number"]
     buyerPtr.mobile_verification = int(buyer["mobile_verification"])
     buyerPtr.email_verification = int(buyer["email_verification"])
+    buyerPtr.whatsapp_sharing_active = int(buyer["whatsapp_sharing_active"])
     buyerPtr.gender = buyer["gender"]
-
+    
 def populateBuyerInterest(buyerInterestPtr, buyerInterest):
     buyerInterestPtr.scale = int(buyerInterest["scale"])
     buyerInterestPtr.min_price_per_unit = Decimal(buyerInterest["min_price_per_unit"])
@@ -418,12 +433,15 @@ def populateBuyerAddress(buyerAddressPtr, buyeraddress):
         buyerAddressPtr.state_name = buyeraddress["state"]
         buyerAddressPtr.country_name = "India"
 
-def filterBuyer(buyerParameters):
+def filterBuyer(parameters = {}):
 
     buyers = Buyer.objects.filter(delete_status=False).select_related('buyerdetails')
 
-    if "buyersArr" in buyerParameters:
-        buyers = buyers.filter(id__in=buyerParameters["buyersArr"])
+    if "buyersArr" in parameters:
+        buyers = buyers.filter(id__in=parameters["buyersArr"])
+
+    if "whatsapp_sharing_active" in parameters:
+        buyers = buyers.filter(whatsapp_sharing_active=parameters["whatsapp_sharing_active"])
 
     return buyers
 

@@ -3,7 +3,10 @@ from scripts.utils import customResponse, closeDBConnection, convert_keys_to_str
 from ..models.category import Category
 from ..models.product import Product, validateProductData, ProductDetails, validateProductDetailsData, populateProductData, populateProductDetailsData, filterProducts, getProductFileName
 from ..models.productLot import ProductLot, validateProductLotData, parseMinPricePerUnit, populateProductLotData
+from ..models.productData import ColourType, FabricType, filterProductFabricType, filterProductColourType
+
 from ..serializers.product import multiple_products_parser, serialize_product
+from ..serializers.productData import parseProductColourType, parseProductFabricType
 from users.models.seller import Seller
 import json
 from django.template.defaultfilters import slugify
@@ -13,19 +16,19 @@ from django.core.paginator import Paginator
 import logging
 log = logging.getLogger("django")
 
-def get_product_details(request, productParameters):
+def get_product_details(request, parameters = {}):
     try:
-        products = filterProducts(productParameters)
+        products = filterProducts(parameters)
 
-        paginator = Paginator(products, productParameters["itemsPerPage"])
+        paginator = Paginator(products, parameters["itemsPerPage"])
 
         try:
-            pageProducts = paginator.page(productParameters["pageNumber"])
+            pageProducts = paginator.page(parameters["pageNumber"])
         except Exception as e:
             pageProducts = []
 
         response = multiple_products_parser(pageProducts)
-        body = {"products": response,"total_products":paginator.count, "total_pages":paginator.num_pages, "page_number":productParameters["pageNumber"], "items_per_page":productParameters["itemsPerPage"]}
+        body = {"products": response,"total_products":paginator.count, "total_pages":paginator.num_pages, "page_number":parameters["pageNumber"], "items_per_page":parameters["itemsPerPage"]}
             
         statusCode = "2XX"
     except Exception as e:
@@ -33,6 +36,36 @@ def get_product_details(request, productParameters):
         statusCode = "4XX"
         body = {"error": "Invalid product"}
 
+    closeDBConnection()
+    return customResponse(statusCode, body)
+
+def get_product_colour_details(request, parameters = {}):
+    try:
+        productColours = filterProductColourType(parameters)
+
+        statusCode = "2XX"
+        body = {"product_colour_types": parseProductColourType(productColours)}
+
+    except Exception as e:
+        log.critical(e)
+        statusCode = "4XX"
+        body = {"error": "Invalid product colour"}
+        
+    closeDBConnection()
+    return customResponse(statusCode, body)
+
+def get_product_fabric_details(request, parameters = {}):
+    try:
+        productFabrics = filterProductFabricType(parameters)
+
+        statusCode = "2XX"
+        body = {"product_fabric_types": parseProductFabricType(productFabrics)}
+
+    except Exception as e:
+        log.critical(e)
+        statusCode = "4XX"
+        body = {"error": "Invalid product fabric"}
+        
     closeDBConnection()
     return customResponse(statusCode, body)
 
