@@ -57,7 +57,11 @@ urlpatterns += [
 
 urlpatterns += [
     url(r'^users/seller/$', user_handler.seller_details),
-    url(r'^users/seller/login/$', user_handler.seller_login),
+    url(r'^users/seller/login/$', user_handler.seller_login)
+]
+
+urlpatterns += [
+    url(r'^users/internaluser/$', user_handler.internal_user_details),
     url(r'^users/internaluser/login/$', user_handler.internaluser_login)
 ]
 
