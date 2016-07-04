@@ -3,7 +3,7 @@ from django.db import models
 from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString
 
 from catalog.models.category import Category
-from catalog.models.product import Product
+from catalog.models.product import Product, filterProducts
 from address.models.state import State
 from address.models.pincode import Pincode
 
@@ -445,82 +445,97 @@ def filterBuyer(parameters = {}):
 
     return buyers
 
-def filterBuyerSharedProductID(buyerParameters):
+def filterBuyerSharedProductID(parameters = {}):
 
     buyerSharedProductID = BuyerSharedProductID.objects.filter(delete_status=False)
 
-    if "buyersArr" in buyerParameters:
-        buyerSharedProductID = buyerSharedProductID.filter(buyer_id__in=buyerParameters["buyersArr"])
+    if "buyersArr" in parameters:
+        buyerSharedProductID = buyerSharedProductID.filter(buyer_id__in=parameters["buyersArr"])
 
-    if "buyersharedproductID" in buyerParameters:
-        buyerSharedProductID = buyerSharedProductID.filter(id=buyerParameters["buyersharedproductID"])
+    if "buyersharedproductID" in parameters:
+        buyerSharedProductID = buyerSharedProductID.filter(id=parameters["buyersharedproductID"])
 
     return buyerSharedProductID
 
-def filterBuyerInterest(buyerParameters):
+def filterBuyerInterest(parameters = {}):
 
     buyersInterest = BuyerInterest.objects.filter(delete_status=False,buyer__delete_status=False)
 
-    if "buyersArr" in buyerParameters:
-        buyersInterest = buyersInterest.filter(buyer_id__in=buyerParameters["buyersArr"])
+    if "buyersArr" in parameters:
+        buyersInterest = buyersInterest.filter(buyer_id__in=parameters["buyersArr"])
 
-    if "buyerInterestArr" in buyerParameters:
-        buyersInterest = buyersInterest.filter(id__in=buyerParameters["buyerInterestArr"])
+    if "buyerInterestArr" in parameters:
+        buyersInterest = buyersInterest.filter(id__in=parameters["buyerInterestArr"])
+
+    if "is_active" in parameters:
+        buyersInterest = buyersInterest.filter(is_active=parameters["is_active"])
 
     return buyersInterest
 
-def filterBuyerProducts(buyerParameters):
+def filterBuyerProducts(parameters = {}):
 
     buyerProducts = BuyerProducts.objects.filter(delete_status=False,buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
 
     query = reduce(operator.or_, (Q(buyer_interest__is_active = item) for item in [None,True]))
     buyerProducts = buyerProducts.filter(query)
 
-    if "is_active" in buyerParameters:
-        buyerProducts = buyerProducts.filter(is_active=buyerParameters["is_active"])
+    if "delete_status" in parameters:
+        buyerProducts = buyerProducts.filter(delete_status=parameters["delete_status"])
+
+    if "is_active" in parameters:
+        buyerProducts = buyerProducts.filter(is_active=parameters["is_active"])
+
+    if "product_new_in_product_matrix" in parameters:
+        buyerProducts = buyerProducts.filter(product__new_in_product_matrix=parameters["product_new_in_product_matrix"])
     
-    if "responded" in buyerParameters:
-        buyerProducts = buyerProducts.filter(responded= buyerParameters["responded"])
+    if "responded" in parameters:
+        buyerProducts = buyerProducts.filter(responded= parameters["responded"])
 
-    if "buyersArr" in buyerParameters:
-        buyerProducts = buyerProducts.filter(buyer_id__in=buyerParameters["buyersArr"])
+    if "buyersArr" in parameters:
+        buyerProducts = buyerProducts.filter(buyer_id__in=parameters["buyersArr"])
 
-    if "buyerProductsArr" in buyerParameters:
-        buyerProducts = buyerProducts.filter(id__in=buyerParameters["buyerProductsArr"])
+    if "buyerProductsArr" in parameters:
+        buyerProducts = buyerProducts.filter(id__in=parameters["buyerProductsArr"])
 
-    if "buyerInterestArr" in buyerParameters:
-        buyerProducts = buyerProducts.filter(buyer_interest_id__in=buyerParameters["buyerInterestArr"])
+    if "buyerInterestArr" in parameters:
+        buyerProducts = buyerProducts.filter(buyer_interest_id__in=parameters["buyerInterestArr"])
 
-    if "buyersharedproductID" in buyerParameters:
-        buyerSharedProductIDPtr = BuyerSharedProductID.objects.filter(id=int(buyerParameters["buyersharedproductID"]))
+    if "buyersharedproductID" in parameters:
+        buyerSharedProductIDPtr = BuyerSharedProductID.objects.filter(id=int(parameters["buyersharedproductID"]))
         if len(buyerSharedProductIDPtr) > 0:
             productIds =  getArrFromString(buyerSharedProductIDPtr[0].productid_filter_text)
         else:
             productIds = []
         buyerProducts = buyerProducts.filter(product_id__in=productIds)
 
-    if "productsArr" in buyerParameters:
-        buyerProducts = buyerProducts.filter(product_id__in=buyerParameters["productsArr"])
+    if "productsArr" in parameters:
+        buyerProducts = buyerProducts.filter(product_id__in=parameters["productsArr"])
 
     return buyerProducts
 
-def filterBuyerInterestProducts(BuyerInterestPtr):
-    productPtr = Product.objects.filter(delete_status=False, verification=True,show_online=True,seller__delete_status=False, seller__show_online=True, category__delete_status=False)
+def filterBuyerInterestProducts(BuyerInterestPtr, parameters = {}):
+
+    parameters["product_verification"] = True
+    parameters["product_show_online"] = True
+    parameters["seller_show_online"] = True
 
     if BuyerInterestPtr.price_filter_applied == True:
-        productPtr = productPtr.filter(min_price_per_unit__range=(BuyerInterestPtr.min_price_per_unit,BuyerInterestPtr.max_price_per_unit))
+        parameters["price_filter_applied"] = True
+        parameters["min_price_per_unit"] = BuyerInterestPtr.min_price_per_unit
+        parameters["max_price_per_unit"] = BuyerInterestPtr.max_price_per_unit
 
     if BuyerInterestPtr.category_id != None:
-        productPtr = productPtr.filter(category_id = BuyerInterestPtr.category_id)
+        parameters["categoriesArr"] = [BuyerInterestPtr.category_id]
 
     if BuyerInterestPtr.fabric_filter_text != None and BuyerInterestPtr.fabric_filter_text != "":
         fabricArr = getStrArrFromString(BuyerInterestPtr.fabric_filter_text)
-        query = reduce(operator.or_, (Q(productdetails__fabric_gsm__icontains = item) for item in fabricArr))
-        productPtr = productPtr.filter(query)
+        parameters["fabricArr"] = fabricArr
 
     if BuyerInterestPtr.productid_filter_text!= None and BuyerInterestPtr.productid_filter_text != "":
         productIDs = getArrFromString(BuyerInterestPtr.productid_filter_text)
-        productPtr = productPtr.filter(id__in=productIDs)
+        parameters["productsArr"] = productIDs
+
+    productPtr = filterProducts(parameters)
 
     return productPtr
 

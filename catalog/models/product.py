@@ -240,31 +240,40 @@ def populateProductDetailsData(productDetailsPtr, productdetails):
     productDetailsPtr.sample_description = productdetails["sample_description"]
     productDetailsPtr.sample_price = Decimal(productdetails["sample_price"])
 
-def filterProducts(productParameters = {}):
+def filterProducts(parameters = {}):
     products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related('seller', 'productdetails', 'category').order_by('-id')
 
-    if "categoriesArr" in productParameters:
-        products = products.filter(category_id__in=productParameters["categoriesArr"])
+    if "categoriesArr" in parameters:
+        products = products.filter(category_id__in=parameters["categoriesArr"])
 
-    if "productsArr" in productParameters:
-        products = products.filter(id__in=productParameters["productsArr"])
+    if "productsArr" in parameters:
+        products = products.filter(id__in=parameters["productsArr"])
 
-    if "sellersArr" in productParameters:
-        products = products.filter(seller_id__in=productParameters["sellersArr"])
+    if "sellersArr" in parameters:
+        products = products.filter(seller_id__in=parameters["sellersArr"])
 
-    if "fabricArr" in productParameters:
-        query = reduce(operator.or_, (Q(productdetails__fabric_gsm__icontains = item) for item in productParameters["fabricArr"]))
+    if "fabricArr" in parameters:
+        query = reduce(operator.or_, (Q(productdetails__fabric_gsm__icontains = item) for item in parameters["fabricArr"]))
         products = products.filter(query)
 
-    if "colourArr" in productParameters:
-        query = reduce(operator.or_, (Q(productdetails__colours__icontains = item) for item in productParameters["colourArr"]))
+    if "colourArr" in parameters:
+        query = reduce(operator.or_, (Q(productdetails__colours__icontains = item) for item in parameters["colourArr"]))
         products = products.filter(query)
 
-    if "price_filter_applied" in productParameters:
-        products = products.filter(min_price_per_unit__range=(productParameters["min_price_per_unit"],productParameters["max_price_per_unit"]))
+    if "price_filter_applied" in parameters:
+        products = products.filter(min_price_per_unit__range=(parameters["min_price_per_unit"],parameters["max_price_per_unit"]))
 
-    if productParameters["isSeller"]==0 and productParameters["isInternalUser"]==0:
-        products = products.filter(verification=True,show_online=True,seller__show_online=True)
+    if "product_verification" in parameters:
+        products = products.filter(verification=parameters["product_verification"])
+
+    if "product_show_online" in parameters:
+        products = products.filter(show_online=parameters["product_show_online"])
+
+    if "seller_show_online" in parameters:
+        products = products.filter(seller__show_online=parameters["seller_show_online"])
+
+    if "product_new_in_product_matrix" in parameters:
+        products = products.filter(new_in_product_matrix=parameters["product_new_in_product_matrix"])
 
     return products
 
