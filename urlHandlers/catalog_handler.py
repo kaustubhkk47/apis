@@ -2,7 +2,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from catalog.views import categories
 from catalog.views import product
-from scripts.utils import customResponse, get_token_payload, getArrFromString, getStrArrFromString, validate_number, getPaginationParameters
+from scripts.utils import customResponse, get_token_payload, getArrFromString, getStrArrFromString, validate_number, getPaginationParameters, validate_bool
 import jwt as JsonWebToken
 
 from .user_handler import populateSellerIDParameters, populateInternalUserIDParameters

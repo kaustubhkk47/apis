@@ -257,11 +257,14 @@ def populateSellerIDParameters(request, parameters = {}):
 def populateInternalUserIDParameters(request, parameters = {}):
 	accessToken = request.GET.get("access_token", "")
 	tokenPayload = get_token_payload(accessToken, "internaluserID")
+	internalUserID = request.GET.get("internaluserID", "")
 
 	parameters["isInternalUser"] = 0
 	if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
 		parameters["internalusersArr"] = [tokenPayload["internaluserID"]]
 		parameters["isInternalUser"] = 1
+	elif internalUserID != "":
+		parameters["internalusersArr"] = getArrFromString(internalUserID)
 
 	return parameters
 

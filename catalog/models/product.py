@@ -202,6 +202,7 @@ def populateProductData(productPtr, product):
     productPtr.display_name = product["display_name"]
     productPtr.is_catalog = int(product["is_catalog"])
     productPtr.delete_status = int(product["delete_status"])
+    productPtr.new_in_product_matrix = 1
     if "image_count" in product and product["image_count"]!=None:
         nowtime = datetime.datetime.now()
         productPtr.image_path = "media/productimages/" + str(productPtr.seller.id) + "/" + nowtime.strftime('%Y%m%d%H%M%S') + "/"
@@ -248,8 +249,8 @@ def filterProducts(productParameters = {}):
     if "productsArr" in productParameters:
         products = products.filter(id__in=productParameters["productsArr"])
 
-    if "sellerArr" in productParameters:
-        products = products.filter(seller_id__in=productParameters["sellerArr"])
+    if "sellersArr" in productParameters:
+        products = products.filter(seller_id__in=productParameters["sellersArr"])
 
     if "fabricArr" in productParameters:
         query = reduce(operator.or_, (Q(productdetails__fabric_gsm__icontains = item) for item in productParameters["fabricArr"]))
