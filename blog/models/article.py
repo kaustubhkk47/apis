@@ -35,8 +35,8 @@ def filterArticles(parameters):
     if "show_online" in parameters:
         articles = articles.filter(show_online=parameters["show_online"])
 
-    if "internalusersArr" in parameters:
-        articles = articles.filter(author_id__in=parameters["internalusersArr"])
+    #if "internalusersArr" in parameters:
+    #    articles = articles.filter(author_id__in=parameters["internalusersArr"])
 
     return articles
 
