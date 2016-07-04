@@ -1,6 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
 
-from users.views import user, buyer, seller
+from users.views import user, buyer, seller, internaluser
 from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool, validate_integer, getPaginationParameters
 from users.models.buyer import *
 from users.serializers.buyer import *
@@ -285,6 +285,20 @@ def seller_details(request):
 		return seller.update_seller(request)
 	elif request.method == "DELETE":
 		return seller.delete_seller(request)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
+def internal_user_details(request):
+
+	if request.method == "GET":
+
+		parameters = populateInternalUserIDParameters(request)
+		
+		#if parameters["isInternalUser"] == 0:
+		#	return customResponse("4XX", {"error": "Authentication failure"})
+
+		return internaluser.get_internal_user_details(request,parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
