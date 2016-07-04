@@ -22,6 +22,7 @@ def serializeArticle(articleEntry, parameters = {}):
 	article["updated_at"] = articleEntry.updated_at
 
 	if "article_details" in parameters and parameters["article_details"] == 1:
+		article["content"] = articleEntry.content
 		article["linkedin_pulse_link"] = articleEntry.linkedin_pulse_link
 		article["medium_link"] = articleEntry.medium_link
 		article["tumblr_link"] = articleEntry.tumblr_link

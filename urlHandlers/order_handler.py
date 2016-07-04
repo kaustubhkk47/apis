@@ -166,6 +166,8 @@ def populateOrderParameters(request, parameters = {}):
 
 	parameters = getPaginationParameters(request, parameters, 10)
 
+	parameters = populateOrderDetailsParameters(request, parameters)
+
 	return parameters
 
 def populateOrderDetailsParameters(request, parameters = {}):

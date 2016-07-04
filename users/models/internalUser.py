@@ -16,3 +16,12 @@ class InternalUser(models.Model):
 
     def __unicode__(self):
         return str(self.id) + " - " + self.name
+
+def filterInternalUser(parameters = {}):
+
+    internalUsers = InternalUser.objects.all()
+
+    if "internalusersArr" in parameters:
+        internalUsers = internalUsers.filter(id__in=parameters["internalusersArr"])
+
+    return internalUsers

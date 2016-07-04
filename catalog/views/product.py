@@ -18,6 +18,11 @@ log = logging.getLogger("django")
 
 def get_product_details(request, parameters = {}):
     try:
+        if "isSeller" in parameters and "isInternalUser" in parameters and parameters["isSeller"]==0 and parameters["isInternalUser"]==0:
+            parameters["product_verification"] = True
+            parameters["product_show_online"] = True
+            parameters["seller_show_online"] = True
+        
         products = filterProducts(parameters)
 
         paginator = Paginator(products, parameters["itemsPerPage"])

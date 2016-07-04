@@ -10,6 +10,8 @@ from django.core.paginator import Paginator
 import logging
 log = logging.getLogger("django")
 
+from pandas import DataFrame
+
 def get_buyer_details(request,buyerParameters):
 	try:
 		buyers = filterBuyer(buyerParameters)
@@ -358,6 +360,29 @@ def update_buyer_product(request):
 	else:
 		closeDBConnection()
 		return customResponse("2XX", {"buyer_products" : serialize_buyer_product(buyerProductPtr)})
+
+def master_update_buyer_product():
+
+	buyerInterestParameters = {"is_active":True}
+	allBuyerInterests = filterBuyerInterest(buyerInterestParameters).values('id', 'buyer_id', 'category_id', 'price_filter_applied','min_price_per_unit','max_price_per_unit','fabric_filter_text')
+	allBuyerInterestsDF = DataFrame(list(allBuyerInterests))
+
+	allBuyersSeries = allBuyerInterestsDF.buyer_id.unique
+
+	productParameters = {}
+	productParameters["product_verification"] = True
+	productParameters["product_show_online"] = True
+	productParameters["seller_show_online"] = True
+	productParameters["product_new_in_product_matrix"] = True
+
+	allProducts = filterProducts(productParameters).values('id','category_id','min_price_per_unit', 'productdetails__fabric_gsm')
+	allProductsDF = DataFrame(list(allProducts))
+
+	buyerProductParameters = {}
+	buyerProductParameters["product_new_in_product_matrix"] = True
+	buyerProductParameters["buyersArr"] = list(allBuyersSeries)
+
+	allBuyerProducts = filterBuyerProducts(buyerProductParameters).values('id','buyer_id', 'product_id', 'buyer_interest_id', 'responded')
 
 def delete_buyer_interest(request):
 	try:
