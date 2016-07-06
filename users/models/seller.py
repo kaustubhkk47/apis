@@ -27,6 +27,8 @@ class Seller(models.Model):
     delete_status = models.BooleanField(default=False)
     show_online = models.BooleanField(default=True)
 
+    test_seller = models.BooleanField(default=False)
+
     def __unicode__(self):
         return str(self.id) + " - " +self.name + " - " + self.company_name + " - " + self.mobile_number
 

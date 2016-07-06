@@ -39,6 +39,8 @@ class Buyer(models.Model):
     whatsapp_sharing_active = models.BooleanField(default=True)
     whatsapp_contact_name = models.CharField(max_length=200, blank=True)
 
+    test_buyer = models.BooleanField(default=False)
+
     def __unicode__(self):
         return str(self.id) + " - " + self.name + " - " + self.company_name + " - " + self.mobile_number
 
