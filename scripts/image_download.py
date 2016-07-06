@@ -1,7 +1,10 @@
 ## This script is useful only for downloading images where every a link has been given
 ## against every image
-## The image links have to be kept in a workbook in sheet 1. Also create another workbook 2
-## in which feedback is  given 
+## The image links have to be kept in a workbook in "Sheet 1". Also create another workbook "Sheet 2"
+## in which feedback is  given
+## Image links should be put in cells starting from the 5th row, first coumn. All links corresponding
+## to a particular product should be kept in the same row as in the product upload sheet, so that the
+## renamed images have correct filenames.
 
 import urllib
 import openpyxl
@@ -43,6 +46,7 @@ def download_product_images(wb):
 		imageLink = toString(ws.cell(row = row, column = column).value)
 		if imageLink == "" or imageLink == None or imageLink == 'None':
 			if(column==1):
+				print "Completed at row" + str(row-1)
 				break
 			else:
 				row += 1

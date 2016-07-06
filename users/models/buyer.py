@@ -474,10 +474,11 @@ def filterBuyerInterest(parameters = {}):
 
 def filterBuyerProducts(parameters = {}):
 
-    buyerProducts = BuyerProducts.objects.filter(delete_status=False,buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
+    buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
 
-    query = reduce(operator.or_, (Q(buyer_interest__is_active = item) for item in [None,True]))
-    buyerProducts = buyerProducts.filter(query)
+    if "buyer_interest_active" in parameters:
+        query = reduce(operator.or_, (Q(buyer_interest__is_active = item) for item in [None,parameters["buyer_interest_active"]]))
+        buyerProducts = buyerProducts.filter(query)
 
     if "delete_status" in parameters:
         buyerProducts = buyerProducts.filter(delete_status=parameters["delete_status"])
@@ -544,26 +545,26 @@ def getIntersectingProducts(leftPtr, rightPtr):
     innerList = []
     rightList = []
 
-    if len(rightPtr) > 0 and len(leftPtr) > 0:
+    if len(leftPtr) > 0 and len(rightPtr) > 0:
 
         productsToAdd = DataFrame(list(leftPtr.values('id')))
 
-        productAgainstBuyer = DataFrame(list(rightPtr.values('product_id')))
+        productAgainstBuyer = DataFrame(list(rightPtr.values('product_id','id')))
 
-        innerFrame = productsToAdd[(productsToAdd.id.isin(productAgainstBuyer.product_id))]
+        innerFrame = productAgainstBuyer[(productAgainstBuyer.product_id.isin(productsToAdd.id))]
 
         #innerFrame = merge(productsToAdd, productAgainstBuyer, how="inner", left_on="id", right_on="product_id", sort=False)
 
         innerList = innerFrame["id"].tolist()
 
-        leftOnlyFrame = productsToAdd[(~productsToAdd.id.isin(innerFrame.id))]
+        leftOnlyFrame = productsToAdd[(~productsToAdd.id.isin(innerFrame.product_id))]
 
-        rightOnlyFrame = productAgainstBuyer[(~productAgainstBuyer.product_id.isin(innerFrame.id))]
+        rightOnlyFrame = productAgainstBuyer[(~productAgainstBuyer.id.isin(innerFrame.id))]
 
         leftList = leftOnlyFrame["id"].tolist()
-        rightList = rightOnlyFrame["product_id"].tolist()
+        rightList = rightOnlyFrame["id"].tolist()
     elif len(rightPtr) > 0 and len(leftPtr) == 0:
-        rightList = [int(e) for e in list(rightPtr.values_list('product_id',flat=True))]
+        rightList = [int(e) for e in list(rightPtr.values_list('id',flat=True))]
     elif len(rightPtr) == 0 and len(leftPtr) > 0:
         leftList = [int(e) for e in list(leftPtr.values_list('id',flat=True))]
 
