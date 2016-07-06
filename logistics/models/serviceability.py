@@ -16,4 +16,4 @@ class PincodeServiceability(models.Model):
 	cod_available = models.BooleanField(default=False)
 
 	def __unicode__(self):
-		return str(self.id) + " - " + self.pincode.pincode + " - delivery: " + self.delivery_available
+		return str(self.id) + " - " + self.pincode.pincode + " - delivery: " + str(self.delivery_available)
