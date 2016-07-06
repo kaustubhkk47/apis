@@ -40,12 +40,12 @@ def get_buyer_shared_product_id_details(request,buyerParameters):
 		log.critical(e)
 		return customResponse("4XX", {"error": "Invalid request"})
 
-def get_buyer_interest_details(request,buyerParameters):
+def get_buyer_interest_details(request,parameters = {}):
 	try:
-		buyerInterests = filterBuyerInterest(buyerParameters)
+		buyerInterests = filterBuyerInterest(parameters)
 
 		response = {
-			"buyer_interests" : parse_buyer_interest(buyerInterests, buyerParameters)
+			"buyer_interests" : parse_buyer_interest(buyerInterests, parameters)
 		}
 		closeDBConnection()
 
@@ -54,20 +54,22 @@ def get_buyer_interest_details(request,buyerParameters):
 		log.critical(e)
 		return customResponse("4XX", {"error": "Invalid request"})
 
-def get_buyer_product_details(request, buyerParameters):
+def get_buyer_product_details(request, parameters = {}):
 	try:
-		buyerProducts = filterBuyerProducts(buyerParameters)
+		parameters["delete_status"] = False
+		parameters["buyer_interest_active"] = True
+		buyerProducts = filterBuyerProducts(parameters)
 
-		paginator = Paginator(buyerProducts, buyerParameters["itemsPerPage"])
+		paginator = Paginator(buyerProducts, parameters["itemsPerPage"])
 
 		try:
-			pageItems = paginator.page(buyerParameters["pageNumber"])
+			pageItems = paginator.page(parameters["pageNumber"])
 		except Exception as e:
 			pageItems = []
 
-		body = parse_buyer_product(pageItems,buyerParameters)
+		body = parse_buyer_product(pageItems,parameters)
 		statusCode = "2XX"
-		response = {"buyer_products": body,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":buyerParameters["pageNumber"], "items_per_page":buyerParameters["itemsPerPage"]}
+		response = {"buyer_products": body,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":parameters["pageNumber"], "items_per_page":parameters["itemsPerPage"]}
 
 	except Exception as e:
 		log.critical(e)
@@ -186,7 +188,7 @@ def post_new_buyer_interest(request):
 
 		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
 
-		BuyerProducts.objects.filter(product_id__in=intersectingProducts[1],buyer_id=buyerPtr.id).update(buyer_interest=newBuyerInterest,delete_status=False)
+		BuyerProducts.objects.filter(id__in=intersectingProducts[1]).update(buyer_interest=newBuyerInterest,delete_status=False)
 
 	except Exception as e:
 		log.critical(e)
@@ -240,7 +242,7 @@ def post_new_buyer_product(request):
 		
 		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
 
-		BuyerProducts.objects.filter(product_id__in=intersectingProducts[1],buyer_id=buyerPtr.id).update(is_active=True,delete_status=False)
+		BuyerProducts.objects.filter(id__in=intersectingProducts[1]).update(is_active=True,delete_status=False)
 
 	except Exception as e:
 		log.critical(e)
@@ -295,9 +297,9 @@ def update_buyer_interest(request):
 
 		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
 
-		BuyerProducts.objects.filter(product_id__in=intersectingProducts[1],buyer_id=buyerInterestPtr.buyer_id).update(buyer_interest=buyerInterestPtr,delete_status=False)
+		BuyerProducts.objects.filter(id__in=intersectingProducts[1]).update(buyer_interest=buyerInterestPtr,delete_status=False)
 
-		BuyerProducts.objects.filter(product_id__in=intersectingProducts[2],buyer_id=buyerInterestPtr.buyer_id).update(delete_status=True)
+		BuyerProducts.objects.filter(id__in=intersectingProducts[2],responded=0).update(delete_status=True, buyer_interest_id=None)
 
 	except Exception as e:
 		log.critical(e)
@@ -361,28 +363,81 @@ def update_buyer_product(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer_products" : serialize_buyer_product(buyerProductPtr)})
 
-def master_update_buyer_product():
+def master_update_buyer_product(request):
 
-	buyerInterestParameters = {"is_active":True}
-	allBuyerInterests = filterBuyerInterest(buyerInterestParameters).values('id', 'buyer_id', 'category_id', 'price_filter_applied','min_price_per_unit','max_price_per_unit','fabric_filter_text')
-	allBuyerInterestsDF = DataFrame(list(allBuyerInterests))
+	try:
 
-	allBuyersSeries = allBuyerInterestsDF.buyer_id.unique
+		buyerInterestParameters = {"is_active":True}
+		allBuyerInterests = filterBuyerInterest(buyerInterestParameters).values('id', 'buyer_id', 'category_id', 'price_filter_applied','min_price_per_unit','max_price_per_unit','fabric_filter_text')
+		if len(allBuyerInterests) == 0:
+			return customResponse("2XX", {"success" : "Already updated"})
 
-	productParameters = {}
-	productParameters["product_verification"] = True
-	productParameters["product_show_online"] = True
-	productParameters["seller_show_online"] = True
-	productParameters["product_new_in_product_matrix"] = True
+		allBuyerInterestsDF = DataFrame(list(allBuyerInterests))
+		allBuyerInterestsDF['fabricArr'] = allBuyerInterestsDF.fabric_filter_text.str.replace(" ","").str.lower().str.split(",")
+	
+		allBuyersSeries = allBuyerInterestsDF.buyer_id.unique()
+	
+		productParameters = {}
+		productParameters["product_verification"] = True
+		productParameters["product_show_online"] = True
+		productParameters["seller_show_online"] = True
+		productParameters["product_new_in_product_matrix"] = True
 
-	allProducts = filterProducts(productParameters).values('id','category_id','min_price_per_unit', 'productdetails__fabric_gsm')
-	allProductsDF = DataFrame(list(allProducts))
+		allProducts = filterProducts(productParameters).values('id','category_id','min_price_per_unit', 'productdetails__fabric_gsm')
+		if len(allProducts) == 0:
+			return customResponse("2XX", {"success" : "Already updated"})
+		allProductsDF = DataFrame(list(allProducts))
+		allProductsDF['productdetails__fabric_gsm'] = allProductsDF['productdetails__fabric_gsm'].str.replace(" ","").str.lower()
 
-	buyerProductParameters = {}
-	buyerProductParameters["product_new_in_product_matrix"] = True
-	buyerProductParameters["buyersArr"] = list(allBuyersSeries)
+		buyerProductParameters = {}
+		buyerProductParameters["product_new_in_product_matrix"] = True
+		buyerProductParameters["buyersArr"] = list(allBuyersSeries)
 
-	allBuyerProducts = filterBuyerProducts(buyerProductParameters).values('id','buyer_id', 'product_id', 'buyer_interest_id', 'responded')
+		allBuyerProducts = filterBuyerProducts(buyerProductParameters).values('id','buyer_id', 'product_id', 'buyer_interest_id', 'responded')
+		if len(allBuyerProducts) == 0:
+			columns = ['buyer_id','buyer_interest_id','id','product_id','responded']
+			allBuyerProductsDF = DataFrame(columns=columns)
+		else:
+			allBuyerProductsDF = DataFrame(list(allBuyerProducts))
+	
+		#  Buyer ID, BuyerInterestID, Set of product ID
+		buyerProductsToCreate = []
+		# BuyerInterestID, set of BuyerproductID
+		middleSet = []
+		#BuyerproductID
+		rightSet = []
+	
+		for buyer in allBuyersSeries:
+			tempBuyerProductsDF = allBuyerProductsDF[allBuyerProductsDF.buyer_id==buyer]
+			tempBuyerInterestsDF = allBuyerInterestsDF[allBuyerInterestsDF.buyer_id==buyer]
+			for row in tempBuyerInterestsDF.itertuples():
+				tempProductsDF = allProductsDF[(allProductsDF.category_id==row[2])&(allProductsDF.productdetails__fabric_gsm.str.contains('|'.join(row[8])))]
+				if row[7] == True:
+					tempProductsDF = tempProductsDF[(tempProductsDF.min_price_per_unit>=row[6])&(tempProductsDF.min_price_per_unit<=row[5])]
+				innerFrame = tempBuyerProductsDF[(tempBuyerProductsDF.product_id.isin(tempProductsDF.id))]
+				leftOnlyFrame = tempProductsDF[(~tempProductsDF.id.isin(innerFrame.product_id))]
+				rightOnlyFrame = tempBuyerProductsDF[(~tempBuyerProductsDF.id.isin(innerFrame.id))&(tempBuyerProductsDF.responded==0)]
+				
+				for product_id in leftOnlyFrame['id'].tolist():
+					buyerProduct = BuyerProducts(buyer_id=buyer, product_id=product_id, buyer_interest_id=row[4])
+					buyerProductsToCreate.append(buyerProduct)
+	
+				middleSet.append([row[4], innerFrame['id'].tolist()])
+				rightSet.extend(rightOnlyFrame['id'].tolist())
+		
+		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
+		for row in middleSet:
+			BuyerProducts.objects.filter(id__in=row[1]).update(buyer_interest_id=row[0],delete_status=False)
+		BuyerProducts.objects.filter(id__in=rightSet).update(delete_status=True, buyer_interest_id=None)
+		allProducts.update(new_in_product_matrix=False)
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to update"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"success" : "updated"})
 
 def delete_buyer_interest(request):
 	try:

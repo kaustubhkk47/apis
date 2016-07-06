@@ -96,6 +96,14 @@ def buyer_product_details(request):
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
+@csrf_exempt
+def buyer_product_master_update(request):
+
+	if request.method == "POST":
+		return buyer.master_update_buyer_product(request)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
 def populateBuyerProductParameters(request):
 
 	parameters = populateBuyerParameters(request)

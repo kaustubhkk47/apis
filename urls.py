@@ -52,6 +52,7 @@ urlpatterns += [
     url(r'^users/buyer/address/$', user_handler.buyer_address_details),
     url(r'^users/buyer/buyerinterest/$', user_handler.buyer_interest_details),
     url(r'^users/buyer/buyerproducts/$', user_handler.buyer_product_details),
+    url(r'^users/buyer/buyerproducts/masterupdate/$', user_handler.buyer_product_master_update),
     url(r'^users/buyer/buyersharedproductid/$', user_handler.buyer_shared_product_id_details)
 ]
 
