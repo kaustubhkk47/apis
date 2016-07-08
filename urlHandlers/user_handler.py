@@ -100,7 +100,7 @@ def buyer_product_details(request):
 def buyer_product_master_update(request):
 
 	if request.method == "POST":
-		return buyer.master_update_buyer_product(request, {})
+		return buyer.master_update_buyer_product(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 

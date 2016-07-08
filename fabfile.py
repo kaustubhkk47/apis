@@ -17,8 +17,6 @@ def ssh_into_server():
 def get_version():
     run('cat /etc/issue')
 
-def hello():
-    print("Hello world!")
-
 def restart_server():
 	run("~/webapps/"+APP_NAME+"apache2/bin/restart")
+	run("~/webapps/mysql/bin/start")
