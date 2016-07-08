@@ -4,17 +4,17 @@ from scripts.utils import customResponse, get_token_payload
 from address.views import state
 
 @csrf_exempt
-def state_details(request):
+def state_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		parameters = populateAddressParameters(request, {})
+		parameters = populateAddressParameters(request, {}, version)
 
 		return state.get_state_details(request,parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
 
-def populateAddressParameters(request, parameters = {}):
+def populateAddressParameters(request, parameters = {}, version = "0"):
 
 	return parameters

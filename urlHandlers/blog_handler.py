@@ -7,10 +7,10 @@ from blog.views import article
 from .user_handler import populateInternalUserIDParameters
 
 @csrf_exempt
-def article_details(request):
+def article_details(request, version = "0"):
     if request.method == 'GET':
 
-        parameters = getArticleParameters(request, {})
+        parameters = getArticleParameters(request, {}, version)
 
         return article.get_article_details(request, parameters)
 
@@ -23,7 +23,9 @@ def article_details(request):
     
     return customResponse('4XX', {"error": "Invalid request"})
 
-def getArticleParameters(request, parameters = {}):
+def getArticleParameters(request, parameters = {}, version = "0"):
+
+    defaultValue = 0
 
     articleID = request.GET.get("articleID", "")
     if articleID != "" and articleID != None:
@@ -37,13 +39,13 @@ def getArticleParameters(request, parameters = {}):
     if validate_bool(articleDetails):
         parameters["article_details"] = int(articleDetails)
     else:
-        parameters["article_details"] = 0
+        parameters["article_details"] = defaultValue
 
     internalUserDetails = request.GET.get("internal_user_details", None)
     if validate_bool(internalUserDetails):
         parameters["internal_user_details"] = int(internalUserDetails)
     else:
-        parameters["internal_user_details"] = 0
+        parameters["internal_user_details"] = defaultValue
 
     parameters = populateInternalUserIDParameters(request, parameters)
 

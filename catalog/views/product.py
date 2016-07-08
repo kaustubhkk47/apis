@@ -32,7 +32,7 @@ def get_product_details(request, parameters = {}):
         except Exception as e:
             pageProducts = []
 
-        response = multiple_products_parser(pageProducts)
+        response = multiple_products_parser(pageProducts, parameters)
         body = {"products": response,"total_products":paginator.count, "total_pages":paginator.num_pages, "page_number":parameters["pageNumber"], "items_per_page":parameters["itemsPerPage"]}
             
         statusCode = "2XX"

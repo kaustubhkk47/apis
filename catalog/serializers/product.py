@@ -7,7 +7,7 @@ from .category import serialize_categories
 from users.serializers.seller import serialize_seller
 import ast
 
-def serialize_product_lots(productsItem):
+def serialize_product_lots(productsItem, parameters = {}):
 
 	productLotsQuerySet = ProductLot.objects.filter(product_id = productsItem.id)
 	productLots = []
@@ -23,7 +23,7 @@ def serialize_product_lots(productsItem):
 
 	return productLots
 
-def serialize_product(productsItem):
+def serialize_product(productsItem, parameters = {}):
 
 	product = {}
 
@@ -43,51 +43,66 @@ def serialize_product(productsItem):
 	product["display_name"] = productsItem.display_name
 	product["is_catalog"] = productsItem.is_catalog
 	product["delete_status"] = productsItem.delete_status
-
-	productLink = "http://www.wholdus.com/" + productsItem.category.slug + "-" + str(productsItem.category_id) + "/" +productsItem.slug +"-" + str(productsItem.id)
-	product["absolute_path"] = productLink
-
+	product["absolute_path"] = "http://www.wholdus.com/" + productsItem.category.slug + "-" + str(productsItem.category_id) + "/" +productsItem.slug +"-" + str(productsItem.id)
 	product["margin"] = '{0:.1f}'.format((float(productsItem.price_per_unit) - float(productsItem.min_price_per_unit))/float(productsItem.price_per_unit)*100)
-
-	image ={}
-
-	image["image_path"] = productsItem.image_path
-	image["image_name"] = productsItem.image_name
-		
-	image_numbers = str(productsItem.image_numbers)
-	
-	try:
-		image_numbers = ast.literal_eval(image_numbers)
-	except Exception as e:
-		image_numbers = {}
-
-	image_numers_arr = []
-
-	for i in range(len(image_numbers)):
-		image_numers_arr.append(image_numbers[i+1])
-
-	imageLink = "http://api.wholdus.com/" + productsItem.image_path + "700x700/" + productsItem.image_name + "-1.jpg"
-	image["absolute_path"] = imageLink
-
-	image["image_numbers"] = image_numers_arr
-	image["image_count"] = len(image_numbers)
-
-	product["image"] = image
-	
-	product["seller"] = serialize_seller(productsItem.seller)
-
-	product["category"] = serialize_categories(productsItem.category)
-	
-	if hasattr(productsItem, 'productdetails'):
-		product = serialize_product_details(productsItem, product)
-
-	product["product_lot"] = serialize_product_lots(productsItem)
 	product["url"] = productsItem.category.slug + "-" + str(productsItem.category.id) + "/" + productsItem.slug+ "-" + str(productsItem.id)
 
+	if "seller_details" in parameters and parameters["seller_details"] == 1:
+		product["seller"] = serialize_seller(productsItem.seller, parameters)
+	else:
+		seller = {}
+		seller["sellerID"] =productsItem.seller.id
+		seller["name"] =productsItem.seller.name
+		product["seller"] = seller
+
+	if "category_details" in parameters and parameters["category_details"] == 1:
+		product["category"] = serialize_categories(productsItem.category, parameters)
+	else:
+		category = {}
+		category["categoryID"] = productsItem.category.id
+		category["name"] = productsItem.category.name
+		product["category"] = category
+	
+	if "product_details_details" in parameters and parameters["product_details_details"] == 1 and hasattr(productsItem, 'productdetails'):
+		product["details"] = serialize_product_details(productsItem, parameters)
+	else:
+		product_details = {}
+		product_details["seller_catalog_number"] = productsItem.productdetails.seller_catalog_number
+		product_details["fabric_gsm"] = productsItem.productdetails.fabric_gsm
+		product_details["colours"] = productsItem.productdetails.colours
+		product_details["sizes"] = productsItem.productdetails.sizes
+		product["details"] = product_details
+
+	if "product_lot_details" in parameters and parameters["product_lot_details"] == 1:
+		product["product_lot"] = serialize_product_lots(productsItem, parameters)
+
+	if "product_image_details" in parameters and parameters["product_image_details"] == 1:
+		image = {}
+
+		image_numbers = str(productsItem.image_numbers)
+		try:
+			image_numbers = ast.literal_eval(image_numbers)
+		except Exception as e:
+			image_numbers = {}
+
+		image_numbers_arr = []
+		for i in range(len(image_numbers)):
+			image_numbers_arr.append(image_numbers[i+1])
+
+		if len(image_numbers_arr) > 0:
+			imageLink = "http://api.wholdus.com/" + productsItem.image_path + "700x700/" + productsItem.image_name + "-" + str(image_numbers_arr[0]) +".jpg"		
+			image["absolute_path"] = imageLink
+
+		image["image_numbers"] = image_numbers_arr
+		image["image_count"] = len(image_numbers)
+		image["image_path"] = productsItem.image_path
+		image["image_name"] = productsItem.image_name
+
+		product["image"] = image
 
 	return product
 
-def serialize_product_details(productsItem, product):
+def serialize_product_details(productsItem, parameters = {}):
 
 	details ={}
 
@@ -120,13 +135,11 @@ def serialize_product_details(productsItem, product):
 	details["warranty"] = productsItem.productdetails.warranty
 	details["remarks"] = productsItem.productdetails.remarks
 
-	product["details"] = details
+	return details
 
-	return product
-
-def multiple_products_parser(productQuerySet):
+def multiple_products_parser(productQuerySet, parameters = {}):
 	products = []
 	for productsItem in productQuerySet:
-		product = serialize_product(productsItem)
+		product = serialize_product(productsItem, parameters)
 		products.append(product)
 	return products

@@ -8,12 +8,10 @@ from .orderItem import serializeOrderItem, parseOrderItem
 from .orderShipment import serializeOrderShipment, parseOrderShipments
 from .payments import serializeSellerPayment, parseSellerPayments
 
-def serializeSubOrder(subOrderEntry, subOrderParameters = {}):
+def serializeSubOrder(subOrderEntry, parameters = {}):
 	subOrder = {}
 	subOrder["orderID"]=subOrderEntry.order_id
 	subOrder["suborderID"]=subOrderEntry.id
-	subOrder["seller"]=serialize_seller(subOrderEntry.seller)
-	subOrder["buyer"]=serialize_buyer(subOrderEntry.order.buyer)
 	subOrder["product_count"] = subOrderEntry.product_count
 	subOrder["retail_price"] = subOrderEntry.retail_price
 	subOrder["calculated_price"] = subOrderEntry.calculated_price
@@ -21,14 +19,13 @@ def serializeSubOrder(subOrderEntry, subOrderParameters = {}):
 	subOrder["cod_charge"] = subOrderEntry.cod_charge
 	subOrder["shipping_charge"] = subOrderEntry.shipping_charge
 	subOrder["final_price"] = subOrderEntry.final_price
-	
 	subOrder["display_number"] = subOrderEntry.display_number
 	subOrder["created_at"] = subOrderEntry.created_at
 	subOrder["updated_at"] = subOrderEntry.updated_at
 	subOrder["merchant_notified_time"] = subOrderEntry.merchant_notified_time
 	subOrder["completed_time"] = subOrderEntry.completed_time
 	subOrder["closed_time"] = subOrderEntry.closed_time
-	
+
 	subOrder["sub_order_status"] = {
 		"value": subOrderEntry.suborder_status,
 		"display_value":SubOrderStatus[subOrderEntry.suborder_status]["display_value"]
@@ -39,26 +36,45 @@ def serializeSubOrder(subOrderEntry, subOrderParameters = {}):
 		"display_value":SubOrderPaymentStatus[subOrderEntry.suborder_payment_status]["display_value"]
 	}
 
-	sellerPaymentQuerySet = filterSellerPayment(subOrderParameters)
-	sellerPaymentQuerySet = sellerPaymentQuerySet.filter(suborder_id=subOrderEntry.id)
-	subOrder["seller_payments"] = parseSellerPayments(sellerPaymentQuerySet, subOrderParameters)
+	if "seller_details" in parameters and parameters["seller_details"] == 1:
+		subOrder["seller"]=serialize_seller(subOrderEntry.seller)
+	else:
+		seller = {}
+		seller["sellerID"] = subOrderEntry.seller.id
+		seller["name"] = subOrderEntry.seller.name
+		subOrder["seller"] = seller
 
-	orderShipmentQuerySet = filterOrderShipment(subOrderParameters)
-	orderShipmentQuerySet = orderShipmentQuerySet.filter(suborder_id=subOrderEntry.id)
-	subOrder["order_shipments"] = parseOrderShipments(orderShipmentQuerySet, subOrderParameters)
+	if "buyer_details" in parameters and parameters["buyer_details"] == 1:
+		subOrder["buyer"]=serialize_buyer(subOrderEntry.order.buyer)
+	else:
+		buyer = {}
+		buyer["buyerID"] = subOrderEntry.order.buyer.id
+		buyer["name"] = subOrderEntry.order.buyer.name
+		subOrder["buyer"] = buyer
+	
+	if "seller_payment_details" in parameters and parameters["seller_payment_details"] == 1:
+		sellerPaymentQuerySet = filterSellerPayment(parameters)
+		sellerPaymentQuerySet = sellerPaymentQuerySet.filter(suborder_id=subOrderEntry.id)
+		subOrder["seller_payments"] = parseSellerPayments(sellerPaymentQuerySet, parameters)
 
-	orderItemQuerySet = filterOrderItem(subOrderParameters)
-	orderItemQuerySet = orderItemQuerySet.filter(suborder_id=subOrderEntry.id)
-	subOrder["order_items"] = parseOrderItem(orderItemQuerySet, subOrderParameters)
+	if "order_shipment_details" in parameters and parameters["order_shipment_details"] == 1:
+		orderShipmentQuerySet = filterOrderShipment(parameters)
+		orderShipmentQuerySet = orderShipmentQuerySet.filter(suborder_id=subOrderEntry.id)
+		subOrder["order_shipments"] = parseOrderShipments(orderShipmentQuerySet, parameters)
+
+	if "order_item_details" in parameters and parameters["order_item_details"] == 1:
+		orderItemQuerySet = filterOrderItem(parameters)
+		orderItemQuerySet = orderItemQuerySet.filter(suborder_id=subOrderEntry.id)
+		subOrder["order_items"] = parseOrderItem(orderItemQuerySet, parameters)
 		
 	return subOrder
 
-def parseSubOrders(subOrderQuerySet, subOrderParameters = {}):
+def parseSubOrders(subOrderQuerySet, parameters = {}):
 
 	subOrders = []
 
 	for subOrder in subOrderQuerySet:
-		subOrderEntry = serializeSubOrder(subOrder, subOrderParameters)
+		subOrderEntry = serializeSubOrder(subOrder, parameters)
 		subOrders.append(subOrderEntry)
 
 	return subOrders
