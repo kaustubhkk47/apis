@@ -10,7 +10,7 @@ from .user_handler import populateInternalUserIDParameters
 def article_details(request):
     if request.method == 'GET':
 
-        parameters = getArticleParameters(request)
+        parameters = getArticleParameters(request, {})
 
         return article.get_article_details(request, parameters)
 

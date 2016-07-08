@@ -8,7 +8,7 @@ def state_details(request):
 
 	if request.method == "GET":
 
-		parameters = populateAddressParameters(request)
+		parameters = populateAddressParameters(request, {})
 
 		return state.get_state_details(request,parameters)
 
