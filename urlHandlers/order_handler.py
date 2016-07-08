@@ -12,7 +12,7 @@ def order_shipment_details(request):
 
 	if request.method == "GET":
 
-		orderShipmentParameters = populateOrderParameters(request)
+		orderShipmentParameters = populateOrderParameters(request, {})
 
 		if orderShipmentParameters["isSeller"] == 0 and orderShipmentParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -30,7 +30,7 @@ def suborder_details(request):
 
 	if request.method == "GET":
 
-		subOrderParameters = populateOrderParameters(request)
+		subOrderParameters = populateOrderParameters(request, {})
 
 		if subOrderParameters["isSeller"] == 0 and subOrderParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -46,7 +46,7 @@ def order_details(request):
 
 	if request.method == "GET":
 
-		orderParameters = populateOrderParameters(request)
+		orderParameters = populateOrderParameters(request, {})
 
 		if orderParameters["isBuyer"] == 0 and orderParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -62,7 +62,7 @@ def order_item_details(request):
 
 	if request.method == "GET":
 
-		orderItemParameters = populateOrderParameters(request)
+		orderItemParameters = populateOrderParameters(request, {})
 
 		if orderItemParameters["isSeller"] == 0 and orderItemParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -78,7 +78,7 @@ def buyer_payment_details(request):
 
 	if request.method == "GET":
 
-		buyerPaymentParameters = populateOrderParameters(request)
+		buyerPaymentParameters = populateOrderParameters(request, {})
 
 		if buyerPaymentParameters["isBuyer"] == 0 and buyerPaymentParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -95,7 +95,7 @@ def seller_payment_details(request):
 
 	if request.method == "GET":
 
-		sellerPaymentParameters = populateOrderParameters(request)
+		sellerPaymentParameters = populateOrderParameters(request, {})
 
 		if sellerPaymentParameters["isSeller"] == 0 and sellerPaymentParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})

@@ -25,7 +25,7 @@ def buyer_details(request):
 
 	if request.method == "GET":
 
-		buyerParameters = populateBuyerParameters(request)
+		buyerParameters = populateBuyerParameters(request, {})
 
 		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -45,7 +45,7 @@ def buyer_shared_product_id_details(request):
 
 	if request.method == "GET":
 
-		buyerParameters = populateBuyerParameters(request)
+		buyerParameters = populateBuyerParameters(request, {})
 
 		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -61,7 +61,7 @@ def buyer_interest_details(request):
 
 	if request.method == "GET":
 
-		buyerParameters = populateBuyerParameters(request)
+		buyerParameters = populateBuyerParameters(request, {})
 
 		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -81,7 +81,7 @@ def buyer_product_details(request):
 
 	if request.method == "GET":
 
-		buyerParameters = populateBuyerProductParameters(request)
+		buyerParameters = populateBuyerProductParameters(request, {})
 
 		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -100,13 +100,13 @@ def buyer_product_details(request):
 def buyer_product_master_update(request):
 
 	if request.method == "POST":
-		return buyer.master_update_buyer_product(request)
+		return buyer.master_update_buyer_product(request, {})
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
-def populateBuyerProductParameters(request):
+def populateBuyerProductParameters(request, parameters = {}):
 
-	parameters = populateBuyerParameters(request)
+	parameters = populateBuyerParameters(request, parameters)
 
 	isActive = request.GET.get("is_active", None)
 	responded = request.GET.get("responded", None)
@@ -281,7 +281,7 @@ def seller_details(request):
 
 	if request.method == "GET":
 
-		parameters = populateSellerParameters(request)
+		parameters = populateSellerParameters(request, {})
 		
 		if parameters["isSeller"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -301,7 +301,7 @@ def internal_user_details(request):
 
 	if request.method == "GET":
 
-		parameters = populateInternalUserIDParameters(request)
+		parameters = populateInternalUserIDParameters(request, {})
 		
 		#if parameters["isInternalUser"] == 0:
 		#	return customResponse("4XX", {"error": "Authentication failure"})
