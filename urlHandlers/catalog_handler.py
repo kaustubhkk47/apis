@@ -34,7 +34,7 @@ def product_details(request):
 
 	if request.method == "GET":
 
-		productParameters = populateProductParameters(request)
+		productParameters = populateProductParameters(request, {})
 
 		return product.get_product_details(request,productParameters)
 	elif request.method == "POST":
@@ -69,7 +69,7 @@ def product_file(request):
 
 	if request.method == "GET":
 
-		productParameters = populateProductParameters(request)
+		productParameters = populateProductParameters(request, {})
 
 		return product.get_product_file(request,productParameters)
 
@@ -80,14 +80,13 @@ def product_catalog(request):
 
 	if request.method == "GET":
 
-		productParameters = populateProductParameters(request)
+		productParameters = populateProductParameters(request, {})
 
 		return product.get_product_catalog(request,productParameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
-def populateProductParameters(request):
-	parameters = {}
+def populateProductParameters(request, parameters = {}):
 
 	productID = request.GET.get("productID", "")
 	categoryID = request.GET.get("categoryID", "")
