@@ -1,4 +1,4 @@
-from ..models.buyer import Buyer, BuyerAddress, BuyerDetails, filterBuyer, filterBuyerInterest
+from ..models.buyer import Buyer, BuyerAddress, BuyerDetails, filterBuyer, filterBuyerInterest, filterBuyerProducts
 from catalog.serializers.category import serialize_categories
 from catalog.serializers.product import serialize_product
 
@@ -41,6 +41,17 @@ def serialize_buyer(buyer_entry, parameters = {}):
 	   buyerInterestQuerySet = filterBuyerInterest(parameters)
 	   buyerInterestQuerySet = buyerInterestQuerySet.filter(buyer_id = buyer_entry.id)
 	   buyer["buyer_interests"] = parse_buyer_interest(buyerInterestQuerySet,parameters)
+
+	if "buyer_product_details" in parameters and parameters["buyer_product_details"] == 1:
+		tempParameters = parameters
+		tempParameters["buyer_interest_active"] = True
+		tempParameters["buyer_product_delete_status"] = False
+		tempParameters["buyer_product_is_active"] = True
+		tempParameters["responded"] = 0
+		buyerProductQuerySet = filterBuyerProducts(tempParameters)
+		buyerProductQuerySet = buyerProductQuerySet.filter(buyer_id = buyer_entry.id)
+		buyerProductQuerySet = buyerProductQuerySet[:parameters["buyer_product_count"]]
+		buyer["buyer_products"] = parse_buyer_product(buyerProductQuerySet,parameters)
 
 	return buyer
 

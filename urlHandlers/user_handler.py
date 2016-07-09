@@ -115,7 +115,8 @@ def populateBuyerProductParameters(request, parameters = {}, version = "0"):
 	productID = request.GET.get("productID", "")
 	
 	if validate_bool(isActive):
-		parameters["is_active"] = int(isActive)
+		parameters["buyer_product_is_active"] = int(isActive)
+
 	if validate_integer(responded):
 		parameters["responded"] = int(responded)
 
@@ -142,15 +143,15 @@ def populateBuyerParameters(request, parameters = {}, version = "0"):
 	buyerInterestID = request.GET.get("buyerinterestID", "")
 	buyersharedproductID = request.GET.get("buyersharedproductID", "")
 
+	whatsappSharingActive = request.GET.get("whatsapp_sharing_active", None)
+	if validate_bool(whatsappSharingActive):
+		parameters["whatsapp_sharing_active"] = int(whatsappSharingActive)
+
 	if buyerInterestID != "":
 		parameters["buyerInterestArr"] = getArrFromString(buyerInterestID)
 
 	if buyersharedproductID != "" and validate_integer(buyersharedproductID):
 		parameters["buyersharedproductID"] = int(buyersharedproductID)
-
-	whatsappSharingActive = request.GET.get("whatsapp_sharing_active", None)
-	if validate_bool(whatsappSharingActive):
-		parameters["whatsapp_sharing_active"] = int(whatsappSharingActive)
 
 	parameters = populateBuyerDetailsParameters(request, parameters, version)
 
@@ -186,6 +187,17 @@ def populateBuyerDetailsParameters(request, parameters = {}, version = "0"):
 		parameters["buyer_interest_details"] = int(buyerInterestDetails)
 	else:
 		parameters["buyer_interest_details"] = defaultValue
+
+	buyerProductDetails = request.GET.get("buyer_product_details", None)
+	buyerProductCount = request.GET.get("buyer_product_count", None)
+	if validate_bool(buyerProductDetails):
+		parameters["buyer_product_details"] = int(buyerProductDetails)
+		try:
+			parameters["buyer_product_count"] = int(buyerProductCount)
+		except Exception as e:
+			parameters["buyer_product_count"] = 10
+	else:
+		parameters["buyer_product_details"] = 0
 
 	return parameters
 

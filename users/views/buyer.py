@@ -12,12 +12,12 @@ log = logging.getLogger("django")
 
 from pandas import DataFrame
 
-def get_buyer_details(request,buyerParameters):
+def get_buyer_details(request,parameters = {}):
 	try:
-		buyers = filterBuyer(buyerParameters)
+		buyers = filterBuyer(parameters)
 
 		response = {
-			"buyers" : parse_buyer(buyers, buyerParameters)
+			"buyers" : parse_buyer(buyers, parameters)
 		}
 		closeDBConnection()
 
@@ -26,12 +26,12 @@ def get_buyer_details(request,buyerParameters):
 		log.critical(e)
 		return customResponse("4XX", {"error": "Invalid request"})
 
-def get_buyer_shared_product_id_details(request,buyerParameters):
+def get_buyer_shared_product_id_details(request,parameters = {}):
 	try:
-		buyerSharedProductID = filterBuyerSharedProductID(buyerParameters)
+		buyerSharedProductID = filterBuyerSharedProductID(parameters)
 
 		response = {
-			"buyer_shared_product_id" : parse_buyer_shared_product_id(buyerSharedProductID, buyerParameters)
+			"buyer_shared_product_id" : parse_buyer_shared_product_id(buyerSharedProductID, parameters)
 		}
 		closeDBConnection()
 
@@ -56,7 +56,7 @@ def get_buyer_interest_details(request,parameters = {}):
 
 def get_buyer_product_details(request, parameters = {}):
 	try:
-		parameters["delete_status"] = False
+		parameters["buyer_product_delete_status"] = False
 		parameters["buyer_interest_active"] = True
 		buyerProducts = filterBuyerProducts(parameters)
 
