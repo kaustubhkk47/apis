@@ -192,6 +192,7 @@ def populateBuyerDetailsParameters(request, parameters = {}, version = "0"):
 	buyerProductCount = request.GET.get("buyer_product_count", None)
 	if validate_bool(buyerProductDetails):
 		parameters["buyer_product_details"] = int(buyerProductDetails)
+		parameters["product_image_details"] = 1
 		try:
 			parameters["buyer_product_count"] = int(buyerProductCount)
 		except Exception as e:

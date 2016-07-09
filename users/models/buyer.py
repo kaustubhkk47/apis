@@ -172,6 +172,8 @@ class BuyerProducts(models.Model):
 
     delete_status = models.BooleanField(default=False)
 
+    shared_on_whatsapp = models.BooleanField(default=False)
+
     class Meta:
         ordering = ["-product__id"]
 
@@ -484,6 +486,9 @@ def filterBuyerProducts(parameters = {}):
 
     if "buyer_product_delete_status" in parameters:
         buyerProducts = buyerProducts.filter(delete_status=parameters["buyer_product_delete_status"])
+
+    if "buyer_product_shared_on_whatsapp" in parameters:
+        buyerProducts = buyerProducts.filter(shared_on_whatsapp=parameters["buyer_product_shared_on_whatsapp"])
 
     if "buyer_product_is_active" in parameters:
         buyerProducts = buyerProducts.filter(is_active=parameters["buyer_product_is_active"])

@@ -48,6 +48,7 @@ def serialize_buyer(buyer_entry, parameters = {}):
 		tempParameters["buyer_product_delete_status"] = False
 		tempParameters["buyer_product_is_active"] = True
 		tempParameters["responded"] = 0
+		tempParameters["buyer_product_shared_on_whatsapp"] = False
 		buyerProductQuerySet = filterBuyerProducts(tempParameters)
 		buyerProductQuerySet = buyerProductQuerySet.filter(buyer_id = buyer_entry.id)
 		buyerProductQuerySet = buyerProductQuerySet[:parameters["buyer_product_count"]]
