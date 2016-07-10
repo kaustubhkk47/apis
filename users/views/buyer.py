@@ -10,6 +10,8 @@ from django.core.paginator import Paginator
 import logging
 log = logging.getLogger("django")
 
+import time
+
 from pandas import DataFrame
 
 def get_buyer_details(request,parameters = {}):
@@ -23,6 +25,34 @@ def get_buyer_details(request,parameters = {}):
 
 		return customResponse("2XX", response)
 	except Exception as e:
+		log.critical(e)
+		return customResponse("4XX", {"error": "Invalid request"})
+
+def get_buyer_access_token_details(request,parameters = {}):
+	try:
+		buyerPanelURL = parameters["buyer_panel_url"].split("-")
+		try:
+			buyerID = int(buyerPanelURL[0])
+			timeStamp = int(buyerPanelURL[1])
+		except Exception as e:
+			return customResponse("4XX", {"error": "Invalid data in request sent"})
+
+		buyerPtr = Buyer.objects.get(id=buyerID)
+
+		if int(time.mktime(buyerPtr.created_at.timetuple())) != timeStamp:
+			closeDBConnection()
+			return customResponse("4XX", {"error": "Invalid time sent"})
+
+		from urlHandlers.user_handler import getBuyerToken
+
+		response = {
+			"token" : getBuyerToken(buyerPtr)
+		}
+		closeDBConnection()
+
+		return customResponse("2XX", response)
+	except Exception as e:
+		closeDBConnection()
 		log.critical(e)
 		return customResponse("4XX", {"error": "Invalid request"})
 
@@ -109,6 +139,8 @@ def post_new_buyer(request):
 		newBuyer = Buyer()
 
 		populateBuyer(newBuyer, buyer)
+		newBuyer.save()
+		newBuyer.whatsapp_contact_name = str(newBuyer.id) + " Wholdus " + newBuyer.name
 		newBuyer.save()
 
 		buyeraddress = buyer["address"]

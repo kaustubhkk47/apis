@@ -1,7 +1,7 @@
 from ..models.buyer import Buyer, BuyerAddress, BuyerDetails, filterBuyer, filterBuyerInterest, filterBuyerProducts
 from catalog.serializers.category import serialize_categories
 from catalog.serializers.product import serialize_product
-
+import time
 def serialize_buyer(buyer_entry, parameters = {}):
 
 	buyer = {}
@@ -25,6 +25,7 @@ def serialize_buyer(buyer_entry, parameters = {}):
 	buyer["gender"] = buyer_entry.gender
 	buyer["created_at"] = buyer_entry.created_at
 	buyer["updated_at"] = buyer_entry.updated_at
+	buyer["buyer_panel_url"] = str(buyer_entry.id) + "-" + str(int(time.mktime(buyer_entry.created_at.timetuple())))
 	
 	if "buyer_details_details" in parameters and parameters["buyer_details_details"] == 1 and hasattr(buyer_entry,'buyerdetails'):
 		buyer_details = {}

@@ -41,6 +41,17 @@ def buyer_details(request, version = "0"):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
+def buyer_access_token_details(request, version = "0"):
+
+	if request.method == "GET":
+		parameters = {}
+		parameters["buyer_panel_url"] = request.GET.get("buyer_panel_url", "")
+
+		return buyer.get_buyer_access_token_details(request, parameters)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
 def buyer_shared_product_id_details(request, version = "0"):
 
 	if request.method == "GET":
@@ -376,14 +387,8 @@ def buyer_login(request, version = "0"):
 			return customResponse("4XX", {"error": "Invalid buyer credentials"})
 
 		if password == buyer.password:
-			tokenPayload = {
-				"user": "buyer",
-				"buyerID": buyer.id,
-			}
-
-			encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
 			response = {
-				"token": encoded.decode("utf-8"),
+				"token": getBuyerToken(buyer),
 				"buyer": serialize_buyer(buyer)
 			}
 			return customResponse("2XX", response)
