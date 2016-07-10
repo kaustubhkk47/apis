@@ -11,6 +11,8 @@ from .businessType import BusinessType
 
 from decimal import Decimal
 import datetime
+import jwt as JsonWebToken
+import settings
 
 import operator
 from django.db.models import Q
@@ -270,8 +272,6 @@ def validateBuyerData(buyer, oldbuyer, is_new):
 		else:
 			buyer["password"] = oldbuyer.password
 
-	buyer["whatsapp_contact_name"] = "Wholdus " + buyer["name"]
-
 	if is_new == 1 and flag == 1:
 		return False
 
@@ -391,7 +391,6 @@ def validateBuyerAddressData(buyeraddress, oldbuyeraddress):
 
 def populateBuyer(buyerPtr, buyer):
 	buyerPtr.name = buyer["name"]
-	buyerPtr.whatsapp_contact_name = buyer["whatsapp_contact_name"]
 	buyerPtr.company_name = buyer["company_name"]
 	buyerPtr.mobile_number = buyer["mobile_number"]
 	buyerPtr.whatsapp_number = buyer["whatsapp_number"]
@@ -605,3 +604,11 @@ def validate_buyer_customer_type(x):
 	if not validate_integer(x) or not (int(x) in BuyerCustomerTypeValues):
 		return False
 	return True
+
+def getBuyerToken(buyer):
+	tokenPayload = {
+		"user": "buyer",
+		"buyerID": buyer.id,
+	}
+	encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
+	return encoded.decode("utf-8")
