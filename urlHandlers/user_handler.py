@@ -139,6 +139,10 @@ def populateBuyerProductParameters(request, parameters = {}, version = "0"):
 
 	parameters = getPaginationParameters(request, parameters, 1, version)
 
+	from .catalog_handler import populateProductDetailsParameters
+
+	parameters = populateProductDetailsParameters(request, parameters, version)
+
 	return parameters
 
 
