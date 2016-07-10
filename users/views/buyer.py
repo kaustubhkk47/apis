@@ -363,6 +363,35 @@ def update_buyer_product(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer_products" : serialize_buyer_product(buyerProductPtr)})
 
+def update_buyer_product_whatsapp(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_product = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_product) or not "buyerproductID" in buyer_product or buyer_product["buyerproductID"]==None:
+		return customResponse("4XX", {"error": "Id for buyer product not sent"})
+
+	buyerProductIDs = getArrFromString(str(buyer_product["buyerproductID"]))
+
+	buyerProductPtr = BuyerProducts.objects.filter(id__in=buyerProductIDs)
+
+	if len(buyerProductPtr) != len(buyerProductIDs):
+		return customResponse("4XX", {"error": "Invalid ids for for buyer products sent"})
+
+	try:
+		
+		buyerProductPtr.update(shared_on_whatsapp=True)
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to update"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"success" : "updated"})
+
 def master_update_buyer_product(request):
 
 	try:

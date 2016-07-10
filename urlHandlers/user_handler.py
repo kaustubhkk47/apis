@@ -97,6 +97,14 @@ def buyer_product_details(request, version = "0"):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
+def buyer_product_whatsapp_details(request, version = "0"):
+	
+	if request.method == "PUT":
+		return buyer.update_buyer_product_whatsapp(request)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
 def buyer_product_master_update(request,version = "0"):
 
 	if request.method == "POST":
@@ -130,6 +138,10 @@ def populateBuyerProductParameters(request, parameters = {}, version = "0"):
 		parameters["productsArr"] = getArrFromString(productID)
 
 	parameters = getPaginationParameters(request, parameters, 1, version)
+
+	from .catalog_handler import populateProductDetailsParameters
+
+	parameters = populateProductDetailsParameters(request, parameters, version)
 
 	return parameters
 
