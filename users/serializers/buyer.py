@@ -54,6 +54,7 @@ def serialize_buyer(buyer_entry, parameters = {}):
 		buyerProductQuerySet = buyerProductQuerySet[:parameters["buyer_product_count"]]
 		buyer["buyer_products"] = parse_buyer_product(buyerProductQuerySet,parameters)
 
+
 	return buyer
 
 
@@ -168,6 +169,6 @@ def serialize_buyer_product(buyer_product_entry, parameters = {}):
 	buyer_product["created_at"] = buyer_product_entry.created_at
 	buyer_product["updated_at"] = buyer_product_entry.updated_at
 	
-	buyer_product["product"] = serialize_product(buyer_product_entry.product)
+	buyer_product["product"] = serialize_product(buyer_product_entry.product, parameters)
 
 	return buyer_product
