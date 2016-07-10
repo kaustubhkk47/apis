@@ -97,6 +97,14 @@ def buyer_product_details(request, version = "0"):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
+def buyer_product_whatsapp_details(request, version = "0"):
+	
+	if request.method == "PUT":
+		return buyer.update_buyer_product_whatsapp(request)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
 def buyer_product_master_update(request,version = "0"):
 
 	if request.method == "POST":
