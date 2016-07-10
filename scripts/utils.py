@@ -196,7 +196,7 @@ def arrToFilename(arr):
 
     return x
 
-def getPaginationParameters(request, parameters={}, defaultItemsPerPage = 10):
+def getPaginationParameters(request, parameters={}, defaultItemsPerPage = 10, version = "0"):
 
     try:
         pageNumber = int(request.GET.get("page_number", 1))
