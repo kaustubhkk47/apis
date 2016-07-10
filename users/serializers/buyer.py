@@ -1,6 +1,7 @@
 from ..models.buyer import Buyer, BuyerAddress, BuyerDetails, filterBuyer, filterBuyerInterest, filterBuyerProducts
 from catalog.serializers.category import serialize_categories
 from catalog.serializers.product import serialize_product
+from address.serializers.state import serialize_state
 import time
 def serialize_buyer(buyer_entry, parameters = {}):
 
@@ -173,3 +174,27 @@ def serialize_buyer_product(buyer_product_entry, parameters = {}):
 	buyer_product["product"] = serialize_product(buyer_product_entry.product, parameters)
 
 	return buyer_product
+
+def parse_buyer_purchasing_state(buyer_purchasing_statees_queryset, parameters = {}):
+
+	buyer_purchasing_states =[]
+
+	for buyer_purchasing_state in buyer_purchasing_statees_queryset:
+
+		buyer_purchasing_state_entry = serialize_buyer_purchasing_state(buyer_purchasing_state, parameters)
+		buyer_purchasing_states.append(buyer_purchasing_state_entry)
+
+	return buyer_purchasing_states
+
+def serialize_buyer_purchasing_state(buyer_purchasing_state_entry, parameters = {}):
+
+	buyer_purchasing_state = {}
+	buyer_purchasing_state["buyerpurchasingstateID"] = buyer_purchasing_state_entry.id
+	buyer_purchasing_state["buyerID"] = buyer_purchasing_state_entry.buyer_id
+	buyer_purchasing_state["created_at"] = buyer_purchasing_state_entry.created_at
+	buyer_purchasing_state["updated_at"] = buyer_purchasing_state_entry.updated_at
+	buyer_purchasing_state["delete_status"] = buyer_purchasing_state_entry.delete_status
+
+	buyer_purchasing_state["state"] = serialize_state(buyer_purchasing_state_entry.state)
+
+	return buyer_purchasing_state
