@@ -8,11 +8,11 @@ from .user_handler import populateBuyerDetailsParameters, populateSellerDetailsP
 from .catalog_handler import populateProductDetailsParameters
 
 @csrf_exempt
-def order_shipment_details(request):
+def order_shipment_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		orderShipmentParameters = populateOrderParameters(request, {})
+		orderShipmentParameters = populateOrderParameters(request, {}, version)
 
 		if orderShipmentParameters["isSeller"] == 0 and orderShipmentParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -26,11 +26,11 @@ def order_shipment_details(request):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
-def suborder_details(request):
+def suborder_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		subOrderParameters = populateOrderParameters(request, {})
+		subOrderParameters = populateOrderParameters(request, {},version)
 
 		if subOrderParameters["isSeller"] == 0 and subOrderParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -42,11 +42,11 @@ def suborder_details(request):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
-def order_details(request):
+def order_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		orderParameters = populateOrderParameters(request, {})
+		orderParameters = populateOrderParameters(request, {}, version)
 
 		if orderParameters["isBuyer"] == 0 and orderParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -58,11 +58,11 @@ def order_details(request):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
-def order_item_details(request):
+def order_item_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		orderItemParameters = populateOrderParameters(request, {})
+		orderItemParameters = populateOrderParameters(request, {}, version)
 
 		if orderItemParameters["isSeller"] == 0 and orderItemParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -74,11 +74,11 @@ def order_item_details(request):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
-def buyer_payment_details(request):
+def buyer_payment_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		buyerPaymentParameters = populateOrderParameters(request, {})
+		buyerPaymentParameters = populateOrderParameters(request, {}, version)
 
 		if buyerPaymentParameters["isBuyer"] == 0 and buyerPaymentParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -91,11 +91,11 @@ def buyer_payment_details(request):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
-def seller_payment_details(request):
+def seller_payment_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		sellerPaymentParameters = populateOrderParameters(request, {})
+		sellerPaymentParameters = populateOrderParameters(request, {}, version)
 
 		if sellerPaymentParameters["isSeller"] == 0 and sellerPaymentParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -106,9 +106,9 @@ def seller_payment_details(request):
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
-def populateOrderParameters(request, parameters = {}):
+def populateOrderParameters(request, parameters = {}, version = "0"):
 
-	parameters = populateAllUserIDParameters(request, parameters)
+	parameters = populateAllUserIDParameters(request, parameters, version)
 
 	orderID = request.GET.get("orderID", "")
 	orderStatus = request.GET.get("order_status", "")
@@ -164,54 +164,59 @@ def populateOrderParameters(request, parameters = {}):
 	if sellerPaymentStatus != "":
 		parameters["sellerPaymentStatusArr"] = getArrFromString(sellerPaymentStatus)
 
-	parameters = getPaginationParameters(request, parameters, 10)
+	parameters = getPaginationParameters(request, parameters, 10, version)
 
-	parameters = populateOrderDetailsParameters(request, parameters)
+	parameters = populateOrderDetailsParameters(request, parameters, version)
 
 	return parameters
 
-def populateOrderDetailsParameters(request, parameters = {}):
+def populateOrderDetailsParameters(request, parameters = {}, version = "0"):
+
+	defaultValue = 1
+
+	if version == "1":
+		defaultValue = 0
 
 	orderDetails = request.GET.get("order_details", None)
 	if validate_bool(orderDetails):
 		parameters["order_details"] = int(orderDetails)
 	else:
-		parameters["order_details"] = 1
+		parameters["order_details"] = defaultValue
 
 	subOrderDetails = request.GET.get("sub_order_details", None)
 	if validate_bool(subOrderDetails):
 		parameters["sub_order_details"] = int(subOrderDetails)
 	else:
-		parameters["sub_order_details"] = 1
+		parameters["sub_order_details"] = defaultValue
 
 	orderShipmentDetails = request.GET.get("order_shipment_details", None)
 	if validate_bool(orderShipmentDetails):
 		parameters["order_shipment_details"] = int(orderShipmentDetails)
 	else:
-		parameters["order_shipment_details"] = 1
+		parameters["order_shipment_details"] = defaultValue
 
 	orderItemDetails = request.GET.get("order_item_details", None)
 	if validate_bool(orderItemDetails):
 		parameters["order_item_details"] = int(orderItemDetails)
 	else:
-		parameters["order_item_details"] = 1
+		parameters["order_item_details"] = defaultValue
 
 	buyerPaymentDetails = request.GET.get("buyer_payment_details", None)
 	if validate_bool(buyerPaymentDetails):
 		parameters["buyer_payment_details"] = int(buyerPaymentDetails)
 	else:
-		parameters["buyer_payment_details"] = 1
+		parameters["buyer_payment_details"] = defaultValue
 
 	sellerPaymentDetails = request.GET.get("seller_payment_details", None)
 	if validate_bool(sellerPaymentDetails):
 		parameters["seller_payment_details"] = int(sellerPaymentDetails)
 	else:
-		parameters["seller_payment_details"] = 1
+		parameters["seller_payment_details"] = defaultValue
 
-	parameters = populateBuyerDetailsParameters(request, parameters)
+	parameters = populateBuyerDetailsParameters(request, parameters, version)
 
-	parameters = populateSellerDetailsParameters(request, parameters)
+	parameters = populateSellerDetailsParameters(request, parameters, version)
 
-	parameters = populateProductDetailsParameters(request, parameters)
+	parameters = populateProductDetailsParameters(request, parameters, version)
 
 	return parameters

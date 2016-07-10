@@ -5,7 +5,7 @@ from ..models.orderShipment import OrderShipmentStatus
 from ..models.orderItem import filterOrderItem
 from .orderItem import serializeOrderItem, parseOrderItem
 
-def serializeOrderShipment(orderShipmentEntry, orderShipmentParameters = {}):
+def serializeOrderShipment(orderShipmentEntry, parameters = {}):
 	orderShipment = {}
 	orderShipment["suborderID"] = orderShipmentEntry.suborder_id
 	orderShipment["suborder_display_number"] =orderShipmentEntry.suborder.display_number
@@ -36,16 +36,28 @@ def serializeOrderShipment(orderShipmentEntry, orderShipmentParameters = {}):
 	orderShipment["created_at"] = orderShipmentEntry.created_at
 	orderShipment["updated_at"] = orderShipmentEntry.updated_at
 	orderShipment["manifest_link"] = orderShipmentEntry.manifest_link
-
-	orderShipment["buyer"] = serialize_buyer(orderShipmentEntry.suborder.order.buyer)
-	orderShipment["seller"] = serialize_seller(orderShipmentEntry.suborder.seller)
-
-	if "order_item_details" in orderShipmentParameters and orderShipmentParameters["order_item_details"] ==1:
-		orderItemQuerySet = filterOrderItem(orderShipmentParameters)
-		orderItemQuerySet = orderItemQuerySet.filter(order_shipment_id=orderShipmentEntry.id)
-		orderShipment["order_items"] = parseOrderItem(orderItemQuerySet,orderShipmentParameters)
-		
 	orderShipment["final_price"] = orderShipmentEntry.final_price
+
+	if "buyer_details" in parameters and parameters["buyer_details"] == 1:
+		orderShipment["buyer"] = serialize_buyer(orderShipmentEntry.suborder.order.buyer)
+	else:
+		buyer = {}
+		buyer["buyerID"] = orderShipmentEntry.suborder.order.buyer.id
+		buyer["name"] = orderShipmentEntry.suborder.order.buyer.name
+		orderShipment["buyer"] = buyer
+
+	if "seller_details" in parameters and parameters["seller_details"] == 1:
+		orderShipment["seller"] = serialize_seller(orderShipmentEntry.suborder.seller)
+	else:
+		seller = {}
+		seller["sellerID"] = orderShipmentEntry.suborder.seller.id
+		seller["name"] = orderShipmentEntry.suborder.seller.name
+		orderShipment["seller"] = seller
+
+	if "order_item_details" in parameters and parameters["order_item_details"] ==1:
+		orderItemQuerySet = filterOrderItem(parameters)
+		orderItemQuerySet = orderItemQuerySet.filter(order_shipment_id=orderShipmentEntry.id)
+		orderShipment["order_items"] = parseOrderItem(orderItemQuerySet,parameters)
 
 	orderShipment["order_shipment_status"] = {
 		"value": orderShipmentEntry.current_status,
@@ -60,12 +72,12 @@ def serializeOrderShipment(orderShipmentEntry, orderShipmentParameters = {}):
 	
 	return orderShipment
 
-def parseOrderShipments(orderShipmentQuerySet, orderShipmentParameters = {}):
+def parseOrderShipments(orderShipmentQuerySet, parameters = {}):
 
 	orderShipments = []
 
 	for orderShipment in orderShipmentQuerySet:
-		orderShipmentEntry = serializeOrderShipment(orderShipment, orderShipmentParameters)
+		orderShipmentEntry = serializeOrderShipment(orderShipment, parameters)
 		orderShipments.append(orderShipmentEntry)
 
 	return orderShipments

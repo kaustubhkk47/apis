@@ -5,10 +5,10 @@ from catalog.views import product
 from scripts.utils import customResponse, get_token_payload, getArrFromString, getStrArrFromString, validate_number, getPaginationParameters, validate_bool
 import jwt as JsonWebToken
 
-from .user_handler import populateSellerIDParameters, populateInternalUserIDParameters
+from .user_handler import populateSellerIDParameters, populateInternalUserIDParameters, populateSellerDetailsParameters
 
 @csrf_exempt
-def categories_details(request):
+def categories_details(request, version = "0"):
 
 	if request.method == "GET":
 
@@ -30,11 +30,11 @@ def categories_details(request):
 
 
 @csrf_exempt
-def product_details(request):
+def product_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		productParameters = populateProductParameters(request, {})
+		productParameters = populateProductParameters(request, {}, version)
 
 		return product.get_product_details(request,productParameters)
 	elif request.method == "POST":
@@ -47,7 +47,7 @@ def product_details(request):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
-def product_colour_details(request):
+def product_colour_details(request, version = "0"):
 
 	if request.method == "GET":
 
@@ -56,7 +56,7 @@ def product_colour_details(request):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
-def product_fabric_details(request):
+def product_fabric_details(request, version = "0"):
 
 	if request.method == "GET":
 
@@ -65,28 +65,28 @@ def product_fabric_details(request):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
-def product_file(request):
+def product_file(request, version = "0"):
 
 	if request.method == "GET":
 
-		productParameters = populateProductParameters(request, {})
+		productParameters = populateProductParameters(request, {}, version)
 
 		return product.get_product_file(request,productParameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
-def product_catalog(request):
+def product_catalog(request, version = "0"):
 
 	if request.method == "GET":
 
-		productParameters = populateProductParameters(request, {})
+		productParameters = populateProductParameters(request, {}, version)
 
 		return product.get_product_catalog(request,productParameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
-def populateProductParameters(request, parameters = {}):
+def populateProductParameters(request, parameters = {}, version = "0"):
 
 	productID = request.GET.get("productID", "")
 	categoryID = request.GET.get("categoryID", "")
@@ -114,30 +114,51 @@ def populateProductParameters(request, parameters = {}):
 		parameters["min_price_per_unit"] = float(min_price_per_unit)
 		parameters["max_price_per_unit"] = float(max_price_per_unit)
 
-	parameters = populateSellerIDParameters(request, parameters)
+	parameters = populateSellerIDParameters(request, parameters, version)
 
-	parameters = populateInternalUserIDParameters(request, parameters)
+	parameters = populateInternalUserIDParameters(request, parameters, version)
+
+	parameters = populateProductDetailsParameters(request, parameters, version)
 
 	return parameters
 
-def populateProductDetailsParameters(request, parameters = {}):
+def populateProductDetailsParameters(request, parameters = {}, version = "0"):
+
+	defaultValue = 1
+
+	if version == "1":
+		defaultValue = 0
 
 	productDetails = request.GET.get("product_details", None)
 	if validate_bool(productDetails):
 		parameters["product_details"] = int(productDetails)
 	else:
-		parameters["product_details"] = 1
+		parameters["product_details"] = defaultValue
 
 	productDetailsDetails = request.GET.get("product_details_details", None)
 	if validate_bool(productDetailsDetails):
 		parameters["product_details_details"] = int(productDetailsDetails)
 	else:
-		parameters["product_details_details"] = 1
+		parameters["product_details_details"] = defaultValue
 
 	productLotDetails = request.GET.get("product_lot_details", None)
 	if validate_bool(productLotDetails):
 		parameters["product_lot_details"] = int(productLotDetails)
 	else:
-		parameters["product_lot_details"] = 1
+		parameters["product_lot_details"] = defaultValue
+
+	productImageDetails = request.GET.get("product_image_details", None)
+	if validate_bool(productImageDetails):
+		parameters["product_image_details"] = int(productImageDetails)
+	else:
+		parameters["product_image_details"] = defaultValue
+
+	categoryDetails = request.GET.get("category_details", None)
+	if validate_bool(categoryDetails):
+		parameters["category_details"] = int(categoryDetails)
+	else:
+		parameters["category_details"] = defaultValue
+
+	parameters = populateSellerDetailsParameters(request, parameters, version)
 
 	return parameters

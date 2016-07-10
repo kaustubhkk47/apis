@@ -5,10 +5,9 @@ from ..models.payments import filterBuyerPayment
 from .subOrder import serializeSubOrder, parseSubOrders
 from .payments import serializeBuyerPayment, parseBuyerPayments
 
-def serializeOrder(orderEntry, orderParameters = {}):
+def serializeOrder(orderEntry, parameters = {}):
 	order = {}
-	order["orderID"]=orderEntry.id
-	order["buyer"]=serialize_buyer(orderEntry.buyer)
+	order["orderID"]=orderEntry.id	
 	order["product_count"]=orderEntry.product_count
 	order["retail_price"]=orderEntry.retail_price
 	order["calculated_price"]=orderEntry.calculated_price
@@ -31,24 +30,32 @@ def serializeOrder(orderEntry, orderParameters = {}):
 		"display_value":OrderPaymentStatus[orderEntry.order_payment_status]["display_value"]
 	}
 
-	if "sub_order_details" in orderParameters and orderParameters["sub_order_details"] ==1:
-		subOrderQuerySet = filterSubOrder(orderParameters)
+	if "sub_order_details" in parameters and parameters["sub_order_details"] == 1:
+		subOrderQuerySet = filterSubOrder(parameters)
 		subOrderQuerySet = subOrderQuerySet.filter(order_id = orderEntry.id)
-		order["sub_orders"] = parseSubOrders(subOrderQuerySet,orderParameters)
+		order["sub_orders"] = parseSubOrders(subOrderQuerySet,parameters)
 
-	if "buyer_payment_details" in orderParameters and orderParameters["buyer_payment_details"] ==1:
-		buyerPaymentQuerySet = filterBuyerPayment(orderParameters)
+	if "buyer_payment_details" in parameters and parameters["buyer_payment_details"] == 1:
+		buyerPaymentQuerySet = filterBuyerPayment(parameters)
 		buyerPaymentQuerySet = buyerPaymentQuerySet.filter(order_id = orderEntry.id)
-		order["buyer_payments"] = parseBuyerPayments(buyerPaymentQuerySet,orderParameters)
+		order["buyer_payments"] = parseBuyerPayments(buyerPaymentQuerySet,parameters)
+
+	if "buyer_details" in parameters and parameters["buyer_details"] == 1:
+		order["buyer"]=serialize_buyer(orderEntry.buyer)
+	else:
+		buyer = {}
+		buyer["buyerID"] = orderEntry.buyer.id
+		buyer["name"] = orderEntry.buyer.name
+		order["buyer"] = buyer
 	
 	return order
 
-def parseOrders(OrderQuerySet, orderParameters = {}):
+def parseOrders(OrderQuerySet, parameters = {}):
 
 	Orders = []
 
 	for Order in OrderQuerySet:
-		OrderEntry = serializeOrder(Order, orderParameters)
+		OrderEntry = serializeOrder(Order, parameters)
 		Orders.append(OrderEntry)
 
 	return Orders

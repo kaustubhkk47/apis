@@ -13,7 +13,7 @@ def get_seller_details(request,sellerParameters):
 		sellers = filterSeller(sellerParameters)
 
 		response = {
-			"sellers" : parse_seller(sellers)
+			"sellers" : parse_seller(sellers, sellerParameters)
 		}
 
 		closeDBConnection()

@@ -5,11 +5,11 @@ from leads.views import buyerLeads,contactUsLead, sellerLeads
 from .user_handler import populateInternalUserIDParameters
 
 @csrf_exempt
-def buyer_leads(request):
+def buyer_leads(request, version = "0"):
 
 	if request.method == "GET":
 
-		buyerLeadParameters = getBuyerLeadParameters(request, {})
+		buyerLeadParameters = getBuyerLeadParameters(request, {}, version)
 
 		return buyerLeads.get_buyer_leads(request,buyerLeadParameters)
 	if request.method == "POST":
@@ -19,7 +19,7 @@ def buyer_leads(request):
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
-def getBuyerLeadParameters(request, parameters = {}):
+def getBuyerLeadParameters(request, parameters = {}, version = "0"):
 
 	status = request.GET.get("status", "")
 	if status != "":
@@ -29,16 +29,16 @@ def getBuyerLeadParameters(request, parameters = {}):
 	if buyerLeadID != "":
 		parameters["buyerLeadsArr"] = getArrFromString(buyerLeadID)
 
-	parameters = populateInternalUserIDParameters(request, parameters)
+	parameters = populateInternalUserIDParameters(request, parameters, version)
 
 	return parameters
 
 @csrf_exempt
-def seller_leads(request):
+def seller_leads(request, version = "0"):
 
 	if request.method == "GET":
 
-		sellerLeadParameters = getSellerLeadParameters(request, {})
+		sellerLeadParameters = getSellerLeadParameters(request, {}, version)
 
 		return sellerLeads.get_seller_leads(request,sellerLeadParameters)
 	elif request.method == "POST":
@@ -48,7 +48,7 @@ def seller_leads(request):
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
-def getSellerLeadParameters(request, parameters = {}):
+def getSellerLeadParameters(request, parameters = {}, version = "0"):
 
 	status = request.GET.get("status", "")
 	if status != "":
@@ -58,16 +58,16 @@ def getSellerLeadParameters(request, parameters = {}):
 	if sellerLeadID != "":
 		parameters["sellerLeadsArr"] = getArrFromString(sellerLeadID)
 
-	parameters = populateInternalUserIDParameters(request, parameters)
+	parameters = populateInternalUserIDParameters(request, parameters, version)
 
 	return parameters
 
 @csrf_exempt
-def contactus_leads(request):
+def contactus_leads(request, version = "0"):
 
 	if request.method == "GET":
 
-		contactUsLeadParameters = getContactUsLeadParameters(request, {})
+		contactUsLeadParameters = getContactUsLeadParameters(request, {}, version)
 
 		contactUsLeadID = request.GET.get("contactusleadID", "")
 
@@ -82,7 +82,7 @@ def contactus_leads(request):
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
-def getContactUsLeadParameters(request, parameters = {}):
+def getContactUsLeadParameters(request, parameters = {}, version = "0"):
 
 	status = request.GET.get("status", "")
 	if status != "":
@@ -92,6 +92,6 @@ def getContactUsLeadParameters(request, parameters = {}):
 	if contactUsLeadID != "":
 		contactUsLeadParameters["contactUsLeadsArr"] = getArrFromString(contactUsLeadID)
 
-	parameters = populateInternalUserIDParameters(request, parameters)
+	parameters = populateInternalUserIDParameters(request, parameters, version)
 
 	return parameters

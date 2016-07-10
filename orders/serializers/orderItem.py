@@ -11,11 +11,10 @@ def parseOrderItem(orderItemQuerySet, orderItemParameters = {}):
 
 	return orderItems
 
-def serializeOrderItem(orderItemEntry, orderItemParameters = {}):
+def serializeOrderItem(orderItemEntry, parameters = {}):
 	orderItem = {}
 	orderItem["suborderID"] = orderItemEntry.suborder_id
 	orderItem["orderitemID"] = orderItemEntry.id
-	orderItem["product"] = serialize_product(orderItemEntry.product)
 	orderItem["pieces"] = orderItemEntry.pieces
 	orderItem["lots"] = orderItemEntry.lots
 	orderItem["retail_price_per_piece"] = orderItemEntry.retail_price_per_piece
@@ -41,5 +40,14 @@ def serializeOrderItem(orderItemEntry, orderItemParameters = {}):
 
 	if orderItemEntry.seller_payment_id != None:
 		orderItem["sellerpaymentID"] = orderItemEntry.seller_payment_id
+
+	if "product_details" in parameters and parameters["product_details"] == 1:
+		orderItem["product"] = serialize_product(orderItemEntry.product)
+	else:
+		product = {}
+		product["id"] = orderItemEntry.product.id
+		product["display_name"] = orderItemEntry.product.display_name
+		product["min_price_per_unit"] = orderItemEntry.product.min_price_per_unit
+		orderItem["product"] = product
 
 	return orderItem
