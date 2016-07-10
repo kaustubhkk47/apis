@@ -142,6 +142,8 @@ class BuyerPurchasingState(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	delete_status = models.BooleanField(default=False)
+
 	def __unicode__(self):
 		return str(self.buyer.id) + " - " + self.buyer.name + " - " + self.state.name
 
@@ -474,6 +476,15 @@ def filterBuyerInterest(parameters = {}):
 		buyersInterest = buyersInterest.filter(is_active=parameters["is_active"])
 
 	return buyersInterest
+
+def filterBuyerPurchasingState(parameters = {}):
+
+	buyerPurchasingStates = BuyerPurchasingState.objects.filter(buyer__delete_status=False, delete_status=False)
+
+	if "buyerPurchasingStateArr" in parameters:
+		buyerPurchasingStates = buyerPurchasingStates.filter(id__in=parameters["buyerPurchasingStateArr"])
+
+	return buyerPurchasingStates
 
 def filterBuyerProducts(parameters = {}):
 

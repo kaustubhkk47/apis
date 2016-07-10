@@ -4,6 +4,7 @@ import json
 from ..models.buyer import *
 from catalog.models.category import Category
 from catalog.models.product import Product
+from address.models.state import State
 from ..serializers.buyer import *
 from django.core.paginator import Paginator
 
@@ -20,6 +21,20 @@ def get_buyer_details(request,parameters = {}):
 
 		response = {
 			"buyers" : parse_buyer(buyers, parameters)
+		}
+		closeDBConnection()
+
+		return customResponse("2XX", response)
+	except Exception as e:
+		log.critical(e)
+		return customResponse("4XX", {"error": "Invalid request"})
+
+def get_buyer_purchasing_state_details(request,parameters = {}):
+	try:
+		buyersPurchasingState = filterBuyerPurchasingState(parameters)
+
+		response = {
+			"buyer_purchasing_states" : parse_buyer_purchasing_state(buyersPurchasingState, parameters)
 		}
 		closeDBConnection()
 
@@ -229,6 +244,56 @@ def post_new_buyer_interest(request):
 	else:
 		closeDBConnection()
 		return customResponse("2XX", {"buyer_interest" : serialize_buyer_interest(newBuyerInterest)})
+
+def post_new_buyer_purchasing_state(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_purchasing_state = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_purchasing_state) or not "buyerID" in buyer_purchasing_state or buyer_purchasing_state["buyerID"]==None or not validate_integer(buyer_purchasing_state["buyerID"]):
+		return customResponse("4XX", {"error": "Id for buyer not sent"})
+
+	buyerPtr = Buyer.objects.filter(id=int(buyer_purchasing_state["buyerID"]))
+
+	if len(buyerPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
+
+	buyerPtr = buyerPtr[0]
+
+	if not "stateID" in buyer_purchasing_state or buyer_purchasing_state["stateID"]==None or not validate_integer(buyer_purchasing_state["stateID"]):
+		return customResponse("4XX", {"error": "Id for state not sent"})
+
+	statePtr = State.objects.filter(id=int(buyer_purchasing_state["stateID"]))
+
+	if len(statePtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for state sent"})
+
+	statePtr = statePtr[0]
+
+	BuyerPurchasingStatePtr = BuyerPurchasingState.objects.filter(buyer_id=buyerPtr.id,state_id=statePtr.id)
+
+	if len(BuyerPurchasingStatePtr)>0:
+		BuyerPurchasingStatePtr = BuyerPurchasingStatePtr[0]
+		if BuyerPurchasingStatePtr.delete_status == True:
+			BuyerPurchasingStatePtr.delete_status = False
+			BuyerPurchasingStatePtr.save()
+			closeDBConnection()
+			return customResponse("2XX", {"buyer_purchasing_state" : serialize_buyer_purchasing_state(BuyerPurchasingStatePtr)})
+		else:
+			return customResponse("4XX", {"error": "Buyer purchasing_state already exists"})
+
+	try:
+		newBuyerPurchasingState = BuyerPurchasingState(buyer=buyerPtr,state=statePtr)
+		newBuyerPurchasingState.save()
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to create entry in db"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer_purchasing_state" : serialize_buyer_purchasing_state(newBuyerPurchasingState)})
 
 def post_new_buyer_product(request):
 	try:
@@ -527,6 +592,31 @@ def delete_buyer_interest(request):
 	else:
 		closeDBConnection()
 		return customResponse("2XX", {"buyer": "buyer interest deleted"})
+
+def delete_buyer_purchasing_state(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_purchasing_state = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_purchasing_state) or not "buyerpurchasingstateID" in buyer_purchasing_state or buyer_purchasing_state["buyerpurchasingstateID"]==None or not validate_integer(buyer_purchasing_state["buyerpurchasingstateID"]):
+		return customResponse("4XX", {"error": "Id for buyer purchasing_state not sent"})
+
+	buyerPurchasingStatePtr = BuyerPurchasingState.objects.filter(id=int(buyer_purchasing_state["buyerpurchasingstateID"]))
+
+	if len(buyerPurchasingStatePtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for buyer purchasing_state sent"})
+
+	try:
+		buyerPurchasingStatePtr.update(delete_status = True)
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "could not delete"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer": "buyer purchasing_state deleted"})
 
 
 def delete_buyer_shared_product_id(request):
