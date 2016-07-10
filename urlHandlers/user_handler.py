@@ -40,6 +40,54 @@ def buyer_details(request, version = "0"):
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
+def populateBuyerParameters(request, parameters = {}, version = "0"):
+
+	parameters = populateBuyerIDParameters(request, parameters, version)
+
+	parameters = populateInternalUserIDParameters(request, parameters, version)
+
+	buyerInterestID = request.GET.get("buyerinterestID", "")
+	buyersharedproductID = request.GET.get("buyersharedproductID", "")
+
+	whatsappSharingActive = request.GET.get("whatsapp_sharing_active", None)
+	if validate_bool(whatsappSharingActive):
+		parameters["whatsapp_sharing_active"] = int(whatsappSharingActive)
+
+	if buyerInterestID != "":
+		parameters["buyerInterestArr"] = getArrFromString(buyerInterestID)
+
+	if buyersharedproductID != "" and validate_integer(buyersharedproductID):
+		parameters["buyersharedproductID"] = int(buyersharedproductID)
+
+	buyerPurchasingStateID = request.GET.get("buyerpurchasingstateID", "")
+	if buyerPurchasingStateID != "":
+		parameters["buyerPurchasingStateArr"] = getArrFromString(buyerPurchasingStateID)
+
+	parameters = populateBuyerDetailsParameters(request, parameters, version)
+
+	return parameters
+
+@csrf_exempt
+def buyer_purchasing_state_details(request, version = "0"):
+
+	if request.method == "GET":
+
+		buyerParameters = populateBuyerParameters(request, {}, version)
+
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return buyer.get_buyer_purchasing_state_details(request,buyerParameters)
+	elif request.method == "POST":
+		return buyer.post_new_buyer_purchasing_state(request)
+	#elif request.method == "PUT":
+	#	return buyer.update_buyer_purchasing_state(request)
+	elif request.method == "DELETE":
+		return buyer.delete_buyer_purchasing_state(request)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+
 @csrf_exempt
 def buyer_access_token_details(request, version = "0"):
 
@@ -157,28 +205,7 @@ def populateBuyerProductParameters(request, parameters = {}, version = "0"):
 	return parameters
 
 
-def populateBuyerParameters(request, parameters = {}, version = "0"):
 
-	parameters = populateBuyerIDParameters(request, parameters, version)
-
-	parameters = populateInternalUserIDParameters(request, parameters, version)
-
-	buyerInterestID = request.GET.get("buyerinterestID", "")
-	buyersharedproductID = request.GET.get("buyersharedproductID", "")
-
-	whatsappSharingActive = request.GET.get("whatsapp_sharing_active", None)
-	if validate_bool(whatsappSharingActive):
-		parameters["whatsapp_sharing_active"] = int(whatsappSharingActive)
-
-	if buyerInterestID != "":
-		parameters["buyerInterestArr"] = getArrFromString(buyerInterestID)
-
-	if buyersharedproductID != "" and validate_integer(buyersharedproductID):
-		parameters["buyersharedproductID"] = int(buyersharedproductID)
-
-	parameters = populateBuyerDetailsParameters(request, parameters, version)
-
-	return parameters
 
 def populateBuyerDetailsParameters(request, parameters = {}, version = "0"):
 
@@ -415,14 +442,8 @@ def seller_login(request, version = "0"):
 			return customResponse("4XX", {"error": "Invalid seller credentials"})
 
 		if password == seller.password:
-			tokenPayload = {
-				"user": "seller",
-				"sellerID": seller.id,
-			}
-
-			encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
 			response = {
-				"token": encoded.decode("utf-8"),
+				"token": getSellerToken(seller),
 				"seller": serialize_seller(seller)
 			}
 			return customResponse("2XX", response)
@@ -450,14 +471,8 @@ def internaluser_login(request, version = "0"):
 			return customResponse("4XX", {"error": "Invalid internaluser credentials"})
 
 		if password == internaluser.password:
-			tokenPayload = {
-				"user": "internaluser",
-				"internaluserID": internaluser.id,
-			}
-
-			encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
 			response = {
-				"token": encoded.decode("utf-8"),
+				"token": getInternalUserToken(internaluser),
 				"internaluser": serialize_internaluser(internaluser)
 			}
 			return customResponse("2XX", response)
