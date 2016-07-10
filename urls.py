@@ -57,6 +57,7 @@ urlpatterns += [
     url(r'^users/buyer/$', user_handler.buyer_details),
     url(r'^users/buyer/v(?P<version>[1])/$', user_handler.buyer_details),
     url(r'^users/buyer/login/$', user_handler.buyer_login),
+    url(r'^users/buyer/accesstoken/$', user_handler.buyer_access_token_details),
     url(r'^users/buyer/address/$', user_handler.buyer_address_details),
     url(r'^users/buyer/address/v(?P<version>[1])/$', user_handler.buyer_address_details),
     url(r'^users/buyer/buyerinterest/$', user_handler.buyer_interest_details),
