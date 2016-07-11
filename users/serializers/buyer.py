@@ -32,6 +32,8 @@ def serialize_buyer(buyer_entry, parameters = {}):
 		buyer_details["customer_type"] = buyer_entry.buyerdetails.customer_type
 		buyer_details["buying_capacity"] = buyer_entry.buyerdetails.buying_capacity
 		buyer_details["purchase_duration"] = buyer_entry.buyerdetails.purchase_duration
+		if hasattr(buyer_entry.buyerdetails, "buyer_type") and buyer_entry.buyerdetails.buyer_type != None:
+			buyer_details["buyer_type"] = serialize_business_type(buyer_entry.buyerdetails.buyer_type)
 
 		buyer["details"] = buyer_details
 

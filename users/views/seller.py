@@ -2,6 +2,7 @@ from scripts.utils import *
 import json
 from ..models.seller import *
 from ..serializers.seller import parse_seller, serialize_seller
+from ..models.businessType import BusinessType
 
 from leads.models.sellerLeads import SellerLeads
 
@@ -50,7 +51,9 @@ def post_new_seller(request):
 	validateSellerBankdetailsData(seller["bank_details"], SellerBankDetails())
 
 	if not "details" in seller or seller["details"]==None:
-			seller["details"] = {}
+		seller["details"] = {
+			"sellertypeID":1
+		}
 
 	validateSellerDetailsData(seller["details"], SellerDetails())
 
@@ -70,6 +73,11 @@ def post_new_seller(request):
 		
 		sellerdetails = seller["details"]
 		newSellerDetails = SellerDetails(seller = newSeller)
+		if "sellertypeID" in seller["details"] and validate_integer(seller["details"]["sellertypeID"]):
+			businessTypePtr = BusinessType.objects.filter(id=int(seller["details"]["sellertypeID"]), can_be_seller=True)
+			if len(businessTypePtr) > 0:
+				businessTypePtr = businessTypePtr[0]
+				newSellerDetails.seller_type = businessTypePtr
 		populateSellerDetailsData(newSellerDetails, sellerdetails)
 		
 		newSellerDetails.save()
@@ -136,10 +144,20 @@ def update_seller(request):
 			if hasattr(sellerPtr, "sellerdetails"):
 				validateSellerDetailsData(sellerdetails, sellerPtr.sellerdetails)
 				populateSellerDetailsData(sellerPtr.sellerdetails, sellerdetails)
+				if "sellertypeID" in seller["details"] and validate_integer(seller["details"]["sellertypeID"]):
+					businessTypePtr = BusinessType.objects.filter(id=int(seller["details"]["sellertypeID"]), can_be_seller=True)
+					if len(businessTypePtr) > 0:
+						businessTypePtr = businessTypePtr[0]
+						sellerPtr.sellerdetails.seller_type = businessTypePtr
 			else:
 				detailsPresent = 0
 				validateSellerDetailsData(sellerdetails, SellerDetails())
 				newSellerDetails = SellerDetails(seller = sellerPtr)
+				if "sellertypeID" in seller["details"] and validate_integer(seller["details"]["sellertypeID"]):
+					businessTypePtr = BusinessType.objects.filter(id=int(seller["details"]["sellertypeID"]), can_be_seller=True)
+					if len(businessTypePtr) > 0:
+						businessTypePtr = businessTypePtr[0]
+						newSellerDetails.seller_type = businessTypePtr
 				populateSellerDetailsData(newSellerDetails, sellerdetails)
 
 		if "address" in seller and seller["address"]!=None:
