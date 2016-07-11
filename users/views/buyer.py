@@ -6,6 +6,7 @@ from catalog.models.category import Category
 from catalog.models.product import Product
 from address.models.state import State
 from ..serializers.buyer import *
+from ..models.businessType import *
 from django.core.paginator import Paginator
 
 import logging
@@ -35,6 +36,20 @@ def get_buyer_purchasing_state_details(request,parameters = {}):
 
 		response = {
 			"buyer_purchasing_states" : parse_buyer_purchasing_state(buyersPurchasingState, parameters)
+		}
+		closeDBConnection()
+
+		return customResponse("2XX", response)
+	except Exception as e:
+		log.critical(e)
+		return customResponse("4XX", {"error": "Invalid request"})
+
+def get_buyer_buys_from_details(request,parameters = {}):
+	try:
+		buyerBuysFrom = filterBuyerBuysFrom(parameters)
+
+		response = {
+			"buyer_buys_from" : parse_buyer_buys_from(buyerBuysFrom, parameters)
 		}
 		closeDBConnection()
 
@@ -164,6 +179,11 @@ def post_new_buyer(request):
 
 		buyerdetails = buyer["details"]
 		newBuyerDetails = BuyerDetails(buyer = newBuyer)
+		if "buyertypeID" in buyer["details"] and validate_integer(buyer["details"]["buyertypeID"]):
+			businessTypePtr = BusinessType.objects.filter(id=int(buyer["details"]["buyertypeID"]), can_be_buyer=True)
+			if len(businessTypePtr) > 0:
+				businessTypePtr = businessTypePtr[0]
+				newBuyerDetails.buyer_type = businessTypePtr
 		populateBuyerDetails(newBuyerDetails, buyerdetails)
 		
 		newBuyerDetails.save()
@@ -294,6 +314,56 @@ def post_new_buyer_purchasing_state(request):
 	else:
 		closeDBConnection()
 		return customResponse("2XX", {"buyer_purchasing_state" : serialize_buyer_purchasing_state(newBuyerPurchasingState)})
+
+def post_new_buyer_buys_from(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_buys_from = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_buys_from) or not "buyerID" in buyer_buys_from or buyer_buys_from["buyerID"]==None or not validate_integer(buyer_buys_from["buyerID"]):
+		return customResponse("4XX", {"error": "Id for buyer not sent"})
+
+	buyerPtr = Buyer.objects.filter(id=int(buyer_buys_from["buyerID"]))
+
+	if len(buyerPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
+
+	buyerPtr = buyerPtr[0]
+
+	if not "businesstypeID" in buyer_buys_from or buyer_buys_from["businesstypeID"]==None or not validate_integer(buyer_buys_from["businesstypeID"]):
+		return customResponse("4XX", {"error": "Id for state not sent"})
+
+	businessTypePtr = BusinessType.objects.filter(id=int(buyer_buys_from["businesstypeID"]), can_buyer_buy_from=True)
+
+	if len(businessTypePtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for business type sent"})
+
+	businessTypePtr = businessTypePtr[0]
+
+	BuyerBuysFromPtr = BuyerBuysFrom.objects.filter(buyer_id=buyerPtr.id,business_type_id=businessTypePtr.id)
+
+	if len(BuyerBuysFromPtr)>0:
+		BuyerBuysFromPtr = BuyerBuysFromPtr[0]
+		if BuyerBuysFromPtr.delete_status == True:
+			BuyerBuysFromPtr.delete_status = False
+			BuyerBuysFromPtr.save()
+			closeDBConnection()
+			return customResponse("2XX", {"buyer_buys_from" : serialize_buyer_buys_from(BuyerBuysFromPtr)})
+		else:
+			return customResponse("4XX", {"error": "Buyer buys_from already exists"})
+
+	try:
+		newBuyerBuysFrom = BuyerBuysFrom(buyer=buyerPtr,business_type=businessTypePtr)
+		newBuyerBuysFrom.save()
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to create entry in db"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer_buys_from" : serialize_buyer_buys_from(newBuyerBuysFrom)})
 
 def post_new_buyer_product(request):
 	try:
@@ -618,6 +688,30 @@ def delete_buyer_purchasing_state(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer": "buyer purchasing_state deleted"})
 
+def delete_buyer_buys_from(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_buys_from = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_buys_from) or not "buyerbuysfromID" in buyer_buys_from or buyer_buys_from["buyerbuysfromID"]==None or not validate_integer(buyer_buys_from["buyerbuysfromID"]):
+		return customResponse("4XX", {"error": "Id for buyer buys_from not sent"})
+
+	buyerBuysFromPtr = BuyerBuysFrom.objects.filter(id=int(buyer_buys_from["buyerbuysfromID"]))
+
+	if len(buyerBuysFromPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for buyer buys_from sent"})
+
+	try:
+		buyerBuysFromPtr.update(delete_status = True)
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "could not delete"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer": "buyer buys_from deleted"})
 
 def delete_buyer_shared_product_id(request):
 	try:
@@ -679,11 +773,21 @@ def update_buyer(request):
 			buyerdetails = buyer["details"]
 			if hasattr(buyerPtr, "buyerdetails"):
 				validateBuyerDetailsData(buyerdetails, buyerPtr.buyerdetails, 0)
-				populateBuyerDetails(buyerPtr.buyerdetails, buyerdetails)	
+				populateBuyerDetails(buyerPtr.buyerdetails, buyerdetails)
+				if "buyertypeID" in buyer["details"] and validate_integer(buyer["details"]["buyertypeID"]):
+					businessTypePtr = BusinessType.objects.filter(id=int(buyer["details"]["buyertypeID"]), can_be_buyer=True)
+					if len(businessTypePtr) > 0:
+						businessTypePtr = businessTypePtr[0]
+						buyerPtr.buyerdetails.buyer_type = businessTypePtr
 			else:
 				detailsPresent = 0
 				validateBuyerDetailsData(buyerdetails, BuyerDetails())
 				newBuyerDetails = BuyerDetails(buyer = buyerPtr)
+				if "buyertypeID" in buyer["details"] and validate_integer(buyer["details"]["buyertypeID"]):
+					businessTypePtr = BusinessType.objects.filter(id=int(buyer["details"]["buyertypeID"]), can_be_buyer=True)
+					if len(businessTypePtr) > 0:
+						businessTypePtr = businessTypePtr[0]
+						newBuyerDetails.buyer_type = businessTypePtr
 				populateBuyerDetails(newBuyerDetails,buyerdetails)
 
 		if "address" in buyer and buyer["address"]!=None:

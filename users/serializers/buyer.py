@@ -1,16 +1,12 @@
-from ..models.buyer import Buyer, BuyerAddress, BuyerDetails, filterBuyer, filterBuyerInterest, filterBuyerProducts
+from ..models.buyer import *
 from catalog.serializers.category import serialize_categories
 from catalog.serializers.product import serialize_product
 from address.serializers.state import serialize_state
+from .businesstype import serialize_business_type
 import time
 def serialize_buyer(buyer_entry, parameters = {}):
 
 	buyer = {}
-
-	if "buyer_address_details" in parameters and parameters["buyer_address_details"] == 1:
-		buyer_addresses_queryset = BuyerAddress.objects.filter(buyer_id = buyer_entry.id)
-		buyer_addresses = parse_buyer_address(buyer_addresses_queryset, parameters)
-		buyer["address"] = buyer_addresses
 
 	buyer["buyerID"] = buyer_entry.id
 	buyer["name"] = buyer_entry.name
@@ -36,6 +32,8 @@ def serialize_buyer(buyer_entry, parameters = {}):
 		buyer_details["customer_type"] = buyer_entry.buyerdetails.customer_type
 		buyer_details["buying_capacity"] = buyer_entry.buyerdetails.buying_capacity
 		buyer_details["purchase_duration"] = buyer_entry.buyerdetails.purchase_duration
+		if hasattr(buyer_entry.buyerdetails, "buyer_type") and buyer_entry.buyerdetails.buyer_type != None:
+			buyer_details["buyer_type"] = serialize_business_type(buyer_entry.buyerdetails.buyer_type)
 
 		buyer["details"] = buyer_details
 
@@ -56,6 +54,22 @@ def serialize_buyer(buyer_entry, parameters = {}):
 		buyerProductQuerySet = buyerProductQuerySet[:parameters["buyer_product_count"]]
 		buyer["buyer_products"] = parse_buyer_product(buyerProductQuerySet,parameters)
 
+	if "buyer_address_details" in parameters and parameters["buyer_address_details"] == 1:
+		buyer_addresses_queryset = BuyerAddress.objects.filter(buyer_id = buyer_entry.id)
+		buyer_addresses = parse_buyer_address(buyer_addresses_queryset, parameters)
+		buyer["address"] = buyer_addresses
+
+	if "buyer_purchasing_state_details" in parameters and parameters["buyer_purchasing_state_details"] == 1:
+		buyer_purchasing_state_queryset = filterBuyerPurchasingState(parameters)
+		buyer_purchasing_state_queryset = buyer_purchasing_state_queryset.filter(buyer_id=buyer_entry.id)
+		buyer_purchasing_state = parse_buyer_purchasing_state(buyer_purchasing_state_queryset, parameters)
+		buyer["purchasing_states"] = buyer_purchasing_state
+
+	if "buyer_buys_from_details" in parameters and parameters["buyer_buys_from_details"] == 1:
+		buyer_buys_from_queryset = filterBuyerBuysFrom(parameters)
+		buyer_buys_from_queryset = buyer_buys_from_queryset.filter(buyer_id=buyer_entry.id)
+		buyer_buys_from = parse_buyer_buys_from(buyer_buys_from_queryset, parameters)
+		buyer["buys_from"] = buyer_buys_from
 
 	return buyer
 
@@ -175,11 +189,11 @@ def serialize_buyer_product(buyer_product_entry, parameters = {}):
 
 	return buyer_product
 
-def parse_buyer_purchasing_state(buyer_purchasing_statees_queryset, parameters = {}):
+def parse_buyer_purchasing_state(buyer_purchasing_states_queryset, parameters = {}):
 
 	buyer_purchasing_states =[]
 
-	for buyer_purchasing_state in buyer_purchasing_statees_queryset:
+	for buyer_purchasing_state in buyer_purchasing_states_queryset:
 
 		buyer_purchasing_state_entry = serialize_buyer_purchasing_state(buyer_purchasing_state, parameters)
 		buyer_purchasing_states.append(buyer_purchasing_state_entry)
@@ -198,3 +212,26 @@ def serialize_buyer_purchasing_state(buyer_purchasing_state_entry, parameters = 
 	buyer_purchasing_state["state"] = serialize_state(buyer_purchasing_state_entry.state)
 
 	return buyer_purchasing_state
+
+def parse_buyer_buys_from(buyer_buys_from_entry, parameters = {}):
+
+	buyer_buys_froms =[]
+
+	for buyer_buys_from in buyer_buys_from_entry:
+
+		buyer_buys_from_entry = serialize_buyer_buys_from(buyer_buys_from, parameters)
+		buyer_buys_froms.append(buyer_buys_from_entry)
+
+	return buyer_buys_froms
+
+def serialize_buyer_buys_from(buyer_buys_from_entry, parameters = {}):
+
+	buyer_buys_from = {}
+	buyer_buys_from["buyerbuysfromID"] = buyer_buys_from_entry.id
+	buyer_buys_from["buyerID"] = buyer_buys_from_entry.buyer_id
+	buyer_buys_from["created_at"] = buyer_buys_from_entry.created_at
+	buyer_buys_from["updated_at"] = buyer_buys_from_entry.updated_at
+
+	buyer_buys_from["business_type"] = serialize_business_type(buyer_buys_from_entry.business_type)
+
+	return buyer_buys_from

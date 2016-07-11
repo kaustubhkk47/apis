@@ -39,7 +39,7 @@ def serializeOrderShipment(orderShipmentEntry, parameters = {}):
 	orderShipment["final_price"] = orderShipmentEntry.final_price
 
 	if "buyer_details" in parameters and parameters["buyer_details"] == 1:
-		orderShipment["buyer"] = serialize_buyer(orderShipmentEntry.suborder.order.buyer)
+		orderShipment["buyer"] = serialize_buyer(orderShipmentEntry.suborder.order.buyer, parameters)
 	else:
 		buyer = {}
 		buyer["buyerID"] = orderShipmentEntry.suborder.order.buyer.id
@@ -47,7 +47,7 @@ def serializeOrderShipment(orderShipmentEntry, parameters = {}):
 		orderShipment["buyer"] = buyer
 
 	if "seller_details" in parameters and parameters["seller_details"] == 1:
-		orderShipment["seller"] = serialize_seller(orderShipmentEntry.suborder.seller)
+		orderShipment["seller"] = serialize_seller(orderShipmentEntry.suborder.seller, parameters)
 	else:
 		seller = {}
 		seller["sellerID"] = orderShipmentEntry.suborder.seller.id

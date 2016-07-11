@@ -42,7 +42,7 @@ def serializeOrderItem(orderItemEntry, parameters = {}):
 		orderItem["sellerpaymentID"] = orderItemEntry.seller_payment_id
 
 	if "product_details" in parameters and parameters["product_details"] == 1:
-		orderItem["product"] = serialize_product(orderItemEntry.product)
+		orderItem["product"] = serialize_product(orderItemEntry.product, parameters)
 	else:
 		product = {}
 		product["id"] = orderItemEntry.product.id
