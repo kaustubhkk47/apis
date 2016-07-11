@@ -179,6 +179,11 @@ def post_new_buyer(request):
 
 		buyerdetails = buyer["details"]
 		newBuyerDetails = BuyerDetails(buyer = newBuyer)
+		if "buyertypeID" in buyer["details"] and validate_integer(buyer["details"]["buyertypeID"]):
+			businessTypePtr = BusinessType.objects.filter(id=int(buyer["details"]["buyertypeID"]), can_be_buyer=True)
+			if len(businessTypePtr) > 0:
+				businessTypePtr = businessTypePtr[0]
+				newBuyerDetails.buyer_type = businessTypePtr
 		populateBuyerDetails(newBuyerDetails, buyerdetails)
 		
 		newBuyerDetails.save()
@@ -768,11 +773,21 @@ def update_buyer(request):
 			buyerdetails = buyer["details"]
 			if hasattr(buyerPtr, "buyerdetails"):
 				validateBuyerDetailsData(buyerdetails, buyerPtr.buyerdetails, 0)
-				populateBuyerDetails(buyerPtr.buyerdetails, buyerdetails)	
+				populateBuyerDetails(buyerPtr.buyerdetails, buyerdetails)
+				if "buyertypeID" in buyer["details"] and validate_integer(buyer["details"]["buyertypeID"]):
+					businessTypePtr = BusinessType.objects.filter(id=int(buyer["details"]["buyertypeID"]), can_be_buyer=True)
+					if len(businessTypePtr) > 0:
+						businessTypePtr = businessTypePtr[0]
+						buyerPtr.buyerdetails.buyer_type = businessTypePtr
 			else:
 				detailsPresent = 0
 				validateBuyerDetailsData(buyerdetails, BuyerDetails())
 				newBuyerDetails = BuyerDetails(buyer = buyerPtr)
+				if "buyertypeID" in buyer["details"] and validate_integer(buyer["details"]["buyertypeID"]):
+					businessTypePtr = BusinessType.objects.filter(id=int(buyer["details"]["buyertypeID"]), can_be_buyer=True)
+					if len(businessTypePtr) > 0:
+						businessTypePtr = businessTypePtr[0]
+						newBuyerDetails.buyer_type = businessTypePtr
 				populateBuyerDetails(newBuyerDetails,buyerdetails)
 
 		if "address" in buyer and buyer["address"]!=None:

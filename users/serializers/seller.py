@@ -1,4 +1,5 @@
 from ..models.seller import Seller, SellerAddress, SellerBankDetails, filterSeller
+from .businesstype import serialize_business_type
 
 def serialize_seller(seller_entry, parameters = {}):
 
@@ -30,6 +31,8 @@ def serialize_seller(seller_entry, parameters = {}):
 		seller_details["dob_on_pan"] = seller_entry.sellerdetails.dob_on_pan
 		seller_details["pan_verification"] = seller_entry.sellerdetails.pan_verification
 		seller_details["tin_verification"] = seller_entry.sellerdetails.tin_verification
+		if hasattr(seller_entry.sellerdetails, "seller_type") and seller_entry.sellerdetails.seller_type != None:
+			seller_details["seller_type"] = serialize_business_type(seller_entry.sellerdetails.seller_type)
 
 		seller["details"] = seller_details
 

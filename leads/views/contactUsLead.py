@@ -61,7 +61,7 @@ def post_new_contactus_lead(request):
 			subject = "We at Wholdus have received your request"
 			to = [contactUsLead["email"]]
 			from_email = "Wholdus Info <info@wholdus.com>"
-			bcc = ["manish@wholdus.com","kushagra@wholdus.com"]
+			bcc = ["manish@wholdus.com","kushagra@wholdus.com","aditya.rana@wholdus.com"]
 			create_email(mail_template_file,mail_dict,subject,from_email,to,bcc=bcc)
 
 		return customResponse("2XX", {"contactus_lead" : serialize_contactus_lead(newcontactUsLead)})
