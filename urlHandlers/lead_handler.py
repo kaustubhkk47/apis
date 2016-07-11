@@ -90,7 +90,7 @@ def getContactUsLeadParameters(request, parameters = {}, version = "0"):
 
 	contactUsLeadID = request.GET.get("contactusleadID", "")
 	if contactUsLeadID != "":
-		contactUsLeadParameters["contactUsLeadsArr"] = getArrFromString(contactUsLeadID)
+		parameters["contactUsLeadsArr"] = getArrFromString(contactUsLeadID)
 
 	parameters = populateInternalUserIDParameters(request, parameters, version)
 

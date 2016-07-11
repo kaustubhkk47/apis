@@ -61,6 +61,7 @@ urlpatterns += [
 	url(r'^users/buyer/address/$', user_handler.buyer_address_details),
 	url(r'^users/buyer/address/v(?P<version>[1])/$', user_handler.buyer_address_details),
 	url(r'^users/buyer/purchasingstate/$', user_handler.buyer_purchasing_state_details),
+	url(r'^users/buyer/buysfrom/$', user_handler.buyer_buys_from_details),
 	url(r'^users/buyer/buyerinterest/$', user_handler.buyer_interest_details),
 	url(r'^users/buyer/buyerinterest/v(?P<version>[1])/$', user_handler.buyer_interest_details),
 	url(r'^users/buyer/buyerproducts/$', user_handler.buyer_product_details),
@@ -75,6 +76,10 @@ urlpatterns += [
 	url(r'^users/seller/$', user_handler.seller_details),
 	url(r'^users/seller/v(?P<version>[1])/$', user_handler.seller_details),
 	url(r'^users/seller/login/$', user_handler.seller_login)
+]
+
+urlpatterns += [
+	url(r'^users/businesstype/$', user_handler.business_type_details)
 ]
 
 urlpatterns += [

@@ -37,7 +37,7 @@ def serializeSubOrder(subOrderEntry, parameters = {}):
 	}
 
 	if "seller_details" in parameters and parameters["seller_details"] == 1:
-		subOrder["seller"]=serialize_seller(subOrderEntry.seller)
+		subOrder["seller"]=serialize_seller(subOrderEntry.seller, parameters)
 	else:
 		seller = {}
 		seller["sellerID"] = subOrderEntry.seller.id
@@ -45,7 +45,7 @@ def serializeSubOrder(subOrderEntry, parameters = {}):
 		subOrder["seller"] = seller
 
 	if "buyer_details" in parameters and parameters["buyer_details"] == 1:
-		subOrder["buyer"]=serialize_buyer(subOrderEntry.order.buyer)
+		subOrder["buyer"]=serialize_buyer(subOrderEntry.order.buyer, parameters)
 	else:
 		buyer = {}
 		buyer["buyerID"] = subOrderEntry.order.buyer.id
