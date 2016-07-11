@@ -155,6 +155,8 @@ class BuyerBuysFrom(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	delete_status = models.BooleanField(default=False)
+
 	def __unicode__(self):
 		return str(self.buyer.id) + " - " + self.buyer.name + " - " + self.business_type.name
 
@@ -484,7 +486,19 @@ def filterBuyerPurchasingState(parameters = {}):
 	if "buyerPurchasingStateArr" in parameters:
 		buyerPurchasingStates = buyerPurchasingStates.filter(id__in=parameters["buyerPurchasingStateArr"])
 
+	if "buyersArr" in parameters:
+		buyerPurchasingStates = buyerPurchasingStates.filter(buyer_id__in=parameters["buyersArr"])
+
 	return buyerPurchasingStates
+
+def filterBuyerBuysFrom(parameters = {}):
+
+	buyerBuysFrom = BuyerBuysFrom.objects.filter(buyer__delete_status=False, delete_status=False)
+
+	if "buyersArr" in parameters:
+		buyerBuysFrom = buyerBuysFrom.filter(buyer_id__in=parameters["buyersArr"])
+
+	return buyerBuysFrom
 
 def filterBuyerProducts(parameters = {}):
 

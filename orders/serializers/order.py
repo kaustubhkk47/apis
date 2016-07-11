@@ -41,7 +41,7 @@ def serializeOrder(orderEntry, parameters = {}):
 		order["buyer_payments"] = parseBuyerPayments(buyerPaymentQuerySet,parameters)
 
 	if "buyer_details" in parameters and parameters["buyer_details"] == 1:
-		order["buyer"]=serialize_buyer(orderEntry.buyer)
+		order["buyer"]=serialize_buyer(orderEntry.buyer, parameters)
 	else:
 		buyer = {}
 		buyer["buyerID"] = orderEntry.buyer.id

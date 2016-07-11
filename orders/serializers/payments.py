@@ -37,7 +37,7 @@ def serializeSellerPayment(SellerPaymentEntry, parameters = {}):
 	}
 
 	if "seller_details" in parameters and parameters["seller_details"] == 1:
-		sellerPayment["seller"] = serialize_seller(SellerPaymentEntry.suborder.seller)
+		sellerPayment["seller"] = serialize_seller(SellerPaymentEntry.suborder.seller, parameters)
 	else:
 		seller = {}
 		seller["sellerID"] = SellerPaymentEntry.suborder.seller.id
@@ -63,7 +63,7 @@ def serializeBuyerPayment(BuyerPaymentEntry, parameters= {}):
 	buyerPayment["updated_at"] = BuyerPaymentEntry.updated_at
 
 	if "buyer_details" in parameters and parameters["buyer_details"] == 1:
-		buyerPayment["buyer"] = serialize_buyer(BuyerPaymentEntry.order.buyer)
+		buyerPayment["buyer"] = serialize_buyer(BuyerPaymentEntry.order.buyer, parameters)
 	else:
 		buyer = {}
 		buyer["buyerID"] = BuyerPaymentEntry.order.buyer.id
