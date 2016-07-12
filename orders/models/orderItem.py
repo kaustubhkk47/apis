@@ -28,6 +28,9 @@ class OrderItem(models.Model):
 
     current_status = models.IntegerField(default=0)
 
+    buyer_payment_status = models.BooleanField(default=False)
+    seller_payment_status = models.BooleanField(default=False)
+
     remarks = models.TextField(blank=True)
 
     cancellation_remarks = models.TextField(blank=True)

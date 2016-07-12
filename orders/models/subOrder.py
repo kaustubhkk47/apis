@@ -45,7 +45,7 @@ def populateSubOrderData(subOrderPtr, subOrder,orderID):
     subOrderPtr.retail_price = Decimal(subOrder["retail_price"])
     subOrderPtr.calculated_price = Decimal(subOrder["calculated_price"])
     subOrderPtr.edited_price = Decimal(subOrder["edited_price"])
-    subOrderPtr.final_price = round(subOrder["edited_price"])
+    subOrderPtr.final_price = subOrder["edited_price"]
     subOrderPtr.suborder_status = 1
     subOrderPtr.confirmed_time = datetime.datetime.now()
     subOrderPtr.save()
@@ -100,6 +100,7 @@ def update_suborder_completion_status(subOrder):
     subOrder.save()
 
 SubOrderStatus = {
+    -1:{"display_value":"Cancelled"},
     0:{"display_value":"Unconfirmed"},
     1:{"display_value":"Confirmed"},
     2:{"display_value":"Merchant Notified"},

@@ -43,7 +43,7 @@ def populateOrderData(orderPtr, order):
     orderPtr.retail_price = Decimal(order["retail_price"])
     orderPtr.calculated_price = Decimal(order["calculated_price"])
     orderPtr.edited_price = Decimal(order["edited_price"])
-    orderPtr.final_price = round(order["edited_price"])
+    orderPtr.final_price = order["edited_price"]
     orderPtr.remarks = order["remarks"]
     orderPtr.order_status = 1
     orderPtr.save()
@@ -105,6 +105,7 @@ def update_order_completion_status(order):
     order.save()
 
 OrderStatus = {
+    -1:{"display_value":"Cancelled"},
     0:{"display_value":"Placed"},
     1:{"display_value":"Confirmed"},
     2:{"display_value":"Partially Shipped"},
