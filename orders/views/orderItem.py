@@ -3,6 +3,8 @@ import json
 import logging
 log = logging.getLogger("django")
 from ..models.orderItem import filterOrderItem, OrderItem
+from ..models.subOrder import sendSubOrderCancellationMail, populateSellerMailDict
+from users.models.buyer import BuyerAddress
 from ..serializers.orderItem import parseOrderItem
 import datetime
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -104,9 +106,15 @@ def cancel_order_item(request):
 				break
 
 		if isSubOrderCancelled == 1:
-			orderItemPtr.suborder.suborder_status = -1
-			orderItemPtr.suborder.save()
-
+			SubOrderPtr = orderItemPtr.suborder
+			SubOrderPtr.suborder_status = -1
+			SubOrderPtr.save()
+			buyerPtr = SubOrderPtr.order.buyer
+			buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
+			buyerAddressPtr = buyerAddressPtr[0]
+			seller_mail_dict = populateSellerMailDict(SubOrderPtr, buyerPtr, buyerAddressPtr)
+			seller_mail_dict["suborder"]["summary_title"] = "Order Cancelled"
+			sendSubOrderCancellationMail(SubOrderPtr, seller_mail_dict)
 		
 	except Exception as e:
 		log.critical(e)

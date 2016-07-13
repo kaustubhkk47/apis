@@ -128,3 +128,28 @@ OrderItemStatus = {
 }
 
 OrderItemCompletionStatus = [4, 11, 13, 14]
+
+def populateMailOrderItem(OrderItemPtr):
+
+    productPtr = Product.objects.filter(id=OrderItemPtr.product_id)
+    productPtr = productPtr[0]
+
+    imageLink = "http://api.wholdus.com/" + productPtr.image_path + "200x200/" + productPtr.image_name + "-1.jpg"
+    productLink = "http://www.wholdus.com/" + productPtr.category.slug + "-" + str(productPtr.category_id) + "/" +productPtr.slug +"-" + str(productPtr.id)
+    itemMargin = float((OrderItemPtr.retail_price_per_piece - OrderItemPtr.edited_price_per_piece)/OrderItemPtr.retail_price_per_piece*100)
+
+    mailOrderItem = {
+        "name":productPtr.display_name,
+        "catalog_number":productPtr.productdetails.seller_catalog_number,
+        "pieces":OrderItemPtr.pieces,
+        "price_per_piece":OrderItemPtr.edited_price_per_piece,
+        "final_price":OrderItemPtr.final_price,
+        "image_link":imageLink,
+        "product_link":productLink,
+        "margin":'{0:.1f}'.format(itemMargin)
+    }
+        
+    if OrderItemPtr.remarks != "":
+        mailOrderItem["remarks"] = OrderItemPtr.remarks
+
+    return mailOrderItem
