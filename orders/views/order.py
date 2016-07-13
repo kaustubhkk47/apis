@@ -2,15 +2,14 @@ from scripts.utils import *
 import json
 import logging
 log = logging.getLogger("django")
-from ..models.order import filterOrder, Order, validateOrderProductsData, populateOrderData
+from ..models.order import filterOrder, Order, validateOrderProductsData, populateOrderData, sendOrderMail
 from users.models.buyer import Buyer, BuyerAddress
 from catalog.models.product import Product
-from ..models.subOrder import SubOrder, populateSubOrderData
+from ..models.subOrder import SubOrder, populateSubOrderData, sendSubOrderMail, populateSellerMailDict, sendSubOrderCancellationMail
 from ..models.orderItem import OrderItem, populateOrderItemData
 from ..serializers.order import parseOrders, serializeOrder
-from users.serializers.buyer import serialize_buyer_address
 from decimal import Decimal
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator
 
 def get_order_details(request, orderParameters):
 	try:
@@ -71,6 +70,7 @@ def post_new_order(request):
 	subOrders = []
 
 	orderProductCount = 0
+	orderPieces = 0
 	orderRetailPrice = Decimal(0.0)
 	orderCalculatedPrice = Decimal(0.0)
 	orderEditedPrice = Decimal(0.0)
@@ -84,6 +84,7 @@ def post_new_order(request):
 		sellerID = seller.id
 
 		orderProductCount += 1
+		orderPieces += int(orderProduct["pieces"])
 		orderRetailPrice += Decimal(orderProduct["pieces"])*Decimal(orderProduct["retail_price_per_piece"])
 		orderCalculatedPrice += Decimal(orderProduct["pieces"])*Decimal(orderProduct["calculated_price_per_piece"])
 		orderEditedPrice += Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
@@ -91,6 +92,7 @@ def post_new_order(request):
 		if sellerID in sellersHash:
 			subOrders[sellersHash[sellerID]]["order_products"].append(orderProduct)
 			subOrders[sellersHash[sellerID]]["product_count"] += 1
+			subOrders[sellersHash[sellerID]]["pieces"] += int(orderProduct["pieces"])
 			subOrders[sellersHash[sellerID]]["retail_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["retail_price_per_piece"])
 			subOrders[sellersHash[sellerID]]["calculated_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["calculated_price_per_piece"])
 			subOrders[sellersHash[sellerID]]["edited_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])			
@@ -99,6 +101,7 @@ def post_new_order(request):
 			subOrderItem = {}
 			subOrderItem["order_products"] = [orderProduct]
 			subOrderItem["product_count"] = 1
+			subOrderItem["pieces"] = int(orderProduct["pieces"])
 			subOrderItem["retail_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["retail_price_per_piece"])
 			subOrderItem["calculated_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["calculated_price_per_piece"])
 			subOrderItem["edited_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
@@ -110,6 +113,7 @@ def post_new_order(request):
 
 	orderData = {}
 	orderData["product_count"] = orderProductCount
+	orderData["pieces"] = orderPieces
 	orderData["retail_price"] = orderRetailPrice
 	orderData["calculated_price"] = orderCalculatedPrice
 	orderData["edited_price"] = orderEditedPrice
@@ -120,107 +124,77 @@ def post_new_order(request):
 		newOrder = Order(buyer=buyerPtr)
 		populateOrderData(newOrder, orderData)
 		newOrder.save()
-
-		from_email = "Wholdus Info <info@wholdus.com>"
-
-		buyer_mail_template_file = "buyer/new_order.html"
-		buyer_subject = "New order received with order ID " + newOrder.display_number
-		buyer_to = [buyerPtr.email]
-		buyer_bcc = ["aditya.rana@wholdus.com", "kushagra@wholdus.com"]
-		buyer_mail_dict = {}
-
-		buyer_mail_dict["order"] = {
-			"orderNumber":newOrder.display_number,
-			"product_count":newOrder.product_count,
-			"final_price":'{0:.0f}'.format(newOrder.final_price)
-		}
-
-		buyerMargin = (float(newOrder.retail_price) - float(newOrder.final_price))/float(newOrder.retail_price)*100
-		buyer_mail_dict["order"]["total_margin"] = '{0:.1f}'.format(buyerMargin)
-
-		buyerTotalPieces = 0
-
-		buyer_mail_dict["subOrders"] = []
 		
 		for subOrder in subOrders:
 			newSubOrder = SubOrder(order=newOrder, seller=subOrder["seller"])
 			populateSubOrderData(newSubOrder,subOrder,newOrder.id)
 			newSubOrder.save()
 
-			seller_mail_template_file = "seller/new_suborder.html"
-			seller_subject = "New order received with order ID " + newSubOrder.display_number
-			seller_to = [subOrder["seller"].email]
-			seller_bcc = ["manish@wholdus.com"]
-			seller_mail_dict = {}
-
-			seller_mail_dict["suborder"] = {
-				"suborderNumber":newSubOrder.display_number,
-				"product_count":newSubOrder.product_count,
-				"final_price":'{0:.0f}'.format(newSubOrder.final_price)
-			}
-			seller_mail_dict["buyer"] = {
-				"name":buyerPtr.name,
-				"company_name":buyerPtr.company_name
-			}
-			seller_mail_dict["buyerAddress"] = serialize_buyer_address(buyerAddressPtr)
-			
-			seller_mail_dict["orderItems"] = []
-			totalPieces = 0
-
 			for orderItem in subOrder["order_products"]:
-
-				productPtr = Product.objects.filter(id=int(orderItem["productID"]))
-				productPtr = productPtr[0]
-
-				newOrderItem = OrderItem(suborder=newSubOrder,product=productPtr)
+				newOrderItem = OrderItem(suborder=newSubOrder,product_id=int(orderItem["productID"]))
 				populateOrderItemData(newOrderItem, orderItem)
 				newOrderItem.save()
-
-				imageLink = "http://api.wholdus.com/" + productPtr.image_path + "200x200/" + productPtr.image_name + "-1.jpg"
-				productLink = "http://www.wholdus.com/" + productPtr.category.slug + "-" + str(productPtr.category_id) + "/" +productPtr.slug +"-" + str(productPtr.id)
-
-				mailOrderItem = {
-					"name":productPtr.display_name,
-					"catalog_number":productPtr.productdetails.seller_catalog_number,
-					"pieces":newOrderItem.pieces,
-					"price_per_piece":newOrderItem.edited_price_per_piece,
-					"final_price":newOrderItem.final_price,
-					"image_link":imageLink,
-					"product_link":productLink
-				}
-
-				itemMargin = float((newOrderItem.retail_price_per_piece - newOrderItem.edited_price_per_piece)/newOrderItem.retail_price_per_piece*100)
-				mailOrderItem["margin"] = '{0:.1f}'.format(itemMargin)
-
-				if newOrderItem.remarks != "":
-					mailOrderItem["remarks"] = newOrderItem.remarks
-
-				totalPieces += newOrderItem.pieces
-				buyerTotalPieces += newOrderItem.pieces
-
-				seller_mail_dict["orderItems"].append(mailOrderItem)
-
-			seller_mail_dict["suborder"]["pieces"] = totalPieces
-			seller_mail_dict["suborder"]["items_title"] = "Order Items"
-
-			create_email(seller_mail_template_file,seller_mail_dict,seller_subject,from_email,seller_to,bcc=seller_bcc)
-
-			seller_mail_dict["suborder"]["isBuyer"] = "Yes"
-			if subOrder["seller"].company_name != None and subOrder["seller"].company_name != "":
-				seller_mail_dict["suborder"]["items_title"] = subOrder["seller"].company_name
-			else:
-				seller_mail_dict["suborder"]["items_title"] = subOrder["seller"].name
-			buyer_mail_dict["subOrders"].append(seller_mail_dict)
-
-		buyer_mail_dict["order"]["pieces"] = buyerTotalPieces
-
-		if buyerPtr.email != None and buyerPtr.email != "":	
-			create_email(buyer_mail_template_file,buyer_mail_dict,buyer_subject,from_email,buyer_to,bcc=buyer_bcc)
 
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
+		sendOrderMail(newOrder)
+		subOrders = SubOrder.objects.filter(order_id = newOrder.id)
+		for SubOrderPtr in subOrders:
+			seller_mail_dict = populateSellerMailDict(SubOrderPtr, buyerPtr, buyerAddressPtr)
+			sendSubOrderMail(SubOrderPtr, seller_mail_dict)
 		closeDBConnection()
 		return customResponse("2XX", {"order": serializeOrder(newOrder)})
+
+def cancel_order(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		order = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(order) or not "orderID" in order or not validate_integer(order["orderID"]):
+		return customResponse("4XX", {"error": "Id for order not sent"})
+
+	orderPtr = Order.objects.filter(id=int(order["orderID"]))
+
+	if len(orderPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for order sent"})
+
+	orderPtr = orderPtr[0]
+
+	if not "cancellation_remarks" in order or order["cancellation_remarks"]==None:
+		order["cancellation_remarks"] = ""
+
+	if orderPtr.order_status == -1:
+		return customResponse("4XX", {"error": "Already cancelled"})
+
+	try:
+		nowDateTime = datetime.datetime.now()
+		orderPtr.order_status = -1
+		orderPtr.cancellation_remarks = order["cancellation_remarks"]
+		orderPtr.cancellation_time = nowDateTime
+		orderPtr.save()
+
+		OrderItem.objects.filter(suborder__order_id = orderPtr.id).update(current_status=4, cancellation_time=nowDateTime)
+		allSubOrders = SubOrder.objects.filter(order_id = orderPtr.id)
+		allSubOrders.update(suborder_status=-1, cancellation_time=nowDateTime)
+
+		buyerPtr = orderPtr.buyer
+		buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
+		buyerAddressPtr = buyerAddressPtr[0]
+
+		for subOrderPtr in allSubOrders:
+			seller_mail_dict = populateSellerMailDict(subOrderPtr, buyerPtr, buyerAddressPtr)
+			seller_mail_dict["suborder"]["summary_title"] = "Order Cancelled"
+			sendSubOrderCancellationMail(subOrderPtr, seller_mail_dict)
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "could not update"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"order": "order updated"})

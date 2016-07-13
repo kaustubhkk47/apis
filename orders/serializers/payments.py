@@ -22,7 +22,7 @@ def serializeSellerPayment(SellerPaymentEntry, parameters = {}):
 	sellerPayment["reference_number"] = SellerPaymentEntry.reference_number
 	sellerPayment["payment_time"] = SellerPaymentEntry.payment_time
 	sellerPayment["details"] = SellerPaymentEntry.details
-	sellerPayment["payment_value"] = SellerPaymentEntry.payment_value
+	sellerPayment["payment_value"] = '{0:.0f}'.format(float(SellerPaymentEntry.payment_value))
 	sellerPayment["created_at"] = SellerPaymentEntry.created_at
 	sellerPayment["updated_at"] = SellerPaymentEntry.updated_at
 
@@ -58,7 +58,7 @@ def serializeBuyerPayment(BuyerPaymentEntry, parameters= {}):
 	buyerPayment["reference_number"] = BuyerPaymentEntry.reference_number
 	buyerPayment["payment_time"] = BuyerPaymentEntry.payment_time
 	buyerPayment["details"] = BuyerPaymentEntry.details
-	buyerPayment["payment_value"] = BuyerPaymentEntry.payment_value
+	buyerPayment["payment_value"] = '{0:.0f}'.format(float(BuyerPaymentEntry.payment_value))
 	buyerPayment["created_at"] = BuyerPaymentEntry.created_at
 	buyerPayment["updated_at"] = BuyerPaymentEntry.updated_at
 
