@@ -38,6 +38,8 @@ def suborder_details(request, version = "0"):
 		return subOrder.get_suborder_details(request,subOrderParameters)
 	#elif request.method == "PUT":
 	#	return subOrder.update_suborder(request)
+	elif request.method == "DELETE":
+		return subOrder.cancel_suborder(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -54,6 +56,8 @@ def order_details(request, version = "0"):
 		return order.get_order_details(request,orderParameters)
 	elif request.method == "POST":
 		return order.post_new_order(request)
+	elif request.method == "DELETE":
+		return order.cancel_order(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 

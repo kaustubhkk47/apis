@@ -1,8 +1,9 @@
 from django.db import models
-
+from scripts.utils import create_email
 from users.models.seller import Seller
+from users.serializers.buyer import serialize_buyer_address
 #from orders.models.order import Order
-from orders.models.orderItem import OrderItem, OrderItemCompletionStatus
+from orders.models.orderItem import OrderItem, OrderItemCompletionStatus, populateMailOrderItem
 
 import datetime
 from decimal import Decimal
@@ -12,6 +13,7 @@ class SubOrder(models.Model):
     order = models.ForeignKey('orders.Order')
     seller = models.ForeignKey(Seller)
 
+    pieces = models.PositiveIntegerField(default=1)
     product_count = models.PositiveIntegerField(default=1)
     retail_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
     calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
@@ -33,6 +35,9 @@ class SubOrder(models.Model):
     completed_time = models.DateTimeField(null=True, blank=True)
     closed_time = models.DateTimeField(null=True, blank=True)
 
+    cancellation_remarks = models.TextField(blank=True)
+    cancellation_time = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         ordering = ["-id"]
 
@@ -42,10 +47,11 @@ class SubOrder(models.Model):
 def populateSubOrderData(subOrderPtr, subOrder,orderID):
     
     subOrderPtr.product_count = int(subOrder["product_count"])
+    subOrderPtr.pieces = int(subOrder["pieces"])
     subOrderPtr.retail_price = Decimal(subOrder["retail_price"])
     subOrderPtr.calculated_price = Decimal(subOrder["calculated_price"])
     subOrderPtr.edited_price = Decimal(subOrder["edited_price"])
-    subOrderPtr.final_price = round(subOrder["edited_price"])
+    subOrderPtr.final_price = subOrder["edited_price"]
     subOrderPtr.suborder_status = 1
     subOrderPtr.confirmed_time = datetime.datetime.now()
     subOrderPtr.save()
@@ -100,6 +106,7 @@ def update_suborder_completion_status(subOrder):
     subOrder.save()
 
 SubOrderStatus = {
+    -1:{"display_value":"Cancelled"},
     0:{"display_value":"Unconfirmed"},
     1:{"display_value":"Confirmed"},
     2:{"display_value":"Merchant Notified"},
@@ -113,3 +120,44 @@ SubOrderPaymentStatus = {
     1:{"display_value":"Paid"},
     2:{"display_value":"Partially paid"}
 }
+
+def sendSubOrderMail(SubOrderPtr, seller_mail_dict):
+    from_email = "Wholdus Info <info@wholdus.com>"
+    seller_mail_template_file = "seller/new_suborder.html"
+    seller_subject = "New order received with order ID " + SubOrderPtr.display_number
+    seller_to = [SubOrderPtr.seller.email]
+    seller_bcc = ["manish@wholdus.com"]
+    create_email(seller_mail_template_file,seller_mail_dict,seller_subject,from_email,seller_to,bcc=seller_bcc)
+
+def sendSubOrderCancellationMail(SubOrderPtr, seller_mail_dict):
+    from_email = "Wholdus Info <info@wholdus.com>"
+    seller_mail_template_file = "seller/suborder_cancelled.html"
+    seller_subject = "Cancellation of order with order ID " + SubOrderPtr.display_number
+    seller_to = [SubOrderPtr.seller.email]
+    seller_bcc = ["manish@wholdus.com"]
+    create_email(seller_mail_template_file,seller_mail_dict,seller_subject,from_email,seller_to,bcc=seller_bcc)
+
+def populateSellerMailDict(SubOrderPtr, buyerPtr, buyerAddressPtr):
+    seller_mail_dict = {}
+    seller_mail_dict["suborder"] = {
+        "suborderNumber":SubOrderPtr.display_number,
+        "product_count":SubOrderPtr.product_count,
+        "final_price":'{0:.0f}'.format(SubOrderPtr.final_price),
+        "pieces":SubOrderPtr.pieces
+    }
+    seller_mail_dict["buyer"] = {
+        "name":buyerPtr.name,
+        "company_name":buyerPtr.company_name
+    }
+    seller_mail_dict["buyerAddress"] = serialize_buyer_address(buyerAddressPtr)
+    
+    seller_mail_dict["orderItems"] = []
+
+    orderItems = OrderItem.objects.filter(suborder_id=SubOrderPtr.id)
+
+    for OrderItemPtr in orderItems:
+        mailOrderItem = populateMailOrderItem(OrderItemPtr)
+        seller_mail_dict["orderItems"].append(mailOrderItem)
+        seller_mail_dict["suborder"]["items_title"] = "Order Items"
+
+    return seller_mail_dict

@@ -3,6 +3,8 @@ import json
 import logging
 log = logging.getLogger("django")
 from ..models.orderItem import filterOrderItem, OrderItem
+from ..models.subOrder import sendSubOrderCancellationMail, populateSellerMailDict
+from users.models.buyer import BuyerAddress
 from ..serializers.orderItem import parseOrderItem
 import datetime
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -61,7 +63,7 @@ def cancel_order_item(request):
 		orderItemPtr.cancellation_remarks = orderItem["cancellation_remarks"]
 		orderItemPtr.cancellation_time = datetime.datetime.now()
 		orderItemPtr.save()
-
+		"""
 		orderItemPtr.suborder.product_count -= 1
 		orderItemPtr.suborder.retail_price -= orderItemPtr.pieces*orderItemPtr.retail_price_per_piece
 		orderItemPtr.suborder.calculated_price -= orderItemPtr.pieces*orderItemPtr.calculated_price_per_piece
@@ -79,6 +81,40 @@ def cancel_order_item(request):
 		if orderItemPtr.order_shipment != None:
 			orderItemPtr.order_shipment.final_price -= orderItemPtr.final_price
 			orderItemPtr.order_shipment.save()
+		"""
+
+		isOrderCancelled = 1
+
+		allOrderItems = OrderItem.objects.filter(suborder__order_id=orderItemPtr.suborder.order_id)
+
+		for orderItem in allOrderItems:
+			if orderItem.current_status != 4:
+				isOrderCancelled = 0
+				break
+
+		if isOrderCancelled == 1:
+			orderItemPtr.suborder.order.order_status = -1
+			orderItemPtr.suborder.order.save()
+
+		isSubOrderCancelled = 1
+
+		allSubOrderItems = OrderItem.objects.filter(suborder_id=orderItemPtr.suborder_id)
+
+		for orderItem in allSubOrderItems:
+			if orderItem.current_status != 4:
+				isSubOrderCancelled = 0
+				break
+
+		if isSubOrderCancelled == 1:
+			SubOrderPtr = orderItemPtr.suborder
+			SubOrderPtr.suborder_status = -1
+			SubOrderPtr.save()
+			buyerPtr = SubOrderPtr.order.buyer
+			buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
+			buyerAddressPtr = buyerAddressPtr[0]
+			seller_mail_dict = populateSellerMailDict(SubOrderPtr, buyerPtr, buyerAddressPtr)
+			seller_mail_dict["suborder"]["summary_title"] = "Order Cancelled"
+			sendSubOrderCancellationMail(SubOrderPtr, seller_mail_dict)
 		
 	except Exception as e:
 		log.critical(e)

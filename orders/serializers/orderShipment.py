@@ -20,8 +20,8 @@ def serializeOrderShipment(orderShipmentEntry, parameters = {}):
 	orderShipment["packaged_length"] = orderShipmentEntry.packaged_length
 	orderShipment["packaged_breadth"] = orderShipmentEntry.packaged_breadth
 	orderShipment["packaged_height"] = orderShipmentEntry.packaged_height
-	orderShipment["cod_charge"] = orderShipmentEntry.cod_charge
-	orderShipment["shipping_charge"] = orderShipmentEntry.shipping_charge
+	orderShipment["cod_charge"] = '{0:.0f}'.format(float(orderShipmentEntry.cod_charge))
+	orderShipment["shipping_charge"] = '{0:.0f}'.format(float(orderShipmentEntry.shipping_charge))
 	orderShipment["remarks"] = orderShipmentEntry.remarks
 	orderShipment["tpl_manifested_time"] = orderShipmentEntry.tpl_manifested_time
 	orderShipment["tpl_in_transit_time"] = orderShipmentEntry.tpl_in_transit_time
@@ -36,7 +36,7 @@ def serializeOrderShipment(orderShipmentEntry, parameters = {}):
 	orderShipment["created_at"] = orderShipmentEntry.created_at
 	orderShipment["updated_at"] = orderShipmentEntry.updated_at
 	orderShipment["manifest_link"] = orderShipmentEntry.manifest_link
-	orderShipment["final_price"] = orderShipmentEntry.final_price
+	orderShipment["final_price"] = '{0:.0f}'.format(float(orderShipmentEntry.final_price))
 
 	if "buyer_details" in parameters and parameters["buyer_details"] == 1:
 		orderShipment["buyer"] = serialize_buyer(orderShipmentEntry.suborder.order.buyer, parameters)

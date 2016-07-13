@@ -101,6 +101,7 @@ def post_new_buyer_payment(request):
 
 		if int(buyerPayment["fully_paid"]) == 1:
 			OrderPtr.order_payment_status = 1
+			OrderItem.objects.filter(suborder__order_id=OrderPtr.id).exclude(current_status__in=[4]).update(buyer_payment_status=True)
 		else:
 			OrderPtr.order_payment_status = 2
 		OrderPtr.save()
@@ -147,11 +148,7 @@ def post_new_seller_payment(request):
 
 		if int(sellerPayment["fully_paid"]) == 1:
 			SubOrderPtr.suborder_payment_status = 1
-
-			orderItemQuerySet = OrderItem.objects.filter(suborder_id = SubOrderPtr.id).exclude(current_status = 4)
-			for orderItem in orderItemQuerySet:
-				orderItem.seller_payment = newSellerPayment
-				orderItem.save()
+			OrderItem.objects.filter(suborder_id = SubOrderPtr.id).exclude(current_status = 4).update(seller_payment_id=newSellerPayment.id)
 		else:
 			SubOrderPtr.suborder_payment_status = 2
 
