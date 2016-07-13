@@ -5,7 +5,7 @@ log = logging.getLogger("django")
 from ..models.order import filterOrder, Order, validateOrderProductsData, populateOrderData, sendOrderMail
 from users.models.buyer import Buyer, BuyerAddress
 from catalog.models.product import Product
-from ..models.subOrder import SubOrder, populateSubOrderData, sendSubOrderMail, populateSellerMailDict
+from ..models.subOrder import SubOrder, populateSubOrderData, sendSubOrderMail, populateSellerMailDict, sendSubOrderCancellationMail
 from ..models.orderItem import OrderItem, populateOrderItemData
 from ..serializers.order import parseOrders, serializeOrder
 from decimal import Decimal
@@ -147,3 +147,54 @@ def post_new_order(request):
 			sendSubOrderMail(SubOrderPtr, seller_mail_dict)
 		closeDBConnection()
 		return customResponse("2XX", {"order": serializeOrder(newOrder)})
+
+def cancel_order(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		order = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(order) or not "orderID" in order or not validate_integer(order["orderID"]):
+		return customResponse("4XX", {"error": "Id for order not sent"})
+
+	orderPtr = Order.objects.filter(id=int(order["orderID"]))
+
+	if len(orderPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for order sent"})
+
+	orderPtr = orderPtr[0]
+
+	if not "cancellation_remarks" in order or order["cancellation_remarks"]==None:
+		order["cancellation_remarks"] = ""
+
+	if orderPtr.order_status == -1:
+		return customResponse("4XX", {"error": "Already cancelled"})
+
+	try:
+		nowDateTime = datetime.datetime.now()
+		orderPtr.order_status = -1
+		orderPtr.cancellation_remarks = order["cancellation_remarks"]
+		orderPtr.cancellation_time = nowDateTime
+		orderPtr.save()
+
+		OrderItem.objects.filter(suborder__order_id = orderPtr.id).update(current_status=4, cancellation_time=nowDateTime)
+		allSubOrders = SubOrder.objects.filter(order_id = orderPtr.id)
+		allSubOrders.update(suborder_status=-1, cancellation_time=nowDateTime)
+
+		buyerPtr = orderPtr.buyer
+		buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
+		buyerAddressPtr = buyerAddressPtr[0]
+
+		for subOrderPtr in allSubOrders:
+			seller_mail_dict = populateSellerMailDict(subOrderPtr, buyerPtr, buyerAddressPtr)
+			seller_mail_dict["suborder"]["summary_title"] = "Order Cancelled"
+			sendSubOrderCancellationMail(subOrderPtr, seller_mail_dict)
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "could not update"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"order": "order updated"})

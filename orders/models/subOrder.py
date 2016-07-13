@@ -35,6 +35,9 @@ class SubOrder(models.Model):
     completed_time = models.DateTimeField(null=True, blank=True)
     closed_time = models.DateTimeField(null=True, blank=True)
 
+    cancellation_remarks = models.TextField(blank=True)
+    cancellation_time = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         ordering = ["-id"]
 

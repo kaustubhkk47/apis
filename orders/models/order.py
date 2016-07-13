@@ -38,6 +38,9 @@ class Order(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	cancellation_remarks = models.TextField(blank=True)
+	cancellation_time = models.DateTimeField(null=True, blank=True)
+
 	class Meta:
 		ordering = ["-id"]
 
