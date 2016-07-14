@@ -559,6 +559,35 @@ def update_buyer_product_whatsapp(request):
 		closeDBConnection()
 		return customResponse("2XX", {"success" : "updated"})
 
+def post_buyer_product_landing(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_product = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_product) or not "buyerproductID" in buyer_product or not validate_integer(buyer_product["buyerproductID"]):
+		return customResponse("4XX", {"error": "Id for buyer product not sent"})
+
+	buyerProductPtr = BuyerProducts.objects.filter(id=int(buyer_product["buyerproductID"]))
+
+	if len(buyerProductPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for for buyer product sent"})
+
+	buyerProductPtr = buyerProductPtr[0]
+
+	try:
+		newBuyerProductLanding = BuyerProductLanding(buyer_id=buyerProductPtr.buyer_id, product_id=buyerProductPtr.product_id,buyer_product_id=buyerProductPtr.id)
+		newBuyerProductLanding.save()
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to update"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"success" : "created"})
+
 def master_update_buyer_product(request):
 
 	try:

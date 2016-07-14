@@ -217,6 +217,23 @@ BuyerProductResponseCodes = {
 	2:{"display_value":"Disliked"}
 }
 
+class BuyerProductLanding(models.Model):
+	buyer = models.ForeignKey(Buyer)
+	product = models.ForeignKey(Product)
+	buyer_product = models.ForeignKey(BuyerProducts, null = True, blank = True)
+
+	source = models.IntegerField(default=1)
+
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	def __unicode__(self):
+		return str(self.id)
+
+BuyerProductLandingSource = {
+	1:{"display_value":"Whatsapp"}
+}
+
 class BuyerProductResponseHistory(models.Model):
 
 	buyer = models.ForeignKey(Buyer)
