@@ -37,9 +37,9 @@ def populateAllUserIDParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def buyer_details(request, version = "0"):
 
-	if request.method == "GET":
+	buyerParameters = populateBuyerParameters(request, {}, version)
 
-		buyerParameters = populateBuyerParameters(request, {}, version)
+	if request.method == "GET":
 
 		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -48,8 +48,16 @@ def buyer_details(request, version = "0"):
 	elif request.method == "POST":
 		return buyer.post_new_buyer(request)
 	elif request.method == "PUT":
+
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
 		return buyer.update_buyer(request)
 	elif request.method == "DELETE":
+
+		if buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
 		return buyer.delete_buyer(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
@@ -84,19 +92,26 @@ def populateBuyerParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def buyer_purchasing_state_details(request, version = "0"):
 
-	if request.method == "GET":
+	buyerParameters = populateBuyerParameters(request, {}, version)
 
-		buyerParameters = populateBuyerParameters(request, {}, version)
+	if request.method == "GET":
 
 		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return buyer.get_buyer_purchasing_state_details(request,buyerParameters)
 	elif request.method == "POST":
+
+		if buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
 		return buyer.post_new_buyer_purchasing_state(request)
 	#elif request.method == "PUT":
 	#	return buyer.update_buyer_purchasing_state(request)
 	elif request.method == "DELETE":
+
+		if buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return buyer.delete_buyer_purchasing_state(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
@@ -104,19 +119,27 @@ def buyer_purchasing_state_details(request, version = "0"):
 @csrf_exempt
 def buyer_buys_from_details(request, version = "0"):
 
-	if request.method == "GET":
+	buyerParameters = populateBuyerParameters(request, {}, version)
 
-		buyerParameters = populateBuyerParameters(request, {}, version)
+	if request.method == "GET":
 
 		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return buyer.get_buyer_buys_from_details(request,buyerParameters)
 	elif request.method == "POST":
+
+		if buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
 		return buyer.post_new_buyer_buys_from(request)
 	#elif request.method == "PUT":
 	#	return buyer.update_buyer_purchasing_state(request)
 	elif request.method == "DELETE":
+
+		if buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
 		return buyer.delete_buyer_buys_from(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
@@ -136,15 +159,19 @@ def buyer_access_token_details(request, version = "0"):
 @csrf_exempt
 def buyer_shared_product_id_details(request, version = "0"):
 
-	if request.method == "GET":
+	buyerParameters = populateBuyerParameters(request, {}, version)
 
-		buyerParameters = populateBuyerParameters(request, {}, version)
+	if request.method == "GET":
 
 		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return buyer.get_buyer_shared_product_id_details(request,buyerParameters)
 	elif request.method == "DELETE":
+
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
 		return buyer.delete_buyer_shared_product_id(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
@@ -152,19 +179,25 @@ def buyer_shared_product_id_details(request, version = "0"):
 @csrf_exempt
 def buyer_interest_details(request, version = "0"):
 
-	if request.method == "GET":
+	buyerParameters = populateBuyerParameters(request, {}, version )
 
-		buyerParameters = populateBuyerParameters(request, {}, version )
+	if request.method == "GET":
 
 		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return buyer.get_buyer_interest_details(request,buyerParameters)
 	elif request.method == "POST":
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return buyer.post_new_buyer_interest(request)
 	elif request.method == "PUT":
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return buyer.update_buyer_interest(request)
 	elif request.method == "DELETE":
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return buyer.delete_buyer_interest(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
@@ -172,17 +205,21 @@ def buyer_interest_details(request, version = "0"):
 @csrf_exempt
 def buyer_product_details(request, version = "0"):
 
-	if request.method == "GET":
+	buyerParameters = populateBuyerProductParameters(request, {}, version )
 
-		buyerParameters = populateBuyerProductParameters(request, {}, version )
+	if request.method == "GET":
 
 		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return buyer.get_buyer_product_details(request,buyerParameters)
 	elif request.method == "POST":
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return buyer.post_new_buyer_product(request)
 	elif request.method == "PUT":
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return buyer.update_buyer_product(request)
 	#elif request.method == "DELETE":
 	#	return buyer.delete_buyer_interest(request)
@@ -194,6 +231,14 @@ def buyer_product_whatsapp_details(request, version = "0"):
 	
 	if request.method == "PUT":
 		return buyer.update_buyer_product_whatsapp(request)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
+def buyer_product_landing_details(request, version = "0"):
+	
+	if request.method == "POST":
+		return buyer.post_buyer_product_landing(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -299,12 +344,19 @@ def populateBuyerDetailsParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def buyer_address_details(request, version = "0"):
 
-	
+	buyerParameters = populateBuyerParameters(request, {}, version )
+
 	if request.method == "POST":
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return buyer.post_new_buyer(request)
 	elif request.method == "PUT":
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return buyer.update_buyer(request)
 	elif request.method == "DELETE":
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return buyer.delete_buyer(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
@@ -329,10 +381,10 @@ def populateBuyerIDParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def seller_details(request, version = "0"):
 
+	parameters = populateSellerParameters(request, {}, version)
+
 	if request.method == "GET":
 
-		parameters = populateSellerParameters(request, {}, version)
-		
 		if parameters["isSeller"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
@@ -340,8 +392,12 @@ def seller_details(request, version = "0"):
 	elif request.method == "POST":
 		return seller.post_new_seller(request)
 	elif request.method == "PUT":
+		if parameters["isSeller"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return seller.update_seller(request)
 	elif request.method == "DELETE":
+		if parameters["isSeller"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return seller.delete_seller(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})

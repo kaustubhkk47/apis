@@ -10,17 +10,19 @@ from .catalog_handler import populateProductDetailsParameters
 @csrf_exempt
 def order_shipment_details(request, version = "0"):
 
+	orderShipmentParameters = populateOrderParameters(request, {}, version)
+
 	if request.method == "GET":
-
-		orderShipmentParameters = populateOrderParameters(request, {}, version)
-
 		if orderShipmentParameters["isSeller"] == 0 and orderShipmentParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-
 		return orderShipment.get_order_shipment_details(request,orderShipmentParameters)
 	elif request.method == "POST":
+		if orderShipmentParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return orderShipment.post_new_order_shipment(request)
 	elif request.method == "PUT":
+		if orderShipmentParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return orderShipment.update_order_shipment(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
@@ -28,9 +30,9 @@ def order_shipment_details(request, version = "0"):
 @csrf_exempt
 def suborder_details(request, version = "0"):
 
-	if request.method == "GET":
+	subOrderParameters = populateOrderParameters(request, {},version)
 
-		subOrderParameters = populateOrderParameters(request, {},version)
+	if request.method == "GET":
 
 		if subOrderParameters["isSeller"] == 0 and subOrderParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -39,6 +41,8 @@ def suborder_details(request, version = "0"):
 	#elif request.method == "PUT":
 	#	return subOrder.update_suborder(request)
 	elif request.method == "DELETE":
+		if subOrderParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return subOrder.cancel_suborder(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
@@ -46,17 +50,19 @@ def suborder_details(request, version = "0"):
 @csrf_exempt
 def order_details(request, version = "0"):
 
+	orderParameters = populateOrderParameters(request, {}, version)
+
 	if request.method == "GET":
-
-		orderParameters = populateOrderParameters(request, {}, version)
-
 		if orderParameters["isBuyer"] == 0 and orderParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-
 		return order.get_order_details(request,orderParameters)
 	elif request.method == "POST":
+		if orderParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return order.post_new_order(request)
 	elif request.method == "DELETE":
+		if orderParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return order.cancel_order(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
@@ -64,15 +70,17 @@ def order_details(request, version = "0"):
 @csrf_exempt
 def order_item_details(request, version = "0"):
 
-	if request.method == "GET":
+	orderItemParameters = populateOrderParameters(request, {}, version)
 
-		orderItemParameters = populateOrderParameters(request, {}, version)
+	if request.method == "GET":
 
 		if orderItemParameters["isSeller"] == 0 and orderItemParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return orderItem.get_order_item_details(request,orderItemParameters)
 	elif request.method == "DELETE":
+		if orderItemParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 		return orderItem.cancel_order_item(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
@@ -80,15 +88,19 @@ def order_item_details(request, version = "0"):
 @csrf_exempt
 def buyer_payment_details(request, version = "0"):
 
-	if request.method == "GET":
+	buyerPaymentParameters = populateOrderParameters(request, {}, version)
 
-		buyerPaymentParameters = populateOrderParameters(request, {}, version)
+	if request.method == "GET":
 
 		if buyerPaymentParameters["isBuyer"] == 0 and buyerPaymentParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return payments.get_buyer_payment_details(request,buyerPaymentParameters)
 	elif request.method == "POST":
+
+		if buyerPaymentParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
 		return payments.post_new_buyer_payment(request)
 
 
@@ -97,15 +109,19 @@ def buyer_payment_details(request, version = "0"):
 @csrf_exempt
 def seller_payment_details(request, version = "0"):
 
-	if request.method == "GET":
+	sellerPaymentParameters = populateOrderParameters(request, {}, version)
 
-		sellerPaymentParameters = populateOrderParameters(request, {}, version)
+	if request.method == "GET":
 
 		if sellerPaymentParameters["isSeller"] == 0 and sellerPaymentParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return payments.get_seller_payment_details(request,sellerPaymentParameters)
 	elif request.method == "POST":
+
+		if sellerPaymentParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
 		return payments.post_new_seller_payment(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
