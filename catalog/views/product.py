@@ -114,7 +114,7 @@ def get_product_catalog(request, productParameters):
         closeDBConnection()
         return customResponse(statusCode, body)
 
-def post_new_product(request):
+def post_new_product(request, parameters = {}):
     try:
         requestbody = request.body.decode("utf-8")
         product = convert_keys_to_string(json.loads(requestbody))
@@ -176,9 +176,9 @@ def post_new_product(request):
         return customResponse("4XX", {"error": "unable to create entry in db"})
     else:
         closeDBConnection()
-        return customResponse("2XX", {"product": serialize_product(newProduct)})
+        return customResponse("2XX", {"product": serialize_product(newProduct, parameters)})
 
-def update_product(request):
+def update_product(request, parameters = {}):
     try:
         requestbody = request.body.decode("utf-8")
         product = convert_keys_to_string(json.loads(requestbody))
@@ -247,7 +247,7 @@ def update_product(request):
         return customResponse("4XX", {"error": "could not update"})
     else:
         closeDBConnection()
-        return customResponse("2XX", {"product": serialize_product(productPtr)})
+        return customResponse("2XX", {"product": serialize_product(productPtr , parameters)})
 
 def delete_product(request):
     try:
