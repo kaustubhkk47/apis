@@ -31,16 +31,14 @@ def categories_details(request, version = "0"):
 
 @csrf_exempt
 def product_details(request, version = "0"):
+	productParameters = populateProductParameters(request, {}, version)
 
 	if request.method == "GET":
-
-		productParameters = populateProductParameters(request, {}, version)
-
 		return product.get_product_details(request,productParameters)
 	elif request.method == "POST":
-		return product.post_new_product(request)
+		return product.post_new_product(request, productParameters)
 	elif request.method == "PUT":
-		return product.update_product(request)
+		return product.update_product(request, productParameters)
 	elif request.method == "DELETE":
 		return product.delete_product(request)
 
