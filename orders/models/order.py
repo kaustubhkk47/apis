@@ -79,7 +79,7 @@ def filterOrder(orderParameters):
 def validateOrderProductsData(orderProducts):
 
 	for orderProduct in orderProducts:
-		if not "productID" in orderProduct or orderProduct["productID"]==None or not validate_integer(orderProduct["productID"]):
+		if not "productID" in orderProduct or not validate_integer(orderProduct["productID"]):
 			return False
 
 		productPtr = Product.objects.filter(id=int(orderProduct["productID"]))
@@ -88,7 +88,7 @@ def validateOrderProductsData(orderProducts):
 
 		productPtr = productPtr[0]
 
-		if not "pieces" in orderProduct or orderProduct["pieces"]==None or not validate_integer(orderProduct["pieces"]):
+		if not "pieces" in orderProduct or not validate_integer(orderProduct["pieces"]):
 			return False
 		if not "edited_price_per_piece" in orderProduct or orderProduct["edited_price_per_piece"]==None or not validate_number(orderProduct["edited_price_per_piece"]):
 			return False

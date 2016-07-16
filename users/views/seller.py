@@ -117,7 +117,7 @@ def update_seller(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(seller) or not "sellerID" in seller or seller["sellerID"]==None or not validate_integer(seller["sellerID"]):
+	if not len(seller) or not "sellerID" in seller or not validate_integer(seller["sellerID"]):
 		return customResponse("4XX", {"error": "Id for seller not sent"})
 
 	sellerPtr = Seller.objects.filter(id=int(seller["sellerID"])).select_related('sellerdetails')
@@ -163,7 +163,7 @@ def update_seller(request):
 		if "address" in seller and seller["address"]!=None:
 			addressSent = 1
 			selleraddress = seller["address"]
-			if not "addressID" in selleraddress or not selleraddress["addressID"] or not validate_integer(selleraddress["addressID"]):
+			if not "addressID" in selleraddress or not validate_integer(selleraddress["addressID"]):
 				return customResponse("4XX", {"error": "Address id not sent"})
 			sellerAddressPtr = SellerAddress.objects.filter(id = int(selleraddress["addressID"]))
 
@@ -182,7 +182,7 @@ def update_seller(request):
 		if "bank_details" in seller and seller["bank_details"]!=None:
 			bankdetailsSent = 1
 			sellerbankdetails = seller["bank_details"]
-			if not "bank_detailsID" in sellerbankdetails or not sellerbankdetails["bank_detailsID"] or not validate_integer(sellerbankdetails["bank_detailsID"]):
+			if not "bank_detailsID" in sellerbankdetails or not validate_integer(sellerbankdetails["bank_detailsID"]):
 				return customResponse("4XX", {"error": "Bank details id not sent"})
 			sellerBankDetailsPtr = SellerBankDetails.objects.filter(id = int(sellerbankdetails["bank_detailsID"]))
 
@@ -222,7 +222,7 @@ def delete_seller(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(seller) or not "sellerID" in seller or not seller["sellerID"] or not validate_integer(seller["sellerID"]):
+	if not len(seller) or not "sellerID" in seller or not validate_integer(seller["sellerID"]):
 		return customResponse("4XX", {"error": "Id for seller not sent"})
 
 	sellerPtr = Seller.objects.filter(id=int(seller["sellerID"]))

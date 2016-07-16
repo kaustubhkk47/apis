@@ -30,7 +30,7 @@ def validateContactUsLeadData(contactUsLead, oldcontactUsLead, is_new):
 		contactUsLead["mobile_number"] = oldcontactUsLead.mobile_number
 	if not "email" in contactUsLead or contactUsLead["email"]==None:
 		contactUsLead["email"] = oldcontactUsLead.email
-	if not "status" in contactUsLead or contactUsLead["status"]==None or not validate_bool(contactUsLead["status"]):
+	if not "status" in contactUsLead or not validate_bool(contactUsLead["status"]):
 		contactUsLead["status"] = oldcontactUsLead.status
 	if not "comments" in contactUsLead or contactUsLead["comments"]==None:
 		contactUsLead["comments"] = oldcontactUsLead.comments

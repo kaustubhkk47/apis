@@ -206,6 +206,8 @@ class BuyerProductResponse(models.Model):
 
 	response_code = models.IntegerField(default=0)
 
+	has_swiped = models.BooleanField(default=False)
+
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
@@ -241,6 +243,7 @@ class BuyerProductResponseHistory(models.Model):
 	buyer_product = models.ForeignKey(BuyerProducts, null = True, blank = True)
 
 	response_code = models.IntegerField(default=0)
+	has_swiped = models.BooleanField(default=False)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -275,9 +278,9 @@ def validateBuyerData(buyer, oldbuyer, is_new):
 		buyer["password"] = oldbuyer.password
 	if not "alternate_phone_number" in buyer or buyer["alternate_phone_number"]==None:
 		buyer["alternate_phone_number"] = oldbuyer.alternate_phone_number
-	if not "mobile_verification" in buyer or buyer["mobile_verification"]==None or not validate_bool(buyer["mobile_verification"]):
+	if not "mobile_verification" in buyer or not validate_bool(buyer["mobile_verification"]):
 		buyer["mobile_verification"] = oldbuyer.mobile_verification
-	if not "email_verification" in buyer or buyer["email_verification"]==None  or not validate_bool(buyer["email_verification"]):
+	if not "email_verification" in buyer  or not validate_bool(buyer["email_verification"]):
 		buyer["email_verification"] = oldbuyer.email_verification
 	if not "gender" in buyer or buyer["gender"]:
 		buyer["gender"] = oldbuyer.gender
@@ -286,7 +289,7 @@ def validateBuyerData(buyer, oldbuyer, is_new):
 			buyer["whatsapp_number"] = buyer["mobile_number"]
 		else:
 			buyer["whatsapp_number"] = oldbuyer.whatsapp_number
-	if not "whatsapp_sharing_active" in buyer or buyer["whatsapp_sharing_active"]==None  or not validate_bool(buyer["whatsapp_sharing_active"]):
+	if not "whatsapp_sharing_active" in buyer or not validate_bool(buyer["whatsapp_sharing_active"]):
 		buyer["whatsapp_sharing_active"] = oldbuyer.whatsapp_sharing_active
 	if not "password" in buyer or buyer["password"]:
 		if is_new == 1:
@@ -313,7 +316,7 @@ def validateBuyerInterestData(buyer_interest, old_buyer_interest, is_new):
 		buyer_interest["fabric_filter_text"] = old_buyer_interest.fabric_filter_text
 	if not "productid_filter_text" in buyer_interest or buyer_interest["productid_filter_text"]==None:
 		buyer_interest["productid_filter_text"] = old_buyer_interest.productid_filter_text
-	if not "is_active" in buyer_interest or buyer_interest["is_active"]==None or not validate_bool(buyer_interest["is_active"]):
+	if not "is_active" in buyer_interest or not validate_bool(buyer_interest["is_active"]):
 		buyer_interest["is_active"] = old_buyer_interest.is_active
 
 
@@ -330,6 +333,9 @@ def validateBuyerInterestData(buyer_interest, old_buyer_interest, is_new):
 	return True
 
 def validateBuyerProductData(buyer_product, old_buyer_product, is_new, buyer_product_populator):
+
+	if "has_swiped" in buyer_product and validate_bool(buyer_product["has_swiped"]):
+		buyer_product_populator["has_swiped"] = buyer_product["has_swiped"]
 
 	if "is_active" in buyer_product and validate_bool(buyer_product["is_active"]):
 		if int(buyer_product["is_active"]) != int(old_buyer_product.is_active) and old_buyer_product.responded == 0:
@@ -376,9 +382,13 @@ def populateBuyerProduct(buyerProductPtr, buyerproduct):
 
 def populateBuyerProductResponseHistory(buyerProductResponsePtr,buyerProductResponse):
 	buyerProductResponsePtr.response_code = int(buyerProductResponse["response_code"])
+	if "has_swiped" in buyerProductResponse:
+		buyerProductResponsePtr.has_swiped = int(buyerProductResponse["has_swiped"])
 
 def populateBuyerProductResponse(buyerProductResponsePtr,buyerProductResponse):
 	buyerProductResponsePtr.response_code = int(buyerProductResponse["response_code"])
+	if "has_swiped" in buyerProductResponse:
+		buyerProductResponsePtr.has_swiped = int(buyerProductResponse["has_swiped"])
 
 def validate_buyer_interest_scale(x):
 	if not validate_integer(x) or not (0<=int(x)<=10):
@@ -393,9 +403,9 @@ def validateBuyerDetailsData(buyerdetails, oldbuyerdetails, is_new):
 		buyerdetails["cst"] = oldbuyerdetails.cst
 	if not "customer_type" in buyerdetails or buyerdetails["customer_type"]==None or not validate_buyer_customer_type(buyerdetails["customer_type"]):
 		buyerdetails["customer_type"] = oldbuyerdetails.customer_type
-	if not "buying_capacity" in buyerdetails or buyerdetails["buying_capacity"]==None  or not validate_integer(buyerdetails["buying_capacity"]):
+	if not "buying_capacity" in buyerdetails  or not validate_integer(buyerdetails["buying_capacity"]):
 		buyerdetails["buying_capacity"] = oldbuyerdetails.buying_capacity
-	if not "purchase_duration" in buyerdetails or buyerdetails["purchase_duration"]==None or not validate_integer(buyerdetails["purchase_duration"]):
+	if not "purchase_duration" in buyerdetails or not validate_integer(buyerdetails["purchase_duration"]):
 		buyerdetails["purchase_duration"] = oldbuyerdetails.purchase_duration
 
 def validateBuyerAddressData(buyeraddress, oldbuyeraddress):

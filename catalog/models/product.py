@@ -110,23 +110,23 @@ def validateProductData(product, oldproduct, is_new):
         product["tax"] = oldproduct.tax
     if not "min_price_per_unit" in product or product["min_price_per_unit"]==None or not validate_number(product["min_price_per_unit"]):
         product["min_price_per_unit"] = oldproduct.min_price_per_unit
-    if not "lot_size" in product or product["lot_size"]==None or not validate_integer(product["lot_size"]):
+    if not "lot_size" in product or not validate_integer(product["lot_size"]):
         flag = 1
         product["lot_size"] = oldproduct.lot_size
     if not "price_per_lot" in product or product["price_per_lot"]==None or not validate_number(product["price_per_lot"]):
         flag = 1
         product["price_per_lot"] = oldproduct.price_per_lot
-    if not "verification" in product or product["verification"]==None or not validate_bool(product["verification"]):
+    if not "verification" in product or not validate_bool(product["verification"]):
         product["verification"] = oldproduct.verification
-    if not "show_online" in product or product["show_online"]==None or not validate_bool(product["show_online"]):
+    if not "show_online" in product or not validate_bool(product["show_online"]):
         product["show_online"] = oldproduct.show_online
     if not "slug" in product or product["slug"]==None:
         product["slug"] = oldproduct.slug
     if not "display_name" in product or product["display_name"]==None:
         product["display_name"] = oldproduct.display_name
-    if not "is_catalog" in product or product["is_catalog"]==None or not validate_bool(product["is_catalog"]):
+    if not "is_catalog" in product or not validate_bool(product["is_catalog"]):
         product["is_catalog"] = oldproduct.is_catalog
-    if not "delete_status" in product or product["delete_status"]==None or not validate_bool(product["delete_status"]):
+    if not "delete_status" in product or not validate_bool(product["delete_status"]):
         product["delete_status"] = oldproduct.delete_status
         
     if is_new == 1 and flag == 1:

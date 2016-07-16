@@ -205,7 +205,7 @@ def post_new_buyer_interest(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer_interest) or not "buyerID" in buyer_interest or buyer_interest["buyerID"]==None or not validate_integer(buyer_interest["buyerID"]):
+	if not len(buyer_interest) or not "buyerID" in buyer_interest or not validate_integer(buyer_interest["buyerID"]):
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
 	buyerPtr = Buyer.objects.filter(id=int(buyer_interest["buyerID"]))
@@ -215,7 +215,7 @@ def post_new_buyer_interest(request):
 
 	buyerPtr = buyerPtr[0]
 
-	if not "categoryID" in buyer_interest or buyer_interest["categoryID"]==None or not validate_integer(buyer_interest["categoryID"]):
+	if not "categoryID" in buyer_interest or not validate_integer(buyer_interest["categoryID"]):
 		return customResponse("4XX", {"error": "Id for category not sent"})
 
 	categoryPtr = Category.objects.filter(id=int(buyer_interest["categoryID"]))
@@ -273,7 +273,7 @@ def post_new_buyer_purchasing_state(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer_purchasing_state) or not "buyerID" in buyer_purchasing_state or buyer_purchasing_state["buyerID"]==None or not validate_integer(buyer_purchasing_state["buyerID"]):
+	if not len(buyer_purchasing_state) or not "buyerID" in buyer_purchasing_state or not validate_integer(buyer_purchasing_state["buyerID"]):
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
 	buyerPtr = Buyer.objects.filter(id=int(buyer_purchasing_state["buyerID"]))
@@ -283,7 +283,7 @@ def post_new_buyer_purchasing_state(request):
 
 	buyerPtr = buyerPtr[0]
 
-	if not "stateID" in buyer_purchasing_state or buyer_purchasing_state["stateID"]==None or not validate_integer(buyer_purchasing_state["stateID"]):
+	if not "stateID" in buyer_purchasing_state or not validate_integer(buyer_purchasing_state["stateID"]):
 		return customResponse("4XX", {"error": "Id for state not sent"})
 
 	statePtr = State.objects.filter(id=int(buyer_purchasing_state["stateID"]))
@@ -323,7 +323,7 @@ def post_new_buyer_buys_from(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer_buys_from) or not "buyerID" in buyer_buys_from or buyer_buys_from["buyerID"]==None or not validate_integer(buyer_buys_from["buyerID"]):
+	if not len(buyer_buys_from) or not "buyerID" in buyer_buys_from or not validate_integer(buyer_buys_from["buyerID"]):
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
 	buyerPtr = Buyer.objects.filter(id=int(buyer_buys_from["buyerID"]))
@@ -333,7 +333,7 @@ def post_new_buyer_buys_from(request):
 
 	buyerPtr = buyerPtr[0]
 
-	if not "businesstypeID" in buyer_buys_from or buyer_buys_from["businesstypeID"]==None or not validate_integer(buyer_buys_from["businesstypeID"]):
+	if not "businesstypeID" in buyer_buys_from or not validate_integer(buyer_buys_from["businesstypeID"]):
 		return customResponse("4XX", {"error": "Id for state not sent"})
 
 	businessTypePtr = BusinessType.objects.filter(id=int(buyer_buys_from["businesstypeID"]), can_buyer_buy_from=True)
@@ -373,7 +373,7 @@ def post_new_buyer_product(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer_product) or not "buyerID" in buyer_product or buyer_product["buyerID"]==None or not validate_integer(buyer_product["buyerID"]):
+	if not len(buyer_product) or not "buyerID" in buyer_product or not validate_integer(buyer_product["buyerID"]):
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
 	buyerPtr = Buyer.objects.filter(id=int(buyer_product["buyerID"]))
@@ -427,7 +427,7 @@ def update_buyer_interest(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer_interest) or not "buyerinterestID" in buyer_interest or buyer_interest["buyerinterestID"]==None or not validate_integer(buyer_interest["buyerinterestID"]):
+	if not len(buyer_interest) or not "buyerinterestID" in buyer_interest or not validate_integer(buyer_interest["buyerinterestID"]):
 		return customResponse("4XX", {"error": "Id for buyer interest not sent"})
 
 	buyerInterestPtr = BuyerInterest.objects.filter(id=int(buyer_interest["buyerinterestID"]))
@@ -484,7 +484,7 @@ def update_buyer_product(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer_product) or not "buyerproductID" in buyer_product or buyer_product["buyerproductID"]==None or not validate_integer(buyer_product["buyerproductID"]):
+	if not len(buyer_product) or not "buyerproductID" in buyer_product or not validate_integer(buyer_product["buyerproductID"]):
 		return customResponse("4XX", {"error": "Id for buyer product not sent"})
 
 	buyerProductPtr = BuyerProducts.objects.filter(id=int(buyer_product["buyerproductID"]))
@@ -516,10 +516,12 @@ def update_buyer_product(request):
 			else: 
 				try:
 					BuyerProductResponsePtr = BuyerProductResponse.objects.filter(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id)
+					if not "has_swiped" in buyer_product_populator:
+						buyer_product_populator["has_swiped"] = 0
 					if buyer_product_populator["response_code"] == 3:
-						BuyerProductResponsePtr.update(response_code=1)
+						BuyerProductResponsePtr.update(response_code=1, has_swiped=buyer_product_populator["has_swiped"])
 					elif buyer_product_populator["response_code"] == 4:
-						BuyerProductResponsePtr.update(response_code=2)
+						BuyerProductResponsePtr.update(response_code=2, has_swiped=buyer_product_populator["has_swiped"])
 				except Exception as e:
 					pass
 
@@ -672,7 +674,7 @@ def delete_buyer_interest(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer_interest) or not "buyerinterestID" in buyer_interest or buyer_interest["buyerinterestID"]==None or not validate_integer(buyer_interest["buyerinterestID"]):
+	if not len(buyer_interest) or not "buyerinterestID" in buyer_interest or not validate_integer(buyer_interest["buyerinterestID"]):
 		return customResponse("4XX", {"error": "Id for buyer interest not sent"})
 
 	buyerInterestPtr = BuyerInterest.objects.filter(id=int(buyer_interest["buyerinterestID"]))
@@ -700,7 +702,7 @@ def delete_buyer_purchasing_state(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer_purchasing_state) or not "buyerpurchasingstateID" in buyer_purchasing_state or buyer_purchasing_state["buyerpurchasingstateID"]==None or not validate_integer(buyer_purchasing_state["buyerpurchasingstateID"]):
+	if not len(buyer_purchasing_state) or not "buyerpurchasingstateID" in buyer_purchasing_state or not validate_integer(buyer_purchasing_state["buyerpurchasingstateID"]):
 		return customResponse("4XX", {"error": "Id for buyer purchasing_state not sent"})
 
 	buyerPurchasingStatePtr = BuyerPurchasingState.objects.filter(id=int(buyer_purchasing_state["buyerpurchasingstateID"]))
@@ -725,7 +727,7 @@ def delete_buyer_buys_from(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer_buys_from) or not "buyerbuysfromID" in buyer_buys_from or buyer_buys_from["buyerbuysfromID"]==None or not validate_integer(buyer_buys_from["buyerbuysfromID"]):
+	if not len(buyer_buys_from) or not "buyerbuysfromID" in buyer_buys_from or not validate_integer(buyer_buys_from["buyerbuysfromID"]):
 		return customResponse("4XX", {"error": "Id for buyer buys_from not sent"})
 
 	buyerBuysFromPtr = BuyerBuysFrom.objects.filter(id=int(buyer_buys_from["buyerbuysfromID"]))
@@ -750,7 +752,7 @@ def delete_buyer_shared_product_id(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer_shared_product_id) or not "buyersharedproductID" in buyer_shared_product_id or buyer_shared_product_id["buyersharedproductID"]==None or not validate_integer(buyer_shared_product_id["buyersharedproductID"]):
+	if not len(buyer_shared_product_id) or not "buyersharedproductID" in buyer_shared_product_id or not validate_integer(buyer_shared_product_id["buyersharedproductID"]):
 		return customResponse("4XX", {"error": "Id for buyer shared_product_id not sent"})
 
 	buyerSharedProductIDPtr = BuyerSharedProductID.objects.filter(id=int(buyer_shared_product_id["buyersharedproductID"]))

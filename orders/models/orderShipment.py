@@ -92,7 +92,7 @@ def validateOrderShipmentData(orderShipment):
         orderShipment["rto_remarks"] = ""
     if not "tracking_url" in orderShipment or orderShipment["tracking_url"]==None:
         orderShipment["tracking_url"] = ""
-    if not "all_items" in orderShipment or orderShipment["all_items"]==None or not validate_bool(orderShipment["all_items"]):
+    if not "all_items" in orderShipment or not validate_bool(orderShipment["all_items"]):
         flag = False
     
     return flag
@@ -137,7 +137,7 @@ def validateOrderShipmentItemsData(orderItems, subOrderID):
 
     for orderItem in orderItems:
 
-        if not "orderitemID" in orderItem or orderItem["orderitemID"]==None or not validate_integer(orderItem["orderitemID"]):
+        if not "orderitemID" in orderItem or not validate_integer(orderItem["orderitemID"]):
             return False
 
         orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))

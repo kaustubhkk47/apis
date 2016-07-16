@@ -43,7 +43,7 @@ def post_new_buyer_lead(request):
 
 		populateBuyerLead(newBuyerLead, buyerLead)
 
-		if "productID" in buyerLead and buyerLead["productID"]!=None and validate_integer(buyerLead["productID"]):
+		if "productID" in buyerLead and validate_integer(buyerLead["productID"]):
 			productPtr = Product.objects.filter(id=int(buyerLead["productID"]))
 
 			if len(productPtr) == 0:
@@ -52,7 +52,7 @@ def post_new_buyer_lead(request):
 			productPtr = productPtr[0]
 			newBuyerLead.product = productPtr
 
-		if "categoryID" in buyerLead and buyerLead["categoryID"]!=None and validate_integer(buyerLead["categoryID"]):
+		if "categoryID" in buyerLead and validate_integer(buyerLead["categoryID"]):
 			categoryPtr = Category.objects.filter(id=int(buyerLead["categoryID"]))
 
 			if len(categoryPtr) == 0:
@@ -103,7 +103,7 @@ def update_buyer_lead(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyerLead) or not "buyerleadID" in buyerLead or buyerLead["buyerleadID"]==None or not validate_integer(buyerLead["buyerleadID"]):
+	if not len(buyerLead) or not "buyerleadID" in buyerLead or not validate_integer(buyerLead["buyerleadID"]):
 		return customResponse("4XX", {"error": "Id for buyer lead not sent"})
 
 	buyerLeadPtr = BuyerLeads.objects.filter(id=int(buyerLead["buyerleadID"]))
