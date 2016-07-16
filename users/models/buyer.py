@@ -249,9 +249,10 @@ class BuyerProductResponseHistory(models.Model):
 		return str(self.id)
 
 BuyerProductResponseHistoryCodes = {
-	1:{"display_value":"Shortlisted"},
-	2:{"display_value":"Disliked"},
-	3:{"display_value":"Dislike to shortlist"}
+	1:{"display_value":"Like"},
+	2:{"display_value":"Dislike"},
+	3:{"display_value":"Dislike to Like"},
+	4:{"display_value":"Like to Dislike"}
 }
 
 def validateBuyerData(buyer, oldbuyer, is_new):
@@ -330,10 +331,7 @@ def validateBuyerInterestData(buyer_interest, old_buyer_interest, is_new):
 
 def validateBuyerProductData(buyer_product, old_buyer_product, is_new, buyer_product_populator):
 
-	if old_buyer_product.responded == 1:
-		return False
-	
-	if "is_active" in buyer_product and buyer_product["is_active"] != None and validate_bool(buyer_product["is_active"]):
+	if "is_active" in buyer_product and validate_bool(buyer_product["is_active"]):
 		if int(buyer_product["is_active"]) != int(old_buyer_product.is_active) and old_buyer_product.responded == 0:
 			buyer_product_populator["is_active"] = int(buyer_product["is_active"])
 			return True
@@ -341,19 +339,26 @@ def validateBuyerProductData(buyer_product, old_buyer_product, is_new, buyer_pro
 	if old_buyer_product.is_active == 0:
 		return False
 
-	if "responded" in buyer_product and buyer_product["responded"] != None and validate_integer(buyer_product["responded"]):
+	if "responded" in buyer_product and validate_integer(buyer_product["responded"]):
 		if int(buyer_product["responded"]) == 1:
 			buyer_product_populator["shortlisted_time"] = datetime.datetime.now()
 			buyer_product_populator["responded"] = 1
-			if int(old_buyer_product.responded) == 2:
+			if old_buyer_product.responded == 2:
 				buyer_product_populator["response_code"] = 3
-			else:
+			elif old_buyer_product.responded == 0:
 				buyer_product_populator["response_code"] = 1
+			else:
+				return False
 			return True
-		elif int(buyer_product["responded"]) == 2 and old_buyer_product.responded == 0:
+		elif int(buyer_product["responded"]) == 2:
 			buyer_product_populator["disliked_time"] = datetime.datetime.now()
 			buyer_product_populator["responded"] = 2
-			buyer_product_populator["response_code"] = 2
+			if  old_buyer_product.responded == 0:
+				buyer_product_populator["response_code"] = 2
+			elif old_buyer_product.responded == 1:
+				buyer_product_populator["response_code"] = 4
+			else:
+				return False
 			return True
 
 	return False
@@ -519,7 +524,13 @@ def filterBuyerBuysFrom(parameters = {}):
 
 def filterBuyerProducts(parameters = {}):
 
-	buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
+	buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)\
+
+	if "buyerProductsArr" in parameters:
+		buyerProducts = buyerProducts.filter(id__in=parameters["buyerProductsArr"])
+
+	if "buyer_product_landing" in parameters and parameters["buyer_product_landing"] == 1:
+		return buyerProducts
 
 	if "buyer_interest_active" in parameters:
 		query = reduce(operator.or_, (Q(buyer_interest__is_active = item) for item in [None,parameters["buyer_interest_active"]]))
@@ -542,9 +553,6 @@ def filterBuyerProducts(parameters = {}):
 
 	if "buyersArr" in parameters:
 		buyerProducts = buyerProducts.filter(buyer_id__in=parameters["buyersArr"])
-
-	if "buyerProductsArr" in parameters:
-		buyerProducts = buyerProducts.filter(id__in=parameters["buyerProductsArr"])
 
 	if "buyerInterestArr" in parameters:
 		buyerProducts = buyerProducts.filter(buyer_interest_id__in=parameters["buyerInterestArr"])
