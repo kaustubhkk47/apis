@@ -76,7 +76,8 @@ def get_buyer_access_token_details(request,parameters = {}):
 		from urlHandlers.user_handler import getBuyerToken
 
 		response = {
-			"token" : getBuyerToken(buyerPtr)
+			"token" : getBuyerToken(buyerPtr),
+			"buyer": serialize_buyer(buyerPtr)
 		}
 		closeDBConnection()
 
