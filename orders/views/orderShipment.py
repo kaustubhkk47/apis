@@ -50,7 +50,7 @@ def post_new_order_shipment(request):
 	if not len(orderShipment) or not validateOrderShipmentData(orderShipment):
 		return customResponse("4XX", {"error": "Invalid data for order shipment sent"})
 
-	if not "suborderID" in orderShipment or orderShipment["suborderID"]==None or not validate_integer(orderShipment["suborderID"]):
+	if not "suborderID" in orderShipment or not validate_integer(orderShipment["suborderID"]):
 		return customResponse("4XX", {"error": "Id for sub order not sent"})
 
 	subOrderPtr = SubOrder.objects.filter(id=int(orderShipment["suborderID"])).select_related('order')
@@ -213,10 +213,10 @@ def update_order_shipment(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(orderShipment) or not "ordershipmentID" in orderShipment or orderShipment["ordershipmentID"]==None or not validate_integer(orderShipment["ordershipmentID"]):
+	if not len(orderShipment) or not "ordershipmentID" in orderShipment or not validate_integer(orderShipment["ordershipmentID"]):
 		return customResponse("4XX", {"error": "Id for order shipment not sent"})
 
-	if not "status" in orderShipment or orderShipment["status"]==None or not validate_integer(orderShipment["status"]):
+	if not "status" in orderShipment or not validate_integer(orderShipment["status"]):
 		return customResponse("4XX", {"error": "Current status not sent"})
 
 	status = int(orderShipment["status"])

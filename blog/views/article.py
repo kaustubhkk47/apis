@@ -43,7 +43,7 @@ def post_new_article(request):
 	if not len(article) or not validateArticleData(article, Article(), 1):
 		return customResponse("4XX", {"error": "Invalid data for article sent"})
 
-	if not "internaluserID" in article or article["internaluserID"]==None or not validate_integer(article["internaluserID"]):
+	if not "internaluserID" in article or not validate_integer(article["internaluserID"]):
 		return customResponse("4XX", {"error": "ID for author not sent"})
 
 	internalUserPtr = InternalUser.objects.filter(id=int(article["internaluserID"]))
@@ -75,7 +75,7 @@ def update_article(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(article) or not "articleID" in article or article["articleID"]==None or not validate_integer(article["articleID"]):
+	if not len(article) or not "articleID" in article or not validate_integer(article["articleID"]):
 		return customResponse("4XX", {"error": "Id for article not sent"})
 
 	articlePtr = Article.objects.filter(id=int(article["articleID"]))
@@ -108,7 +108,7 @@ def delete_article(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(article) or not "articleID" in article or article["articleID"]==None or not validate_integer(article["articleID"]):
+	if not len(article) or not "articleID" in article or not validate_integer(article["articleID"]):
 		return customResponse("4XX", {"error": "Id for article not sent"})
 
 	articlePtr = Article.objects.filter(id=int(article["articleID"]))

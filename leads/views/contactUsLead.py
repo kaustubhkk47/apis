@@ -73,7 +73,7 @@ def update_contactus_lead(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(contactusLead) or not "contactusleadID" in contactusLead or contactusLead["contactusleadID"]==None or not validate_integer(contactusLead["contactusleadID"]):
+	if not len(contactusLead) or not "contactusleadID" in contactusLead or not validate_integer(contactusLead["contactusleadID"]):
 		return customResponse("4XX", {"error": "Id for contactus lead not sent"})
 
 	contactusLeadPtr = ContactUsLead.objects.filter(id=int(contactusLead["contactusleadID"]))

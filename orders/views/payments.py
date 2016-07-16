@@ -69,7 +69,7 @@ def post_new_buyer_payment(request):
 	if not len(buyerPayment) or not validateBuyerPaymentData(buyerPayment):
 		return customResponse("4XX", {"error": "Invalid data for buyer payment sent"})
 
-	if not "orderID" in buyerPayment or buyerPayment["orderID"]==None or not validate_integer(buyerPayment["orderID"]):
+	if not "orderID" in buyerPayment or not validate_integer(buyerPayment["orderID"]):
 		return customResponse("4XX", {"error": "Id for order not sent"})
 
 	OrderPtr = Order.objects.filter(id=int(buyerPayment["orderID"]))
@@ -80,7 +80,7 @@ def post_new_buyer_payment(request):
 	OrderPtr = OrderPtr[0]
 
 	if int(buyerPayment["payment_method"]) == 0:
-		if not "ordershipmentID" in buyerPayment or buyerPayment["ordershipmentID"]==None or not validate_integer(buyerPayment["ordershipmentID"]):
+		if not "ordershipmentID" in buyerPayment or not validate_integer(buyerPayment["ordershipmentID"]):
 			return customResponse("4XX", {"error": "Id for order shipment not sent"})
 
 		OrderShipmentPtr = OrderShipment.objects.filter(id=int(buyerPayment["ordershipmentID"]))
@@ -124,7 +124,7 @@ def post_new_seller_payment(request):
 	if not len(sellerPayment) or not validateSellerPaymentData(sellerPayment):
 		return customResponse("4XX", {"error": "Invalid data for seller payment sent"})
 
-	if not "suborderID" in sellerPayment or sellerPayment["suborderID"]==None or not validate_integer(sellerPayment["suborderID"]):
+	if not "suborderID" in sellerPayment or not validate_integer(sellerPayment["suborderID"]):
 		return customResponse("4XX", {"error": "Id for suborder not sent"})
 
 	SubOrderPtr = SubOrder.objects.filter(id=int(sellerPayment["suborderID"]))

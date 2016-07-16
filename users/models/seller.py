@@ -114,15 +114,15 @@ def validateSellerData(seller, oldseller, isnew):
 		seller["password"] = oldseller.password
 	if not "alternate_phone_number" in seller or seller["alternate_phone_number"]==None:
 		seller["alternate_phone_number"] = oldseller.alternate_phone_number
-	if not "mobile_verification" in seller or seller["mobile_verification"]==None or not validate_bool(seller["mobile_verification"]):
+	if not "mobile_verification" in seller or not validate_bool(seller["mobile_verification"]):
 		seller["mobile_verification"] = oldseller.mobile_verification
-	if not "email_verification" in seller or seller["email_verification"]==None or not validate_bool(seller["email_verification"]):
+	if not "email_verification" in seller or not validate_bool(seller["email_verification"]):
 		seller["email_verification"] = oldseller.email_verification
 	if not "company_profile" in seller or seller["company_profile"]==None:
 		seller["company_profile"] = oldseller.company_profile
 	if not "seller_conditions" in seller or seller["seller_conditions"]==None:
 		seller["seller_conditions"] = oldseller.seller_conditions
-	if not "show_online" in seller or seller["show_online"]==None or not validate_bool(seller["show_online"]):
+	if not "show_online" in seller or not validate_bool(seller["show_online"]):
 		seller["show_online"] = oldseller.show_online
 	if not "concerned_person" in seller or seller["concerned_person"]==None:
 		seller["concerned_person"] = oldseller.concerned_person
@@ -162,9 +162,9 @@ def validateSellerDetailsData(sellerdetails, oldsellerdetails):
 		sellerdetails["name_on_pan"] = oldsellerdetails.name_on_pan
 	if not "dob_on_pan" in sellerdetails or sellerdetails["dob_on_pan"]==None or not validate_date(sellerdetails["dob_on_pan"]):
 		sellerdetails["dob_on_pan"] = oldsellerdetails.dob_on_pan
-	if not "pan_verification" in sellerdetails or sellerdetails["pan_verification"]==None or not validate_bool(sellerdetails["pan_verification"]):
+	if not "pan_verification" in sellerdetails or not validate_bool(sellerdetails["pan_verification"]):
 		sellerdetails["pan_verification"] = oldsellerdetails.pan_verification
-	if not "tin_verification" in sellerdetails or sellerdetails["tin_verification"]==None or not validate_bool(sellerdetails["tin_verification"]):
+	if not "tin_verification" in sellerdetails or not validate_bool(sellerdetails["tin_verification"]):
 		sellerdetails["tin_verification"] = oldsellerdetails.tin_verification
 
 def validateSellerBankdetailsData(sellerbankdetails, oldsellerbankdetails):
