@@ -259,9 +259,13 @@ def populateBuyerProductParameters(request, parameters = {}, version = "0"):
 	buyerProductID = request.GET.get("buyerproductID", "")
 	buyerInterestID = request.GET.get("buyerinterestID", "")
 	productID = request.GET.get("productID", "")
+	landing = request.GET.get("landing", "")
 	
 	if validate_bool(isActive):
 		parameters["buyer_product_is_active"] = int(isActive)
+
+	if validate_bool(landing):
+		parameters["buyer_product_landing"] = int(landing)
 
 	if validate_integer(responded):
 		parameters["responded"] = int(responded)
