@@ -5,8 +5,8 @@ from address.models.pincode import Pincode
 
 class PincodeServiceability(models.Model):
 
-	logistics_partner = models.ForeignKey(LogisticsPartner)
-	pincode = models.ForeignKey(Pincode)
+	logistics_partner = models.ForeignKey('logistics.LogisticsPartner')
+	pincode = models.ForeignKey('address.Pincode')
 
 	delivery_available = models.BooleanField(default=False)
 	pickup_available = models.BooleanField(default=False)

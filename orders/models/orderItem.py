@@ -10,7 +10,7 @@ from catalog.models.product import Product
 class OrderItem(models.Model):
 
     suborder = models.ForeignKey('orders.SubOrder')
-    product = models.ForeignKey(Product)
+    product = models.ForeignKey('catalog.Product')
     order_shipment = models.ForeignKey('orders.OrderShipment',null=True,blank=True)
     seller_payment = models.ForeignKey('orders.SellerPayment',null=True,blank=True)
 

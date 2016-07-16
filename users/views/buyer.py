@@ -420,6 +420,37 @@ def post_new_buyer_product(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer_product":"successfully added"})
 
+def post_new_buyer_panel_tracking(request):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer) or not "buyerID" in buyer or not validate_integer(buyer["buyerID"]):
+		return customResponse("4XX", {"error": "Id for buyer not sent"})
+
+	buyerPtr = Buyer.objects.filter(id=int(buyer["buyerID"]))
+
+	if len(buyerPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
+
+	buyerPtr = buyerPtr[0]
+
+	if not "page_closed" in buyer or not validate_integer(buyer["page_closed"]):
+		return customResponse("4XX", {"error": "Page number not sent"})
+	try:
+		newBuyerPanelInstructionsTracking = BuyerPanelInstructionsTracking(buyer=buyerPtr, page_closed=int(buyer["page_closed"]))
+		newBuyerPanelInstructionsTracking.save()
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to create entry in db"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer_product_tracking":"successfully added"})
+
 def update_buyer_interest(request):
 	try:
 		requestbody = request.body.decode("utf-8")

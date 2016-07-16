@@ -17,7 +17,7 @@ from scripts.utils import validate_integer, validate_number
 
 class Order(models.Model):
 
-	buyer = models.ForeignKey(Buyer)
+	buyer = models.ForeignKey('users.Buyer')
 
 	pieces = models.PositiveIntegerField(default=1)
 	product_count = models.PositiveIntegerField(default=1)
@@ -90,7 +90,7 @@ def validateOrderProductsData(orderProducts):
 
 		if not "pieces" in orderProduct or not validate_integer(orderProduct["pieces"]):
 			return False
-		if not "edited_price_per_piece" in orderProduct or orderProduct["edited_price_per_piece"]==None or not validate_number(orderProduct["edited_price_per_piece"]):
+		if not "edited_price_per_piece" in orderProduct or not validate_number(orderProduct["edited_price_per_piece"]):
 			return False
 		if not "remarks" in orderProduct or orderProduct["remarks"]==None:
 			orderProduct["remarks"] = ""

@@ -7,8 +7,8 @@ from scripts.utils import validate_bool
 
 class BuyerLeads(models.Model):
 
-	product = models.ForeignKey(Product, blank = True, null=True)
-	category = models.ForeignKey(Category, blank = True, null=True)
+	product = models.ForeignKey('catalog.Product', blank = True, null=True)
+	category = models.ForeignKey('catalog.Category', blank = True, null=True)
 
 	name = models.CharField(max_length=200, blank=True)
 	email = models.EmailField(max_length=255, blank=True)

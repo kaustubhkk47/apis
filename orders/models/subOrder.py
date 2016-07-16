@@ -11,7 +11,7 @@ from decimal import Decimal
 class SubOrder(models.Model):
 
     order = models.ForeignKey('orders.Order')
-    seller = models.ForeignKey(Seller)
+    seller = models.ForeignKey('users.Seller')
 
     pieces = models.PositiveIntegerField(default=1)
     product_count = models.PositiveIntegerField(default=1)

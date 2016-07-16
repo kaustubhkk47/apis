@@ -6,7 +6,7 @@ from decimal import Decimal
 from scripts.utils import validate_number, validate_integer, validate_bool
 
 class ProductLot(models.Model):
-    product = models.ForeignKey(Product)
+    product = models.ForeignKey('catalog.Product')
 
     lot_size_from = models.IntegerField()
     lot_size_to = models.IntegerField()
@@ -27,7 +27,7 @@ def validateProductLotData(product_lots):
 			flag = 0
 		if not "lot_size_to" in product_lot or not validate_integer(product_lot["lot_size_to"]):
 			flag = 0
-		if not "price_per_unit" in product_lot or product_lot["price_per_unit"]==None or not validate_number(product_lot["price_per_unit"]):
+		if not "price_per_unit" in product_lot or not validate_number(product_lot["price_per_unit"]):
 			flag = 0
 
 	return flag

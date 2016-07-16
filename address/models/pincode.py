@@ -4,7 +4,7 @@ from .city import City
 
 class Pincode(models.Model):
 
-	city = models.ForeignKey(City,blank=True, null=True)
+	city = models.ForeignKey('address.City',blank=True, null=True)
 
 	pincode = models.CharField(max_length=15, blank=False)
 	city_name = models.CharField(max_length=50, blank=False)

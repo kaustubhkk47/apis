@@ -16,13 +16,13 @@ class OrderShipment(models.Model):
 
     suborder = models.ForeignKey('orders.SubOrder')
 
-    pickup_address = models.ForeignKey(SellerAddress)
-    drop_address = models.ForeignKey(BuyerAddress)
+    pickup_address = models.ForeignKey('users.SellerAddress')
+    drop_address = models.ForeignKey('users.BuyerAddress')
 
     invoice_number = models.CharField(max_length=50, blank=True)
     invoice_date = models.DateTimeField(blank=True, null=True)
 
-    logistics_partner = models.ForeignKey(LogisticsPartner, blank=True, null =True)
+    logistics_partner = models.ForeignKey('logistics.LogisticsPartner', blank=True, null =True)
     logistics_partner_name = models.CharField(max_length=50, blank=True,null=True)
     waybill_number = models.CharField(max_length=50, blank=True,null=True)
 
@@ -74,17 +74,17 @@ def validateOrderShipmentData(orderShipment):
         flag = False
     if not "waybill_number" in orderShipment or orderShipment["waybill_number"]==None:
         orderShipment["waybill_number"] = ""
-    if not "packaged_weight" in orderShipment or orderShipment["packaged_weight"]==None or not validate_number(orderShipment["packaged_weight"]):
+    if not "packaged_weight" in orderShipment or not validate_number(orderShipment["packaged_weight"]):
         flag = False
-    if not "packaged_length" in orderShipment or orderShipment["packaged_length"]==None or not validate_number(orderShipment["packaged_length"]):
+    if not "packaged_length" in orderShipment or not validate_number(orderShipment["packaged_length"]):
         flag = False
-    if not "packaged_breadth" in orderShipment or orderShipment["packaged_breadth"]==None or not validate_number(orderShipment["packaged_breadth"]):
+    if not "packaged_breadth" in orderShipment or not validate_number(orderShipment["packaged_breadth"]):
         flag = False
-    if not "packaged_height" in orderShipment or orderShipment["packaged_height"]==None or not validate_number(orderShipment["packaged_height"]):
+    if not "packaged_height" in orderShipment  or not validate_number(orderShipment["packaged_height"]):
         flag = False
-    if not "cod_charge" in orderShipment or orderShipment["cod_charge"]==None or not validate_number(orderShipment["cod_charge"]):
+    if not "cod_charge" in orderShipment or not validate_number(orderShipment["cod_charge"]):
         flag = False
-    if not "shipping_charge" in orderShipment or orderShipment["shipping_charge"]==None or not validate_number(orderShipment["shipping_charge"]):
+    if not "shipping_charge" in orderShipment or not validate_number(orderShipment["shipping_charge"]):
         flag = False
     if not "remarks" in orderShipment or orderShipment["remarks"]==None:
         orderShipment["remarks"] = ""

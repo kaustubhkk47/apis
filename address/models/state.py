@@ -4,7 +4,7 @@ from .country import Country
 
 class State(models.Model):
 
-	country = models.ForeignKey(Country,blank=True, null=True)
+	country = models.ForeignKey('address.Country',blank=True, null=True)
 
 	name = models.CharField(max_length=50, blank=False)
 	short_form = models.CharField(max_length=10, blank=True)

@@ -17,6 +17,7 @@ admin.site.register(BuyerProductResponseHistory)
 admin.site.register(BuyerBuysFrom)
 admin.site.register(BuyerPurchasingState)
 admin.site.register(BuyerProductLanding)
+admin.site.register(BuyerPanelInstructionsTracking)
 
 admin.site.register(Seller,SellerAdmin)
 admin.site.register(SellerAddress)

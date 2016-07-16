@@ -4,7 +4,7 @@ from .state import State
 
 class City(models.Model):
 
-	state = models.ForeignKey(State,blank=True, null=True)
+	state = models.ForeignKey('address.State',blank=True, null=True)
 
 	name = models.CharField(max_length=50, blank=False)
 	state_name = models.CharField(max_length=50, blank=False)

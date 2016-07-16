@@ -13,8 +13,8 @@ from decimal import Decimal
 
 class BuyerPayment(models.Model):
 
-	order = models.ForeignKey(Order)
-	order_shipment = models.ForeignKey(OrderShipment,null=True,blank=True)
+	order = models.ForeignKey('orders.Order')
+	order_shipment = models.ForeignKey('orders.OrderShipment',null=True,blank=True)
 
 	payment_status = models.IntegerField(default=0)
 	payment_method = models.IntegerField(default = 0)
@@ -35,7 +35,7 @@ class BuyerPayment(models.Model):
 
 class SellerPayment(models.Model):
 
-	suborder = models.ForeignKey(SubOrder)
+	suborder = models.ForeignKey('orders.SubOrder')
 
 	payment_status = models.IntegerField(default=0)
 	payment_method = models.IntegerField(default=0)
@@ -62,9 +62,9 @@ def validateBuyerPaymentData(buyerPayment):
 		return False
 	if not "details" in buyerPayment or buyerPayment["details"]==None:
 		buyerPayment["details"] = ""
-	if not "payment_time" in buyerPayment or buyerPayment["payment_time"]==None or not validate_date_time(buyerPayment["payment_time"]):
+	if not "payment_time" in buyerPayment or not validate_date_time(buyerPayment["payment_time"]):
 		return False
-	if not "payment_value" in buyerPayment or buyerPayment["payment_value"]==None or not validate_number(buyerPayment["payment_value"]):
+	if not "payment_value" in buyerPayment or not validate_number(buyerPayment["payment_value"]):
 		return False
 	if not "fully_paid" in buyerPayment or not validate_bool(buyerPayment["fully_paid"]):
 		return False
@@ -87,9 +87,9 @@ def validateSellerPaymentData(sellerPayment):
 		return False
 	if not "details" in sellerPayment or sellerPayment["details"]==None:
 		sellerPayment["details"] = ""
-	if not "payment_time" in sellerPayment or sellerPayment["payment_time"]==None or not validate_date_time(sellerPayment["payment_time"]):
+	if not "payment_time" in sellerPayment or not validate_date_time(sellerPayment["payment_time"]):
 		return False
-	if not "payment_value" in sellerPayment or sellerPayment["payment_value"]==None or not validate_number(sellerPayment["payment_value"]):
+	if not "payment_value" in sellerPayment or not validate_number(sellerPayment["payment_value"]):
 		return False
 	if not "fully_paid" in sellerPayment or not validate_bool(sellerPayment["fully_paid"]):
 		return False

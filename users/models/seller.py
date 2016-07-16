@@ -39,8 +39,8 @@ class SellerAdmin(admin.ModelAdmin):
 	exclude = ('password',)
 
 class SellerAddress(models.Model):
-	seller = models.ForeignKey(Seller)
-	pincode = models.ForeignKey(Pincode, blank=True,null=True)
+	seller = models.ForeignKey('users.Seller')
+	pincode = models.ForeignKey('address.Pincode', blank=True,null=True)
 
 	address_line = models.CharField(max_length=255, blank=True, null=False)
 	landmark = models.CharField(max_length=50, blank=True)
@@ -58,8 +58,8 @@ class SellerAddress(models.Model):
 
 class SellerDetails(models.Model):
 
-	seller = models.OneToOneField(Seller)
-	seller_type = models.ForeignKey(BusinessType,blank=True, null=True)
+	seller = models.OneToOneField('users.Seller')
+	seller_type = models.ForeignKey('users.BusinessType',blank=True, null=True)
 
 	vat_tin = models.CharField(max_length=20, blank=True)
 	cst = models.CharField(max_length=20, blank=True)
@@ -79,7 +79,7 @@ class SellerDetails(models.Model):
 
 class SellerBankDetails(models.Model):
 
-	seller = models.ForeignKey(Seller)
+	seller = models.ForeignKey('users.Seller')
 
 	account_holders_name = models.CharField(max_length=100, blank=True)
 	account_number = models.CharField(max_length=18, blank=True)

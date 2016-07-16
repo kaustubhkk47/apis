@@ -16,7 +16,7 @@ from django.db.models import Q
 
 class Product(models.Model):
     seller = models.ForeignKey('users.Seller')
-    category = models.ForeignKey(Category)
+    category = models.ForeignKey('catalog.Category')
 
     name = models.CharField(max_length=255, blank=False)
 
@@ -101,19 +101,19 @@ def validateProductData(product, oldproduct, is_new):
     if not "name" in product or product["name"]==None:
         flag = 1
         product["name"] = oldproduct.name
-    if not "price_per_unit" in product or product["price_per_unit"]==None or not validate_number(product["price_per_unit"]):
+    if not "price_per_unit" in product or not validate_number(product["price_per_unit"]):
         flag = 1
         product["price_per_unit"] = oldproduct.price_per_unit
     if not "unit" in product or product["unit"]==None:
         product["unit"] = oldproduct.unit
-    if not "tax" in product or product["tax"]==None or not validate_number(product["tax"]):
+    if not "tax" in product or not validate_number(product["tax"]):
         product["tax"] = oldproduct.tax
-    if not "min_price_per_unit" in product or product["min_price_per_unit"]==None or not validate_number(product["min_price_per_unit"]):
+    if not "min_price_per_unit" in product or not validate_number(product["min_price_per_unit"]):
         product["min_price_per_unit"] = oldproduct.min_price_per_unit
     if not "lot_size" in product or not validate_integer(product["lot_size"]):
         flag = 1
         product["lot_size"] = oldproduct.lot_size
-    if not "price_per_lot" in product or product["price_per_lot"]==None or not validate_number(product["price_per_lot"]):
+    if not "price_per_lot" in product or not validate_number(product["price_per_lot"]):
         flag = 1
         product["price_per_lot"] = oldproduct.price_per_lot
     if not "verification" in product or not validate_bool(product["verification"]):
@@ -179,13 +179,13 @@ def validateProductDetailsData(productdetails, oldproductdetails):
         productdetails["manufactured_city"] = oldproductdetails.manufactured_city
     if not "lot_description" in productdetails or productdetails["lot_description"]==None:
         productdetails["lot_description"] = oldproductdetails.lot_description
-    if not "weight_per_unit" in productdetails or productdetails["weight_per_unit"]==None or not validate_number(productdetails["weight_per_unit"]):
+    if not "weight_per_unit" in productdetails or not validate_number(productdetails["weight_per_unit"]):
         productdetails["weight_per_unit"] = oldproductdetails.weight_per_unit
     if not "sample_type" in productdetails or productdetails["sample_type"]==None:
         productdetails["sample_type"] = oldproductdetails.sample_type
     if not "sample_description" in productdetails or productdetails["sample_description"]==None:
         productdetails["sample_description"] = oldproductdetails.sample_description
-    if not "sample_price" in productdetails or productdetails["sample_price"]==None or not validate_number(productdetails["sample_price"]):
+    if not "sample_price" in productdetails or not validate_number(productdetails["sample_price"]):
         productdetails["sample_price"] = oldproductdetails.sample_price
 
 def populateProductData(productPtr, product):
