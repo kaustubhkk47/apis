@@ -23,9 +23,9 @@ def validateProductLotData(product_lots):
 	flag = 1
 	for i in range(len(product_lots)):
 		product_lot = product_lots[i]
-		if not "lot_size_from" in product_lot or product_lot["lot_size_from"]==None or not validate_integer(product_lot["lot_size_from"]):
+		if not "lot_size_from" in product_lot or not validate_integer(product_lot["lot_size_from"]):
 			flag = 0
-		if not "lot_size_to" in product_lot or product_lot["lot_size_to"]==None or not validate_integer(product_lot["lot_size_to"]):
+		if not "lot_size_to" in product_lot or not validate_integer(product_lot["lot_size_to"]):
 			flag = 0
 		if not "price_per_unit" in product_lot or product_lot["price_per_unit"]==None or not validate_number(product_lot["price_per_unit"]):
 			flag = 0

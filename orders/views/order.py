@@ -44,7 +44,7 @@ def post_new_order(request):
 	if not len(order):
 		return customResponse("4XX", {"error": "Invalid data for order sent"})
 
-	if not "buyerID" in order or order["buyerID"]==None or not validate_integer(order["buyerID"]):
+	if not "buyerID" in order or not validate_integer(order["buyerID"]):
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
 	buyerPtr = Buyer.objects.filter(id=int(order["buyerID"]))

@@ -50,7 +50,7 @@ def validateArticleData(article, old_article, is_new):
     if not "content" in article or article["content"]==None:
         flag = 1
         article["content"] = old_article.content
-    if not "show_online" in article or article["show_online"]==None or not validate_bool(article["show_online"]):
+    if not "show_online" in article or not validate_bool(article["show_online"]):
         article["show_online"] = old_article.show_online
     if not "linkedin_pulse_link" in article or article["linkedin_pulse_link"]==None:
         article["linkedin_pulse_link"] = old_article.linkedin_pulse_link
