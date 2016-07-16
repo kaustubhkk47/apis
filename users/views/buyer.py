@@ -490,7 +490,7 @@ def update_buyer_product(request):
 	buyerProductPtr = BuyerProducts.objects.filter(id=int(buyer_product["buyerproductID"]))
 
 	if len(buyerProductPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid id product for buyer sent"})
+		return customResponse("4XX", {"error": "Invalid id for buyer product sent"})
 
 	buyerProductPtr = buyerProductPtr[0]
 
@@ -513,13 +513,13 @@ def update_buyer_product(request):
 				newBuyerProductResponse = BuyerProductResponse(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id,buyer_product_id=buyerProductPtr.id)
 				populateBuyerProductResponse(newBuyerProductResponse, buyer_product_populator)
 				newBuyerProductResponse.save()
-			elif buyer_product_populator["response_code"] == 3:
+			else: 
 				try:
 					BuyerProductResponsePtr = BuyerProductResponse.objects.filter(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id)
-					if len(BuyerProductResponsePtr) > 0:
-						BuyerProductResponsePtr = BuyerProductResponsePtr[0]
-						BuyerProductResponsePtr.response_code = 1
-						BuyerProductResponsePtr.save()
+					if buyer_product_populator["response_code"] == 3:
+						BuyerProductResponsePtr.update(response_code=1)
+					elif buyer_product_populator["response_code"] == 4:
+						BuyerProductResponsePtr.update(response_code=2)
 				except Exception as e:
 					pass
 
