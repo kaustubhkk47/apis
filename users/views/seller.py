@@ -104,7 +104,7 @@ def post_new_seller(request):
 		subject = str(newSeller.name) + " congratulations on your successful registration as a seller"
 		to = [seller_email]
 		from_email = "Wholdus Info <info@wholdus.com>"
-		attachment = "/home/probzip/webapps/wholdus_website/build/files/SellerTNC.pdf"
+		#attachment = "/home/probzip/webapps/wholdus_website/build/files/SellerTNC.pdf"
 
 		create_email(mail_template_file,mail_dict,subject,from_email,to,attachment)		
 

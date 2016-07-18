@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import admin
 
 from .logisticspartner import LogisticsPartner
 from address.models.pincode import Pincode
@@ -16,4 +17,7 @@ class PincodeServiceability(models.Model):
 	cod_available = models.BooleanField(default=False)
 
 	def __unicode__(self):
-		return str(self.id) + " - " + self.pincode.pincode + " - delivery: " + str(self.delivery_available)
+		return self.pincode.pincode + " - " +  self.logistics_partner.name  + " - Delivery: " + str(self.delivery_available)
+
+class PincodeServiceabilityAdmin(admin.ModelAdmin):
+	search_fields = ["pincode__pincode"]
