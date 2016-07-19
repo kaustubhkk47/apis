@@ -6,7 +6,7 @@ from .models.buyerLeads import *
 from .models.contactUsLead import *
 from .models.sellerLeads import *
 
-admin.site.register(BuyerLeads)
-admin.site.register(ContactUsLead)
-admin.site.register(SellerLeads)
+admin.site.register(BuyerLeads, BuyerLeadsAdmin)
+admin.site.register(ContactUsLead, ContactUsLeadAdmin)
+admin.site.register(SellerLeads, SellerLeadsAdmin)
 

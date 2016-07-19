@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib import admin
 from users.models.seller import *
 from users.models.internalUser import *
 from users.models.buyer import *
@@ -8,13 +8,13 @@ from .orderShipment import OrderShipment
 from .order import Order
 from .orderItem import OrderItem
 
-from scripts.utils import validate_date_time, validate_integer, validate_number, validate_bool
+from scripts.utils import validate_date_time, validate_integer, validate_number, validate_bool, link_to_foreign_key
 from decimal import Decimal
 
 class BuyerPayment(models.Model):
 
-	order = models.ForeignKey(Order)
-	order_shipment = models.ForeignKey(OrderShipment,null=True,blank=True)
+	order = models.ForeignKey('orders.Order')
+	order_shipment = models.ForeignKey('orders.OrderShipment',null=True,blank=True)
 
 	payment_status = models.IntegerField(default=0)
 	payment_method = models.IntegerField(default = 0)
@@ -29,13 +29,29 @@ class BuyerPayment(models.Model):
 
 	class Meta:
 		ordering = ["-id"]
+		default_related_name = "buyerpayment"
+		verbose_name="Buyer Payment"
+		verbose_name_plural = "Buyer Payments"
 
 	def __unicode__(self):
-		return str(self.id) + " - " + self.order.display_number + " - " + self.order.buyer.name
+		return "{} - {} - {}".format(self.id,self.order.display_number,self.order.buyer.name)
+
+class BuyerPaymentAdmin(admin.ModelAdmin):
+	search_fields = ["order__display_number"]
+	list_display = ["id", "link_to_order","payment_status", "reference_number", "payment_value"]
+
+	list_display_links = ["id","link_to_order"]
+
+	list_filter = ["payment_status"]
+
+	def link_to_order(self, obj):
+		return link_to_foreign_key(obj, "order")
+	link_to_order.short_description = "Order"
+	link_to_order.allow_tags=True
 
 class SellerPayment(models.Model):
 
-	suborder = models.ForeignKey(SubOrder)
+	suborder = models.ForeignKey('orders.SubOrder')
 
 	payment_status = models.IntegerField(default=0)
 	payment_method = models.IntegerField(default=0)
@@ -50,9 +66,25 @@ class SellerPayment(models.Model):
 
 	class Meta:
 		ordering = ["-id"]
+		default_related_name = "sellerpayment"
+		verbose_name="Seller Payment"
+		verbose_name_plural = "Seller Payments"
 
 	def __unicode__(self):
-		return str(self.id) + " -" + self.suborder.display_number + " - " + self.suborder.seller.name
+		return "{} - {} - {}".format(self.id,self.suborder.display_number,self.suborder.seller.name)
+
+class SellerPaymentAdmin(admin.ModelAdmin):
+	search_fields = ["suborder__display_number"]
+	list_display = ["id", "link_to_suborder","payment_status", "reference_number", "payment_value"]
+
+	list_display_links = ["id","link_to_suborder"]
+
+	list_filter = ["payment_status"]
+
+	def link_to_suborder(self, obj):
+		return link_to_foreign_key(obj, "suborder")
+	link_to_suborder.short_description = "Suborder"
+	link_to_suborder.allow_tags=True
 
 def validateBuyerPaymentData(buyerPayment):
 
@@ -62,9 +94,9 @@ def validateBuyerPaymentData(buyerPayment):
 		return False
 	if not "details" in buyerPayment or buyerPayment["details"]==None:
 		buyerPayment["details"] = ""
-	if not "payment_time" in buyerPayment or buyerPayment["payment_time"]==None or not validate_date_time(buyerPayment["payment_time"]):
+	if not "payment_time" in buyerPayment or not validate_date_time(buyerPayment["payment_time"]):
 		return False
-	if not "payment_value" in buyerPayment or buyerPayment["payment_value"]==None or not validate_number(buyerPayment["payment_value"]):
+	if not "payment_value" in buyerPayment or not validate_number(buyerPayment["payment_value"]):
 		return False
 	if not "fully_paid" in buyerPayment or not validate_bool(buyerPayment["fully_paid"]):
 		return False
@@ -87,9 +119,9 @@ def validateSellerPaymentData(sellerPayment):
 		return False
 	if not "details" in sellerPayment or sellerPayment["details"]==None:
 		sellerPayment["details"] = ""
-	if not "payment_time" in sellerPayment or sellerPayment["payment_time"]==None or not validate_date_time(sellerPayment["payment_time"]):
+	if not "payment_time" in sellerPayment or not validate_date_time(sellerPayment["payment_time"]):
 		return False
-	if not "payment_value" in sellerPayment or sellerPayment["payment_value"]==None or not validate_number(sellerPayment["payment_value"]):
+	if not "payment_value" in sellerPayment or not validate_number(sellerPayment["payment_value"]):
 		return False
 	if not "fully_paid" in sellerPayment or not validate_bool(sellerPayment["fully_paid"]):
 		return False

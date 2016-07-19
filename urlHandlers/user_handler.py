@@ -17,7 +17,12 @@ import settings
 @csrf_exempt
 def user_details(request, version = "0"):
 
+	parameters = populateAllUserIDParameters(request, {}, version)
+
 	if request.method == "GET":
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0 and parameters["isSeller"]:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
 		return user.get_user_details(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
@@ -59,6 +64,18 @@ def buyer_details(request, version = "0"):
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return buyer.delete_buyer(request)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
+def buyer_panel_tracking_details(request, version = "0"):
+
+	buyerParameters = populateBuyerParameters(request, {}, version)
+
+	if request.method == "POST":
+		if buyerParameters["isBuyer"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return buyer.post_new_buyer_panel_tracking(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 

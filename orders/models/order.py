@@ -1,6 +1,7 @@
 from django.db import models
+from django.contrib import admin
 
-from scripts.utils import create_email
+from scripts.utils import create_email, link_to_foreign_key, validate_integer, validate_number
 
 from users.models.buyer import Buyer, BuyerAddress
 
@@ -13,11 +14,9 @@ from users.serializers.buyer import serialize_buyer_address
 from decimal import Decimal
 import math
 
-from scripts.utils import validate_integer, validate_number
-
 class Order(models.Model):
 
-	buyer = models.ForeignKey(Buyer)
+	buyer = models.ForeignKey('users.Buyer')
 
 	pieces = models.PositiveIntegerField(default=1)
 	product_count = models.PositiveIntegerField(default=1)
@@ -43,9 +42,25 @@ class Order(models.Model):
 
 	class Meta:
 		ordering = ["-id"]
+		default_related_name = "order"
+		verbose_name="Order"
+		verbose_name_plural = "Orders"
 
 	def __unicode__(self):
-		return str(self.id) + " - " + str(self.display_number) + " - " + self.buyer.name + " - Price: " + str(self.final_price)
+		return "{} - {} - {}".format(self.id,self.display_number,self.buyer.name)
+
+class OrderAdmin(admin.ModelAdmin):
+	search_fields = ["buyer__name", "display_number", "buyer__company_name", "buyer__mobile_number"]
+	list_display = ["id", "display_number", "link_to_buyer", "final_price", "pieces"]
+
+	list_display_links = ["display_number","link_to_buyer"]
+
+	list_filter = ["order_status", "order_payment_status"]
+
+	def link_to_buyer(self, obj):
+		return link_to_foreign_key(obj, "buyer")
+	link_to_buyer.short_description = "Buyer"
+	link_to_buyer.allow_tags=True
 
 def populateOrderData(orderPtr, order):
 	orderPtr.product_count = int(order["product_count"])
@@ -90,7 +105,7 @@ def validateOrderProductsData(orderProducts):
 
 		if not "pieces" in orderProduct or not validate_integer(orderProduct["pieces"]):
 			return False
-		if not "edited_price_per_piece" in orderProduct or orderProduct["edited_price_per_piece"]==None or not validate_number(orderProduct["edited_price_per_piece"]):
+		if not "edited_price_per_piece" in orderProduct or not validate_number(orderProduct["edited_price_per_piece"]):
 			return False
 		if not "remarks" in orderProduct or orderProduct["remarks"]==None:
 			orderProduct["remarks"] = ""

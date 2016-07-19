@@ -1,11 +1,12 @@
 from django.db import models
+from django.contrib import admin
 from scripts.utils import validate_bool
 
 class SellerLeads(models.Model):
 
 	company_name = models.CharField(max_length=200, blank=True)
 	email = models.EmailField(max_length=255, blank=True)
-	mobile_number = models.CharField(max_length=11, blank=True, db_index=True)
+	mobile_number = models.CharField(max_length=11, blank=True)
 
 	status = models.IntegerField(default=0)
 	comments = models.TextField(blank=True)
@@ -15,9 +16,19 @@ class SellerLeads(models.Model):
 
 	class Meta:
 		ordering = ["-id"]
+		default_related_name = "sellerlead"
+		verbose_name="Seller Lead"
+		verbose_name_plural = "Seller Leads"
 
 	def __unicode__(self):
-		return str(self.id) + " - " + self.mobile_number + " - " + self.company_name + " - " + self.email
+		return "{} - {} - {} - {}".format(self.id,self.mobile_number,self.company_name,self.email)
+
+class SellerLeadsAdmin(admin.ModelAdmin):
+
+	list_display = ["id", "mobile_number", "company_name", "email"]
+	list_filter = ["status"]
+
+	list_display_links = ["id", "mobile_number"]
 
 def validateSellerLeadData(sellerlead, oldsellerlead, is_new):
 
