@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import admin
 
 #from users.models import Seller
 from .category import Category
@@ -7,7 +8,7 @@ from decimal import Decimal
 import datetime
 import math
 
-from scripts.utils import validate_integer, validate_number, validate_bool, arrToFilename
+from scripts.utils import validate_integer, validate_number, validate_bool, arrToFilename, link_to_foreign_key
 
 import operator
 from django.db.models import Q
@@ -46,6 +47,9 @@ class Product(models.Model):
 	delete_status = models.BooleanField(default=False)
 	is_catalog = models.BooleanField(default=False)
 
+	def get_absolute_url(self):
+		return r"http://www.wholdus.com/{}-{}/{}-{}".format(self.category.slug,self.category.id,self.slug,self.id)
+
 	class Meta:
 		ordering = ["-id"]
 		default_related_name = "product"
@@ -53,7 +57,8 @@ class Product(models.Model):
 		verbose_name_plural = "Products"
 
 	def __unicode__(self):
-		return "{} - {} - {}".format(self.id,self.display_name,self.seller.name)
+		return "{} - {} - {}".format(self.id,self.name,self.seller.name)
+
 
 class ProductDetails(models.Model):
 
@@ -100,7 +105,47 @@ class ProductDetails(models.Model):
 		verbose_name_plural = "Product Details"
 
 	def __unicode__(self):
-		return str(self.product)
+		return "{} - {}".format(self.product.id,self.product.name)
+
+class ProductDetailsAdmin(admin.ModelAdmin):
+	search_fields = ["product__name", "product__category__name", "product__seller__name"]
+	list_display = ["id", "link_to_product"]
+
+	list_display_links = ["id","link_to_product"]
+
+	def link_to_product(self, obj):
+		return link_to_foreign_key(obj, "product")
+	link_to_product.short_description = "Product"
+	link_to_product.allow_tags=True
+
+class ProductDetailsInline(admin.StackedInline):
+	model = ProductDetails
+
+class ProductAdmin(admin.ModelAdmin):
+	search_fields = ["name", "category__name", "seller__name"]
+	list_display = ["id", "name", "link_to_seller", "link_to_category", "link_to_productdetails"]
+
+	list_display_links = ["name","link_to_seller", "link_to_category"]
+
+	list_filter = ["category", "seller", "verification", "show_online", "delete_status"]
+
+	def link_to_seller(self, obj):
+		return link_to_foreign_key(obj, "seller")
+	link_to_seller.short_description = "Seller"
+	link_to_seller.allow_tags=True
+
+	def link_to_category(self, obj):
+		return link_to_foreign_key(obj, "category")
+	link_to_category.short_description = "Category"
+	link_to_category.allow_tags=True
+
+	def link_to_productdetails(self, obj):
+		return link_to_foreign_key(obj, "productdetails")
+	link_to_productdetails.short_description = "Product Details"
+	link_to_productdetails.allow_tags=True
+	inlines = [ProductDetailsInline,]
+
+
 
 def validateProductData(product, oldproduct, is_new):
 

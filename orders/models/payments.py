@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib import admin
 from users.models.seller import *
 from users.models.internalUser import *
 from users.models.buyer import *
@@ -8,7 +8,7 @@ from .orderShipment import OrderShipment
 from .order import Order
 from .orderItem import OrderItem
 
-from scripts.utils import validate_date_time, validate_integer, validate_number, validate_bool
+from scripts.utils import validate_date_time, validate_integer, validate_number, validate_bool, link_to_foreign_key
 from decimal import Decimal
 
 class BuyerPayment(models.Model):
@@ -36,6 +36,19 @@ class BuyerPayment(models.Model):
 	def __unicode__(self):
 		return "{} - {} - {}".format(self.id,self.order.display_number,self.order.buyer.name)
 
+class BuyerPaymentAdmin(admin.ModelAdmin):
+	search_fields = ["order__display_number"]
+	list_display = ["id", "link_to_order","payment_status", "reference_number", "payment_value"]
+
+	list_display_links = ["id","link_to_order"]
+
+	list_filter = ["payment_status"]
+
+	def link_to_order(self, obj):
+		return link_to_foreign_key(obj, "order")
+	link_to_order.short_description = "Order"
+	link_to_order.allow_tags=True
+
 class SellerPayment(models.Model):
 
 	suborder = models.ForeignKey('orders.SubOrder')
@@ -59,6 +72,19 @@ class SellerPayment(models.Model):
 
 	def __unicode__(self):
 		return "{} - {} - {}".format(self.id,self.suborder.display_number,self.suborder.seller.name)
+
+class SellerPaymentAdmin(admin.ModelAdmin):
+	search_fields = ["suborder__display_number"]
+	list_display = ["id", "link_to_suborder","payment_status", "reference_number", "payment_value"]
+
+	list_display_links = ["id","link_to_suborder"]
+
+	list_filter = ["payment_status"]
+
+	def link_to_suborder(self, obj):
+		return link_to_foreign_key(obj, "suborder")
+	link_to_suborder.short_description = "Suborder"
+	link_to_suborder.allow_tags=True
 
 def validateBuyerPaymentData(buyerPayment):
 

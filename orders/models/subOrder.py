@@ -1,5 +1,6 @@
 from django.db import models
-from scripts.utils import create_email
+from django.contrib import admin
+from scripts.utils import create_email, link_to_foreign_key
 from users.models.seller import Seller
 from users.serializers.buyer import serialize_buyer_address
 #from orders.models.order import Order
@@ -45,7 +46,25 @@ class SubOrder(models.Model):
         verbose_name_plural = "Suborders"
 
     def __unicode__(self):
-        return "{} - {} - {} - Price: {}".format(self.id,self.display_number,self.seller.name,self.final_price)
+        return "{} - {} - {}".format(self.id,self.display_number,self.seller.name)
+
+class SubOrderAdmin(admin.ModelAdmin):
+    search_fields = ["seller__name", "display_number", "seller__company_name"]
+    list_display = ["id", "display_number", "link_to_seller", "link_to_order","final_price", "pieces"]
+
+    list_display_links = ["display_number","link_to_seller", "link_to_order"]
+
+    list_filter = ["suborder_status", "suborder_payment_status"]
+
+    def link_to_seller(self, obj):
+        return link_to_foreign_key(obj, "seller")
+    link_to_seller.short_description = "Seller"
+    link_to_seller.allow_tags=True
+
+    def link_to_order(self, obj):
+        return link_to_foreign_key(obj, "order")
+    link_to_order.short_description = "Order"
+    link_to_order.allow_tags=True
 
 def populateSubOrderData(subOrderPtr, subOrder,orderID):
     

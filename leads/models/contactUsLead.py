@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import admin
 
 from scripts.utils import validate_bool
 
@@ -22,6 +23,13 @@ class ContactUsLead(models.Model):
 
 	def __unicode__(self):
 		return "{} - {} - {}".format(self.id,self.mobile_number,self.email)
+
+class ContactUsLeadAdmin(admin.ModelAdmin):
+
+	list_display = ["id", "mobile_number", "email"]
+	list_filter = ["status"]
+
+	list_display_links = ["id", "mobile_number"]
 
 def validateContactUsLeadData(contactUsLead, oldcontactUsLead, is_new):
 

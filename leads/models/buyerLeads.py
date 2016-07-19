@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import admin
 
 from catalog.models.product import Product
 from catalog.models.category import Category
@@ -28,6 +29,13 @@ class BuyerLeads(models.Model):
 
 	def __unicode__(self):
 		return "{} - {} - {} - {}".format(self.id,self.mobile_number,self.name,self.email)
+
+class BuyerLeadsAdmin(admin.ModelAdmin):
+
+	list_display = ["id", "mobile_number", "name", "email"]
+	list_filter = ["status"]
+
+	list_display_links = ["id", "mobile_number"]
 
 def validateBuyerLeadData(buyerlead, oldbuyerlead, is_new):
 

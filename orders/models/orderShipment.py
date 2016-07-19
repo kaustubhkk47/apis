@@ -1,11 +1,11 @@
 from django.db import models
-
+from django.contrib import admin
 from users.models.buyer import BuyerAddress
 from users.models.seller import SellerAddress
 
 from .orderItem import OrderItem
 
-from scripts.utils import validate_date, validate_number, validate_bool, validate_integer
+from scripts.utils import validate_date, validate_number, validate_bool, validate_integer, link_to_foreign_key
 from decimal import Decimal
 import datetime
 
@@ -66,6 +66,29 @@ class OrderShipment(models.Model):
 
     def __unicode__(self):
         return "{} - {} - {}".format(self.id,self.suborder.display_number,self.suborder.seller.name)
+
+class OrderShipmentAdmin(admin.ModelAdmin):
+    search_fields = ["suborder__display_number"]
+    list_display = ["id","waybill_number", "link_to_suborder", "link_to_pickup_address", "link_to_drop_address", "final_price"]
+
+    list_display_links = ["waybill_number","link_to_suborder", "link_to_pickup_address", "link_to_drop_address"]
+
+    list_filter = ["current_status"]
+
+    def link_to_suborder(self, obj):
+        return link_to_foreign_key(obj, "suborder")
+    link_to_suborder.short_description = "Suborder"
+    link_to_suborder.allow_tags=True
+
+    def link_to_pickup_address(self, obj):
+        return link_to_foreign_key(obj, "pickup_address")
+    link_to_pickup_address.short_description = "Pickup Address"
+    link_to_pickup_address.allow_tags=True
+
+    def link_to_drop_address(self, obj):
+        return link_to_foreign_key(obj, "drop_address")
+    link_to_drop_address.short_description = "Drop Address"
+    link_to_drop_address.allow_tags=True
 
 def validateOrderShipmentData(orderShipment):
 

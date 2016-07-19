@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib import admin
-from scripts.utils import validate_date, validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer
+from scripts.utils import validate_date, validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, link_to_foreign_key
 
 from address.models.pincode import Pincode
 from .businessType import BusinessType
@@ -39,33 +39,7 @@ class Seller(models.Model):
 		ordering = ["-id"]
 
 	def __unicode__(self):
-		return "{} - {} - {} - {}".format(self.id,self.name,self.company_name,self.mobile_number)
-
-class SellerAdmin(admin.ModelAdmin):
-	exclude = ('password',)
-
-class SellerAddress(models.Model):
-	seller = models.ForeignKey('users.Seller')
-	pincode = models.ForeignKey('address.Pincode', blank=True,null=True)
-
-	address_line = models.CharField(max_length=255, blank=True, null=False)
-	landmark = models.CharField(max_length=50, blank=True)
-	city_name = models.CharField(max_length=50, blank=True)
-	state_name = models.CharField(max_length=50, blank=True)
-	country_name = models.CharField(max_length=50, blank=True, default="India")
-	contact_number = models.CharField(max_length=11, blank=True)
-	pincode_number = models.CharField(max_length=6, blank=True)
-
-	created_at = models.DateTimeField(auto_now_add=True)
-	updated_at = models.DateTimeField(auto_now=True)
-
-	class Meta:
-		default_related_name = "selleraddress"
-		verbose_name="Seller Address"
-		verbose_name_plural = "Seller Addresses"
-
-	def __unicode__(self):
-		return str(self.seller)
+		return "{} - {} - {}".format(self.id,self.name,self.company_name)
 
 class SellerDetails(models.Model):
 
@@ -92,6 +66,42 @@ class SellerDetails(models.Model):
 
 	def __unicode__(self):
 		return str(self.seller)
+
+
+class SellerDetailsInline(admin.StackedInline):
+	model = SellerDetails
+
+class SellerAdmin(admin.ModelAdmin):
+	exclude = ('password',)
+	list_display = ["id", "name", "company_name", "mobile_number", "email"]
+	list_display_links = ["name"]
+	list_filter = ["mobile_verification", "email_verification", "show_online", "delete_status", "test_seller"]
+	search_fields = ["name", "company_name", "mobile_number", "email"]
+	inlines = [SellerDetailsInline,]
+
+class SellerAddress(models.Model):
+	seller = models.ForeignKey('users.Seller')
+	pincode = models.ForeignKey('address.Pincode', blank=True,null=True)
+
+	address_line = models.CharField(max_length=255, blank=True, null=False)
+	landmark = models.CharField(max_length=50, blank=True)
+	city_name = models.CharField(max_length=50, blank=True)
+	state_name = models.CharField(max_length=50, blank=True)
+	country_name = models.CharField(max_length=50, blank=True, default="India")
+	contact_number = models.CharField(max_length=11, blank=True)
+	pincode_number = models.CharField(max_length=6, blank=True)
+
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		default_related_name = "selleraddress"
+		verbose_name="Seller Address"
+		verbose_name_plural = "Seller Addresses"
+
+	def __unicode__(self):
+		return str(self.seller)
+
 
 class SellerBankDetails(models.Model):
 

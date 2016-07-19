@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import admin
 
 class Country(models.Model):
 
@@ -19,3 +20,7 @@ class Country(models.Model):
 
 	def __unicode__(self):
 		return "{} - {}".format(self.id,self.name)
+
+class CountryAdmin(admin.ModelAdmin):
+	list_display = ["id", "name"]
+	search_fields = ["name"]

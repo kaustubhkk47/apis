@@ -1,5 +1,6 @@
 from django.db import models
-from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString
+from django.contrib import admin
+from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString, link_to_foreign_key
 from decimal import Decimal
 import jwt as JsonWebToken
 import settings
@@ -33,7 +34,8 @@ class Buyer(models.Model):
 		ordering = ["-id"]
 
 	def __unicode__(self):
-		return "{} - {} - {} - {}".format(self.id,self.name,self.company_name,self.mobile_number)
+		return "{} - {} - {}".format(self.id,self.name,self.mobile_number)
+
 
 class BuyerAddress(models.Model):
 	buyer = models.ForeignKey('users.Buyer')
@@ -84,6 +86,17 @@ class BuyerDetails(models.Model):
 
 	def __unicode__(self):
 		return str(self.buyer)
+
+class BuyerDetailsInline(admin.StackedInline):
+	model = BuyerDetails
+
+class BuyerAdmin(admin.ModelAdmin):
+	list_display = ["id", "name", "company_name", "mobile_number", "email"]
+	list_filter = ["mobile_verification", "email_verification", "whatsapp_sharing_active", "delete_status", "test_buyer"]
+	search_fields = ["name", "company_name", "mobile_number", "email"]
+	list_display_links = ["name"]
+	inlines = [BuyerDetailsInline,]
+
 
 def validateBuyerData(buyer, oldbuyer, is_new):
 

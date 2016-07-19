@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib import admin
+from scripts.utils import link_to_foreign_key
 
 from .city import City
 
@@ -24,3 +25,11 @@ class Pincode(models.Model):
 
 class PincodeAdmin(admin.ModelAdmin):
 	search_fields = ["pincode", "city_name", "state_name"]
+	list_display = ["pincode", "link_to_city", "state_name"]
+
+	list_display_links = ["pincode","link_to_city"]
+	def link_to_city(self, obj):
+		return link_to_foreign_key(obj, "city")
+	link_to_city.short_description = "City"
+	
+	link_to_city.allow_tags=True

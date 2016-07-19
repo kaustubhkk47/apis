@@ -1,5 +1,6 @@
 from django.db import models
-from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString
+from django.contrib import admin
+from scripts.utils import *
 from decimal import Decimal
 import operator
 from django.db.models import Q
@@ -76,6 +77,24 @@ class BuyerProductResponse(models.Model):
 	def __unicode__(self):
 		return "{}".format(self.id)
 
+class BuyerProductResponseAdmin(admin.ModelAdmin):
+	search_fields = ["buyer_id", "buyer__name", "buyer__company_name", "buyer__mobile_number"]
+	list_display = ["id", "link_to_buyer", "link_to_product", "response_code","has_swiped", "created_at"]
+
+	list_display_links = ["id","link_to_buyer", "link_to_product"]
+
+	list_filter = ["response_code"]
+
+	def link_to_buyer(self, obj):
+		return link_to_foreign_key(obj, "buyer")
+	link_to_buyer.short_description = "Buyer"
+	link_to_buyer.allow_tags=True
+
+	def link_to_product(self, obj):
+		return link_to_foreign_key(obj, "product")
+	link_to_product.short_description = "Product"
+	link_to_product.allow_tags=True
+
 BuyerProductResponseCodes = {
 	1:{"display_value":"Shortlisted"},
 	2:{"display_value":"Disliked"}
@@ -98,6 +117,24 @@ class BuyerProductLanding(models.Model):
 
 	def __unicode__(self):
 		return "{}".format(self.id)
+
+class BuyerProductLandingAdmin(admin.ModelAdmin):
+	search_fields = ["buyer_id", "buyer__name", "buyer__company_name", "buyer__mobile_number"]
+	list_display = ["id", "link_to_buyer", "link_to_product", "created_at", "source"]
+
+	list_display_links = ["id","link_to_buyer", "link_to_product"]
+
+	list_filter = ["source"]
+
+	def link_to_buyer(self, obj):
+		return link_to_foreign_key(obj, "buyer")
+	link_to_buyer.short_description = "Buyer"
+	link_to_buyer.allow_tags=True
+
+	def link_to_product(self, obj):
+		return link_to_foreign_key(obj, "product")
+	link_to_product.short_description = "Product"
+	link_to_product.allow_tags=True
 
 BuyerProductLandingSource = {
 	1:{"display_value":"Whatsapp"}

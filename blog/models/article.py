@@ -1,6 +1,7 @@
 from django.db import models
+from django.contrib import admin
 
-from scripts.utils import validate_bool
+from scripts.utils import validate_bool, link_to_foreign_key
 
 class Article(models.Model):
 	author = models.ForeignKey('users.InternalUser', blank=True, null=True)
@@ -24,10 +25,21 @@ class Article(models.Model):
 		ordering = ['-id']
 		default_related_name = "article"
 		verbose_name="Article"
-		verbose_name_plural = "Artiles"
+		verbose_name_plural = "Articles"
 
 	def __unicode__(self):
 		return "{} - {} - {}".format(self.id,self.title,self.author.name)
+
+class ArticleAdmin(admin.ModelAdmin):
+	list_display = ["id", "title", "link_to_author"]
+	list_filter = ["author"]
+
+	list_display_links = ["title","link_to_author"]
+	def link_to_author(self, obj):
+		return link_to_foreign_key(obj, "author")
+	link_to_author.allow_tags=True
+	link_to_author.short_description = "Author"
+
 
 def filterArticles(parameters):
 	articles = Article.objects.filter(delete_status=False)

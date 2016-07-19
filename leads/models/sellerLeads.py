@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import admin
 from scripts.utils import validate_bool
 
 class SellerLeads(models.Model):
@@ -21,6 +22,13 @@ class SellerLeads(models.Model):
 
 	def __unicode__(self):
 		return "{} - {} - {} - {}".format(self.id,self.mobile_number,self.company_name,self.email)
+
+class SellerLeadsAdmin(admin.ModelAdmin):
+
+	list_display = ["id", "mobile_number", "company_name", "email"]
+	list_filter = ["status"]
+
+	list_display_links = ["id", "mobile_number"]
 
 def validateSellerLeadData(sellerlead, oldsellerlead, is_new):
 

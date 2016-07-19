@@ -1,5 +1,6 @@
 from django.db import models
-from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString
+from django.contrib import admin
+from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString, link_to_foreign_key
 from decimal import Decimal
 
 class BuyerInterest(models.Model):
@@ -32,6 +33,19 @@ class BuyerInterest(models.Model):
 
 	def __unicode__(self):
 		return "{} - {} - {} - {}".format(self.id,self.buyer.id,self.buyer.name,self.category.name)
+
+class BuyerInterestAdmin(admin.ModelAdmin):
+	search_fields = ["buyer__id","buyer__name", "buyer__company_name", "buyer__mobile_number"]
+	list_display = ["id", "link_to_buyer", "category", "min_price_per_unit", "max_price_per_unit","fabric_filter_text", "is_active", "delete_status"]
+
+	list_display_links = ["id","link_to_buyer"]
+
+	list_filter = ["is_active", "delete_status"]
+
+	def link_to_buyer(self, obj):
+		return link_to_foreign_key(obj, "buyer")
+	link_to_buyer.short_description = "Buyer"
+	link_to_buyer.allow_tags=True
 
 class BuyerInterestHistory(models.Model):
 

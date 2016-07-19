@@ -4,6 +4,8 @@ from django.contrib import admin
 from .logisticspartner import LogisticsPartner
 from address.models.pincode import Pincode
 
+from scripts.utils import link_to_foreign_key
+
 class PincodeServiceability(models.Model):
 
 	logistics_partner = models.ForeignKey('logistics.LogisticsPartner')
@@ -29,3 +31,12 @@ class PincodeServiceability(models.Model):
 
 class PincodeServiceabilityAdmin(admin.ModelAdmin):
 	search_fields = ["pincode__pincode"]
+	list_display = ["id", "link_to_pincode", "logistics_partner", "regular_delivery_available", "cod_available"]
+	list_filter = ["logistics_partner", "regular_delivery_available", "cod_available"]
+
+	list_display_links = ["id", "link_to_pincode"]
+
+	def link_to_pincode(self, obj):
+		return link_to_foreign_key(obj, "pincode")
+	link_to_pincode.short_description = "Pincode"
+	link_to_pincode.allow_tags=True

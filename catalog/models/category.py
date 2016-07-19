@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib import admin
 
 class Category(models.Model):
     name = models.CharField(max_length=50, blank=False)
@@ -21,6 +21,9 @@ class Category(models.Model):
 
     def __unicode__(self):
         return "{} - {}".format(self.id,self.display_name)
+
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ["id", "display_name"]
 
 
 def validateCategoryData(category, oldcategory, is_new):

@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib import admin
+from scripts.utils import link_to_foreign_key
 
 from .country import Country
 
@@ -21,6 +23,16 @@ class State(models.Model):
 
 	def __unicode__(self):
 		return "{} - {}".format(self.id,self.name)
+
+class StateAdmin(admin.ModelAdmin):
+	list_display = ["id", "name", "link_to_country"]
+	search_fields = ["name"]
+
+	list_display_links = ["name","link_to_country"]
+	def link_to_country(self, obj):
+		return link_to_foreign_key(obj, "country")
+	link_to_country.allow_tags=True
+	link_to_country.short_description = "State"
 
 def filterState(stateParameters):
 	states = State.objects.all()
