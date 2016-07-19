@@ -17,8 +17,13 @@ class InternalUser(models.Model):
 	linkedin_profile_link = models.TextField(blank=True,null=True)
 	facebook_profile_link = models.TextField(blank=True,null=True)
 
+	class Meta:
+		default_related_name = "internaluser"
+		verbose_name="Internal User"
+		verbose_name_plural = "Internal Users"
+
 	def __unicode__(self):
-		return str(self.id) + " - " + self.name
+		return "{} - {}".format(self.id,self.name)
 
 def filterInternalUser(parameters = {}):
 

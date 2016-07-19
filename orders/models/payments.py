@@ -29,9 +29,12 @@ class BuyerPayment(models.Model):
 
 	class Meta:
 		ordering = ["-id"]
+		default_related_name = "buyerpayment"
+		verbose_name="Buyer Payment"
+		verbose_name_plural = "Buyer Payments"
 
 	def __unicode__(self):
-		return str(self.id) + " - " + self.order.display_number + " - " + self.order.buyer.name
+		return "{} - {} - {}".format(self.id,self.order.display_number,self.order.buyer.name)
 
 class SellerPayment(models.Model):
 
@@ -50,9 +53,12 @@ class SellerPayment(models.Model):
 
 	class Meta:
 		ordering = ["-id"]
+		default_related_name = "sellerpayment"
+		verbose_name="Seller Payment"
+		verbose_name_plural = "Seller Payments"
 
 	def __unicode__(self):
-		return str(self.id) + " -" + self.suborder.display_number + " - " + self.suborder.seller.name
+		return "{} - {} - {}".format(self.id,self.suborder.display_number,self.suborder.seller.name)
 
 def validateBuyerPaymentData(buyerPayment):
 

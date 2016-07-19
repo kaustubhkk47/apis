@@ -26,8 +26,14 @@ class Buyer(models.Model):
 
 	test_buyer = models.BooleanField(default=False)
 
+	class Meta:
+		default_related_name = "buyer"
+		verbose_name="Buyer"
+		verbose_name_plural = "Buyers"
+		ordering = ["-id"]
+
 	def __unicode__(self):
-		return str(self.id) + " - " + self.name + " - " + self.company_name + " - " + self.mobile_number
+		return "{} - {} - {} - {}".format(self.id,self.name,self.company_name,self.mobile_number)
 
 class BuyerAddress(models.Model):
 	buyer = models.ForeignKey('users.Buyer')
@@ -45,8 +51,13 @@ class BuyerAddress(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	class Meta:
+		default_related_name = "buyeraddress"
+		verbose_name="Buyer Address"
+		verbose_name_plural = "Buyer Addresses"
+
 	def __unicode__(self):
-		return str(self.buyer.id) + " - " + self.buyer.name + " - " + self.buyer.company_name + " - " + self.buyer.mobile_number
+		return str(self.buyer)
 
 class BuyerDetails(models.Model):
 	buyer = models.OneToOneField('users.Buyer')
@@ -66,8 +77,13 @@ class BuyerDetails(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	class Meta:
+		default_related_name = "buyerdetails"
+		verbose_name="Buyer Details"
+		verbose_name_plural = "Buyer Details"
+
 	def __unicode__(self):
-		return str(self.buyer.id) + " - " + self.buyer.name + " - " + self.buyer.company_name + " - " + self.buyer.mobile_number
+		return str(self.buyer)
 
 def validateBuyerData(buyer, oldbuyer, is_new):
 

@@ -23,13 +23,13 @@ class OrderShipment(models.Model):
     invoice_date = models.DateTimeField(blank=True, null=True)
 
     logistics_partner = models.ForeignKey('logistics.LogisticsPartner', blank=True, null =True)
-    logistics_partner_name = models.CharField(max_length=50, blank=True,null=True)
-    waybill_number = models.CharField(max_length=50, blank=True,null=True)
+    logistics_partner_name = models.CharField(max_length=50, blank=True)
+    waybill_number = models.CharField(max_length=50, blank=True)
 
-    packaged_weight = models.DecimalField(max_digits=10, decimal_places=2,blank=True,null=True)
-    packaged_length = models.DecimalField(max_digits=10, decimal_places=2,blank=True,null=True)
-    packaged_breadth = models.DecimalField(max_digits=10, decimal_places=2,blank=True,null=True)
-    packaged_height = models.DecimalField(max_digits=10, decimal_places=2,blank=True,null=True)
+    packaged_weight = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+    packaged_length = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+    packaged_breadth = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+    packaged_height = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
 
     cod_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
     shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
@@ -49,9 +49,9 @@ class OrderShipment(models.Model):
     sent_for_pickup_time = models.DateTimeField(null=True, blank=True)
     lost_time = models.DateTimeField(null=True, blank=True)
 
-    tracking_url = models.URLField(null=True, blank=True)
+    tracking_url = models.URLField(blank=True)
 
-    rto_remarks = models.TextField(blank=True,null=True)
+    rto_remarks = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -60,9 +60,12 @@ class OrderShipment(models.Model):
 
     class Meta:
         ordering = ["-id"]
+        default_related_name = "ordershipment"
+        verbose_name="Order Shipment"
+        verbose_name_plural = "Order Shipments"
 
     def __unicode__(self):
-        return str(self.id) + " - " + self.suborder.display_number + " - " + self.suborder.seller.name
+        return "{} - {} - {}".format(self.id,self.suborder.display_number,self.suborder.seller.name)
 
 def validateOrderShipmentData(orderShipment):
 

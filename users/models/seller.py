@@ -32,8 +32,14 @@ class Seller(models.Model):
 
 	test_seller = models.BooleanField(default=False)
 
+	class Meta:
+		default_related_name = "seller"
+		verbose_name="Seller"
+		verbose_name_plural = "Sellers"
+		ordering = ["-id"]
+
 	def __unicode__(self):
-		return str(self.id) + " - " +self.name + " - " + self.company_name + " - " + self.mobile_number
+		return "{} - {} - {} - {}".format(self.id,self.name,self.company_name,self.mobile_number)
 
 class SellerAdmin(admin.ModelAdmin):
 	exclude = ('password',)
@@ -53,8 +59,13 @@ class SellerAddress(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	class Meta:
+		default_related_name = "selleraddress"
+		verbose_name="Seller Address"
+		verbose_name_plural = "Seller Addresses"
+
 	def __unicode__(self):
-		return str(self.seller.id) + " - " +self.seller.name + " - " + self.seller.company_name + " - " + self.seller.mobile_number
+		return str(self.seller)
 
 class SellerDetails(models.Model):
 
@@ -74,8 +85,13 @@ class SellerDetails(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	class Meta:
+		default_related_name = "sellerdetails"
+		verbose_name="Seller Details"
+		verbose_name_plural = "Seller Details"
+
 	def __unicode__(self):
-		return str(self.seller.id) + " - " +self.seller.name + " - " + self.seller.company_name + " - " + self.seller.mobile_number
+		return str(self.seller)
 
 class SellerBankDetails(models.Model):
 
@@ -93,9 +109,14 @@ class SellerBankDetails(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
-	def __unicode__(self):
-		return str(self.seller.id) + " - " +self.seller.name + " - " + self.seller.company_name + " - " + self.seller.mobile_number
+	class Meta:
+		default_related_name = "sellerbankdetails"
+		verbose_name="Seller Bank Details"
+		verbose_name_plural = "Seller Bank Details"
 
+	def __unicode__(self):
+		return str(self.seller)
+		
 def validateSellerData(seller, oldseller, isnew):
 
 	flag = 0

@@ -12,8 +12,13 @@ class BuyerPurchasingState(models.Model):
 
 	delete_status = models.BooleanField(default=False)
 
+	class Meta:
+		default_related_name = "buyerpurchasingstate"
+		verbose_name="Buyer Purchasing State"
+		verbose_name_plural = "Buyer Purchasing States"
+
 	def __unicode__(self):
-		return str(self.buyer.id) + " - " + self.buyer.name + " - " + self.state.name
+		return "{} - {} - {}".format(self.buyer.id,self.buyer.name,self.state.name)
 
 class BuyerBuysFrom(models.Model):
 
@@ -25,8 +30,13 @@ class BuyerBuysFrom(models.Model):
 
 	delete_status = models.BooleanField(default=False)
 
+	class Meta:
+		default_related_name = "buyerbuysfrom"
+		verbose_name="Buyer Buys From"
+		verbose_name_plural = "Buyer Buys From"
+
 	def __unicode__(self):
-		return str(self.buyer.id) + " - " + self.buyer.name + " - " + self.business_type.name
+		return "{} - {} - {}".format(self.buyer.id,self.buyer.name,self.business_type.business_type)
 
 class BuyerPanelInstructionsTracking(models.Model):
 
@@ -36,8 +46,13 @@ class BuyerPanelInstructionsTracking(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	class Meta:
+		default_related_name = "buyerpanelinstructionstracking"
+		verbose_name="Buyer Panel Instructions Tracking"
+		verbose_name_plural = "Buyer Panel Instructions Tracking"
+
 	def __unicode__(self):
-		return str(self.buyer.id)
+		return "{} - {}".format(self.buyer.id, self.page_closed)
 
 
 def filterBuyerPurchasingState(parameters = {}):

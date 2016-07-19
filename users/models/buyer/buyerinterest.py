@@ -25,8 +25,13 @@ class BuyerInterest(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	class Meta:
+		default_related_name = "buyerinterest"
+		verbose_name="Buyer Interest"
+		verbose_name_plural = "Buyer Interests"
+
 	def __unicode__(self):
-		return str(self.id) + " - " + str(self.buyer.id) + " - " + self.buyer.name + " - " + self.category.name
+		return "{} - {} - {} - {}".format(self.id,self.buyer.id,self.buyer.name,self.category.name)
 
 class BuyerInterestHistory(models.Model):
 
@@ -47,8 +52,13 @@ class BuyerInterestHistory(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	class Meta:
+		default_related_name = "buyerinteresthistory"
+		verbose_name="Buyer Interest History"
+		verbose_name_plural = "Buyer Interest History"
+
 	def __unicode__(self):
-		return str(self.id) + " - " + str(self.buyer_interest.id)
+		return "{} - {}".format(self.id,str(self.buyer_interest))
 
 def validateBuyerInterestData(buyer_interest, old_buyer_interest, is_new):
 

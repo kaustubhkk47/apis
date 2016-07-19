@@ -8,16 +8,21 @@ from scripts.utils import validate_number, validate_integer, validate_bool
 class ProductLot(models.Model):
     product = models.ForeignKey('catalog.Product')
 
-    lot_size_from = models.IntegerField()
-    lot_size_to = models.IntegerField()
+    lot_size_from = models.IntegerField(default=0)
+    lot_size_to = models.IntegerField(default=0)
 
     price_per_unit	 = models.DecimalField(max_digits=7, decimal_places=2)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        default_related_name = "productlot"
+        verbose_name="Product Lot"
+        verbose_name_plural = "Product Lots"
+
     def __unicode__(self):
-        return self.product.name
+        return "{}".format(self.product.name)
 
 def validateProductLotData(product_lots):
 	flag = 1

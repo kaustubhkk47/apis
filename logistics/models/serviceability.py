@@ -16,8 +16,16 @@ class PincodeServiceability(models.Model):
 	regular_pickup_available = models.BooleanField(default=False)
 	cod_available = models.BooleanField(default=False)
 
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		default_related_name = "pincodeserviceability"
+		verbose_name="Pincode Serviceability"
+		verbose_name_plural = "Pincode Serviceability"
+
 	def __unicode__(self):
-		return self.pincode.pincode + " - " +  self.logistics_partner.name  + " - Delivery: " + str(self.delivery_available)
+		return "{} - {} - Regular Delivery Available: {}".format(self.pincode.pincode,self.logistics_partner.name,self.regular_delivery_available)
 
 class PincodeServiceabilityAdmin(admin.ModelAdmin):
 	search_fields = ["pincode__pincode"]

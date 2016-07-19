@@ -12,7 +12,7 @@ class BuyerLeads(models.Model):
 
 	name = models.CharField(max_length=200, blank=True)
 	email = models.EmailField(max_length=255, blank=True)
-	mobile_number = models.CharField(max_length=11, blank=True, db_index=True)
+	mobile_number = models.CharField(max_length=11, blank=True)
 
 	status = models.IntegerField(default=0)
 	comments = models.TextField(blank=True)
@@ -22,9 +22,12 @@ class BuyerLeads(models.Model):
 
 	class Meta:
 		ordering = ["-id"]
+		default_related_name = "buyerlead"
+		verbose_name="Buyer Lead"
+		verbose_name_plural = "Buyer Leads"
 
 	def __unicode__(self):
-		return str(self.id) + " - " + self.mobile_number + " - " + self.name  + " - " + self.email
+		return "{} - {} - {} - {}".format(self.id,self.mobile_number,self.name,self.email)
 
 def validateBuyerLeadData(buyerlead, oldbuyerlead, is_new):
 

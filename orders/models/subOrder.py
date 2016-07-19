@@ -40,9 +40,12 @@ class SubOrder(models.Model):
 
     class Meta:
         ordering = ["-id"]
+        default_related_name = "suborder"
+        verbose_name="Suborder"
+        verbose_name_plural = "Suborders"
 
     def __unicode__(self):
-        return str(self.id) + " - " + str(self.display_number) + " - " + self.seller.name + " - Price: " + str(self.final_price)
+        return "{} - {} - {} - Price: {}".format(self.id,self.display_number,self.seller.name,self.final_price)
 
 def populateSubOrderData(subOrderPtr, subOrder,orderID):
     

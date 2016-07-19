@@ -43,9 +43,12 @@ class Order(models.Model):
 
 	class Meta:
 		ordering = ["-id"]
+		default_related_name = "order"
+		verbose_name="Order"
+		verbose_name_plural = "Orders"
 
 	def __unicode__(self):
-		return str(self.id) + " - " + str(self.display_number) + " - " + self.buyer.name + " - Price: " + str(self.final_price)
+		return "{} - {} - {} - Price: {}".format(self.id,self.display_number,self.buyer.name,self.final_price)
 
 def populateOrderData(orderPtr, order):
 	orderPtr.product_count = int(order["product_count"])

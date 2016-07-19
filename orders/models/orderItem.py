@@ -37,9 +37,12 @@ class OrderItem(models.Model):
 
     class Meta:
         ordering = ["-id"]
+        default_related_name = "orderitem"
+        verbose_name="Order Item"
+        verbose_name_plural = "Order Items"
 
     def __unicode__(self):
-        return str(self.id) + " - " + self.suborder.display_number + " - Price: " + str(self.final_price) + "-" + self.product.display_name + " - " + self.product.seller.name
+        return "{} - {} - Price: {} - {} - {}".format(self.id,self.suborder.display_number,self.final_price,self.product.display_name,self.product.seller.name)
 
 def populateOrderItemData(OrderItemPtr, orderItem):
     OrderItemPtr.pieces = int(orderItem["pieces"])

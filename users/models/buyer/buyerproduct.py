@@ -31,9 +31,12 @@ class BuyerProducts(models.Model):
 
 	class Meta:
 		ordering = ["-product__id"]
+		default_related_name = "buyerproduct"
+		verbose_name="Buyer Product"
+		verbose_name_plural = "Buyer Products"
 
 	def __unicode__(self):
-		return str(self.id) + " - " +  str(self.buyer.id) + " - " + self.buyer.name + " - " + str(self.product.id)
+		return "{} - {}".format(str(self.buyer),str(self.product))
 
 class BuyerSharedProductID(models.Model):
 
@@ -45,8 +48,13 @@ class BuyerSharedProductID(models.Model):
 
 	delete_status = models.BooleanField(default=False)
 
+	class Meta:
+		default_related_name = "buyersharedproductid"
+		verbose_name="Buyer Shared Product ID"
+		verbose_name_plural = "Buyer Shared Product IDs"
+
 	def __unicode__(self):
-		return str(self.id)
+		return "{}".format(self.id)
 
 class BuyerProductResponse(models.Model):
 	buyer = models.ForeignKey('users.Buyer')
@@ -60,8 +68,13 @@ class BuyerProductResponse(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	class Meta:
+		default_related_name = "buyerproductresponse"
+		verbose_name="Buyer Product Response"
+		verbose_name_plural = "Buyer Product Responses"
+
 	def __unicode__(self):
-		return str(self.id)
+		return "{}".format(self.id)
 
 BuyerProductResponseCodes = {
 	1:{"display_value":"Shortlisted"},
@@ -78,8 +91,13 @@ class BuyerProductLanding(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	class Meta:
+		default_related_name = "buyerproductlanding"
+		verbose_name="Buyer Product Landing"
+		verbose_name_plural = "Buyer Product Landings"
+
 	def __unicode__(self):
-		return str(self.id)
+		return "{}".format(self.id)
 
 BuyerProductLandingSource = {
 	1:{"display_value":"Whatsapp"}
@@ -97,8 +115,13 @@ class BuyerProductResponseHistory(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	class Meta:
+		default_related_name = "buyerproductresponsehistory"
+		verbose_name="Buyer Product Response History"
+		verbose_name_plural = "Buyer Product Response History"
+
 	def __unicode__(self):
-		return str(self.id)
+		return "{}".format(self.id)
 
 BuyerProductResponseHistoryCodes = {
 	1:{"display_value":"Like"},

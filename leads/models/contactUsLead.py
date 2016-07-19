@@ -5,7 +5,7 @@ from scripts.utils import validate_bool
 class ContactUsLead(models.Model):
 
 	email = models.EmailField(max_length=255, blank=True)
-	mobile_number = models.CharField(max_length=11, blank=True, db_index=True)
+	mobile_number = models.CharField(max_length=11, blank=True)
 	remarks = models.TextField(blank=True)
 
 	status = models.IntegerField(default=0)
@@ -16,9 +16,12 @@ class ContactUsLead(models.Model):
 
 	class Meta:
 		ordering = ["-id"]
+		default_related_name = "contactuslead"
+		verbose_name="Contact Us Lead"
+		verbose_name_plural = "Contact Us Leads"
 
 	def __unicode__(self):
-		return str(self.id) + " - " + self.mobile_number + " - " + self.email
+		return "{} - {} - {}".format(self.id,self.mobile_number,self.email)
 
 def validateContactUsLeadData(contactUsLead, oldcontactUsLead, is_new):
 
