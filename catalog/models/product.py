@@ -39,7 +39,7 @@ class Product(models.Model):
 	updated_at = models.DateTimeField(auto_now=True)
 	slug = models.CharField(max_length=100, blank=True)
 
-	display_name = models.TextField(blank=True)
+	display_name = models.TextField(blank=True, default="")
 
 	new_in_product_matrix = models.BooleanField(default=True)
 
@@ -62,7 +62,7 @@ class ProductDetails(models.Model):
 	seller_catalog_number = models.CharField(max_length=200, blank=True)
 	brand = models.CharField(max_length=100, blank=True)
 
-	description = models.TextField(blank=True)
+	description = models.TextField(blank=True, default="")
 	gender = models.CharField(max_length=20, blank=True)
 	pattern = models.CharField(max_length=40, blank=True)
 	style = models.CharField(max_length=40, blank=True)

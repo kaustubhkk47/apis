@@ -14,11 +14,11 @@ class Article(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
-	linkedin_pulse_link = models.TextField(blank=True)
-	medium_link = models.TextField(blank=True)
-	tumblr_link = models.TextField(blank=True)
-	quora_link = models.TextField(blank=True)
-	blogspot_link = models.TextField(blank=True)
+	linkedin_pulse_link = models.TextField(blank=True, default="")
+	medium_link = models.TextField(blank=True,default="")
+	tumblr_link = models.TextField(blank=True,default="")
+	quora_link = models.TextField(blank=True,default="")
+	blogspot_link = models.TextField(blank=True,default="")
 
 	class Meta:
 		ordering = ['-id']

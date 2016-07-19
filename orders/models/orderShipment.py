@@ -23,8 +23,8 @@ class OrderShipment(models.Model):
     invoice_date = models.DateTimeField(blank=True, null=True)
 
     logistics_partner = models.ForeignKey('logistics.LogisticsPartner', blank=True, null =True)
-    logistics_partner_name = models.CharField(max_length=50, blank=True)
-    waybill_number = models.CharField(max_length=50, blank=True)
+    logistics_partner_name = models.CharField(max_length=50, blank=True, default="")
+    waybill_number = models.CharField(max_length=50, blank=True, default="")
 
     packaged_weight = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
     packaged_length = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
@@ -49,9 +49,9 @@ class OrderShipment(models.Model):
     sent_for_pickup_time = models.DateTimeField(null=True, blank=True)
     lost_time = models.DateTimeField(null=True, blank=True)
 
-    tracking_url = models.URLField(blank=True)
+    tracking_url = models.URLField(blank=True, default="")
 
-    rto_remarks = models.TextField(blank=True)
+    rto_remarks = models.TextField(blank=True, default="")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
