@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.db import connection
+from django.core import urlresolvers
 import datetime
 import jwt as JsonWebToken
 import settings
@@ -213,3 +214,10 @@ def getPaginationParameters(request, parameters={}, defaultItemsPerPage = 10, ve
     parameters["itemsPerPage"] = itemsPerPage
 
     return parameters
+
+def link_to_foreign_key(obj, fk_name):
+    fk_instance = getattr(obj, fk_name)
+    app_label = fk_instance._meta.app_label.lower()
+    model_name = fk_instance._meta.model_name.lower()
+    link=urlresolvers.reverse("admin:{}_{}_change".format(app_label, model_name), args=[fk_instance.id])
+    return u'<a href="%s" target="_blank">%s</a>' % (link,str(fk_instance))

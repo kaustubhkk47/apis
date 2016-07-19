@@ -2,12 +2,12 @@ from django.contrib import admin
 
 # Register your models here.
 
-from.models.state import State
-from.models.pincode import Pincode
-from.models.city import City
-from.models.country import Country
+from.models.state import *
+from.models.pincode import *
+from.models.city import *
+from.models.country import *
 
-admin.site.register(State)
-admin.site.register(Pincode)
-admin.site.register(City)
-admin.site.register(Country)
+admin.site.register(State, StateAdmin)
+admin.site.register(Pincode, PincodeAdmin)
+admin.site.register(City, CityAdmin)
+admin.site.register(Country, CountryAdmin)

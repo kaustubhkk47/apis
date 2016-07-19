@@ -1,11 +1,11 @@
 from django.db import models
-
+from django.contrib import admin
 from users.models.buyer import BuyerAddress
 from users.models.seller import SellerAddress
 
 from .orderItem import OrderItem
 
-from scripts.utils import validate_date, validate_number, validate_bool, validate_integer
+from scripts.utils import validate_date, validate_number, validate_bool, validate_integer, link_to_foreign_key
 from decimal import Decimal
 import datetime
 
@@ -16,20 +16,20 @@ class OrderShipment(models.Model):
 
     suborder = models.ForeignKey('orders.SubOrder')
 
-    pickup_address = models.ForeignKey(SellerAddress)
-    drop_address = models.ForeignKey(BuyerAddress)
+    pickup_address = models.ForeignKey('users.SellerAddress')
+    drop_address = models.ForeignKey('users.BuyerAddress')
 
     invoice_number = models.CharField(max_length=50, blank=True)
     invoice_date = models.DateTimeField(blank=True, null=True)
 
-    logistics_partner = models.ForeignKey(LogisticsPartner, blank=True, null =True)
-    logistics_partner_name = models.CharField(max_length=50, blank=True,null=True)
-    waybill_number = models.CharField(max_length=50, blank=True,null=True)
+    logistics_partner = models.ForeignKey('logistics.LogisticsPartner', blank=True, null =True)
+    logistics_partner_name = models.CharField(max_length=50, blank=True, default="")
+    waybill_number = models.CharField(max_length=50, blank=True, default="")
 
-    packaged_weight = models.DecimalField(max_digits=10, decimal_places=2,blank=True,null=True)
-    packaged_length = models.DecimalField(max_digits=10, decimal_places=2,blank=True,null=True)
-    packaged_breadth = models.DecimalField(max_digits=10, decimal_places=2,blank=True,null=True)
-    packaged_height = models.DecimalField(max_digits=10, decimal_places=2,blank=True,null=True)
+    packaged_weight = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+    packaged_length = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+    packaged_breadth = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+    packaged_height = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
 
     cod_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
     shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
@@ -49,9 +49,9 @@ class OrderShipment(models.Model):
     sent_for_pickup_time = models.DateTimeField(null=True, blank=True)
     lost_time = models.DateTimeField(null=True, blank=True)
 
-    tracking_url = models.URLField(null=True, blank=True)
+    tracking_url = models.URLField(blank=True, default="")
 
-    rto_remarks = models.TextField(blank=True,null=True)
+    rto_remarks = models.TextField(blank=True, default="")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -60,9 +60,35 @@ class OrderShipment(models.Model):
 
     class Meta:
         ordering = ["-id"]
+        default_related_name = "ordershipment"
+        verbose_name="Order Shipment"
+        verbose_name_plural = "Order Shipments"
 
     def __unicode__(self):
-        return str(self.id) + " - " + self.suborder.display_number + " - " + self.suborder.seller.name
+        return "{} - {} - {}".format(self.id,self.suborder.display_number,self.suborder.seller.name)
+
+class OrderShipmentAdmin(admin.ModelAdmin):
+    search_fields = ["suborder__display_number"]
+    list_display = ["id","waybill_number", "link_to_suborder", "link_to_pickup_address", "link_to_drop_address", "final_price"]
+
+    list_display_links = ["waybill_number","link_to_suborder", "link_to_pickup_address", "link_to_drop_address"]
+
+    list_filter = ["current_status"]
+
+    def link_to_suborder(self, obj):
+        return link_to_foreign_key(obj, "suborder")
+    link_to_suborder.short_description = "Suborder"
+    link_to_suborder.allow_tags=True
+
+    def link_to_pickup_address(self, obj):
+        return link_to_foreign_key(obj, "pickup_address")
+    link_to_pickup_address.short_description = "Pickup Address"
+    link_to_pickup_address.allow_tags=True
+
+    def link_to_drop_address(self, obj):
+        return link_to_foreign_key(obj, "drop_address")
+    link_to_drop_address.short_description = "Drop Address"
+    link_to_drop_address.allow_tags=True
 
 def validateOrderShipmentData(orderShipment):
 
@@ -74,17 +100,17 @@ def validateOrderShipmentData(orderShipment):
         flag = False
     if not "waybill_number" in orderShipment or orderShipment["waybill_number"]==None:
         orderShipment["waybill_number"] = ""
-    if not "packaged_weight" in orderShipment or orderShipment["packaged_weight"]==None or not validate_number(orderShipment["packaged_weight"]):
+    if not "packaged_weight" in orderShipment or not validate_number(orderShipment["packaged_weight"]):
         flag = False
-    if not "packaged_length" in orderShipment or orderShipment["packaged_length"]==None or not validate_number(orderShipment["packaged_length"]):
+    if not "packaged_length" in orderShipment or not validate_number(orderShipment["packaged_length"]):
         flag = False
-    if not "packaged_breadth" in orderShipment or orderShipment["packaged_breadth"]==None or not validate_number(orderShipment["packaged_breadth"]):
+    if not "packaged_breadth" in orderShipment or not validate_number(orderShipment["packaged_breadth"]):
         flag = False
-    if not "packaged_height" in orderShipment or orderShipment["packaged_height"]==None or not validate_number(orderShipment["packaged_height"]):
+    if not "packaged_height" in orderShipment  or not validate_number(orderShipment["packaged_height"]):
         flag = False
-    if not "cod_charge" in orderShipment or orderShipment["cod_charge"]==None or not validate_number(orderShipment["cod_charge"]):
+    if not "cod_charge" in orderShipment or not validate_number(orderShipment["cod_charge"]):
         flag = False
-    if not "shipping_charge" in orderShipment or orderShipment["shipping_charge"]==None or not validate_number(orderShipment["shipping_charge"]):
+    if not "shipping_charge" in orderShipment or not validate_number(orderShipment["shipping_charge"]):
         flag = False
     if not "remarks" in orderShipment or orderShipment["remarks"]==None:
         orderShipment["remarks"] = ""

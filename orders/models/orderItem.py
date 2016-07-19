@@ -1,5 +1,7 @@
 from django.db import models
+from django.contrib import admin
 
+from scripts.utils import link_to_foreign_key
 from catalog.models.productLot import *
 #from .subOrder import SubOrder
 #from .orderShipment import OrderShipment
@@ -10,7 +12,7 @@ from catalog.models.product import Product
 class OrderItem(models.Model):
 
     suborder = models.ForeignKey('orders.SubOrder')
-    product = models.ForeignKey(Product)
+    product = models.ForeignKey('catalog.Product')
     order_shipment = models.ForeignKey('orders.OrderShipment',null=True,blank=True)
     seller_payment = models.ForeignKey('orders.SellerPayment',null=True,blank=True)
 
@@ -37,9 +39,30 @@ class OrderItem(models.Model):
 
     class Meta:
         ordering = ["-id"]
+        default_related_name = "orderitem"
+        verbose_name="Order Item"
+        verbose_name_plural = "Order Items"
 
     def __unicode__(self):
-        return str(self.id) + " - " + self.suborder.display_number + " - Price: " + str(self.final_price) + "-" + self.product.display_name + " - " + self.product.seller.name
+        return "{} - {} - Price: {} - {} - {}".format(self.id,self.suborder.display_number,self.final_price,self.product.display_name,self.product.seller.name)
+
+class OrderItemAdmin(admin.ModelAdmin):
+    search_fields = ["suborder__display_number", "product__name"]
+    list_display = ["id", "link_to_suborder", "link_to_product", "final_price", "pieces"]
+
+    list_display_links = ["id","link_to_suborder","link_to_product"]
+
+    list_filter = ["current_status"]
+
+    def link_to_suborder(self, obj):
+        return link_to_foreign_key(obj, "suborder")
+    link_to_suborder.short_description = "Suborder"
+    link_to_suborder.allow_tags=True
+
+    def link_to_product(self, obj):
+        return link_to_foreign_key(obj, "product")
+    link_to_product.short_description = "Product"
+    link_to_product.allow_tags=True
 
 def populateOrderItemData(OrderItemPtr, orderItem):
     OrderItemPtr.pieces = int(orderItem["pieces"])

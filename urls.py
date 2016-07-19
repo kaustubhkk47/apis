@@ -70,7 +70,8 @@ urlpatterns += [
 	url(r'^users/buyer/buyerproducts/landing/$', user_handler.buyer_product_landing_details),
 	url(r'^users/buyer/buyerproducts/masterupdate/$', user_handler.buyer_product_master_update),
 	url(r'^users/buyer/buyersharedproductid/$', user_handler.buyer_shared_product_id_details),
-	url(r'^users/buyer/buyersharedproductid/v(?P<version>[1])/$', user_handler.buyer_shared_product_id_details)
+	url(r'^users/buyer/buyersharedproductid/v(?P<version>[1])/$', user_handler.buyer_shared_product_id_details),
+	url(r'^users/buyer/buyerpanel/tracking/$', user_handler.buyer_panel_tracking_details),
 ]
 
 urlpatterns += [

@@ -13,8 +13,13 @@ class BusinessType(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	class Meta:
+		default_related_name = "businesstype"
+		verbose_name="Business Type"
+		verbose_name_plural = "Business Types"
+
 	def __unicode__(self):
-		return str(self.id) + " - " + self.business_type
+		return "{} - {}".format(self.id,self.business_type)
 
 def filterBusinessType(parameters = {}):
 
