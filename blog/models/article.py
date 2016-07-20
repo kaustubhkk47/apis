@@ -21,6 +21,8 @@ class Article(models.Model):
 	quora_link = models.TextField(blank=True,default="")
 	blogspot_link = models.TextField(blank=True,default="")
 
+	cover_photo = models.TextField(blank=True)
+
 	class Meta:
 		ordering = ['-id']
 		default_related_name = "article"
