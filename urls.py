@@ -27,7 +27,6 @@ urlpatterns = [
 urlpatterns += [
 	url(r'^category/$', catalog_handler.categories_details),
 	url(r'^products/$', catalog_handler.product_details),
-	url(r'^products/v(?P<version>[1])/$', catalog_handler.product_details),
 	url(r'^products/colour_type/$', catalog_handler.product_colour_details),
 	url(r'^products/fabric_type/$', catalog_handler.product_fabric_details),
 	url(r'^products/generatefile/$', catalog_handler.product_file),
@@ -36,17 +35,11 @@ urlpatterns += [
 
 urlpatterns += [
 	url(r'^ordershipment/$', order_handler.order_shipment_details),
-	url(r'^ordershipment/v(?P<version>[1])/$', order_handler.order_shipment_details),
 	url(r'^orderitem/$', order_handler.order_item_details),
-	url(r'^orderitem/v(?P<version>[1])/$', order_handler.order_item_details),
 	url(r'^suborder/$', order_handler.suborder_details),
-	url(r'^suborder/v(?P<version>[1])/$', order_handler.suborder_details),
 	url(r'^orders/$', order_handler.order_details),
-	url(r'^orders/v(?P<version>[1])/$', order_handler.order_details),
 	url(r'^buyerpayment/$', order_handler.buyer_payment_details),
-	url(r'^buyerpayment/v(?P<version>[1])/$', order_handler.buyer_payment_details),
 	url(r'^sellerpayment/$', order_handler.seller_payment_details),
-	url(r'^sellerpayment/v(?P<version>[1])/$', order_handler.seller_payment_details)
 ]
 
 urlpatterns += [
@@ -55,28 +48,22 @@ urlpatterns += [
 
 urlpatterns += [
 	url(r'^users/buyer/$', user_handler.buyer_details),
-	url(r'^users/buyer/v(?P<version>[1])/$', user_handler.buyer_details),
 	url(r'^users/buyer/login/$', user_handler.buyer_login),
 	url(r'^users/buyer/accesstoken/$', user_handler.buyer_access_token_details),
 	url(r'^users/buyer/address/$', user_handler.buyer_address_details),
-	url(r'^users/buyer/address/v(?P<version>[1])/$', user_handler.buyer_address_details),
 	url(r'^users/buyer/purchasingstate/$', user_handler.buyer_purchasing_state_details),
 	url(r'^users/buyer/buysfrom/$', user_handler.buyer_buys_from_details),
 	url(r'^users/buyer/buyerinterest/$', user_handler.buyer_interest_details),
-	url(r'^users/buyer/buyerinterest/v(?P<version>[1])/$', user_handler.buyer_interest_details),
 	url(r'^users/buyer/buyerproducts/$', user_handler.buyer_product_details),
-	url(r'^users/buyer/buyerproducts/v(?P<version>[1])/$', user_handler.buyer_product_details),
 	url(r'^users/buyer/buyerproducts/whatsapp/$', user_handler.buyer_product_whatsapp_details),
 	url(r'^users/buyer/buyerproducts/landing/$', user_handler.buyer_product_landing_details),
 	url(r'^users/buyer/buyerproducts/masterupdate/$', user_handler.buyer_product_master_update),
 	url(r'^users/buyer/buyersharedproductid/$', user_handler.buyer_shared_product_id_details),
-	url(r'^users/buyer/buyersharedproductid/v(?P<version>[1])/$', user_handler.buyer_shared_product_id_details),
 	url(r'^users/buyer/buyerpanel/tracking/$', user_handler.buyer_panel_tracking_details),
 ]
 
 urlpatterns += [
 	url(r'^users/seller/$', user_handler.seller_details),
-	url(r'^users/seller/v(?P<version>[1])/$', user_handler.seller_details),
 	url(r'^users/seller/login/$', user_handler.seller_login)
 ]
 
@@ -86,7 +73,6 @@ urlpatterns += [
 
 urlpatterns += [
 	url(r'^users/internaluser/$', user_handler.internal_user_details),
-	url(r'^users/internaluser/v(?P<version>[1])/$', user_handler.internal_user_details),
 	url(r'^users/internaluser/login/$', user_handler.internaluser_login)
 ]
 
@@ -102,7 +88,7 @@ urlpatterns += [
 
 urlpatterns += [
 	url(r'^blog/articles/$', blog_handler.article_details),
-	url(r'^blog/articles/v(?P<version>[1])/$', blog_handler.article_details)
+	url(r'^blog/articles/coverphoto/$', blog_handler.article_cover_photo_details),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
