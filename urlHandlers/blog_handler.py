@@ -36,8 +36,8 @@ def article_cover_photo_details(request, version = "0"):
  
     if request.method == 'POST':
         parameters = getArticleParameters(request, {}, version)
-        #if parameters["isInternalUser"] == 0:
-        #    return customResponse('4XX', {"error": "Authentication failure"})
+        if parameters["isInternalUser"] == 0:
+            return customResponse('4XX', {"error": "Authentication failure"})
         return article.upload_article_file(request)
     
     return customResponse('4XX', {"error": "Invalid request"})
