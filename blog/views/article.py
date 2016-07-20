@@ -1,5 +1,6 @@
-from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_integer, validate_bool, getArrFromString
+from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_integer, validate_bool, getArrFromString, save_file_from_request
 import json
+import settings
 
 from ..models.article import Article, filterArticles, validateArticleData, populateArticleData
 from users.models.internalUser import InternalUser
@@ -67,6 +68,43 @@ def post_new_article(request):
 	else:
 		closeDBConnection()
 		return customResponse("2XX", {"article" : serializeArticle(newArticle)})
+
+def upload_article_file(request):
+	try:
+		requestbody = json.dumps(request.POST).encode("utf-8")
+		article = convert_keys_to_string(json.loads(requestbody))
+		print article
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(article) or not "articleID" in article or not validate_integer(article["articleID"]):
+		return customResponse("4XX", {"error": "Id for article not sent"})
+
+	articlePtr = Article.objects.filter(id=int(article["articleID"]))
+
+	if len(articlePtr) == 0:
+		return customResponse("4XX", {"error": "Invalid ID for article sent"})
+
+	articlePtr = articlePtr[0]
+
+	try:
+		if "file" in request.FILES:
+			outputLink = "media/uploadedfiles/blogcoverphoto/{}/".format(articlePtr.author.id)
+			outputDirectory = settings.STATIC_ROOT + outputLink
+			outputFileName = "{}-{}.jpg".format(articlePtr.slug,articlePtr.id)
+			articlePtr.cover_photo = outputLink + outputFileName
+			save_file_from_request(request, outputDirectory, outputFileName)
+			articlePtr.save()
+		else:
+			return customResponse("4XX", {"error": "No files sent in request"})
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "could not save"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX",  {"success" : "file uploaded"})
 
 def update_article(request):
 	try:

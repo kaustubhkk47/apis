@@ -20,6 +20,7 @@ def serializeArticle(articleEntry, parameters = {}):
 	article["delete_status"] = articleEntry.delete_status
 	article["created_at"] = articleEntry.created_at
 	article["updated_at"] = articleEntry.updated_at
+	article["cover_photo"] = articleEntry.cover_photo
 
 	if "article_details" in parameters and parameters["article_details"] == 1:
 		article["content"] = articleEntry.content

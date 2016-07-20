@@ -8,18 +8,37 @@ from .user_handler import populateInternalUserIDParameters
 
 @csrf_exempt
 def article_details(request, version = "0"):
-    if request.method == 'GET':
+    parameters = getArticleParameters(request, {}, version)
 
-        parameters = getArticleParameters(request, {}, version)
+    if request.method == 'GET':
 
         return article.get_article_details(request, parameters)
 
     elif request.method == 'POST':
+
+        if parameters["isInternalUser"] == 0:
+            return customResponse('4XX', {"error": "Authentication failure"})
+
         return article.post_new_article(request)
     elif request.method == "PUT":
+        if parameters["isInternalUser"] == 0:
+            return customResponse('4XX', {"error": "Authentication failure"})
         return article.update_article(request)
     elif request.method == "DELETE":
+        if parameters["isInternalUser"] == 0:
+            return customResponse('4XX', {"error": "Authentication failure"})
         return article.delete_article(request)
+    
+    return customResponse('4XX', {"error": "Invalid request"})
+
+@csrf_exempt
+def article_cover_photo_details(request, version = "0"):
+ 
+    if request.method == 'POST':
+        parameters = getArticleParameters(request, {}, version)
+        #if parameters["isInternalUser"] == 0:
+        #    return customResponse('4XX', {"error": "Authentication failure"})
+        return article.upload_article_file(request)
     
     return customResponse('4XX', {"error": "Invalid request"})
 
