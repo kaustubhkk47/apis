@@ -698,10 +698,18 @@ def master_update_buyer_product(request):
 		del(allBuyersSeries)
 		log.critical("master_update_buyer_product 5 reached")
 		
-		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
+		log.critical("buyerProductsToCreate length is " + str(buyerProductsToCreate))
+		BuyerProducts.objects.bulk_create(buyerProductsToCreate, batch_size=4000)
+		del(buyerProductsToCreate)
+		log.critical("master_update_buyer_product 6 reached")
+
 		for row in middleSet:
 			BuyerProducts.objects.filter(id__in=row[1]).update(buyer_interest_id=row[0],delete_status=False)
+		del(middleSet)
+		log.critical("master_update_buyer_product 7 reached")
 		BuyerProducts.objects.filter(id__in=rightSet).update(delete_status=True, buyer_interest_id=None)
+		del(rightSet)
+		log.critical("master_update_buyer_product 8 reached")
 		filterProducts(productParameters).update(new_in_product_matrix=False)
 
 	except Exception as e:
