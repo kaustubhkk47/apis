@@ -44,7 +44,7 @@ class Seller(models.Model):
 class SellerDetails(models.Model):
 
 	seller = models.OneToOneField('users.Seller')
-	seller_type = models.ForeignKey('users.BusinessType',blank=True, null=True)
+	seller_type = models.ForeignKey('users.BusinessType',blank=True, null=True, on_delete=models.PROTECT)
 
 	vat_tin = models.CharField(max_length=20, blank=True)
 	cst = models.CharField(max_length=20, blank=True)
