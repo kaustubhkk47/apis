@@ -632,9 +632,12 @@ def master_update_buyer_product(request):
 			return customResponse("2XX", {"success" : "Already updated"})
 
 		allBuyerInterestsDF = DataFrame(list(allBuyerInterests))
+		del(allBuyerInterests)
+		log.critical("master_update_buyer_product 1 reached")
 		allBuyerInterestsDF['fabricArr'] = allBuyerInterestsDF.fabric_filter_text.str.replace(" ","").str.lower().str.split(",")
 	
 		allBuyersSeries = allBuyerInterestsDF.buyer_id.unique()
+		log.critical("master_update_buyer_product 2 reached")
 	
 		productParameters = {}
 		productParameters["product_verification"] = True
@@ -646,6 +649,8 @@ def master_update_buyer_product(request):
 		if len(allProducts) == 0:
 			return customResponse("2XX", {"success" : "Already updated"})
 		allProductsDF = DataFrame(list(allProducts))
+		del(allProducts)
+		log.critical("master_update_buyer_product 3 reached")
 		allProductsDF['productdetails__fabric_gsm'] = allProductsDF['productdetails__fabric_gsm'].str.replace(" ","").str.lower()
 
 		buyerProductParameters = {}
@@ -658,6 +663,9 @@ def master_update_buyer_product(request):
 			allBuyerProductsDF = DataFrame(columns=columns)
 		else:
 			allBuyerProductsDF = DataFrame(list(allBuyerProducts))
+
+		del(allBuyerProducts)
+		log.critical("master_update_buyer_product 4 reached")
 	
 		#  Buyer ID, BuyerInterestID, Set of product ID
 		buyerProductsToCreate = []
@@ -683,12 +691,18 @@ def master_update_buyer_product(request):
 	
 				middleSet.append([row[4], innerFrame['id'].tolist()])
 				rightSet.extend(rightOnlyFrame['id'].tolist())
+
+		del(allBuyerProductsDF)
+		del(allProductsDF)
+		del(allBuyerInterestsDF)
+		del(allBuyersSeries)
+		log.critical("master_update_buyer_product 5 reached")
 		
 		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
 		for row in middleSet:
 			BuyerProducts.objects.filter(id__in=row[1]).update(buyer_interest_id=row[0],delete_status=False)
 		BuyerProducts.objects.filter(id__in=rightSet).update(delete_status=True, buyer_interest_id=None)
-		allProducts.update(new_in_product_matrix=False)
+		filterProducts(productParameters).update(new_in_product_matrix=False)
 
 	except Exception as e:
 		log.critical(e)
