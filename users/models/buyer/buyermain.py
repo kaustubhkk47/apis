@@ -63,7 +63,7 @@ class BuyerAddress(models.Model):
 
 class BuyerDetails(models.Model):
 	buyer = models.OneToOneField('users.Buyer')
-	buyer_type = models.ForeignKey('users.BusinessType',blank=True, null=True)
+	buyer_type = models.ForeignKey('users.BusinessType',blank=True, null=True, on_delete=models.PROTECT)
 
 	vat_tin = models.CharField(max_length=20, blank=True)
 	cst = models.CharField(max_length=20, blank=True)
@@ -241,10 +241,13 @@ def buyerMobileNumberExists(mobileNumber):
 BuyerCustomerType = {
 	1:{"display_value":"Average"},
 	2:{"display_value":"Premium"},
-	3:{"display_value":"Average and Premium"}
+	3:{"display_value":"Average and Premium"},
+	4:{"display_value":"Low"},
+	5:{"display_value":"All"},
+	6:{"display_value":"Average and Low"},
 }
 
-BuyerCustomerTypeValues = [1,2,3]
+BuyerCustomerTypeValues = [1,2,3,4,5,6]
 
 def validate_buyer_customer_type(x):
 	if not validate_integer(x) or not (int(x) in BuyerCustomerTypeValues):
