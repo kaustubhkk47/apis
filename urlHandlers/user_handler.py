@@ -1,7 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 
 from users.views import user, buyer, seller, internaluser, businesstype
-from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool, validate_integer, getPaginationParameters
+from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool, validate_integer, getPaginationParameters, convert_keys_to_string
 from users.models.buyer import *
 from users.serializers.buyer import *
 from users.models.seller import *
@@ -391,7 +391,7 @@ def populateBuyerIDParameters(request, parameters = {}, version = "0"):
 	accessToken = request.GET.get("access_token", "")
 
 	buyerID = request.GET.get("buyerID", "")
-	tokenPayload = get_token_payload(accessToken, "buyerID")
+	tokenPayload = convert_keys_to_string(get_token_payload(accessToken, "buyerID"))
 	parameters["isBuyer"] = 0
 	if "buyerID" in tokenPayload and tokenPayload["buyerID"]!=None:
 		parameters["buyersArr"] = [tokenPayload["buyerID"]]
