@@ -220,6 +220,9 @@ def filterBuyer(parameters = {}):
 	if "whatsapp_sharing_active" in parameters:
 		buyers = buyers.filter(whatsapp_sharing_active=parameters["whatsapp_sharing_active"])
 
+	if "test_buyer" in parameters:
+		buyers = buyers.filter(test_buyer=parameters["test_buyer"])
+
 	return buyers
 
 def buyerEmailExists(email):
