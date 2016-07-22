@@ -92,6 +92,10 @@ def populateBuyerParameters(request, parameters = {}, version = "0"):
 	if validate_bool(whatsappSharingActive):
 		parameters["whatsapp_sharing_active"] = int(whatsappSharingActive)
 
+	testBuyer = request.GET.get("test_buyer", None)
+	if validate_bool(testBuyer):
+		parameters["test_buyer"] = int(testBuyer)
+
 	if buyerInterestID != "":
 		parameters["buyerInterestArr"] = getArrFromString(buyerInterestID)
 
