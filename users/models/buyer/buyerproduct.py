@@ -83,7 +83,7 @@ class BuyerProductResponseAdmin(admin.ModelAdmin):
 
 	list_display_links = ["id","link_to_buyer", "link_to_product"]
 
-	list_filter = ["response_code"]
+	list_filter = ["response_code", "buyer"]
 
 	def link_to_buyer(self, obj):
 		return link_to_foreign_key(obj, "buyer")

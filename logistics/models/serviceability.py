@@ -30,7 +30,7 @@ class PincodeServiceability(models.Model):
 		return "{} - {} - Regular Delivery Available: {}".format(self.pincode.pincode,self.logistics_partner.name,self.regular_delivery_available)
 
 class PincodeServiceabilityAdmin(admin.ModelAdmin):
-	search_fields = ["pincode__pincode"]
+	search_fields = ["pincode__pincode", "pincode__city_name", "pincode__state_name"]
 	list_display = ["id", "link_to_pincode", "logistics_partner", "regular_delivery_available", "cod_available"]
 	list_filter = ["logistics_partner", "regular_delivery_available", "cod_available"]
 
