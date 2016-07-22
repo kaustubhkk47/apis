@@ -41,7 +41,7 @@ class BuyerBuysFrom(models.Model):
 class BuyerPanelInstructionsTracking(models.Model):
 
 	buyer = models.ForeignKey('users.Buyer')
-	page_closed = models.IntegerField(default=0)
+	page_closed = models.TextField(blank=True)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)

@@ -437,10 +437,10 @@ def post_new_buyer_panel_tracking(request):
 
 	buyerPtr = buyerPtr[0]
 
-	if not "page_closed" in buyer or not validate_integer(buyer["page_closed"]):
+	if not "page_closed" in buyer:
 		return customResponse("4XX", {"error": "Page number not sent"})
 	try:
-		newBuyerPanelInstructionsTracking = BuyerPanelInstructionsTracking(buyer=buyerPtr, page_closed=int(buyer["page_closed"]))
+		newBuyerPanelInstructionsTracking = BuyerPanelInstructionsTracking(buyer=buyerPtr, page_closed=buyer["page_closed"])
 		newBuyerPanelInstructionsTracking.save()
 
 	except Exception as e:
