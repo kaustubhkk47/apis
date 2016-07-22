@@ -698,7 +698,6 @@ def master_update_buyer_product(request):
 		del(allBuyersSeries)
 		log.critical("master_update_buyer_product 5 reached")
 		
-		log.critical("buyerProductsToCreate length is " + str(buyerProductsToCreate))
 		BuyerProducts.objects.bulk_create(buyerProductsToCreate, batch_size=4000)
 		del(buyerProductsToCreate)
 		log.critical("master_update_buyer_product 6 reached")
@@ -711,6 +710,7 @@ def master_update_buyer_product(request):
 		del(rightSet)
 		log.critical("master_update_buyer_product 8 reached")
 		filterProducts(productParameters).update(new_in_product_matrix=False)
+		log.critical("master_update_buyer_product 9 reached")
 
 	except Exception as e:
 		log.critical(e)
