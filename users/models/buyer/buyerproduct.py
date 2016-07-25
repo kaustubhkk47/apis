@@ -20,9 +20,6 @@ class BuyerProducts(models.Model):
 
 	responded = models.IntegerField(default=0)
 
-	shortlisted_time = models.DateTimeField(null=True, blank=True)
-	disliked_time = models.DateTimeField(null=True, blank=True)
-
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
@@ -79,11 +76,14 @@ class BuyerProductResponse(models.Model):
 
 class BuyerProductResponseAdmin(admin.ModelAdmin):
 	search_fields = ["buyer_id", "buyer__name", "buyer__company_name", "buyer__mobile_number"]
-	list_display = ["id", "link_to_buyer", "link_to_product", "response_code","has_swiped", "created_at"]
+	list_display = ["id", "link_to_buyer", "link_to_product", "response_code","has_swiped", "created_at_ist"]
 
 	list_display_links = ["id","link_to_buyer", "link_to_product"]
 
 	list_filter = ["response_code", "buyer"]
+
+	def created_at_ist(self, obj):
+		return time_in_ist(obj.created_at)
 
 	def link_to_buyer(self, obj):
 		return link_to_foreign_key(obj, "buyer")
@@ -120,11 +120,14 @@ class BuyerProductLanding(models.Model):
 
 class BuyerProductLandingAdmin(admin.ModelAdmin):
 	search_fields = ["buyer_id", "buyer__name", "buyer__company_name", "buyer__mobile_number"]
-	list_display = ["id", "link_to_buyer", "link_to_product", "created_at", "source"]
+	list_display = ["id", "link_to_buyer", "link_to_product", "created_at_ist", "source"]
 
 	list_display_links = ["id","link_to_buyer", "link_to_product"]
 
 	list_filter = ["source"]
+
+	def created_at_ist(self, obj):
+		return time_in_ist(obj.created_at)
 
 	def link_to_buyer(self, obj):
 		return link_to_foreign_key(obj, "buyer")
@@ -182,7 +185,6 @@ def validateBuyerProductData(buyer_product, old_buyer_product, is_new, buyer_pro
 
 	if "responded" in buyer_product and validate_integer(buyer_product["responded"]):
 		if int(buyer_product["responded"]) == 1:
-			buyer_product_populator["shortlisted_time"] = datetime.datetime.now()
 			buyer_product_populator["responded"] = 1
 			if old_buyer_product.responded == 2:
 				buyer_product_populator["response_code"] = 3
@@ -192,7 +194,6 @@ def validateBuyerProductData(buyer_product, old_buyer_product, is_new, buyer_pro
 				return False
 			return True
 		elif int(buyer_product["responded"]) == 2:
-			buyer_product_populator["disliked_time"] = datetime.datetime.now()
 			buyer_product_populator["responded"] = 2
 			if  old_buyer_product.responded == 0:
 				buyer_product_populator["response_code"] = 2
@@ -209,11 +210,7 @@ def populateBuyerProduct(buyerProductPtr, buyerproduct):
 	if "is_active" in buyerproduct:
 		buyerProductPtr.is_active = int(buyerproduct["is_active"])
 	if "responded" in buyerproduct:
-		buyerProductPtr.responded = int(buyerproduct["responded"])    
-	if "shortlisted_time" in buyerproduct:
-		buyerProductPtr.shortlisted_time = buyerproduct["shortlisted_time"]    
-	if "disliked_time" in buyerproduct:
-		buyerProductPtr.disliked_time = buyerproduct["disliked_time"]
+		buyerProductPtr.responded = int(buyerproduct["responded"])
 
 def populateBuyerProductResponseHistory(buyerProductResponsePtr,buyerProductResponse):
 	buyerProductResponsePtr.response_code = int(buyerProductResponse["response_code"])
@@ -239,7 +236,7 @@ def filterBuyerSharedProductID(parameters = {}):
 
 def filterBuyerProducts(parameters = {}):
 
-	buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)\
+	buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
 
 	if "buyerProductsArr" in parameters:
 		buyerProducts = buyerProducts.filter(id__in=parameters["buyerProductsArr"])

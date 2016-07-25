@@ -180,8 +180,6 @@ def serialize_buyer_product(buyer_product_entry, parameters = {}):
 		buyer_product["buyerinterestID"] = buyer_product_entry.buyer_interest_id
 	buyer_product["is_active"] = buyer_product_entry.is_active
 	buyer_product["responded"] = buyer_product_entry.responded
-	buyer_product["shortlisted_time"] = buyer_product_entry.shortlisted_time
-	buyer_product["disliked_time"] = buyer_product_entry.disliked_time
 	buyer_product["created_at"] = buyer_product_entry.created_at
 	buyer_product["updated_at"] = buyer_product_entry.updated_at
 	

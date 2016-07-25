@@ -52,7 +52,7 @@ class BuyerPanelInstructionsTracking(models.Model):
 		verbose_name_plural = "Buyer Panel Instructions Tracking"
 
 	def __unicode__(self):
-		return "{} - {}".format(self.buyer.id, self.page_closed)
+		return "{} - {}".format(str(self.buyer), self.page_closed)
 
 
 def filterBuyerPurchasingState(parameters = {}):
