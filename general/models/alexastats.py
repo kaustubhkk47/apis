@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib import admin
 
+from scripts.utils import time_in_ist
+
 class AlexaStats(models.Model):
 
 	global_rank = models.IntegerField(default=0)
@@ -21,4 +23,7 @@ class AlexaStats(models.Model):
 		return "{} - {} - {}".format(self.id,self.created_at,self.india_rank)
 
 class AlexaStatsAdmin(admin.ModelAdmin):
-	list_display = ["id","created_at", "global_rank", "india_rank", "bounce_rate", "daily_page_views_per_visitor", "daily_time_on_site"]
+	list_display = ["id","created_at_ist", "global_rank", "india_rank", "bounce_rate", "daily_page_views_per_visitor", "daily_time_on_site"]
+
+	def created_at_ist(self, obj):
+		return time_in_ist(obj.created_at)

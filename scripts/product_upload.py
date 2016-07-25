@@ -154,14 +154,16 @@ def moveImages(jsonText, row, wb):
 	while True:
 		check = 0
 		for extension in fileFormatExtensions:
-			imagePath = imageDirectory + toString(row) + "-" + toString(imgNo) + extension
+			imageFileName = toString(row) + "-" + toString(imgNo) + extension
+			imagePath = os.path.join(imageDirectory, imageFileName)
 			if os.path.isfile(imagePath):
 				check = 1
 				img = Image.open(imagePath)
 				for i in range(len(allSizePaths)):
 					sizePath = allSizePaths[i]
-					directory = imageDirectory + image_path + sizePath
-					newPath = directory + image_name + "-" + toString(image_numbers[imgNo-1]) + ".jpg"
+					directory = os.path.join(imageDirectory,image_path,sizePath)
+					imageNewFileName = image_name + "-" + toString(image_numbers[imgNo-1]) + ".jpg"
+					newPath = os.path.join(directory, imageNewFileName)
 					imgnew = resize_image(img, allImageSizes[i])
 					imgnew.save(newPath,format="JPEG",quality=imageQualityPercent)
 				os.remove(imagePath)
@@ -173,7 +175,7 @@ def moveImages(jsonText, row, wb):
 	post_image_feedback(wb, row, imgNo-1)
 
 def create_image_directory(image_path, size_path):
-	directory = imageDirectory + image_path + size_path
+	directory = os.path.join(imageDirectory,image_path,size_path)
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 
@@ -277,7 +279,8 @@ def countImages(row):
 	while True:
 		check = 0
 		for extension in fileFormatExtensions:
-			imagePath = imageDirectory + toString(row) + "-" + toString(imgNo) + extension
+			imageFileName = toString(row) + "-" + toString(imgNo) + extension
+			imagePath = os.path.join(imageDirectory,imageFileName)
 			if os.path.isfile(imagePath):
 				check = 1
 		if(check == 0):
