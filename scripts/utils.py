@@ -237,3 +237,6 @@ def link_to_foreign_key(obj, fk_name):
 	model_name = fk_instance._meta.model_name.lower()
 	link=urlresolvers.reverse("admin:{}_{}_change".format(app_label, model_name), args=[fk_instance.id])
 	return u'<a href="%s" target="_blank">%s</a>' % (link,str(fk_instance))
+
+def time_in_ist(dt):
+	return  dt + datetime.timedelta(0,0,0,0,30,5,0)
