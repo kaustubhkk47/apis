@@ -5,7 +5,7 @@ from django.contrib import admin
 from .category import Category
 from django.template.defaultfilters import slugify
 from decimal import Decimal
-import datetime
+from django.utils import timezone
 import math
 
 from scripts.utils import validate_integer, validate_number, validate_bool, arrToFilename, link_to_foreign_key
@@ -257,7 +257,7 @@ def populateProductData(productPtr, product):
 	productPtr.delete_status = int(product["delete_status"])
 	productPtr.new_in_product_matrix = 1
 	if "image_count" in product and product["image_count"]!=None:
-		nowtime = datetime.datetime.now()
+		nowtime = timezone.now()
 		productPtr.image_path = "media/productimages/" + str(productPtr.seller.id) + "/" + nowtime.strftime('%Y%m%d%H%M%S') + "/"
 		productPtr.image_name = slugify(productPtr.display_name)
 		image_numbers = {}

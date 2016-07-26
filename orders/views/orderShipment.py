@@ -2,7 +2,7 @@ from scripts.utils import *
 import json
 import logging
 log = logging.getLogger("django")
-import datetime
+from django.utils import timezone
 from ..models.order import update_order_completion_status
 from ..models.orderShipment import OrderShipment, filterOrderShipment, validateOrderShipmentData, populateOrderShipment, validateOrderShipmentItemsData, validateOrderShipmentStatus
 from ..models.subOrder import SubOrder, update_suborder_completion_status
@@ -233,28 +233,28 @@ def update_order_shipment(request):
 
 	try:
 		if status == 4:
-			orderShipmentPtr.tpl_in_transit_time = datetime.datetime.now()
+			orderShipmentPtr.tpl_in_transit_time = timezone.now()
 			update_order_item_status(orderShipmentPtr.id, 9)
 		elif status == 5:
-			orderShipmentPtr.tpl_stuck_in_transit_time = datetime.datetime.now()
+			orderShipmentPtr.tpl_stuck_in_transit_time = timezone.now()
 			update_order_item_status(orderShipmentPtr.id, 10)
 		elif status == 6:
-			orderShipmentPtr.delivered_time = datetime.datetime.now()
+			orderShipmentPtr.delivered_time = timezone.now()
 			update_order_item_status(orderShipmentPtr.id, 11)
 			update_order_completion_status(orderShipmentPtr.suborder.order)
 			update_suborder_completion_status(orderShipmentPtr.suborder)
 		elif status == 7:
-			orderShipmentPtr.rto_in_transit_time = datetime.datetime.now()
+			orderShipmentPtr.rto_in_transit_time = timezone.now()
 			if "rto_remarks" in orderShipment and not orderShipment["rto_remarks"]==None:
 				orderShipmentPtr.rto_remarks = orderShipment["rto_remarks"]
 			update_order_item_status(orderShipmentPtr.id, 12)
 		elif status == 8:
-			orderShipmentPtr.rto_delivered_time = datetime.datetime.now()
+			orderShipmentPtr.rto_delivered_time = timezone.now()
 			update_order_item_status(orderShipmentPtr.id, 13)
 			update_order_completion_status(orderShipmentPtr.suborder.order)
 			update_suborder_completion_status(orderShipmentPtr.suborder)
 		elif status == 9:
-			orderShipmentPtr.lost_time = datetime.datetime.now()
+			orderShipmentPtr.lost_time = timezone.now()
 			update_order_item_status(orderShipmentPtr.id, 14)
 			update_order_completion_status(orderShipmentPtr.suborder.order)
 			update_suborder_completion_status(orderShipmentPtr.suborder)

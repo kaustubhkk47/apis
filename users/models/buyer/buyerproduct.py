@@ -6,7 +6,6 @@ import operator
 from django.db.models import Q
 
 from catalog.models.product import Product, filterProducts
-import datetime
 
 from pandas import DataFrame
 
@@ -55,9 +54,9 @@ class BuyerSharedProductID(models.Model):
 		return "{}".format(self.id)
 
 class BuyerProductResponse(models.Model):
-	buyer = models.ForeignKey('users.Buyer')
-	product = models.ForeignKey('catalog.Product')
-	buyer_product = models.ForeignKey('users.BuyerProducts', null = True, blank = True)
+	buyer = models.ForeignKey('users.Buyer', db_index=True)
+	product = models.ForeignKey('catalog.Product', db_index=True)
+	buyer_product = models.ForeignKey('users.BuyerProducts', null = True, blank = True, on_delete=models.SET_NULL, db_index=True)
 
 	response_code = models.IntegerField(default=0)
 

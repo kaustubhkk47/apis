@@ -2,6 +2,7 @@ from scripts.utils import *
 import json
 import logging
 log = logging.getLogger("django")
+from django.utils import timezone
 from ..models.order import filterOrder, Order, validateOrderProductsData, populateOrderData, sendOrderMail
 from users.models.buyer import Buyer, BuyerAddress
 from catalog.models.product import Product
@@ -172,7 +173,7 @@ def cancel_order(request):
 		return customResponse("4XX", {"error": "Already cancelled"})
 
 	try:
-		nowDateTime = datetime.datetime.now()
+		nowDateTime = timezone.now()
 		orderPtr.order_status = -1
 		orderPtr.cancellation_remarks = order["cancellation_remarks"]
 		orderPtr.cancellation_time = nowDateTime
