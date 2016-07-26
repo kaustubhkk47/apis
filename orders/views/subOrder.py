@@ -8,7 +8,7 @@ from ..models.orderItem import OrderItem
 from ..serializers.subOrder import parseSubOrders
 from users.serializers.buyer import BuyerAddress
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-import datetime
+from django.utils import timezone
 
 def get_suborder_details(request,subOrderParameters):
 	try:
@@ -63,7 +63,7 @@ def update_suborder(request):
 	try:
 
 		if status == 2:
-			subOrderPtr.merchant_notified_time = datetime.datetime.now()
+			subOrderPtr.merchant_notified_time = timezone.now()
 
 			orderItemQuerySet = OrderItem.objects.filter(suborder_id = subOrderPtr.id)
 			for orderItem in orderItemQuerySet:
@@ -105,7 +105,7 @@ def cancel_suborder(request):
 		return customResponse("4XX", {"error": "Already cancelled"})
 
 	try:
-		nowDateTime = datetime.datetime.now()
+		nowDateTime = timezone.now()
 		subOrderPtr.suborder_status = -1
 		subOrderPtr.cancellation_remarks = subOrder["cancellation_remarks"]
 		subOrderPtr.cancellation_time = nowDateTime

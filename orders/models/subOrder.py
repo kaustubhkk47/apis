@@ -6,7 +6,7 @@ from users.serializers.buyer import serialize_buyer_address
 #from orders.models.order import Order
 from orders.models.orderItem import OrderItem, OrderItemCompletionStatus, populateMailOrderItem
 
-import datetime
+from django.utils import timezone
 from decimal import Decimal
 
 class SubOrder(models.Model):
@@ -75,7 +75,7 @@ def populateSubOrderData(subOrderPtr, subOrder,orderID):
     subOrderPtr.edited_price = Decimal(subOrder["edited_price"])
     subOrderPtr.final_price = subOrder["edited_price"]
     subOrderPtr.suborder_status = 1
-    subOrderPtr.confirmed_time = datetime.datetime.now()
+    subOrderPtr.confirmed_time = timezone.now()
     subOrderPtr.save()
     subOrderPtr.display_number = "%04d" %(subOrder["seller"].id,) + "-" + "1" + "%06d" %(orderID,)
 
