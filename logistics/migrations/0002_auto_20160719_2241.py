@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import datetime
+from django.utils.timezone import utc
 from django.db import migrations, models
 
 
@@ -24,25 +25,25 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='logisticspartner',
             name='created_at',
-            field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2016, 7, 19, 22, 41, 31, 814899)),
+            field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2016, 7, 19, 22, 41, 31, 814899, tzinfo=utc)),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='logisticspartner',
             name='updated_at',
-            field=models.DateTimeField(auto_now=True, default=datetime.datetime(2016, 7, 19, 22, 41, 34, 411768)),
+            field=models.DateTimeField(auto_now=True, default=datetime.datetime(2016, 7, 19, 22, 41, 34, 411768, tzinfo=utc)),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='pincodeserviceability',
             name='created_at',
-            field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2016, 7, 19, 22, 41, 37, 719857)),
+            field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2016, 7, 19, 22, 41, 37, 719857, tzinfo=utc)),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='pincodeserviceability',
             name='updated_at',
-            field=models.DateTimeField(auto_now=True, default=datetime.datetime(2016, 7, 19, 22, 41, 40, 28002)),
+            field=models.DateTimeField(auto_now=True, default=datetime.datetime(2016, 7, 19, 22, 41, 40, 28002, tzinfo=utc)),
             preserve_default=False,
         ),
     ]

@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import datetime
+from django.utils.timezone import utc
 from django.db import migrations, models
 import django.db.models.deletion
 
@@ -33,49 +34,49 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='city',
             name='created_at',
-            field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2016, 7, 19, 22, 40, 58, 434655)),
+            field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2016, 7, 19, 22, 40, 58, 434655, tzinfo=utc)),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='city',
             name='updated_at',
-            field=models.DateTimeField(auto_now=True, default=datetime.datetime(2016, 7, 19, 22, 41, 3, 83139)),
+            field=models.DateTimeField(auto_now=True, default=datetime.datetime(2016, 7, 19, 22, 41, 3, 83139, tzinfo=utc)),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='country',
             name='created_at',
-            field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2016, 7, 19, 22, 41, 6, 601237)),
+            field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2016, 7, 19, 22, 41, 6, 601237, tzinfo=utc)),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='country',
             name='updated_at',
-            field=models.DateTimeField(auto_now=True, default=datetime.datetime(2016, 7, 19, 22, 41, 11, 246277)),
+            field=models.DateTimeField(auto_now=True, default=datetime.datetime(2016, 7, 19, 22, 41, 11, 246277, tzinfo=utc)),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='pincode',
             name='created_at',
-            field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2016, 7, 19, 22, 41, 16, 222749)),
+            field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2016, 7, 19, 22, 41, 16, 222749, tzinfo=utc)),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='pincode',
             name='updated_at',
-            field=models.DateTimeField(auto_now=True, default=datetime.datetime(2016, 7, 19, 22, 41, 22, 942099)),
+            field=models.DateTimeField(auto_now=True, default=datetime.datetime(2016, 7, 19, 22, 41, 22, 942099, tzinfo=utc)),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='state',
             name='created_at',
-            field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2016, 7, 19, 22, 41, 26, 593371)),
+            field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2016, 7, 19, 22, 41, 26, 593371, tzinfo=utc)),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='state',
             name='updated_at',
-            field=models.DateTimeField(auto_now=True, default=datetime.datetime(2016, 7, 19, 22, 41, 29, 345680)),
+            field=models.DateTimeField(auto_now=True, default=datetime.datetime(2016, 7, 19, 22, 41, 29, 345680, tzinfo=utc)),
             preserve_default=False,
         ),
         migrations.AlterField(
