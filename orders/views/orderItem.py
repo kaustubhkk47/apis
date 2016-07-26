@@ -6,7 +6,7 @@ from ..models.orderItem import filterOrderItem, OrderItem
 from ..models.subOrder import sendSubOrderCancellationMail, populateSellerMailDict
 from users.models.buyer import BuyerAddress
 from ..serializers.orderItem import parseOrderItem
-import datetime
+from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def get_order_item_details(request, orderItemParameters):
@@ -61,7 +61,7 @@ def cancel_order_item(request):
 	try:
 		orderItemPtr.current_status = 4
 		orderItemPtr.cancellation_remarks = orderItem["cancellation_remarks"]
-		orderItemPtr.cancellation_time = datetime.datetime.now()
+		orderItemPtr.cancellation_time = timezone.now()
 		orderItemPtr.save()
 		"""
 		orderItemPtr.suborder.product_count -= 1

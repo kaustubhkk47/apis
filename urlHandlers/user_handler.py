@@ -86,7 +86,7 @@ def populateBuyerParameters(request, parameters = {}, version = "0"):
 	parameters = populateInternalUserIDParameters(request, parameters, version)
 
 	buyerInterestID = request.GET.get("buyerinterestID", "")
-	buyersharedproductID = request.GET.get("buyersharedproductID", "")
+	
 
 	whatsappSharingActive = request.GET.get("whatsapp_sharing_active", None)
 	if validate_bool(whatsappSharingActive):
@@ -99,8 +99,17 @@ def populateBuyerParameters(request, parameters = {}, version = "0"):
 	if buyerInterestID != "":
 		parameters["buyerInterestArr"] = getArrFromString(buyerInterestID)
 
+	buyersharedproductID = request.GET.get("buyersharedproductID", "")
 	if buyersharedproductID != "" and validate_integer(buyersharedproductID):
 		parameters["buyersharedproductID"] = int(buyersharedproductID)
+
+	buyerMinID = request.GET.get("buyer_min_ID", "")
+	if buyerMinID != "" and validate_integer(buyerMinID):
+		parameters["buyer_min_ID"] = int(buyerMinID)
+
+	buyerMaxID = request.GET.get("buyer_max_ID", "")
+	if buyerMaxID != "" and validate_integer(buyerMaxID):
+		parameters["buyer_max_ID"] = int(buyerMaxID)
 
 	buyerPurchasingStateID = request.GET.get("buyerpurchasingstateID", "")
 	if buyerPurchasingStateID != "":

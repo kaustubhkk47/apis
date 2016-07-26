@@ -217,6 +217,12 @@ def filterBuyer(parameters = {}):
 	if "buyersArr" in parameters:
 		buyers = buyers.filter(id__in=parameters["buyersArr"])
 
+	if "buyer_min_ID" in parameters:
+		buyers = buyers.filter(id__gte=parameters["buyer_min_ID"])
+
+	if "buyer_max_ID" in parameters:
+		buyers = buyers.filter(id__lte=parameters["buyer_max_ID"])
+
 	if "whatsapp_sharing_active" in parameters:
 		buyers = buyers.filter(whatsapp_sharing_active=parameters["whatsapp_sharing_active"])
 

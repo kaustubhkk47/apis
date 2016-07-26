@@ -7,7 +7,7 @@ from .orderItem import OrderItem
 
 from scripts.utils import validate_date, validate_number, validate_bool, validate_integer, link_to_foreign_key
 from decimal import Decimal
-import datetime
+from django.utils import timezone
 
 from logistics.models.logisticspartner import LogisticsPartner
 
@@ -140,7 +140,7 @@ def populateOrderShipment(OrderShipmentPtr, orderShipment):
     OrderShipmentPtr.rto_remarks = orderShipment["rto_remarks"]
     OrderShipmentPtr.tracking_url = "https://www.fedex.com/apps/fedextrack/?action=track&trackingnumber="+orderShipment["waybill_number"]+"&cntry_code=in"
     OrderShipmentPtr.current_status = 3
-    OrderShipmentPtr.tpl_manifested_time = datetime.datetime.now()
+    OrderShipmentPtr.tpl_manifested_time = timezone.now()
 
 def filterOrderShipment(orderShipmentParameters):
     orderShipments = OrderShipment.objects.all().select_related('suborder','pickup_address','drop_address')
