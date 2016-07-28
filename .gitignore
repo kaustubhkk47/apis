@@ -1,8 +1,5 @@
 
 ## self added
-**/migrations/
-**/migrations
-/fabfile.py
 
 # Created by https://www.gitignore.io/api/django,vim,sublimetext,intellij,windows,linux,osx,visualstudio,pycharm
 

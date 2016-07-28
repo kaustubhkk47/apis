@@ -373,44 +373,77 @@ def post_new_buyer_product(request):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer_product) or not "buyerID" in buyer_product or not validate_integer(buyer_product["buyerID"]):
-		return customResponse("4XX", {"error": "Id for buyer not sent"})
+	if not len(buyer_product):
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	buyerPtr = Buyer.objects.filter(id=int(buyer_product["buyerID"]))
+	buyerParameters = {}
+	buyerParameters["test_buyer"] = False
+	buyerParameters["whatsapp_sharing_active"] = True
 
-	if len(buyerPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
+	if "all_buyers" in buyer_product and validate_bool(buyer_product["all_buyers"]) and int(buyer_product["all_buyers"])==1:		
+		pass
+	else:
+		if not "buyerID" in buyer_product:
+			return customResponse("4XX", {"error": "Id for buyer not sent"})
+		buyerParameters["buyersArr"] = getArrFromString(buyer_product["buyerID"])
 
-	buyerPtr = buyerPtr[0]
+	allBuyersSeries = filterBuyer(buyerParameters).values_list('id', flat=True)
+
+	if len(allBuyersSeries) == 0:
+		return customResponse("4XX", {"error": "Invalid ids for buyer sent"})
 
 	if not "productID" in buyer_product or buyer_product["productID"]==None:
 		return customResponse("4XX", {"error": "Id for product not sent"})
 
-	productIDs = getArrFromString(buyer_product["productID"])
+	productParameters = {}
+	productParameters["product_verification"] = True
+	productParameters["product_show_online"] = True
+	productParameters["seller_show_online"] = True
+	productParameters["productsArr"] = getArrFromString(buyer_product["productID"])
 
-	productPtr = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False, verification=True,show_online=True,seller__show_online=True, id__in=productIDs)
+	allProductsDF = filterProducts(productParameters).values('id')
+	if len(allProductsDF) == 0:
+		return customResponse("4XX", {"error" : "Invalid ids for products sent"})
+	allProductsDF = DataFrame(list(allProductsDF))
 
-	if len(productPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid ids for products sent"})
+	buyerProductsPtr = BuyerProducts.objects.filter(buyer_id__in = allBuyersSeries).order_by('buyer_id')
 
-	buyerProductsPtr = BuyerProducts.objects.filter(buyer_id = int(buyer_product["buyerID"]))
+	buyerProductParameters = {}
+	buyerProductParameters["buyersArr"] = allBuyersSeries
+	buyerProductParameters["responded"] = 0
 
-	intersectingProducts = getIntersectingProducts(productPtr, buyerProductsPtr)
+	allBuyerProductsDF = filterBuyerProducts(buyerProductParameters).values('id','buyer_id', 'product_id', 'responded')
+	if len(allBuyerProductsDF) == 0:
+		columns = ['id','buyer_id','product_id','responded']
+		allBuyerProductsDF = DataFrame(columns=columns)
+	else:
+		allBuyerProductsDF = DataFrame(list(allBuyerProductsDF))
 
 	buyerProductsToCreate = []
+	buyerProductsToUpdate = []
+	buyerSharedProductIDtoCreate = []
 
-	for product_id in intersectingProducts[0]:
-		buyerProduct = BuyerProducts(buyer=buyerPtr, product_id=product_id, buyer_interest=None)
-		buyerProductsToCreate.append(buyerProduct)
+	for buyer in allBuyersSeries:
+		tempBuyerProductsDF = allBuyerProductsDF[allBuyerProductsDF.buyer_id==buyer]
+		innerFrame = tempBuyerProductsDF[(tempBuyerProductsDF.product_id.isin(allProductsDF.id))]	
+		leftOnlyFrame = allProductsDF[(~allProductsDF.id.isin(innerFrame.product_id))]
+				
+		for product_id in leftOnlyFrame['id'].tolist():
+			buyerProduct = BuyerProducts(buyer_id=buyer, product_id=product_id, buyer_interest=None)
+			buyerProductsToCreate.append(buyerProduct)
+	
+		buyerProductsToUpdate.extend(innerFrame['id'].tolist())
+
+		newBuyerSharedProductID = BuyerSharedProductID(buyer_id=buyer, productid_filter_text=buyer_product["productID"])
+		buyerSharedProductIDtoCreate.append(newBuyerSharedProductID)
 
 	try:
 
-		newBuyerSharedProductID = BuyerSharedProductID(buyer=buyerPtr, productid_filter_text=buyer_product["productID"])
-		newBuyerSharedProductID.save()
+		BuyerSharedProductID.objects.bulk_create(buyerSharedProductIDtoCreate,batch_size=4000)
 		
-		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
+		BuyerProducts.objects.bulk_create(buyerProductsToCreate,batch_size=4000)
 
-		BuyerProducts.objects.filter(id__in=intersectingProducts[1]).update(is_active=True,delete_status=False)
+		BuyerProducts.objects.filter(id__in=buyerProductsToUpdate).update(is_active=True,delete_status=False)
 
 	except Exception as e:
 		log.critical(e)
@@ -626,13 +659,14 @@ def master_update_buyer_product(request):
 
 	try:
 
-		buyerInterestParameters = {"is_active":True}
-		allBuyerInterests = filterBuyerInterest(buyerInterestParameters).values('id', 'buyer_id', 'category_id', 'price_filter_applied','min_price_per_unit','max_price_per_unit','fabric_filter_text')
-		if len(allBuyerInterests) == 0:
+		buyerInterestParameters = {}
+		buyerInterestParameters["is_active"] = True
+		buyerInterestParameters["buyer_whatsapp_sharing_active"] = True
+		allBuyerInterestsDF = filterBuyerInterest(buyerInterestParameters).values('id', 'buyer_id', 'category_id', 'price_filter_applied','min_price_per_unit','max_price_per_unit','fabric_filter_text')
+		if len(allBuyerInterestsDF) == 0:
 			return customResponse("2XX", {"success" : "Already updated"})
 
-		allBuyerInterestsDF = DataFrame(list(allBuyerInterests))
-		del(allBuyerInterests)
+		allBuyerInterestsDF = DataFrame(list(allBuyerInterestsDF))
 		log.critical("master_update_buyer_product 1 reached")
 		allBuyerInterestsDF['fabricArr'] = allBuyerInterestsDF.fabric_filter_text.str.replace(" ","").str.lower().str.split(",")
 	
@@ -645,11 +679,10 @@ def master_update_buyer_product(request):
 		productParameters["seller_show_online"] = True
 		productParameters["product_new_in_product_matrix"] = True
 
-		allProducts = filterProducts(productParameters).values('id','category_id','min_price_per_unit', 'productdetails__fabric_gsm')
-		if len(allProducts) == 0:
+		allProductsDF = filterProducts(productParameters).values('id','category_id','min_price_per_unit', 'productdetails__fabric_gsm')
+		if len(allProductsDF) == 0:
 			return customResponse("2XX", {"success" : "Already updated"})
-		allProductsDF = DataFrame(list(allProducts))
-		del(allProducts)
+		allProductsDF = DataFrame(list(allProductsDF))
 		log.critical("master_update_buyer_product 3 reached")
 		allProductsDF['productdetails__fabric_gsm'] = allProductsDF['productdetails__fabric_gsm'].str.replace(" ","").str.lower()
 
@@ -657,14 +690,13 @@ def master_update_buyer_product(request):
 		buyerProductParameters["product_new_in_product_matrix"] = True
 		buyerProductParameters["buyersArr"] = list(allBuyersSeries)
 
-		allBuyerProducts = filterBuyerProducts(buyerProductParameters).values('id','buyer_id', 'product_id', 'buyer_interest_id', 'responded')
-		if len(allBuyerProducts) == 0:
+		allBuyerProductsDF = filterBuyerProducts(buyerProductParameters).values('id','buyer_id', 'product_id', 'buyer_interest_id', 'responded')
+		if len(allBuyerProductsDF) == 0:
 			columns = ['buyer_id','buyer_interest_id','id','product_id','responded']
 			allBuyerProductsDF = DataFrame(columns=columns)
 		else:
-			allBuyerProductsDF = DataFrame(list(allBuyerProducts))
+			allBuyerProductsDF = DataFrame(list(allBuyerProductsDF))
 
-		del(allBuyerProducts)
 		log.critical("master_update_buyer_product 4 reached")
 	
 		#  Buyer ID, BuyerInterestID, Set of product ID

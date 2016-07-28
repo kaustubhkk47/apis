@@ -54,8 +54,8 @@ class BuyerSharedProductID(models.Model):
 		return "{}".format(self.id)
 
 class BuyerProductResponse(models.Model):
-	buyer = models.ForeignKey('users.Buyer', db_index=True)
-	product = models.ForeignKey('catalog.Product', db_index=True)
+	buyer = models.ForeignKey('users.Buyer')
+	product = models.ForeignKey('catalog.Product')
 	buyer_product = models.ForeignKey('users.BuyerProducts', null = True, blank = True, on_delete=models.SET_NULL, db_index=True)
 
 	response_code = models.IntegerField(default=0)
@@ -308,9 +308,9 @@ def filterBuyerInterestProducts(BuyerInterestPtr, parameters = {}):
 	return productPtr
 
 def getIntersectingProducts(leftPtr, rightPtr):
-	leftList = []
-	innerList = []
-	rightList = []
+	leftList = []   # Products to create
+	innerList = []  # Product already present and to be maintained
+	rightList = []  # Products to remove
 
 	if len(leftPtr) > 0 and len(rightPtr) > 0:
 
