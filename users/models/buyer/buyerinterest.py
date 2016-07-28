@@ -131,4 +131,7 @@ def filterBuyerInterest(parameters = {}):
 	if "is_active" in parameters:
 		buyersInterest = buyersInterest.filter(is_active=parameters["is_active"])
 
+	if "buyer_whatsapp_sharing_active" in parameters:
+		buyersInterest = buyersInterest.filter(buyer__whatsapp_sharing_active=parameters["buyer_whatsapp_sharing_active"])
+
 	return buyersInterest

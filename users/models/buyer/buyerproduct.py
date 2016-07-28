@@ -308,9 +308,9 @@ def filterBuyerInterestProducts(BuyerInterestPtr, parameters = {}):
 	return productPtr
 
 def getIntersectingProducts(leftPtr, rightPtr):
-	leftList = []
-	innerList = []
-	rightList = []
+	leftList = []   # Products to create
+	innerList = []  # Product already present and to be maintained
+	rightList = []  # Products to remove
 
 	if len(leftPtr) > 0 and len(rightPtr) > 0:
 
