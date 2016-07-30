@@ -257,6 +257,21 @@ def buyer_product_details(request, version = "0"):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
+def buyer_product_response_details(request, version = "0"):
+
+	buyerParameters = populateBuyerProductParameters(request, {}, version )
+
+	if request.method == "GET":
+
+		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return buyer.get_buyer_product_response_details(request,buyerParameters)
+	
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
 def buyer_product_whatsapp_details(request, version = "0"):
 	
 	if request.method == "PUT":

@@ -55,6 +55,7 @@ urlpatterns += [
 	url(r'^users/buyer/buysfrom/$', user_handler.buyer_buys_from_details),
 	url(r'^users/buyer/buyerinterest/$', user_handler.buyer_interest_details),
 	url(r'^users/buyer/buyerproducts/$', user_handler.buyer_product_details),
+	url(r'^users/buyer/buyerproducts/response/$', user_handler.buyer_product_response_details),
 	url(r'^users/buyer/buyerproducts/whatsapp/$', user_handler.buyer_product_whatsapp_details),
 	url(r'^users/buyer/buyerproducts/landing/$', user_handler.buyer_product_landing_details),
 	url(r'^users/buyer/buyerproducts/masterupdate/$', user_handler.buyer_product_master_update),

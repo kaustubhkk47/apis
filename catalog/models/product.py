@@ -260,9 +260,7 @@ def populateProductData(productPtr, product):
 		nowtime = timezone.now()
 		productPtr.image_path = "media/productimages/" + str(productPtr.seller.id) + "/" + nowtime.strftime('%Y%m%d%H%M%S') + "/"
 		productPtr.image_name = slugify(productPtr.display_name)
-		image_numbers = {}
-		for i in range(1, product["image_count"] + 1):
-			image_numbers[i] = i
+		image_numbers = range(1,int(product["image_count"])+1)
 		productPtr.image_numbers = str(image_numbers)
 
 def populateProductDetailsData(productDetailsPtr, productdetails):

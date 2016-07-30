@@ -14,13 +14,12 @@ redFill = openpyxl.styles.PatternFill(start_color='FA5858',end_color='FA5858',fi
 greenFill = openpyxl.styles.PatternFill(start_color='00FF40',end_color='00FF40',fill_type='solid')
 
 imageDirectory = "./images/"
-originalSizePath = ""
-thumbnailSizePath = "200x200/"
-mediumSizePath = "400x400/"
-largeSizePath = "700x700/"
 
-allSizePaths = [originalSizePath, thumbnailSizePath, mediumSizePath, largeSizePath]
-allImageSizes = [2000.0, 200.0, 400.0, 700.0]
+allSizePaths = []
+allImageSizes = [2000.0, 100.0, 200.0, 300.0, 400.0, 600.00, 700.0]
+for imageSize in allImageSizes:
+	allSizePaths.append("{:.0f}x{:.0f}/".format(imageSize,imageSize))
+allSizePaths[0] = ""
 fileFormatExtensions = [".jpg", ".jpeg",".png"]
 
 inputFileName = "./ProductDataSheet.xlsx"

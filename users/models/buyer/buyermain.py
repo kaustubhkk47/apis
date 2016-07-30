@@ -4,6 +4,7 @@ from scripts.utils import validate_mobile_number, validate_email, validate_bool,
 from decimal import Decimal
 import jwt as JsonWebToken
 import settings
+from address.models.pincode import Pincode
 
 class Buyer(models.Model):
 	name = models.CharField(max_length=200, blank=True)
