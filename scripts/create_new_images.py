@@ -30,7 +30,7 @@ def create_new_images(minPID,maxPID):
                             img = Image.open(originalFilePath)
                             imgnew = resize_image(img, allImageSizes[i])
                             imgnew.save(filePath,format="JPEG",quality=100)
-            if pid%100 == 0:
+            if pid%10 == 0:
                 print "{} done".format(pid)
         except Exception as e:
             pass
