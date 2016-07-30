@@ -171,15 +171,41 @@ def parse_buyer_product(buyer_products_queryset, parameters = {}):
 
 	return buyer_products
 
+def parse_buyer_product_response(buyer_products_queryset, parameters = {}):
+
+	buyer_products = []
+
+	for buyer_product in buyer_products_queryset:
+		buyer_product_entry = serialize_buyer_product_response(buyer_product, parameters)
+		buyer_products.append(buyer_product_entry)
+
+	return buyer_products
+
 def serialize_buyer_product(buyer_product_entry, parameters = {}):
 
 	buyer_product = {}
 
 	buyer_product["buyerproductID"] = buyer_product_entry.id
+	buyer_product["buyerID"] = buyer_product_entry.buyer_id
 	if hasattr(buyer_product_entry,"buyer_interest"):
 		buyer_product["buyerinterestID"] = buyer_product_entry.buyer_interest_id
 	buyer_product["is_active"] = buyer_product_entry.is_active
 	buyer_product["responded"] = buyer_product_entry.responded
+	buyer_product["created_at"] = buyer_product_entry.created_at
+	buyer_product["updated_at"] = buyer_product_entry.updated_at
+	
+	buyer_product["product"] = serialize_product(buyer_product_entry.product, parameters)
+
+	return buyer_product
+
+def serialize_buyer_product_response(buyer_product_entry, parameters = {}):
+
+	buyer_product = {}
+
+	buyer_product["buyerproductresponseID"] = buyer_product_entry.id
+	buyer_product["buyerID"] = buyer_product_entry.buyer_id
+	buyer_product["response_code"] = buyer_product_entry.response_code
+	buyer_product["has_swiped"] = buyer_product_entry.has_swiped
 	buyer_product["created_at"] = buyer_product_entry.created_at
 	buyer_product["updated_at"] = buyer_product_entry.updated_at
 	

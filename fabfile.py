@@ -22,7 +22,7 @@ def run_local_test():
 	local("python manage.py test --settings=test_settings")
 
 def deploy(message):
-	run_local_test()
+	#run_local_test()
 	push_to_develop(message)
 	deploy_test_server()
 
@@ -33,6 +33,6 @@ def push_to_develop(message):
 	local("git push origin develop")
 
 def deploy_test_server():
-	run("cd " + TEST_APP_DIR + "src/ && git pull origin develop")
+	run("cd " + TEST_APP_DIR + "src/ && git pull origin develop --no-edit")
 	run("cd " + TEST_APP_DIR + "src/ && python manage.py migrate")
 	run(TEST_APP_DIR + "apache2/bin/restart")

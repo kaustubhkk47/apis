@@ -83,17 +83,13 @@ def serialize_product(productsItem, parameters = {}):
 		try:
 			image_numbers = ast.literal_eval(image_numbers)
 		except Exception as e:
-			image_numbers = {}
+			image_numbers = []
 
-		image_numbers_arr = []
-		for i in range(len(image_numbers)):
-			image_numbers_arr.append(image_numbers[i+1])
-
-		if len(image_numbers_arr) > 0:
-			imageLink = "http://api.wholdus.com/" + productsItem.image_path + "700x700/" + productsItem.image_name + "-" + str(image_numbers_arr[0]) +".jpg"		
+		if len(image_numbers) > 0:
+			imageLink = "http://api.wholdus.com/" + productsItem.image_path + "700x700/" + productsItem.image_name + "-" + str(image_numbers[0]) +".jpg"		
 			image["absolute_path"] = imageLink
 
-		image["image_numbers"] = image_numbers_arr
+		image["image_numbers"] = image_numbers
 		image["image_count"] = len(image_numbers)
 		image["image_path"] = productsItem.image_path
 		image["image_name"] = productsItem.image_name

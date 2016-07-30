@@ -210,6 +210,7 @@ def populateBuyerProduct(buyerProductPtr, buyerproduct):
 		buyerProductPtr.is_active = int(buyerproduct["is_active"])
 	if "responded" in buyerproduct:
 		buyerProductPtr.responded = int(buyerproduct["responded"])
+		buyerProductPtr.shared_on_whatsapp = True
 
 def populateBuyerProductResponseHistory(buyerProductResponsePtr,buyerProductResponse):
 	buyerProductResponsePtr.response_code = int(buyerProductResponse["response_code"])
@@ -280,6 +281,21 @@ def filterBuyerProducts(parameters = {}):
 		buyerProducts = buyerProducts.filter(product_id__in=parameters["productsArr"])
 
 	return buyerProducts
+
+def filterBuyerProductResponse(parameters = {}):
+
+	buyerProductResponse = BuyerProductResponse.objects.filter(buyer__delete_status=False,product__delete_status=False, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
+
+	if "buyersArr" in parameters:
+		buyerProductResponse = buyerProductResponse.filter(buyer_id__in=parameters["buyersArr"])
+
+	if "productsArr" in parameters:
+		buyerProductResponse = buyerProductResponse.filter(product_id__in=parameters["productsArr"])
+
+	if "responded" in parameters:
+		buyerProductResponse = buyerProductResponse.filter(response_code= parameters["responded"])
+
+	return buyerProductResponse
 
 def filterBuyerInterestProducts(BuyerInterestPtr, parameters = {}):
 
