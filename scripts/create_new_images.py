@@ -1,6 +1,7 @@
 import settings
 import ast
-import Image
+import Image, ImageFile
+ImageFile.MAXBLOCK = 1000000
 import os
 BASE_DIR = settings.STATIC_ROOT
 from catalog.models.product import Product
@@ -20,16 +21,15 @@ def create_new_images(minPID,maxPID):
             for image_number in image_numbers:
                 originalFilePath = "{}{}{}-{}.jpg".format(BASE_DIR,image_path,image_name,image_number)
                 if os.path.exists(originalFilePath):
+                    img = Image.open(originalFilePath)
                     for i in range(0,len(allSizePaths)):
                         sizePath = allSizePaths[i]
                         directory = "{}{}{}".format(BASE_DIR,image_path,sizePath)
                         if not os.path.exists(directory):
                             os.makedirs(directory)
                         filePath = "{}{}{}{}-{}.jpg".format(BASE_DIR,image_path,sizePath,image_name,image_number)
-                        if not os.path.exists(filePath):
-                            img = Image.open(originalFilePath)
-                            imgnew = resize_image(img, allImageSizes[i])
-                            imgnew.save(filePath,format="JPEG",quality=100, progressive=True)
+                        imgnew = resize_image(img, allImageSizes[i])
+                        imgnew.save(filePath,format="JPEG",quality=100, progressive=True, optimize=True)
             if pid%10 == 0:
                 print "{} done".format(pid)
         except Exception as e:
