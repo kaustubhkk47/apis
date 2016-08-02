@@ -2,7 +2,7 @@ from django.test import TestCase
 from unittest import TestCase as uTestCase
 from scripts.utils import *
 
-class validate_bool_test_case(TestCase):
+class validate_bool_test_case(uTestCase):
 
 	def setUp(self):
 		pass

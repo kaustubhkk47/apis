@@ -97,21 +97,21 @@ def validateOrderShipmentData(orderShipment):
     if not "invoice_number" in orderShipment or orderShipment["invoice_number"]==None:
         orderShipment["invoice_number"] = ""
     if not "invoice_date" in orderShipment or orderShipment["invoice_date"]==None or not validate_date(orderShipment["invoice_date"]):
-        flag = False
+        return False
     if not "waybill_number" in orderShipment or orderShipment["waybill_number"]==None:
         orderShipment["waybill_number"] = ""
     if not "packaged_weight" in orderShipment or not validate_number(orderShipment["packaged_weight"]):
-        flag = False
+        return False
     if not "packaged_length" in orderShipment or not validate_number(orderShipment["packaged_length"]):
-        flag = False
+        return False
     if not "packaged_breadth" in orderShipment or not validate_number(orderShipment["packaged_breadth"]):
-        flag = False
+        return False
     if not "packaged_height" in orderShipment  or not validate_number(orderShipment["packaged_height"]):
-        flag = False
+        return False
     if not "cod_charge" in orderShipment or not validate_number(orderShipment["cod_charge"]):
-        flag = False
+        return False
     if not "shipping_charge" in orderShipment or not validate_number(orderShipment["shipping_charge"]):
-        flag = False
+        return False
     if not "remarks" in orderShipment or orderShipment["remarks"]==None:
         orderShipment["remarks"] = ""
     if not "rto_remarks" in orderShipment or orderShipment["rto_remarks"]==None:
@@ -119,15 +119,22 @@ def validateOrderShipmentData(orderShipment):
     if not "tracking_url" in orderShipment or orderShipment["tracking_url"]==None:
         orderShipment["tracking_url"] = ""
     if not "all_items" in orderShipment or not validate_bool(orderShipment["all_items"]):
-        flag = False
+        return False
+    if not "logistics_partner" in orderShipment or orderShipment["logistics_partner"]==None:
+        return False
+    else:
+        try:
+            logistics_partner = LogisticsPartner.objects.get(name=orderShipment["logistics_partner"])
+        except Exception as e:
+            return False
     
     return flag
 
 def populateOrderShipment(OrderShipmentPtr, orderShipment):
     OrderShipmentPtr.invoice_number = orderShipment["invoice_number"]
     OrderShipmentPtr.invoice_date = orderShipment["invoice_date"]
-    OrderShipmentPtr.logistics_partner_name = "Fedex"
-    logistics_partner = LogisticsPartner.objects.get(id=1)
+    logistics_partner = LogisticsPartner.objects.get(name=orderShipment["logistics_partner"])
+    OrderShipmentPtr.logistics_partner_name = logistics_partner.name
     OrderShipmentPtr.logistics_partner = logistics_partner
     OrderShipmentPtr.waybill_number = orderShipment["waybill_number"]
     OrderShipmentPtr.packaged_weight = Decimal(orderShipment["packaged_weight"])

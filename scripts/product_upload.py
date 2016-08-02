@@ -16,7 +16,7 @@ greenFill = openpyxl.styles.PatternFill(start_color='00FF40',end_color='00FF40',
 imageDirectory = "./images/"
 
 allSizePaths = []
-allImageSizes = [2000.0, 100.0, 200.0, 300.0, 400.0, 600.00, 700.0]
+allImageSizes = [2000.0, 50.0, 100.0, 200.0, 300.0, 400.0, 600.00, 700.0]
 for imageSize in allImageSizes:
 	allSizePaths.append("{:.0f}x{:.0f}/".format(imageSize,imageSize))
 allSizePaths[0] = ""
@@ -164,7 +164,7 @@ def moveImages(jsonText, row, wb):
 					imageNewFileName = image_name + "-" + toString(image_numbers[imgNo-1]) + ".jpg"
 					newPath = os.path.join(directory, imageNewFileName)
 					imgnew = resize_image(img, allImageSizes[i])
-					imgnew.save(newPath,format="JPEG",quality=imageQualityPercent)
+					imgnew.save(newPath,format="JPEG",quality=imageQualityPercent,optimize=True, progressive=True)
 				os.remove(imagePath)
 				
 		if(check == 0):

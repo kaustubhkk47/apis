@@ -4,7 +4,7 @@ import Image
 import os
 BASE_DIR = settings.STATIC_ROOT
 from catalog.models.product import Product
-allImageSizes = [100.0, 200.0, 300.0, 400.0, 600.00, 700.0]
+allImageSizes = [50.0, 100.0, 200.0, 300.0, 400.0, 600.00, 700.0]
 allSizePaths = []
 for imageSize in allImageSizes:
     allSizePaths.append("{:.0f}x{:.0f}/".format(imageSize,imageSize))
@@ -29,7 +29,7 @@ def create_new_images(minPID,maxPID):
                         if not os.path.exists(filePath):
                             img = Image.open(originalFilePath)
                             imgnew = resize_image(img, allImageSizes[i])
-                            imgnew.save(filePath,format="JPEG",quality=100)
+                            imgnew.save(filePath,format="JPEG",quality=100, progressive=True)
             if pid%10 == 0:
                 print "{} done".format(pid)
         except Exception as e:

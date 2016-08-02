@@ -1,0 +1,70 @@
+[
+{
+    "model": "users.sellerdetails",
+    "pk": 1,
+    "fields": {
+        "seller": 1,
+        "seller_type": null,
+        "vat_tin": "",
+        "cst": "",
+        "pan": "",
+        "name_on_pan": "",
+        "dob_on_pan": null,
+        "pan_verification": true,
+        "tin_verification": true,
+        "created_at": "2016-07-30T10:07:14Z",
+        "updated_at": "2016-07-30T10:07:14Z"
+    }
+},
+{
+    "model": "users.sellerdetails",
+    "pk": 2,
+    "fields": {
+        "seller": 2,
+        "seller_type": null,
+        "vat_tin": "",
+        "cst": "",
+        "pan": "",
+        "name_on_pan": "",
+        "dob_on_pan": null,
+        "pan_verification": true,
+        "tin_verification": true,
+        "created_at": "2016-07-30T10:07:14Z",
+        "updated_at": "2016-07-30T10:07:14Z"
+    }
+},
+{
+    "model": "users.sellerdetails",
+    "pk": 3,
+    "fields": {
+        "seller": 3,
+        "seller_type": null,
+        "vat_tin": "",
+        "cst": "",
+        "pan": "",
+        "name_on_pan": "",
+        "dob_on_pan": null,
+        "pan_verification": true,
+        "tin_verification": true,
+        "created_at": "2016-07-30T10:07:14Z",
+        "updated_at": "2016-07-30T10:07:14Z"
+    }
+},
+{
+    "model": "users.sellerdetails",
+    "pk": 4,
+    "fields": {
+        "seller": 4,
+        "seller_type": null,
+        "vat_tin": "",
+        "cst": "",
+        "pan": "",
+        "name_on_pan": "",
+        "dob_on_pan": null,
+        "pan_verification": true,
+        "tin_verification": true,
+        "created_at": "2016-07-30T10:07:14Z",
+        "updated_at": "2016-07-30T10:07:14Z"
+    }
+}
+]
