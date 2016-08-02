@@ -1,0 +1,28 @@
+[
+{
+    "model": "address.country",
+    "pk": 1,
+    "fields": {
+        "name": "India",
+        "a2_iso_code": "IN",
+        "a3_un_code": "IND",
+        "num_un_code": "356",
+        "dialing_code": "91",
+        "created_at": "2016-07-19T22:41:06Z",
+        "updated_at": "2016-07-19T22:41:11Z"
+    }
+},
+{
+    "model": "address.country",
+    "pk": 2,
+    "fields": {
+        "name": "China",
+        "a2_iso_code": "CN",
+        "a3_un_code": "CHN",
+        "num_un_code": "156",
+        "dialing_code": "86",
+        "created_at": "2016-07-19T22:41:06Z",
+        "updated_at": "2016-07-19T22:41:11Z"
+    }
+}
+]

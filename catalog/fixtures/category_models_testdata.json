@@ -1,0 +1,54 @@
+[
+{
+    "model": "catalog.category",
+    "pk": 1,
+    "fields": {
+        "name": "Kurtis",
+        "display_name": "Kurtis",
+        "slug": "kurtis",
+        "created_at": "2016-04-21T19:40:51Z",
+        "updated_at": "2016-04-28T02:43:46Z",
+        "priority": 2,
+        "delete_status": false
+    }
+},
+{
+    "model": "catalog.category",
+    "pk": 2,
+    "fields": {
+        "name": "Ethnic Bottomwear",
+        "display_name": "Ethnic Bottomwear",
+        "slug": "ethnic-bottomwear",
+        "created_at": "2016-04-28T02:42:35Z",
+        "updated_at": "2016-05-02T06:43:43Z",
+        "priority": 2,
+        "delete_status": false
+    }
+},
+{
+    "model": "catalog.category",
+    "pk": 3,
+    "fields": {
+        "name": "Sarees",
+        "display_name": "Sarees",
+        "slug": "sarees",
+        "created_at": "2016-04-28T02:43:25Z",
+        "updated_at": "2016-04-28T02:43:25Z",
+        "priority": 1,
+        "delete_status": false
+    }
+},
+{
+    "model": "catalog.category",
+    "pk": 4,
+    "fields": {
+        "name": "Unstitched suits",
+        "display_name": "Unstitched suits",
+        "slug": "unstitched-suits",
+        "created_at": "2016-04-28T02:45:13Z",
+        "updated_at": "2016-04-29T06:45:43Z",
+        "priority": 0,
+        "delete_status": true
+    }
+}
+]
