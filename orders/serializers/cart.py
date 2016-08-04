@@ -1,5 +1,6 @@
 from catalog.serializers.product import serialize_product
 from users.serializers.buyer import serialize_buyer
+from ..models.cart import filterCartItem
 
 def parseCartItem(cartItemQuerySet, cartItemParameters = {}):
 
@@ -34,6 +35,11 @@ def serializeCart(cartEntry, parameters = {}):
 		buyer["buyerID"] = cartEntry.buyer.id
 		buyer["name"] = cartEntry.buyer.name
 		cart["buyer"] = buyer
+
+	if "cart_item_details" in parameters and parameters["cart_item_details"] == 1:
+		cartItems = filterCartItem(parameters)
+		cartItems = cartItems.filter(cart_id = cartEntry.id)
+		cart["cart_items"] = parseCartItem(cartItems,parameters)
 
 	return cart
 

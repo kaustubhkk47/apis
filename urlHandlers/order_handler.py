@@ -172,6 +172,11 @@ def cart_details(request, version = "0"):
 
 def populateCartParameters(request, parameters = {}, version = "0"):
 
+	defaultValue = 1
+
+	if version == "1":
+		defaultValue = 0
+
 	parameters = populateAllUserIDParameters(request, parameters, version)
 
 	productID = request.GET.get("productID", "")
@@ -190,6 +195,12 @@ def populateCartParameters(request, parameters = {}, version = "0"):
 	parameters = populateProductDetailsParameters(request, parameters, version)
 
 	parameters = getPaginationParameters(request, parameters, 10, version)
+
+	cartItemDetails = request.GET.get("cart_item_details", None)
+	if validate_bool(cartItemDetails):
+		parameters["cart_item_details"] = int(cartItemDetails)
+	else:
+		parameters["cart_item_details"] = defaultValue
 
 	return parameters
 
