@@ -27,7 +27,7 @@ class BuyerProducts(models.Model):
 	shared_on_whatsapp = models.BooleanField(default=False)
 
 	class Meta:
-		ordering = ["-product__id"]
+		ordering = ["-id"]
 		default_related_name = "buyerproduct"
 		verbose_name="Buyer Product"
 		verbose_name_plural = "Buyer Products"

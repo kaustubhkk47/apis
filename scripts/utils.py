@@ -8,6 +8,8 @@ import os
 import re
 import csv
 from django.http import HttpResponse
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 from django.core.mail import EmailMessage
 #from django.template import Context
@@ -241,3 +243,7 @@ def link_to_foreign_key(obj, fk_name):
 
 def time_in_ist(dt):
 	return  dt + datetime.timedelta(0,0,0,0,30,5,0)
+
+def djangoEncodedTime(obj):
+	t = json.dumps(obj, cls=DjangoJSONEncoder)
+	return t[1:len(t)-1]

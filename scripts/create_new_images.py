@@ -1,7 +1,7 @@
 import settings
 import ast
 import Image, ImageFile
-ImageFile.MAXBLOCK = 1000000
+ImageFile.MAXBLOCK = 2**24
 import os
 BASE_DIR = settings.STATIC_ROOT
 from catalog.models.product import Product

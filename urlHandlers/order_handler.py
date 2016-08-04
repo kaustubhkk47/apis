@@ -1,6 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
 
-from orders.views import order, orderItem, orderShipment, payments, subOrder
+from orders.views import order, orderItem, orderShipment, payments, subOrder, cart
 from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool, getPaginationParameters
 import jwt as JsonWebToken
 
@@ -125,6 +125,44 @@ def seller_payment_details(request, version = "0"):
 		return payments.post_new_seller_payment(request)
 
 	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
+def cart_item_details(request, version = "0"):
+
+	cartParameters = populateCartParameters(request, {}, version)
+
+	if request.method == "GET":
+		if cartParameters["isBuyer"] == 0 and cartParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return cart.get_cart_item_details(request,cartParameters)
+	elif request.method == "POST":
+		if cartParameters["isBuyer"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return cart.post_new_cart_item(request, cartParameters)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+def populateCartParameters(request, parameters = {}, version = "0"):
+
+	parameters = populateAllUserIDParameters(request, parameters, version)
+
+	productID = request.GET.get("productID", "")
+	if productID != "" and productID != None:
+		parameters["productsArr"] = getArrFromString(productID)
+
+	cartItemID = request.GET.get("cartitemID", "")
+	if cartItemID != "" and cartItemID != None:
+		parameters["cartItemsArr"] = getArrFromString(cartItemID)	
+
+	cartItemStatus = request.GET.get("cart_item_status", "")
+	if cartItemStatus != "":
+		parameters["cartItemStatusArr"] = getArrFromString(cartItemStatus)
+
+	parameters = populateBuyerDetailsParameters(request, parameters, version)
+	parameters = populateProductDetailsParameters(request, parameters, version)
+
+	return parameters
+
 
 def populateOrderParameters(request, parameters = {}, version = "0"):
 

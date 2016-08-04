@@ -1,126 +1,141 @@
-from django.test import TestCase
-from unittest import TestCase as uTestCase
+from catalog.models.category import Category
+from scripts.baseTestCases import *
 
-class category_test_case_get(TestCase):
+class category_test_case_get(masterTestCase):
 
-	CATEGORY_FIXTURE = ['category_models_testdata.json']
 	fixtures = CATEGORY_FIXTURE
+	BASE_URL = '/category/'
 
-	def test_category_get_all(self):
+	def test_category_get(self):
+		
+		result = self.getMethod("categories", {})[0]
+		categories = Category.objects.filter(delete_status=False)
+		self.assertEqual(len(result), len(categories))
 
-		resp = self.client.get('/category/')
-		self.assertEqual(resp.status_code, 200)
-		respJson = resp.json()
-		self.assertEqual(respJson["statusCode"], '2XX')
-		jsonBody = respJson["body"]
-		categories = jsonBody["categories"]
-		self.assertEqual(len(categories), 3)
+		for i in range(len(result)):
+			self.compareCategories(result[i], categories[i])
 
-		category1 = categories[0]
-		self.assertEqual(category1["display_name"], "Sarees")
-		self.assertEqual(category1["name"], "Sarees")
-		self.assertEqual(category1["url"], "sarees-3")
-		self.assertEqual(category1["slug"], "sarees")
-		self.assertEqual(category1["id"], 3)
-		self.assertEqual(category1["categoryID"], 3)
+		result = self.getMethod("categories",{"categoryID":"1"})[0]
+		self.assertEqual(len(result), 1)
 
-		category2 = categories[1]
-		self.assertEqual(category2["display_name"], "Kurtis")
-		self.assertEqual(category2["name"], "Kurtis")
-		self.assertEqual(category2["url"], "kurtis-1")
-		self.assertEqual(category2["slug"], "kurtis")
-		self.assertEqual(category2["id"], 1)
-		self.assertEqual(category2["categoryID"], 1)
+		result = self.getMethod("categories",{"categoryID":"1,2"})[0]
+		self.assertEqual(len(result), 2)
 
-	def test_category_get_specific(self):
+		result = self.getMethod("categories",{"categoryID":"3,4"})[0]
+		self.assertEqual(len(result), 1)
 
-		resp = self.client.get('/category/?categoryID=1')
-		self.assertEqual(resp.status_code, 200)
-		respJson = resp.json()
-		self.assertEqual(respJson["statusCode"], '2XX')
-		jsonBody = respJson["body"]
-		categories = jsonBody["categories"]
-		self.assertEqual(len(categories), 1)
+		result = self.getMethod("categories",{"categoryID":"10"})[0]
+		self.assertEqual(len(result), 0)
 
-		resp = self.client.get('/category/?categoryID=1,2')
-		self.assertEqual(resp.status_code, 200)
-		respJson = resp.json()
-		self.assertEqual(respJson["statusCode"], '2XX')
-		jsonBody = respJson["body"]
-		categories = jsonBody["categories"]
-		self.assertEqual(len(categories), 2)
+		result = self.getMethod("categories",{"categoryID":""})[0]
+		self.assertEqual(len(result), 3)
 
-		resp = self.client.get('/category/?categoryID=3,4')
-		self.assertEqual(resp.status_code, 200)
-		respJson = resp.json()
-		self.assertEqual(respJson["statusCode"], '2XX')
-		jsonBody = respJson["body"]
-		categories = jsonBody["categories"]
-		self.assertEqual(len(categories), 1)
+		result = self.getMethod("categories",{"categoryID":"hello"})[0]
+		self.assertEqual(len(result), 0)
 
-		resp = self.client.get('/category/?categoryID=10')
-		self.assertEqual(resp.status_code, 200)
-		respJson = resp.json()
-		self.assertEqual(respJson["statusCode"], '2XX')
-		jsonBody = respJson["body"]
-		categories = jsonBody["categories"]
-		self.assertEqual(len(categories), 0)
+class category_test_case_post(masterTestCase):
 
-		resp = self.client.get('/category/?categoryID=')
-		self.assertEqual(resp.status_code, 200)
-		respJson = resp.json()
-		self.assertEqual(respJson["statusCode"], '2XX')
-		jsonBody = respJson["body"]
-		categories = jsonBody["categories"]
-		self.assertEqual(len(categories), 3)
+	fixtures = []
+	BASE_URL = '/category/'
+	METHOD_NAME = "post"
 
-		resp = self.client.get('/category/?categoryID=hello')
-		self.assertEqual(resp.status_code, 200)
-		respJson = resp.json()
-		self.assertEqual(respJson["statusCode"], '2XX')
-		jsonBody = respJson["body"]
-		categories = jsonBody["categories"]
-		self.assertEqual(len(categories), 0)
-"""
-class category_test_case_post(TestCase):
+	def test_category_create(self):
 
-	CATEGORY_FIXTURE = ['category_models_testdata.json']
-	fixtures = CATEGORY_FIXTURE
+		self.blankMethod()
+
+		allKeys = {"name":"New Name", "display_name":"Display Name"}
+
+		tempDict = allKeys.copy()
+		tempDict.pop("name")
+		error = self.generalMethod("error", {}, "4XX")
+		self.assertEqual(error, "Invalid data for category sent")
+
+		tempDict = allKeys.copy()
+		tempDict.pop("display_name")
+		result = self.generalMethod("categories", tempDict, "2XX")
+		categoryPtr = Category.objects.get(id=1)
+		tempDict["slug"] = "new-name"
+		tempDict["url"] = "new-name-1"
+		tempDict["id"] = 1
+		self.compareCategories(tempDict, categoryPtr, 0)
+
+		tempDict = allKeys.copy()
+		result = self.generalMethod("categories", tempDict, "2XX")
+		categoryPtr = Category.objects.get(id=2)
+		tempDict["slug"] = "new-name"
+		tempDict["url"] = "new-name-2"
+		tempDict["id"] = 2
+		self.compareCategories(tempDict, categoryPtr, 0)
+
 	
-	def test_state_url_post(self):
+class category_test_case_put(masterTestCase):
 
-		resp = self.client.post('/address/state/')
-		self.assertEqual(resp.status_code, 200)
-		respJson = resp.json()
-		self.assertEqual(respJson["statusCode"], '4XX')
-		jsonBody = respJson["body"]
-		self.assertEqual(jsonBody["error"], "Invalid request")
-
-class category_test_case_put(TestCase):
-
-	CATEGORY_FIXTURE = ['category_models_testdata.json']
 	fixtures = CATEGORY_FIXTURE
+	BASE_URL = '/category/'
+	METHOD_NAME = "put"
 
-	def test_state_url_put(self):
+	def test_category_update(self):
 
-		resp = self.client.put('/address/state/')
-		self.assertEqual(resp.status_code, 200)
-		respJson = resp.json()
-		self.assertEqual(respJson["statusCode"], '4XX')
-		jsonBody = respJson["body"]
-		self.assertEqual(jsonBody["error"], "Invalid request")
-"""
+		self.blankMethod()
 
-class category_test_case_delete(TestCase):
+		allKeys = {"categoryID":3, "name":"New Name"}
 
-	CATEGORY_FIXTURE = ['category_models_testdata.json']
+		error = self.generalMethod("error", {}, "4XX")
+		self.assertEqual(error, "Id for category not sent")
+
+		error = self.generalMethod("error", {"hello":1}, "4XX")
+		self.assertEqual(error, "Id for category not sent")
+
+		error = self.generalMethod("error", {"categoryID":"None"}, "4XX")
+		self.assertEqual(error, "Id for category not sent")
+
+		error = self.generalMethod("error", {"categoryID":"5"}, "4XX")
+		self.assertEqual(error, "Invalid id for category sent")
+
+		error = self.generalMethod("error", {"categoryID":5}, "4XX")
+		self.assertEqual(error, "Invalid id for category sent")
+
+		result = self.generalMethod("categories", {"categoryID":4}, "2XX")
+		categoryPtr = Category.objects.get(id=4)
+		self.compareCategories(result, categoryPtr)
+
+		tempDict = {"categoryID":3, "name":"New Name"}
+		result = self.generalMethod("categories", tempDict, "2XX")
+		categoryPtr = Category.objects.get(id=3)
+		tempDict["slug"] = "new-name"
+		tempDict["url"] = "new-name-3"
+		self.compareCategories(tempDict, categoryPtr, 0)
+
+class category_test_case_delete(masterTestCase):
+
 	fixtures = CATEGORY_FIXTURE
+	BASE_URL = '/category/'
+	METHOD_NAME = "delete"
 
 	def test_category_delete(self):
 
-		resp = self.client.delete('/category/')
-		self.assertEqual(resp.status_code, 200)
-		respJson = resp.json()
-		self.assertEqual(respJson["statusCode"], '4XX')
-		jsonBody = respJson["body"]
-		self.assertEqual(jsonBody["error"], "Invalid data sent in request")
+		self.blankMethod()
+
+		error = self.generalMethod("error", {}, "4XX")
+		self.assertEqual(error, "Id for category not sent")
+
+		error = self.generalMethod("error", {"hello":1}, "4XX")
+		self.assertEqual(error, "Id for category not sent")
+
+		error = self.generalMethod("error", {"categoryID":"None"}, "4XX")
+		self.assertEqual(error, "Id for category not sent")
+
+		error = self.generalMethod("error", {"categoryID":"5"}, "4XX")
+		self.assertEqual(error, "Invalid id for category sent")
+
+		error = self.generalMethod("error", {"categoryID":5}, "4XX")
+		self.assertEqual(error, "Invalid id for category sent")
+
+		error = self.generalMethod("error", {"categoryID":4}, "4XX")
+		self.assertEqual(error, "Already deleted")
+
+		success = self.generalMethod("success", {"categoryID":3}, "2XX")
+		self.assertEqual(success, "category deleted")
+
+		categories = self.getMethod("categories")[0]
+		self.assertEqual(len(categories), 2)

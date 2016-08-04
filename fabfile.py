@@ -38,6 +38,7 @@ def push_to_develop(message):
 	local("git push origin develop")
 
 def deploy_test_server():
+	run("cd " + TEST_APP_DIR + "src/ && git checkout .")
 	run("cd " + TEST_APP_DIR + "src/ && git pull origin develop --no-edit")
 	run("cd " + TEST_APP_DIR + "src/ && python manage.py migrate")
 	run(TEST_APP_DIR + "apache2/bin/restart")
