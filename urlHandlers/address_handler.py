@@ -1,10 +1,12 @@
 from django.views.decorators.csrf import csrf_exempt
-from scripts.utils import customResponse, get_token_payload
+from scripts.utils import customResponse, get_token_payload, getApiVersion
 
 from address.views import state
 
 @csrf_exempt
 def state_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
 	if request.method == "GET":
 

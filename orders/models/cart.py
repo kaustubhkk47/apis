@@ -162,4 +162,13 @@ def filterCartItem(parameters):
 
 	return cartItems
 
+def filterCarts(parameters):
+
+	carts = Cart.objects.filter(status=0)
+
+	if "buyersArr" in parameters:
+		carts = carts.filter(buyer_id__in=parameters["buyersArr"])
+
+	return carts
+
 

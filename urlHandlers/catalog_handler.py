@@ -2,13 +2,15 @@ from django.views.decorators.csrf import csrf_exempt
 
 from catalog.views import categories
 from catalog.views import product
-from scripts.utils import customResponse, get_token_payload, getArrFromString, getStrArrFromString, validate_number, getPaginationParameters, validate_bool
+from scripts.utils import customResponse, get_token_payload, getArrFromString, getStrArrFromString, validate_number, getPaginationParameters, validate_bool, getApiVersion
 import jwt as JsonWebToken
 
 from .user_handler import populateSellerIDParameters, populateInternalUserIDParameters, populateSellerDetailsParameters
 
 @csrf_exempt
 def categories_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
 	if request.method == "GET":
 
@@ -31,6 +33,7 @@ def categories_details(request, version = "0"):
 
 @csrf_exempt
 def product_details(request, version = "0"):
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 	productParameters = populateProductParameters(request, {}, version)
 
 	if request.method == "GET":
@@ -47,6 +50,8 @@ def product_details(request, version = "0"):
 @csrf_exempt
 def product_colour_details(request, version = "0"):
 
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
 	if request.method == "GET":
 
 		return product.get_product_colour_details(request)
@@ -56,6 +61,8 @@ def product_colour_details(request, version = "0"):
 @csrf_exempt
 def product_fabric_details(request, version = "0"):
 
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
 	if request.method == "GET":
 
 		return product.get_product_fabric_details(request)
@@ -64,6 +71,8 @@ def product_fabric_details(request, version = "0"):
 
 @csrf_exempt
 def product_file(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
 	if request.method == "GET":
 
@@ -75,6 +84,8 @@ def product_file(request, version = "0"):
 
 @csrf_exempt
 def product_catalog(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
 	if request.method == "GET":
 

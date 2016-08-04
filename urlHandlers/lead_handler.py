@@ -1,11 +1,13 @@
 from django.views.decorators.csrf import csrf_exempt
-from scripts.utils import customResponse, get_token_payload, getArrFromString
+from scripts.utils import customResponse, get_token_payload, getArrFromString, getApiVersion
 from leads.views import buyerLeads,contactUsLead, sellerLeads
 
 from .user_handler import populateInternalUserIDParameters
 
 @csrf_exempt
 def buyer_leads(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
 	if request.method == "GET":
 
@@ -36,6 +38,8 @@ def getBuyerLeadParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def seller_leads(request, version = "0"):
 
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
 	if request.method == "GET":
 
 		sellerLeadParameters = getSellerLeadParameters(request, {}, version)
@@ -64,6 +68,8 @@ def getSellerLeadParameters(request, parameters = {}, version = "0"):
 
 @csrf_exempt
 def contactus_leads(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
 	if request.method == "GET":
 

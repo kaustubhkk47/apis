@@ -1,4 +1,5 @@
 from catalog.serializers.product import serialize_product
+from users.serializers.buyer import serialize_buyer
 
 def parseCartItem(cartItemQuerySet, cartItemParameters = {}):
 
@@ -9,6 +10,32 @@ def parseCartItem(cartItemQuerySet, cartItemParameters = {}):
 		cartItems.append(cartItemEntry)
 
 	return cartItems
+
+def parseCart(cartQuerySet, cartParameters = {}):
+
+	carts = []
+
+	for cart in cartQuerySet:
+		cartEntry = serializeCart(cart, cartParameters)
+		carts.append(cartEntry)
+
+	return carts
+
+def serializeCart(cartEntry, parameters = {}):
+	cart = {}
+	cart["cartID"] = cartEntry.id
+	cart["created_at"] = cartEntry.created_at
+	cart["updated_at"] = cartEntry.updated_at
+
+	if "buyer_details" in parameters and parameters["buyer_details"] == 1:
+		cart["buyer"]=serialize_buyer(cartEntry.buyer, parameters)
+	else:
+		buyer = {}
+		buyer["buyerID"] = cartEntry.buyer.id
+		buyer["name"] = cartEntry.buyer.name
+		cart["buyer"] = buyer
+
+	return cart
 
 def serializeCartItem(cartItemEntry, parameters = {}):
 	cartItem = {}
