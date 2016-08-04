@@ -47,7 +47,9 @@ class CartItem(models.Model):
 
 	status = models.IntegerField(default=0)
 
-	added_from_shortlist = models.BooleanField(default=0)
+	#added_from values
+	#0 : category_page, 1 : product_page, 2 : shortlist, 3 : homepage
+	added_from = models.IntegerField(default=0)
 
 	class Meta:
 		ordering = ["-updated_at"]
@@ -61,8 +63,8 @@ class CartItem(models.Model):
 	def validateCartItemData(self, cartitem):
 		if not "lots" in cartitem or not validate_integer(cartitem["lots"]):
 			return False
-		if not "added_from_shortlist" in cartitem or not validate_bool(cartitem["added_from_shortlist"]):
-			cartitem["added_from_shortlist"] = 0
+		if not "added_from" in cartitem or not validate_integer(cartitem["added_from"]):
+			cartitem["added_from"] = 0
 		return True
 
 	def populateCartItemData(self, cartitem):
@@ -74,7 +76,7 @@ class CartItem(models.Model):
 		self.retail_price_per_piece = self.product.price_per_unit
 		self.calculated_price_per_piece = self.product.getCalculatedPricePerPiece(self.lots)
 		self.final_price = self.pieces*self.calculated_price_per_piece
-		self.added_from_shortlist = int(cartitem["added_from_shortlist"])
+		self.added_from = int(cartitem["added_from"])
 
 CartItemStatus = {
 	0:{"display_value":"Active"},
@@ -119,7 +121,7 @@ class CartItemHistory(models.Model):
 
 	status = models.IntegerField(default=0)
 
-	added_from_shortlist = models.BooleanField(default=0)
+	added_from = models.IntegerField(default=0)
 
 	class Meta:
 		verbose_name="Cart Item History"
@@ -140,7 +142,7 @@ class CartItemHistory(models.Model):
 		self.calculated_price_per_piece = cartItemPtr.calculated_price_per_piece
 		self.final_price = cartItemPtr.final_price
 		self.status = cartItemPtr.status
-		self.added_from_shortlist = cartItemPtr.added_from_shortlist
+		self.added_from = cartItemPtr.added_from
 
 def filterCartItem(parameters):
 
