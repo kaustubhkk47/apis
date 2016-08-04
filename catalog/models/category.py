@@ -32,11 +32,10 @@ def validateCategoryData(category, oldcategory, is_new):
         flag = 1
         category["name"] = oldcategory.name
     if not "display_name" in category or category["display_name"]==None:
-        flag = 1
-        if is_new == 1:
-            pass
-        else:
+        if not is_new == 1:
             category["display_name"] = oldcategory.display_name
+        else:
+            category["display_name"] = category["name"]
 
     if is_new == 1 and flag == 1:
         return False

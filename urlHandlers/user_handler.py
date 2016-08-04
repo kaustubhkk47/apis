@@ -615,7 +615,7 @@ def seller_login(request, version = "0"):
 		try:
 			seller = Seller.objects.get(email=email)
 		except Seller.DoesNotExist:
-			return customResponse("4XX", {"error": "Invalid seller credentials"})
+			return customResponse("4XX", {"error": "Invalid email"})
 
 		if password == seller.password:
 			response = {
@@ -624,7 +624,7 @@ def seller_login(request, version = "0"):
 			}
 			return customResponse("2XX", response)
 		else:
-			return customResponse("4XX", {"error": "Invalid seller credentials"})
+			return customResponse("4XX", {"error": "Invalid password"})
 
 	return customResponse("4XX", {"error": "Invalid request"})
 

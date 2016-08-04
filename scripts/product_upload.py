@@ -27,7 +27,7 @@ outputFileName = "./ProductDataSheetf.xlsx"
 
 startRow = 5
 
-imageQualityPercent = 80
+imageQualityPercent = 75
 
 def upload_products():
 	wb = read_file()

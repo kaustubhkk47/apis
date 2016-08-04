@@ -1,48 +1,45 @@
-from django.test import TestCase
-from unittest import TestCase as uTestCase
+from scripts.baseTestCases import *
+from address.models.state import State
 
-class state_test_case(TestCase):
+class state_test_case_get(masterTestCase):
 
-	ADDRESS_FIXTURE = ['country_models_testdata.json', 'state_models_testdata.json', 'city_models_testdata.json','pincode_models_testdata.json']
 	fixtures = ADDRESS_FIXTURE
+	BASE_URL = '/address/state/'
 
 	def test_state_get(self):
 
-		resp = self.client.get('/address/state/')
-		self.assertEqual(resp.status_code, 200)
-		respJson = resp.json()
-		self.assertEqual(respJson["statusCode"], '2XX')
-		jsonBody = respJson["body"]
-		states = jsonBody["states"]
+		states = self.getMethod("states",{})[0]
 		self.assertEqual(len(states), 2)
 		state1 = states[0]
-		self.assertEqual(state1["stateID"], 1)
-		self.assertEqual(state1["short_form"], "AN")
-		self.assertEqual(state1["name"], "Andaman and Nicobar Islands")
+		statePtr = State.objects.get(id=1)
+		self.compareStates(state1, statePtr)
+
+class state_test_case_post(masterTestCase):
+
+	fixtures = []
+	BASE_URL = '/address/state/'
+	METHOD_NAME = "post"
 	
 	def test_state_post(self):
 
-		resp = self.client.post('/address/state/')
-		self.assertEqual(resp.status_code, 200)
-		respJson = resp.json()
-		self.assertEqual(respJson["statusCode"], '4XX')
-		jsonBody = respJson["body"]
-		self.assertEqual(jsonBody["error"], "Invalid request")
+		self.blankMethod("Invalid request")
+
+class state_test_case_put(masterTestCase):
+
+	fixtures = []
+	BASE_URL = '/address/state/'
+	METHOD_NAME = "put"
 
 	def test_state_put(self):
 
-		resp = self.client.put('/address/state/')
-		self.assertEqual(resp.status_code, 200)
-		respJson = resp.json()
-		self.assertEqual(respJson["statusCode"], '4XX')
-		jsonBody = respJson["body"]
-		self.assertEqual(jsonBody["error"], "Invalid request")
+		self.blankMethod("Invalid request")
+
+class state_test_case_delete(masterTestCase):
+
+	fixtures = []
+	BASE_URL = '/address/state/'
+	METHOD_NAME = "delete"
 
 	def test_state_delete(self):
 
-		resp = self.client.delete('/address/state/')
-		self.assertEqual(resp.status_code, 200)
-		respJson = resp.json()
-		self.assertEqual(respJson["statusCode"], '4XX')
-		jsonBody = respJson["body"]
-		self.assertEqual(jsonBody["error"], "Invalid request")
+		self.blankMethod("Invalid request")

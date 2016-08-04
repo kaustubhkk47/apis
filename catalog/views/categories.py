@@ -51,7 +51,7 @@ def post_new_category(request):
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"category" : serialize_categories(newCategory)})
+		return customResponse("2XX", {"categories" : serialize_categories(newCategory)})
 
 
 def update_category(request):
@@ -86,7 +86,7 @@ def update_category(request):
 		return customResponse("4XX", {"error": "could not update"})
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"category": serialize_categories(categoryPtr)})
+		return customResponse("2XX", {"categories": serialize_categories(categoryPtr)})
 
 def delete_category(request):
 	try:

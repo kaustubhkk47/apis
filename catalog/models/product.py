@@ -59,6 +59,15 @@ class Product(models.Model):
 	def __unicode__(self):
 		return "{} - {} - {}".format(self.id,self.name,self.seller.name)
 
+	def getCalculatedPricePerPiece(self, lots):
+		productLotsQuerySet = self.productlot.all().order_by('lot_size_from')
+		if lots < productLotsQuerySet[0].lot_size_from:
+			return productLotsQuerySet[0].price_per_unit
+		for productLot in productLotsQuerySet:
+			if lots <= productLot.lot_size_to:
+				return productLot.price_per_unit
+		return productLotsQuerySet[len(productLotsQuerySet)-1].price_per_unit
+
 
 class ProductDetails(models.Model):
 
