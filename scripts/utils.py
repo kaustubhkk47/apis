@@ -234,6 +234,13 @@ def getPaginationParameters(request, parameters={}, defaultItemsPerPage = 10, ve
 
 	return parameters
 
+def responsePaginationParameters(response, paginator, parameters):
+	response["total_items"] = paginator.count
+	response["total_pages"] = paginator.num_pages
+	response["page_number"] = parameters["pageNumber"]
+	response["items_per_page"] = parameters["itemsPerPage"]
+	return response
+
 def link_to_foreign_key(obj, fk_name):
 	fk_instance = getattr(obj, fk_name)
 	app_label = fk_instance._meta.app_label.lower()
@@ -247,3 +254,11 @@ def time_in_ist(dt):
 def djangoEncodedTime(obj):
 	t = json.dumps(obj, cls=DjangoJSONEncoder)
 	return t[1:len(t)-1]
+
+def getApiVersion(text):
+	version = "0"
+	try:
+		version = re.search("version=(.+?)", text).group(1)
+	except Exception as e:
+		pass
+	return version

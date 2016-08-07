@@ -6,6 +6,34 @@ log = logging.getLogger("django")
 from scripts.utils import *
 from users.models.buyer import filterBuyer
 from catalog.models.product import filterProducts
+from django.core.paginator import Paginator
+
+def get_cart_details(request, parameters):
+	try:
+
+		carts = filterCarts(parameters)
+
+		paginator = Paginator(carts, parameters["itemsPerPage"])
+
+		try:
+			pageItems = paginator.page(parameters["pageNumber"])
+		except Exception as e:
+			pageItems = []
+
+		statusCode = "2XX"
+
+		body = parseCart(pageItems,parameters)
+		statusCode = "2XX"
+		response = {"carts": body}
+		response = responsePaginationParameters(response, paginator, parameters)
+
+	except Exception as e:
+		log.critical(e)
+		statusCode = "4XX"
+		response = {"error": "Invalid request"}
+
+	closeDBConnection()
+	return customResponse(statusCode, response)
 
 def get_cart_item_details(request, parameters):
 	try:
