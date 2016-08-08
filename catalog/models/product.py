@@ -68,6 +68,12 @@ class Product(models.Model):
 				return productLot.price_per_unit
 		return productLotsQuerySet[len(productLotsQuerySet)-1].price_per_unit
 
+	def getShippingPerPiece(self):
+		try:
+			return (self.productdetails.weight_per_unit+50)/1000*35
+		except Exception as e:
+			return  (float(350))/1000*35
+
 
 class ProductDetails(models.Model):
 

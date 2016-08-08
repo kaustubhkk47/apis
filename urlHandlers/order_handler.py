@@ -192,6 +192,7 @@ def populateCartParameters(request, parameters = {}, version = "0"):
 		parameters["cartItemStatusArr"] = getArrFromString(cartItemStatus)
 
 	parameters = populateBuyerDetailsParameters(request, parameters, version)
+	parameters = populateSellerDetailsParameters(request, parameters, version)
 	parameters = populateProductDetailsParameters(request, parameters, version)
 
 	parameters = getPaginationParameters(request, parameters, 10, version)
@@ -201,6 +202,12 @@ def populateCartParameters(request, parameters = {}, version = "0"):
 		parameters["cart_item_details"] = int(cartItemDetails)
 	else:
 		parameters["cart_item_details"] = defaultValue
+
+	subCartDetails = request.GET.get("sub_cart_details", None)
+	if validate_bool(subCartDetails):
+		parameters["sub_cart_details"] = int(subCartDetails)
+	else:
+		parameters["sub_cart_details"] = defaultValue
 
 	return parameters
 
