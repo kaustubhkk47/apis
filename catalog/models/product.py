@@ -70,7 +70,7 @@ class Product(models.Model):
 
 	def getShippingPerPiece(self):
 		try:
-			return (self.productdetails.weight_per_unit+50)/1000*35
+			return float((self.productdetails.weight_per_unit+50)/1000*35)
 		except Exception as e:
 			return  (float(350))/1000*35
 
