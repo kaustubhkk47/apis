@@ -93,23 +93,42 @@ def post_new_cart_item(request, parameters):
 
 	if len(cartPtr) == 0:
 		cartPtr = Cart(buyer_id = buyerID)
+		subCartPtr = SubCart(seller_id =productPtr.seller_id)
+		cartItemPtr = CartItem(buyer_id = buyerID, product = productPtr)
 	else:
 		cartPtr = cartPtr[0]
 
-	cartItemPtr = CartItem.objects.filter(buyer_id=buyerID, product = productPtr, status = 0)
+		subCartPtr = SubCart.objects.filter(cart=cartPtr, seller_id = productPtr.seller_id)
 
-	if len(cartItemPtr) == 0:
-		cartItemPtr = CartItem(buyer_id = buyerID, product = productPtr)
-	else:
-		cartItemPtr = cartItemPtr[0]
+		if len(subCartPtr) == 0:
+			subCartPtr = SubCart(seller_id=productPtr.seller_id)
+			cartItemPtr = CartItem(buyer_id = buyerID, product = productPtr)
+		else:
+			subCartPtr = subCartPtr[0]
+
+			cartItemPtr = CartItem.objects.filter(buyer_id=buyerID, product = productPtr, status = 0)
+
+			if len(cartItemPtr) == 0:
+				cartItemPtr = CartItem(buyer_id = buyerID, product = productPtr)
+			else:
+				cartItemPtr = cartItemPtr[0]
 
 	if not cartItemPtr.validateCartItemData(cartitem):
 		return customResponse("4XX", {"error": " Invalid data for cart item sent"})
 
 	try:
-		cartPtr.save()
-		cartItemPtr.cart = cartPtr
+		initialPrices = cartItemPtr.getPrices()
 		cartItemPtr.populateCartItemData(cartitem)
+		finalPrices =  cartItemPtr.getPrices()
+
+		cartPtr.populateCartData(initialPrices, finalPrices)
+		cartPtr.save()
+
+		subCartPtr.cart = cartPtr
+		subCartPtr.populateSubCartData(initialPrices, finalPrices)
+		subCartPtr.save()
+
+		cartItemPtr.subcart = subCartPtr
 		cartItemPtr.save()
 
 		cartItemHistoryPtr = CartItemHistory()
