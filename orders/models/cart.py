@@ -9,11 +9,11 @@ class Cart(models.Model):
 
 	pieces = models.PositiveIntegerField(default=0)
 	product_count = models.PositiveIntegerField(default=0)
-	retail_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+	retail_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 	
-	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -54,10 +54,10 @@ class SubCart(models.Model):
 	pieces = models.PositiveIntegerField(default=0)
 	product_count = models.PositiveIntegerField(default=0)
 	retail_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+	calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 	
-	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -95,12 +95,12 @@ class CartItem(models.Model):
 	lots = models.PositiveIntegerField(default=0)
 	pieces = models.PositiveIntegerField(default=0)
 	lot_size = models.PositiveIntegerField(default=1)
-	retail_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	calculated_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+	retail_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	calculated_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
-	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
-	final_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+	final_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True, db_index=True)
@@ -137,7 +137,7 @@ class CartItem(models.Model):
 		self.calculated_price_per_piece = self.product.getCalculatedPricePerPiece(self.lots)
 		self.final_price = self.pieces*self.calculated_price_per_piece
 		self.added_from = int(cartitem["added_from"])
-		self.shipping_charge = float(self.product.getShippingPerPiece()*self.pieces)
+		self.shipping_charge = Decimal(self.product.getShippingPerPiece()*self.pieces)
 
 	def getPrices(self):
 		initialPrices = {}
@@ -146,10 +146,10 @@ class CartItem(models.Model):
 			initialPrices["product_count"] = 1
 		else:
 			initialPrices["product_count"] = 0
-		initialPrices["retail_price"] = float(self.retail_price_per_piece*self.pieces)
-		initialPrices["calculated_price"] = float(self.calculated_price_per_piece*self.pieces)
-		initialPrices["shipping_charge"] = float(self.shipping_charge )
-		initialPrices["final_price"] = float(self.final_price)
+		initialPrices["retail_price"] = Decimal(self.retail_price_per_piece*self.pieces)
+		initialPrices["calculated_price"] = Decimal(self.calculated_price_per_piece*self.pieces)
+		initialPrices["shipping_charge"] = Decimal(self.shipping_charge)
+		initialPrices["final_price"] = Decimal(self.final_price)
 		return initialPrices
 
 CartItemStatus = {
@@ -186,10 +186,10 @@ class CartItemHistory(models.Model):
 	lots = models.PositiveIntegerField(default=0)
 	pieces = models.PositiveIntegerField(default=0)
 	lot_size = models.PositiveIntegerField(default=1)
-	retail_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	calculated_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+	retail_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	calculated_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
-	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
 	final_price = models.DecimalField(max_digits=10, decimal_places=2)
 

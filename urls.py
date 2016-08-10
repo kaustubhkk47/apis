@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from urlHandlers import catalog_handler, user_handler, order_handler, lead_handler, address_handler, blog_handler
+from urlHandlers import catalog_handler, user_handler, order_handler, lead_handler, address_handler, blog_handler, logistics_handler
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -87,6 +87,10 @@ urlpatterns += [
 
 urlpatterns += [
 	url(r'^address/state/$', address_handler.state_details)
+]
+
+urlpatterns += [
+	url(r'^logistics/pincodeserviceability/$', logistics_handler.pincode_serviceability_details)
 ]
 
 urlpatterns += [

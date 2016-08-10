@@ -23,7 +23,6 @@ def get_cart_details(request, parameters):
 		statusCode = "2XX"
 
 		body = parseCart(pageItems,parameters)
-		statusCode = "2XX"
 		response = {"carts": body}
 		response = responsePaginationParameters(response, paginator, parameters)
 
@@ -120,10 +119,10 @@ def post_new_cart_item(request, parameters):
 		initialPrices = cartItemPtr.getPrices()
 		cartItemPtr.populateCartItemData(cartitem)
 		finalPrices =  cartItemPtr.getPrices()
-
+		
 		cartPtr.populateCartData(initialPrices, finalPrices)
 		cartPtr.save()
-
+		
 		subCartPtr.cart = cartPtr
 		subCartPtr.populateSubCartData(initialPrices, finalPrices)
 		subCartPtr.save()
