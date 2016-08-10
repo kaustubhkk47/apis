@@ -140,6 +140,4 @@ def post_new_cart_item(request, parameters):
 		return customResponse("4XX", {"error": "could not update"})
 	else:
 		closeDBConnection()
-		if cartItemPtr.pieces == 0:
-			return customResponse("2XX", {"carts": serializeCart(cartItemPtr.subcart.cart, parameters)})
-		return customResponse("2XX", {"cart_items": serializeCartItem(cartItemPtr, parameters)})
+		return customResponse("2XX", {"carts": serializeCart(cartItemPtr.subcart.cart, parameters)})
