@@ -224,7 +224,7 @@ class CartItemHistory(models.Model):
 
 def filterCartItem(parameters):
 
-	cartItems = CartItem.objects.filter(subcart__status=0).select_related('product')
+	cartItems = CartItem.objects.filter(subcart__status=0, status=0).select_related('product')
 
 	if "cartItemsArr" in parameters:
 		cartItems = cartItems.filter(id__in=parameters["cartItemsArr"])
