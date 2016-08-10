@@ -230,7 +230,7 @@ def filterCartItem(parameters):
 		cartItems = cartItems.filter(id__in=parameters["cartItemsArr"])
 
 	if "buyersArr" in parameters:
-		cartItems = cartItems.filter(subcart__buyer_id__in=parameters["buyersArr"])
+		cartItems = cartItems.filter(buyer_id__in=parameters["buyersArr"])
 
 	if "productsArr" in parameters:
 		cartItems = cartItems.filter(product_id__in=parameters["productsArr"])
