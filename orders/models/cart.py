@@ -53,7 +53,7 @@ class SubCart(models.Model):
 
 	pieces = models.PositiveIntegerField(default=0)
 	product_count = models.PositiveIntegerField(default=0)
-	retail_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+	retail_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 	calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 	
 	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
