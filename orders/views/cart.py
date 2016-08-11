@@ -168,3 +168,23 @@ def post_new_cart_item(request, parameters):
 	else:
 		closeDBConnection()
 		return customResponse("2XX", {"carts": serializeCart(cartItemPtr.subcart.cart, parameters)})
+
+
+def post_new_order(request, parameters):
+	try:
+		requestbody = request.body.decode("utf-8")
+		cart = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(cart):
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	buyerID = 0
+
+	try:
+		if not filterBuyer(parameters).exists():
+			return customResponse("4XX", {"error": "Invalid buyer id sent"})
+		buyerID = parameters["buyersArr"][0]
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid buyer id sent"})

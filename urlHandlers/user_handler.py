@@ -61,7 +61,7 @@ def buyer_details(request, version = "0"):
 		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.update_buyer(request)
+		return buyer.update_buyer(request, buyerParameters)
 	elif request.method == "DELETE":
 
 		if buyerParameters["isInternalUser"] == 0:

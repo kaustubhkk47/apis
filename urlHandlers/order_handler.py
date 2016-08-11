@@ -157,6 +157,20 @@ def cart_item_details(request, version = "0"):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
+def cart_place_order_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	cartParameters = populateCartParameters(request, {}, version)
+
+	if request.method == "POST":
+		if cartParameters["isBuyer"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return cart.post_new_order(request, cartParameters)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
 def cart_details(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])

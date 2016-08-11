@@ -901,7 +901,7 @@ def delete_buyer_shared_product_id(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer": "buyer shared_product_id deleted"})
 
-def update_buyer(request):
+def update_buyer(request, parameters = {}):
 	try:
 		requestbody = request.body.decode("utf-8")
 		buyer = convert_keys_to_string(json.loads(requestbody))
@@ -983,7 +983,7 @@ def update_buyer(request):
 		return customResponse("4XX", {"error": "could not update"})
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"buyer": serialize_buyer(buyerPtr)})
+		return customResponse("2XX", {"buyer": serialize_buyer(buyerPtr, parameters)})
 
 def delete_buyer(request):
 	try:

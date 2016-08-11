@@ -42,6 +42,7 @@ urlpatterns += [
 	url(r'^sellerpayment/$', order_handler.seller_payment_details),
 	url(r'^cart/$', order_handler.cart_details),
 	url(r'^cart/item/$', order_handler.cart_item_details),
+	url(r'^cart/placeorder/$', order_handler.cart_place_order_details),
 ]
 
 urlpatterns += [
