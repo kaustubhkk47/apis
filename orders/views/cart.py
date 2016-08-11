@@ -88,6 +88,10 @@ def post_new_cart_item(request, parameters):
 
 	productPtr = productPtr[0]
 
+	isCartNew = 1
+	isSubCartNew = 1
+	isCartItemNew = 1
+
 	cartPtr = Cart.objects.filter(buyer_id=buyerID, status = 0)
 
 	if len(cartPtr) == 0:
@@ -95,6 +99,7 @@ def post_new_cart_item(request, parameters):
 		subCartPtr = SubCart(seller_id =productPtr.seller_id)
 		cartItemPtr = CartItem(buyer_id = buyerID, product = productPtr)
 	else:
+		isCartNew = 0
 		cartPtr = cartPtr[0]
 
 		subCartPtr = SubCart.objects.filter(cart=cartPtr, seller_id = productPtr.seller_id)
@@ -103,6 +108,7 @@ def post_new_cart_item(request, parameters):
 			subCartPtr = SubCart(seller_id=productPtr.seller_id)
 			cartItemPtr = CartItem(buyer_id = buyerID, product = productPtr)
 		else:
+			isSubCartNew = 0
 			subCartPtr = subCartPtr[0]
 
 			cartItemPtr = CartItem.objects.filter(buyer_id=buyerID, product = productPtr, status = 0)
@@ -110,10 +116,14 @@ def post_new_cart_item(request, parameters):
 			if len(cartItemPtr) == 0:
 				cartItemPtr = CartItem(buyer_id = buyerID, product = productPtr)
 			else:
+				isCartItemNew = 0
 				cartItemPtr = cartItemPtr[0]
 
 	if not cartItemPtr.validateCartItemData(cartitem):
 		return customResponse("4XX", {"error": " Invalid data for cart item sent"})
+
+	if isCartItemNew == 1 and int(cartitem["lots"]) == 0:
+		return customResponse("4XX", {"error": "Zero lots sent for new cart item"})
 
 	try:
 		initialPrices = cartItemPtr.getPrices()
@@ -121,14 +131,31 @@ def post_new_cart_item(request, parameters):
 		finalPrices =  cartItemPtr.getPrices()
 		
 		cartPtr.populateCartData(initialPrices, finalPrices)
+		subCartPtr.populateSubCartData(initialPrices, finalPrices)
+
+		if subCartPtr.shipping_charge < 175:
+			extra_shipping_charge = (175-subCartPtr.shipping_charge)
+			cartPtr.shipping_charge += extra_shipping_charge
+			cartPtr.final_price += extra_shipping_charge
+			subCartPtr.shipping_charge += extra_shipping_charge
+			subCartPtr.final_price += extra_shipping_charge
+
 		cartPtr.save()
 		
 		subCartPtr.cart = cartPtr
-		subCartPtr.populateSubCartData(initialPrices, finalPrices)
 		subCartPtr.save()
 
 		cartItemPtr.subcart = subCartPtr
 		cartItemPtr.save()
+
+		if not CartItem.objects.filter(subcart=subCartPtr, status=0).exists():
+			extra_shipping_charge = subCartPtr.shipping_charge
+			cartPtr.shipping_charge -= extra_shipping_charge
+			cartPtr.final_price -= extra_shipping_charge
+			subCartPtr.shipping_charge -= extra_shipping_charge
+			subCartPtr.final_price -= extra_shipping_charge
+			cartPtr.save()
+			subCartPtr.save()
 
 		cartItemHistoryPtr = CartItemHistory()
 		cartItemHistoryPtr.populateCartItemHistoryData(cartItemPtr)

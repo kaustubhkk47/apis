@@ -13,6 +13,7 @@ class Cart(models.Model):
 	calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 	
 	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	cod_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 	final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
 	created_at = models.DateTimeField(auto_now_add=True)
@@ -57,6 +58,7 @@ class SubCart(models.Model):
 	calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 	
 	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	cod_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 	final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
 	created_at = models.DateTimeField(auto_now_add=True)
@@ -147,9 +149,9 @@ class CartItem(models.Model):
 		else:
 			initialPrices["product_count"] = 0
 		initialPrices["retail_price"] = Decimal(self.retail_price_per_piece*self.pieces)
-		initialPrices["calculated_price"] = Decimal(self.calculated_price_per_piece*self.pieces)
+		initialPrices["calculated_price"] = Decimal(self.final_price)
 		initialPrices["shipping_charge"] = Decimal(self.shipping_charge)
-		initialPrices["final_price"] = Decimal(self.final_price)
+		initialPrices["final_price"] = Decimal(self.final_price + self.shipping_charge)
 		return initialPrices
 
 CartItemStatus = {

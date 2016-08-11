@@ -86,7 +86,8 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-	url(r'^address/state/$', address_handler.state_details)
+	url(r'^address/state/$', address_handler.state_details),
+	url(r'^address/pincode/$', address_handler.pincode_details)
 ]
 
 urlpatterns += [

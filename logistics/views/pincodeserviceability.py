@@ -1,4 +1,4 @@
-from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string
+from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, responsePaginationParameters
 import json
 
 from ..serializers.pincodeserviceability import *
@@ -6,6 +6,8 @@ from ..models.serviceability import *
 
 import logging
 log = logging.getLogger("django")
+
+from django.core.paginator import Paginator
 
 def get_pincode_serviceability_details(request,parameters = {}):
 	try:
@@ -19,13 +21,19 @@ def get_pincode_serviceability_details(request,parameters = {}):
 			pageItems = []
 
 
-		body = parseCart(pageItems,parameters)
+		body = parseServiceablePincodes(pageItems,parameters)
+
+		response = {"serviceable_pincodes": body}
 
 		response = responsePaginationParameters(response, paginator, parameters)
 
 		closeDBConnection()
 
-		return customResponse("2XX", response)
+		statusCode = "2XX"
+		
 	except Exception as e:
 		log.critical(e)
-		return customResponse("4XX", {"error": "Invalid request"})
+		statusCode = "4XX"
+		body = {"error": "Invalid pincode serviceability"}
+
+	return customResponse(statusCode, response)
