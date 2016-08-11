@@ -91,6 +91,7 @@ def validate_bool(x):
 	return True
 
 def validate_pincode(x):
+	x = str(x)
 	if not validate_integer(x) or not len(x) == 6:
 		return False
 	return True
