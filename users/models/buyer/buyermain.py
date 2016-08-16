@@ -62,6 +62,43 @@ class BuyerAddress(models.Model):
 	def __unicode__(self):
 		return str(self.buyer)
 
+class BuyerAddressHistory(models.Model):
+	buyer = models.ForeignKey('users.Buyer')
+	buyeraddress = models.ForeignKey('users.BuyerAddress', blank=True,null=True)
+	pincode = models.ForeignKey('address.Pincode', blank=True,null=True)
+
+	address_line = models.CharField(max_length=255, blank=True, null=False)
+	landmark = models.CharField(max_length=50, blank=True)
+	city_name = models.CharField(max_length=50, blank=True)
+	state_name = models.CharField(max_length=50, blank=True)
+	country_name = models.CharField(max_length=50, blank=True, default="India")
+	contact_number = models.CharField(max_length=11, blank=True)
+	pincode_number = models.CharField(max_length=6, blank=True)
+	priority = models.IntegerField(default=1)
+
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name="Buyer Address History"
+		verbose_name_plural = "Buyer Address History"
+
+	def __unicode__(self):
+		return str(self.buyer)
+
+	def populateFromBuyerAddress(self, buyerAddressPtr):
+		self.buyer_id = buyerAddressPtr.buyer_id
+		self.buyeraddress = buyerAddressPtr
+		self.pincode = buyerAddressPtr.pincode
+		self.address_line = buyerAddressPtr.address_line
+		self.landmark = buyerAddressPtr.landmark
+		self.city_name = buyerAddressPtr.city_name
+		self.state_name = buyerAddressPtr.state_name
+		self.country_name = buyerAddressPtr.country_name
+		self.contact_number = buyerAddressPtr.contact_number
+		self.pincode_number = buyerAddressPtr.pincode_number
+		self.priority = buyerAddressPtr.priority
+
 class BuyerDetails(models.Model):
 	buyer = models.OneToOneField('users.Buyer')
 	buyer_type = models.ForeignKey('users.BusinessType',blank=True, null=True, on_delete=models.PROTECT)

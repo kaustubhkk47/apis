@@ -223,5 +223,6 @@ BuyerPaymentMethod = {
 	5:{"display_value":"Debit Card"},
 	6:{"display_value":"Credit Card"},
 	7:{"display_value":"Net Banking"},
-	8:{"display_value":"Wallet"}
+	8:{"display_value":"Wallet"},
+	9:{"display_value":"Credit"}
 }

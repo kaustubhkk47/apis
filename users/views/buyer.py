@@ -214,6 +214,10 @@ def post_new_buyer(request):
 		
 		newBuyerDetails.save()
 		newAddress.save()
+
+		newBuyerAddressHistory = BuyerAddressHistory()
+		newBuyerAddressHistory.populateFromBuyerAddress(newAddress)
+		newBuyerAddressHistory.save()
 		 
 	except Exception as e:
 		log.critical(e)
@@ -223,14 +227,19 @@ def post_new_buyer(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer" : serialize_buyer(newBuyer)})
 
-def post_new_buyer_interest(request):
+def post_new_buyer_interest(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
 		buyer_interest = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer_interest) or not "buyerID" in buyer_interest or not validate_integer(buyer_interest["buyerID"]):
+	if not len(buyer_interest):
+		return customResponse("4XX", {"error": "Id for buyer not sent"})
+
+	if parameters["isBuyer"] == 1:
+		buyer_interest["buyerID"] = parameters["buyersArr"][0]
+	elif not "buyerID" in buyer_interest  or not validate_integer(buyer_interest["buyerID"]):
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
 	buyerPtr = Buyer.objects.filter(id=int(buyer_interest["buyerID"]))
@@ -341,7 +350,7 @@ def post_new_buyer_purchasing_state(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer_purchasing_state" : serialize_buyer_purchasing_state(newBuyerPurchasingState)})
 
-def post_new_buyer_buys_from(request):
+def post_new_buyer_buys_from(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
 		buyer_buys_from = convert_keys_to_string(json.loads(requestbody))
@@ -391,7 +400,7 @@ def post_new_buyer_buys_from(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer_buys_from" : serialize_buyer_buys_from(newBuyerBuysFrom)})
 
-def post_new_buyer_product(request):
+def post_new_buyer_product(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
 		buyer_product = convert_keys_to_string(json.loads(requestbody))
@@ -406,9 +415,12 @@ def post_new_buyer_product(request):
 	buyerParameters["whatsapp_sharing_active"] = True
 
 	if "all_buyers" in buyer_product and validate_bool(buyer_product["all_buyers"]) and int(buyer_product["all_buyers"])==1:		
-		pass
+		if parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
 	else:
-		if not "buyerID" in buyer_product:
+		if parameters["isBuyer"] == 1:
+			buyer_product["buyerID"] = parameters["buyersArr"][0]
+		elif not "buyerID" in buyer_product:
 			return customResponse("4XX", {"error": "Id for buyer not sent"})
 		buyerParameters["buyersArr"] = getArrFromString(buyer_product["buyerID"])
 
@@ -478,15 +490,17 @@ def post_new_buyer_product(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer_product":"successfully added"})
 
-def post_new_buyer_panel_tracking(request):
+def post_new_buyer_panel_tracking(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
 		buyer = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer) or not "buyerID" in buyer or not validate_integer(buyer["buyerID"]):
-		return customResponse("4XX", {"error": "Id for buyer not sent"})
+	#if not len(buyer) or not "buyerID" in buyer or not validate_integer(buyer["buyerID"]):
+	#	return customResponse("4XX", {"error": "Id for buyer not sent"})
+
+	buyer["buyerID"] = parameters["buyersArr"][0]
 
 	buyerPtr = Buyer.objects.filter(id=int(buyer["buyerID"]))
 
@@ -509,7 +523,7 @@ def post_new_buyer_panel_tracking(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer_product_tracking":"successfully added"})
 
-def update_buyer_interest(request):
+def update_buyer_interest(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
 		buyer_interest = convert_keys_to_string(json.loads(requestbody))
@@ -525,6 +539,9 @@ def update_buyer_interest(request):
 		return customResponse("4XX", {"error": "Invalid id interest for buyer sent"})
 
 	buyerInterestPtr = buyerInterestPtr[0]
+
+	if parameters["isBuyer"] == 1 and not buyerInterestPtr.buyer_id == parameters["buyersArr"][0]:
+		return customResponse("4XX", {"error": "Interest id for wrong buyer sent"})
 
 	if not validateBuyerInterestData(buyer_interest, buyerInterestPtr, 0):
 		return customResponse("4XX", {"error": "Invalid data for buyer interest sent"})
@@ -566,7 +583,7 @@ def update_buyer_interest(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer" : serialize_buyer_interest(buyerInterestPtr)})
 
-def update_buyer_product(request):
+def update_buyer_product(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
 		buyer_product = convert_keys_to_string(json.loads(requestbody))
@@ -576,7 +593,9 @@ def update_buyer_product(request):
 	if not len(buyer_product):
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not "buyerID" in buyer_product or not validate_integer(buyer_product["buyerID"]):
+	if parameters["isBuyer"] == 1:
+		buyer_product["buyerID"] = parameters["buyersArr"][0]
+	elif not "buyerID" in buyer_product or not validate_integer(buyer_product["buyerID"]):
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
 	buyerParameters = {"buyersArr":[int(buyer_product["buyerID"])]}
@@ -640,7 +659,7 @@ def update_buyer_product(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer_products" : serialize_buyer_product(buyerProductPtr)})
 
-def update_buyer_product_whatsapp(request):
+def update_buyer_product_whatsapp(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
 		buyer_product = convert_keys_to_string(json.loads(requestbody))
@@ -650,9 +669,14 @@ def update_buyer_product_whatsapp(request):
 	if not len(buyer_product) or not "buyerproductID" in buyer_product or buyer_product["buyerproductID"]==None:
 		return customResponse("4XX", {"error": "Id for buyer product not sent"})
 
+	
+
 	buyerProductIDs = getArrFromString(str(buyer_product["buyerproductID"]))
 
 	buyerProductPtr = BuyerProducts.objects.filter(id__in=buyerProductIDs)
+
+	if parameters["isBuyer"] == 1:
+		buyerProductPtr.filter(buyer_id=parameters["buyersArr"][0])
 
 	if len(buyerProductPtr) != len(buyerProductIDs):
 		return customResponse("4XX", {"error": "Invalid ids for for buyer products sent"})
@@ -795,7 +819,7 @@ def master_update_buyer_product(request):
 		closeDBConnection()
 		return customResponse("2XX", {"success" : "updated"})
 
-def delete_buyer_interest(request):
+def delete_buyer_interest(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
 		buyer_interest = convert_keys_to_string(json.loads(requestbody))
@@ -812,6 +836,9 @@ def delete_buyer_interest(request):
 
 	buyerInterestPtr = buyerInterestPtr[0]
 
+	if parameters["isBuyer"] == 1 and not buyerInterestPtr.buyer_id == parameters["buyersArr"][0]:
+		return customResponse("4XX", {"error": "Interest id for wrong buyer sent"})
+
 	try:
 		buyerInterestPtr.delete_status = True
 		buyerInterestPtr.save()
@@ -823,7 +850,7 @@ def delete_buyer_interest(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer": "buyer interest deleted"})
 
-def delete_buyer_purchasing_state(request):
+def delete_buyer_purchasing_state(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
 		buyer_purchasing_state = convert_keys_to_string(json.loads(requestbody))
@@ -848,7 +875,7 @@ def delete_buyer_purchasing_state(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer": "buyer purchasing_state deleted"})
 
-def delete_buyer_buys_from(request):
+def delete_buyer_buys_from(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
 		buyer_buys_from = convert_keys_to_string(json.loads(requestbody))
@@ -873,7 +900,7 @@ def delete_buyer_buys_from(request):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer": "buyer buys_from deleted"})
 
-def delete_buyer_shared_product_id(request):
+def delete_buyer_shared_product_id(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
 		buyer_shared_product_id = convert_keys_to_string(json.loads(requestbody))
@@ -908,7 +935,12 @@ def update_buyer(request, parameters = {}):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer) or not "buyerID" in buyer or buyer["buyerID"]==None or not validate_integer(buyer["buyerID"]):
+	if not len(buyer):
+		return customResponse("4XX", {"error": "Id for buyer not sent"})
+
+	if parameters["isBuyer"] == 1:
+		buyer["buyerID"] = parameters["buyersArr"][0]
+	elif not "buyerID" in buyer or not validate_integer(buyer["buyerID"]):
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
 	buyerPtr = Buyer.objects.filter(id=int(buyer["buyerID"])).select_related('buyerdetails')
@@ -976,6 +1008,9 @@ def update_buyer(request, parameters = {}):
 			newBuyerDetails.save()
 		if addressSent == 1:
 			buyerAddressPtr.save()
+			newBuyerAddressHistory = BuyerAddressHistory()
+			newBuyerAddressHistory.populateFromBuyerAddress(buyerAddressPtr)
+			newBuyerAddressHistory.save()
 
 	except Exception as e:
 		log.critical(e)
@@ -985,7 +1020,7 @@ def update_buyer(request, parameters = {}):
 		closeDBConnection()
 		return customResponse("2XX", {"buyer": serialize_buyer(buyerPtr, parameters)})
 
-def delete_buyer(request):
+def delete_buyer(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
 		buyer = convert_keys_to_string(json.loads(requestbody))

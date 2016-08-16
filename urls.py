@@ -41,8 +41,12 @@ urlpatterns += [
 	url(r'^buyerpayment/$', order_handler.buyer_payment_details),
 	url(r'^sellerpayment/$', order_handler.seller_payment_details),
 	url(r'^cart/$', order_handler.cart_details),
-	url(r'^cart/item/$', order_handler.cart_item_details),
-	url(r'^cart/placeorder/$', order_handler.cart_place_order_details),
+	url(r'^cart/item/$', order_handler.cart_item_details)
+]
+
+urlpatterns += [
+	url(r'^checkout/placeorder/$', order_handler.checkout_place_order_details),
+	url(r'^checkout/paymentmethod/$', order_handler.checkout_payment_method_details),
 ]
 
 urlpatterns += [

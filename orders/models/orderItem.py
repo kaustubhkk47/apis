@@ -15,12 +15,13 @@ class OrderItem(models.Model):
 	product = models.ForeignKey('catalog.Product')
 	order_shipment = models.ForeignKey('orders.OrderShipment',null=True,blank=True)
 	seller_payment = models.ForeignKey('orders.SellerPayment',null=True,blank=True)
+	cartitem = models.ForeignKey('orders.CartItem', null=True, blank=True)
 
 	pieces = models.PositiveIntegerField(default=0)
 	lots = models.PositiveIntegerField(default=0)
-	retail_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	calculated_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	edited_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+	retail_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	calculated_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	edited_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 	
 	final_price = models.DecimalField(max_digits=10, decimal_places=2)
 	lot_size = models.PositiveIntegerField(default=1)
@@ -45,6 +46,18 @@ class OrderItem(models.Model):
 
 	def __unicode__(self):
 		return "{} - {} - Price: {} - {} - {}".format(self.id,self.suborder.display_number,self.final_price,self.product.display_name,self.product.seller.name)
+
+	def populateDataFromCartItem(self, cartItemPtr):
+		self.cartitem = cartItemPtr
+		self.product_id = cartItemPtr.product_id
+		self.pieces = cartItemPtr.pieces
+		self.lots = cartItemPtr.lots
+		self.lot_size = cartItemPtr.lot_size
+		self.retail_price_per_piece = cartItemPtr.retail_price_per_piece
+		self.calculated_price_per_piece = cartItemPtr.calculated_price_per_piece
+		self.edited_price_per_piece = cartItemPtr.calculated_price_per_piece
+		self.final_price = cartItemPtr.final_price
+		self.current_status = 0
 
 class OrderItemAdmin(admin.ModelAdmin):
 	search_fields = ["suborder__display_number", "product__name"]

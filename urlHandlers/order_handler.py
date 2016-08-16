@@ -1,6 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
 
-from orders.views import order, orderItem, orderShipment, payments, subOrder, cart
+from orders.views import order, orderItem, orderShipment, payments, subOrder, cart, checkout
 from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool, getPaginationParameters, getApiVersion
 import jwt as JsonWebToken
 
@@ -157,16 +157,30 @@ def cart_item_details(request, version = "0"):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
-def cart_place_order_details(request, version = "0"):
+def checkout_place_order_details(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
-	cartParameters = populateCartParameters(request, {}, version)
+	parameters = populateCartParameters(request, {}, version)
 
 	if request.method == "POST":
-		if cartParameters["isBuyer"] == 0:
+		if parameters["isBuyer"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return cart.post_new_order(request, cartParameters)
+		return checkout.post_new_order(request, parameters)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
+def checkout_payment_method_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateAllUserIDParameters(request, {}, version)
+
+	if request.method == "GET":
+		if parameters["isBuyer"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return checkout.get_payment_method(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
