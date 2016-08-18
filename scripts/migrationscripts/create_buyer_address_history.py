@@ -12,6 +12,7 @@ def create_buyer_address_history():
 			buyeraddress["state"] = ""
 			buyerAddressPtr = BuyerAddress(buyer=buyerPtr)
 			populateBuyerAddress(buyerAddressPtr, buyeraddress)
+			buyerAddressPtr.save()
 		else:
 			buyerAddressPtr = buyerAddressPtr[0]
 

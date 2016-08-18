@@ -256,8 +256,3 @@ def filterSubCarts(parameters):
 	subcarts = SubCart.objects.filter(status=0)
 
 	return subcarts
-
-
-class Checkout(models.Model):
-
-	cart = models.ForeignKey(Cart, null=True, blank=True)
