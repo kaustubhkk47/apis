@@ -37,6 +37,13 @@ class Buyer(models.Model):
 	def __unicode__(self):
 		return "{} - {} - {}".format(self.id,self.name,self.mobile_number)
 
+	def latest_buyer_address_history(self):
+		try:
+			return BuyerAddressHistory.objects.filter(buyer=self).latest('created_at')
+		except Exception, e:
+			return None
+		
+
 
 class BuyerAddress(models.Model):
 	buyer = models.ForeignKey('users.Buyer')

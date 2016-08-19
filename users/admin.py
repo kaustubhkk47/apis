@@ -22,6 +22,7 @@ admin.site.register(BuyerPanelInstructionsTracking)
 
 admin.site.register(Seller,SellerAdmin)
 admin.site.register(SellerAddress)
+admin.site.register(SellerAddressHistory)
 admin.site.register(SellerDetails)
 admin.site.register(SellerBankDetails)
 

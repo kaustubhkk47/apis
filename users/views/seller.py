@@ -84,6 +84,10 @@ def post_new_seller(request):
 		newAddress.save()
 		newBankDetails.save()
 
+		newSellerAddressHistory = SellerAddressHistory()
+		newSellerAddressHistory.populateFromSellerAddress(newAddress)
+		newSellerAddressHistory.save()
+
 		sellerLeadsQuerySet = SellerLeads.objects.filter(email = newSeller.email)
 
 		for sellerLead in sellerLeadsQuerySet:
@@ -204,6 +208,9 @@ def update_seller(request):
 			newSellerDetails.save()
 		if addressSent == 1:
 			sellerAddressPtr.save()
+			newSellerAddressHistory = SellerAddressHistory()
+			newSellerAddressHistory.populateFromSellerAddress(sellerAddressPtr)
+			newSellerAddressHistory.save()
 		if bankdetailsSent == 1:
 			sellerBankDetailsPtr.save()
 

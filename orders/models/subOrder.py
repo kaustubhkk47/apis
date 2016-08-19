@@ -14,6 +14,7 @@ class SubOrder(models.Model):
 	order = models.ForeignKey('orders.Order')
 	seller = models.ForeignKey('users.Seller')
 	subcart = models.ForeignKey('orders.SubCart', null=True, blank=True)
+	seller_address_history = models.ForeignKey('users.SellerAddressHistory', null=True, blank=True)
 
 	pieces = models.PositiveIntegerField(default=1)
 	product_count = models.PositiveIntegerField(default=1)
@@ -93,6 +94,7 @@ def populateSubOrderData(subOrderPtr, subOrder,orderID):
 	subOrderPtr.suborder_status = 1
 	subOrderPtr.confirmed_time = timezone.now()
 	subOrderPtr.save()
+	subOrderPtr.seller_address_history = subOrderPtr.seller.latest_seller_address_history()
 	subOrderPtr.display_number = "%04d" %(subOrder["seller"].id,) + "-" + "1" + "%06d" %(orderID,)
 
 def validateSubOrderStatus(status, current_status):

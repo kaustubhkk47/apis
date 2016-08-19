@@ -109,9 +109,6 @@ def post_new_order(request):
 			subOrderItem["seller"] = seller
 			subOrders.append(subOrderItem)	
 
-	buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
-	buyerAddressPtr = buyerAddressPtr[0]
-
 	orderData = {}
 	orderData["product_count"] = orderProductCount
 	orderData["pieces"] = orderPieces
@@ -143,6 +140,7 @@ def post_new_order(request):
 	else:
 		sendOrderMail(newOrder)
 		subOrders = SubOrder.objects.filter(order_id = newOrder.id)
+		buyerAddressPtr = newOrder.buyer_address_history
 		for SubOrderPtr in subOrders:
 			seller_mail_dict = populateSellerMailDict(SubOrderPtr, buyerPtr, buyerAddressPtr)
 			sendSubOrderMail(SubOrderPtr, seller_mail_dict)
@@ -184,8 +182,9 @@ def cancel_order(request):
 		allSubOrders.update(suborder_status=-1, cancellation_time=nowDateTime)
 
 		buyerPtr = orderPtr.buyer
-		buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
-		buyerAddressPtr = buyerAddressPtr[0]
+		#buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
+		#buyerAddressPtr = buyerAddressPtr[0]
+		buyerAddressPtr = orderPtr.buyer_address_history
 
 		for subOrderPtr in allSubOrders:
 			seller_mail_dict = populateSellerMailDict(subOrderPtr, buyerPtr, buyerAddressPtr)

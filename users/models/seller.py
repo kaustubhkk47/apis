@@ -41,6 +41,12 @@ class Seller(models.Model):
 	def __unicode__(self):
 		return "{} - {} - {}".format(self.id,self.name,self.company_name)
 
+	def latest_seller_address_history(self):
+		try:
+			return SellerAddressHistory.objects.filter(seller=self).latest('created_at')
+		except Exception, e:
+			return None
+
 class SellerDetails(models.Model):
 
 	seller = models.OneToOneField('users.Seller')
@@ -102,7 +108,41 @@ class SellerAddress(models.Model):
 	def __unicode__(self):
 		return str(self.seller)
 
+class SellerAddressHistory(models.Model):
+	seller = models.ForeignKey('users.Seller')
+	selleraddress = models.ForeignKey('users.SellerAddress', blank=True,null=True)
+	pincode = models.ForeignKey('address.Pincode', blank=True,null=True)
 
+	address_line = models.CharField(max_length=255, blank=True, null=False)
+	landmark = models.CharField(max_length=50, blank=True)
+	city_name = models.CharField(max_length=50, blank=True)
+	state_name = models.CharField(max_length=50, blank=True)
+	country_name = models.CharField(max_length=50, blank=True, default="India")
+	contact_number = models.CharField(max_length=11, blank=True)
+	pincode_number = models.CharField(max_length=6, blank=True)
+
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name="Seller Address History"
+		verbose_name_plural = "Seller Address History"
+
+	def __unicode__(self):
+		return str(self.seller)
+
+	def populateFromSellerAddress(self,sellerAddressPtr):
+		self.seller_id = sellerAddressPtr.seller_id
+		self.selleraddress = sellerAddressPtr
+		self.pincode = sellerAddressPtr.pincode
+		self.address_line = sellerAddressPtr.address_line
+		self.landmark = sellerAddressPtr.landmark
+		self.city_name = sellerAddressPtr.city_name
+		self.state_name = sellerAddressPtr.state_name
+		self.country_name = sellerAddressPtr.country_name
+		self.contact_number = sellerAddressPtr.contact_number
+		self.pincode_number = sellerAddressPtr.pincode_number
+		
 class SellerBankDetails(models.Model):
 
 	seller = models.ForeignKey('users.Seller')

@@ -60,11 +60,13 @@ def post_new_order_shipment(request):
 
 	subOrderPtr = subOrderPtr[0]
 
-	sellerAddressPtr = SellerAddress.objects.filter(seller_id=subOrderPtr.seller_id)
-	sellerAddressPtr = sellerAddressPtr[0]
+	#sellerAddressPtr = SellerAddress.objects.filter(seller_id=subOrderPtr.seller_id)
+	#sellerAddressPtr = sellerAddressPtr[0]
+	sellerAddressPtr = subOrderPtr.seller_address_history
 
-	buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=subOrderPtr.order.buyer_id)
-	buyerAddressPtr = buyerAddressPtr[0]
+	#buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=subOrderPtr.order.buyer_id)
+	#buyerAddressPtr = buyerAddressPtr[0]
+	buyerAddressPtr = subOrderPtr.order.buyer_address_history
 
 	if (int(orderShipment["all_items"]) == 0):
 		if not "order_items" in orderShipment or orderShipment["order_items"]==None:

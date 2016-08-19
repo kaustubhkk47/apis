@@ -18,6 +18,7 @@ class Order(models.Model):
 
 	buyer = models.ForeignKey('users.Buyer')
 	cart = models.ForeignKey('orders.Cart', null=True, blank=True)
+	buyer_address_history = models.ForeignKey('users.BuyerAddressHistory', null=True, blank=True)
 
 	pieces = models.PositiveIntegerField(default=1)
 	product_count = models.PositiveIntegerField(default=1)
@@ -89,6 +90,7 @@ def populateOrderData(orderPtr, order):
 	orderPtr.remarks = order["remarks"]
 	orderPtr.order_status = 1
 	orderPtr.save()
+	orderPtr.buyer_address_history = orderPtr.buyer.latest_buyer_address_history()
 	orderPtr.display_number = "1" +"%06d" %(orderPtr.id,)
 
 def filterOrder(orderParameters):
@@ -189,8 +191,10 @@ def populateBuyerMailDict(OrderPtr, buyerPtr):
 		"total_margin":'{0:.1f}'.format(buyerMargin)
 	}
 
-	buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
-	buyerAddressPtr = buyerAddressPtr[0]
+	#buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
+	#buyerAddressPtr = buyerAddressPtr[0]
+
+	buyerAddressPtr = OrderPtr.buyer_address_history
 
 	buyer_mail_dict["subOrders"] = []
 
