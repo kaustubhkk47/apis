@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib import admin
-from scripts.utils import validate_integer, link_to_foreign_key, validate_bool
+from scripts.utils import validate_integer, link_to_foreign_key, validate_bool, time_in_ist
 from decimal import Decimal
 
 class Cart(models.Model):
@@ -45,7 +45,10 @@ CartStatusValues = [0,1]
 
 class CartAdmin(admin.ModelAdmin):
 
-	list_display = ["id", "buyer", "created_at"]
+	list_display = ["id", "buyer", "created_at_ist"]
+
+	def created_at_ist(self, obj):
+		return time_in_ist(obj.created_at)
 
 class SubCart(models.Model):
 

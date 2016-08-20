@@ -63,6 +63,7 @@ class SubOrder(models.Model):
 		self.final_price = subCartPtr.final_price
 		self.suborder_status = 0
 		self.save()
+		self.seller_address_history = self.seller.latest_seller_address_history()
 		self.display_number = "%04d" %(self.seller_id,) + "-" + "1" + "%06d" %(self.order_id,)
 
 class SubOrderAdmin(admin.ModelAdmin):

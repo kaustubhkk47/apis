@@ -45,7 +45,7 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-	url(r'^checkout/placeorder/$', order_handler.checkout_place_order_details),
+	url(r'^checkout/$', order_handler.checkout_details),
 	url(r'^checkout/paymentmethod/$', order_handler.checkout_payment_method_details),
 ]
 

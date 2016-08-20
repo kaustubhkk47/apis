@@ -157,34 +157,6 @@ def cart_item_details(request, version = "0"):
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
-def checkout_place_order_details(request, version = "0"):
-
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
-
-	parameters = populateCartParameters(request, {}, version)
-
-	if request.method == "POST":
-		if parameters["isBuyer"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
-		return checkout.post_new_order(request, parameters)
-
-	return customResponse("4XX", {"error": "Invalid request"})
-
-@csrf_exempt
-def checkout_payment_method_details(request, version = "0"):
-
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
-
-	parameters = populateAllUserIDParameters(request, {}, version)
-
-	if request.method == "GET":
-		if parameters["isBuyer"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
-		return checkout.get_payment_method(request, parameters)
-
-	return customResponse("4XX", {"error": "Invalid request"})
-
-@csrf_exempt
 def cart_details(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
@@ -197,6 +169,50 @@ def cart_details(request, version = "0"):
 		return cart.get_cart_details(request,cartParameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
+def checkout_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateCheckoutParameters(request, {}, version)
+
+	if request.method == "POST":
+		if parameters["isBuyer"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return checkout.create_checkout_details(request, parameters)
+
+	elif request.method == "PUT":
+		if parameters["isBuyer"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return checkout.update_checkout_details(request, parameters)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
+def checkout_payment_method_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateCheckoutParameters(request, {}, version)
+
+	if request.method == "GET":
+		if parameters["isBuyer"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return checkout.get_payment_method(request, parameters)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+def populateCheckoutParameters(request, parameters = {}, version = "0"):
+
+	defaultValue = 1
+
+	if version == "1":
+		defaultValue = 0
+
+	parameters = populateAllUserIDParameters(request, parameters, version)
+
+	return parameters
 
 def populateCartParameters(request, parameters = {}, version = "0"):
 

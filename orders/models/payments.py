@@ -11,6 +11,8 @@ from .orderItem import OrderItem
 from scripts.utils import validate_date_time, validate_integer, validate_number, validate_bool, link_to_foreign_key
 from decimal import Decimal
 
+from django.utils import timezone
+
 class BuyerPayment(models.Model):
 
 	order = models.ForeignKey('orders.Order')
@@ -35,6 +37,11 @@ class BuyerPayment(models.Model):
 
 	def __unicode__(self):
 		return "{} - {} - {}".format(self.id,self.order.display_number,self.order.buyer.name)
+
+	def populateFromCheckout(self,checkoutPtr, cartPtr):
+		self.payment_method = checkoutPtr.payment_method
+		self.payment_value = cartPtr.final_price
+		self.payment_time = timezone.now()
 
 class BuyerPaymentAdmin(admin.ModelAdmin):
 	search_fields = ["order__display_number"]
