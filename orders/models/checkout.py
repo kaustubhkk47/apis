@@ -67,3 +67,12 @@ CheckoutStatus = {
 }
 
 CheckoutStatusArr = [0,1,2,3]
+
+def filterCheckouts(parameters):
+
+	checkouts = Checkout.objects.filter(status__in=[0,1,2])
+
+	if "buyersArr" in parameters:
+		checkouts = checkouts.filter(cart__buyer_id__in=parameters["buyersArr"])
+
+	return checkouts

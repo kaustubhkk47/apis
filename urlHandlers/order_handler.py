@@ -177,7 +177,12 @@ def checkout_details(request, version = "0"):
 
 	parameters = populateCheckoutParameters(request, {}, version)
 
-	if request.method == "POST":
+	if request.method == "GET":
+		if parameters["isBuyer"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return checkout.get_checkout_details(request, parameters)
+
+	elif request.method == "POST":
 		if parameters["isBuyer"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 		return checkout.create_checkout_details(request, parameters)

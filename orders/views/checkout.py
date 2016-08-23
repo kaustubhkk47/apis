@@ -10,12 +10,12 @@ from orders.models.order import Order, sendOrderMail, filterOrder
 from orders.models.subOrder import SubOrder
 from orders.models.orderItem import OrderItem
 from orders.models.payments import BuyerPayment
-from orders.models.checkout import Checkout
+from orders.models.checkout import Checkout, filterCheckouts
 
 from users.models.buyer import Buyer
 
 from orders.serializers.order import serializeOrder
-from orders.serializers.checkout import serializeCheckout
+from orders.serializers.checkout import serializeCheckout, parseCheckout
 
 def get_payment_method(request, parameters):
 
@@ -51,6 +51,27 @@ def get_payment_method(request, parameters):
 
 		response = {"payment_methods": body}
 		statusCode = "2XX"
+	except Exception as e:
+		log.critical(e)
+		statusCode = "4XX"
+		response = {"error": "Invalid request"}
+
+	closeDBConnection()
+	return customResponse(statusCode, response)
+
+def get_checkout_details(request, parameters):
+
+	try:
+		checkouts = filterCheckouts(parameters)
+		try:
+			checkouts = checkouts.latest('created_at')
+			body = serializeCheckout(checkouts,parameters)
+			response = {"checkouts": body}
+			statusCode = "2XX"
+		except Exception as e:
+			statusCode = "4XX"
+			response = {"error": "No checkout for buyer"}
+
 	except Exception as e:
 		log.critical(e)
 		statusCode = "4XX"
@@ -124,6 +145,9 @@ def update_checkout_details(request, parameters):
 
 	checkoutPtr = checkoutPtr[0]
 
+	if not checkoutPtr.cart.status ==0:
+		return customResponse("4XX", {"error": "Checkout for cart already completed"})
+
 	if not "status" in checkout or not validate_integer(checkout["status"]):
 		return customResponse("4XX", {"error": "Status not sent"})
 
@@ -143,6 +167,9 @@ def update_checkout_details(request, parameters):
 		elif status == 3:
 			checkoutPtr.payment_done_time = nowTime
 			checkoutPtr.payment_method = int(checkout["payment_method"])
+			if checkoutPtr.payment_method == 0:
+				CODextracost = 0.02
+				checkoutPtr.cart.setCODPaymentMethod(CODextracost)
 			orderBody = checkout_new_order(checkoutPtr, parameters)
 
 		checkoutPtr.status = status
@@ -171,10 +198,8 @@ def checkout_new_order(checkoutPtr, parameters):
 
 		subCarts = SubCart.objects.filter(cart=cartPtr, product_count__gt=0, status=0)
 
-		print 1
 
 		for subCartPtr in subCarts:
-			print 2
 			newSubOrder = SubOrder(order=newOrder)
 			newSubOrder.populateDataFromSubCart(subCartPtr)
 			newSubOrder.save()
@@ -182,14 +207,11 @@ def checkout_new_order(checkoutPtr, parameters):
 			cartItems = CartItem.objects.filter(subcart=subCartPtr, status=0)
 
 			for cartItemPtr in cartItems:
-				print 3
 				newOrderItem = OrderItem(suborder=newSubOrder)
 				newOrderItem.populateDataFromCartItem(cartItemPtr)
 				newOrderItem.save()
 
 			cartItems.update(status=2)
-
-		print 4
 
 		newBuyerPayment = BuyerPayment(order = newOrder)
 		newBuyerPayment.populateFromCheckout(checkoutPtr, cartPtr)

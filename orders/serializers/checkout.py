@@ -3,6 +3,16 @@ from users.serializers.buyer import serialize_buyer_address
 
 from orders.models.checkout import CheckoutStatus
 
+def parseCheckout(checkoutQuerySet, parameters = {}):
+
+	checkouts = []
+
+	for checkout in checkoutQuerySet:
+		checkoutEntry = serializeCheckout(checkout, parameters)
+		checkouts.append(checkoutEntry)
+
+	return checkouts
+
 def serializeCheckout(checkoutEntry, parameters = {}):
 	checkout = {}
 

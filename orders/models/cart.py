@@ -36,6 +36,16 @@ class Cart(models.Model):
 		self.shipping_charge +=  finalPrices["shipping_charge"] - initialPrices["shipping_charge"]
 		self.final_price +=  finalPrices["final_price"] - initialPrices["final_price"]
 
+	def setCODPaymentMethod(self, CODextracost):
+		self.cod_charge = Decimal(CODextracost*float(self.calculated_price))
+		self.final_price += self.cod_charge
+		self.save()
+		parameters = {}
+		subCarts = filterSubCarts(parameters)
+		subCarts = subCarts.filter(cart_id = self.id)
+		for subCartPtr in subCarts:
+			subCartPtr.setCODPaymentMethod(CODextracost)
+
 CartStatus = {
 	0:{"display_value":"Active"},
 	1:{"display_value":"Checked Out"},
@@ -83,6 +93,11 @@ class SubCart(models.Model):
 		self.calculated_price +=  finalPrices["calculated_price"] - initialPrices["calculated_price"]
 		self.shipping_charge +=  finalPrices["shipping_charge"] - initialPrices["shipping_charge"]
 		self.final_price +=  finalPrices["final_price"] - initialPrices["final_price"]
+
+	def setCODPaymentMethod(self, CODextracost):
+		self.cod_charge = Decimal(CODextracost*float(self.calculated_price))
+		self.final_price += self.cod_charge
+		self.save()
 
 SubCartStatus = {
 	0:{"display_value":"Active"},
