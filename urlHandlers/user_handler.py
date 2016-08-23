@@ -46,28 +46,28 @@ def buyer_details(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
-	buyerParameters = populateBuyerParameters(request, {}, version)
+	parameters = populateBuyerParameters(request, {}, version)
 
 	if request.method == "GET":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.get_buyer_details(request,buyerParameters)
+		return buyer.get_buyer_details(request,parameters)
 	elif request.method == "POST":
 		return buyer.post_new_buyer(request)
 	elif request.method == "PUT":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.update_buyer(request)
+		return buyer.update_buyer(request, parameters)
 	elif request.method == "DELETE":
 
-		if buyerParameters["isInternalUser"] == 0:
+		if parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.delete_buyer(request)
+		return buyer.delete_buyer(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -76,12 +76,12 @@ def buyer_panel_tracking_details(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
-	buyerParameters = populateBuyerParameters(request, {}, version)
+	parameters = populateBuyerParameters(request, {}, version)
 
 	if request.method == "POST":
-		if buyerParameters["isBuyer"] == 0:
+		if parameters["isBuyer"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.post_new_buyer_panel_tracking(request)
+		return buyer.post_new_buyer_panel_tracking(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -130,27 +130,27 @@ def buyer_purchasing_state_details(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
-	buyerParameters = populateBuyerParameters(request, {}, version)
+	parameters = populateBuyerParameters(request, {}, version)
 
 	if request.method == "GET":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.get_buyer_purchasing_state_details(request,buyerParameters)
+		return buyer.get_buyer_purchasing_state_details(request,parameters)
 	elif request.method == "POST":
 
-		if buyerParameters["isInternalUser"] == 0:
+		if parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.post_new_buyer_purchasing_state(request)
+		return buyer.post_new_buyer_purchasing_state(request, parameters)
 	#elif request.method == "PUT":
 	#	return buyer.update_buyer_purchasing_state(request)
 	elif request.method == "DELETE":
 
-		if buyerParameters["isInternalUser"] == 0:
+		if parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.delete_buyer_purchasing_state(request)
+		return buyer.delete_buyer_purchasing_state(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -159,28 +159,28 @@ def buyer_buys_from_details(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
-	buyerParameters = populateBuyerParameters(request, {}, version)
+	parameters = populateBuyerParameters(request, {}, version)
 
 	if request.method == "GET":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.get_buyer_buys_from_details(request,buyerParameters)
+		return buyer.get_buyer_buys_from_details(request,parameters)
 	elif request.method == "POST":
 
-		if buyerParameters["isInternalUser"] == 0:
+		if parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.post_new_buyer_buys_from(request)
+		return buyer.post_new_buyer_buys_from(request, parameters)
 	#elif request.method == "PUT":
 	#	return buyer.update_buyer_purchasing_state(request)
 	elif request.method == "DELETE":
 
-		if buyerParameters["isInternalUser"] == 0:
+		if parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.delete_buyer_buys_from(request)
+		return buyer.delete_buyer_buys_from(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -203,20 +203,20 @@ def buyer_shared_product_id_details(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
-	buyerParameters = populateBuyerParameters(request, {}, version)
+	parameters = populateBuyerParameters(request, {}, version)
 
 	if request.method == "GET":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.get_buyer_shared_product_id_details(request,buyerParameters)
+		return buyer.get_buyer_shared_product_id_details(request,parameters)
 	elif request.method == "DELETE":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.delete_buyer_shared_product_id(request)
+		return buyer.delete_buyer_shared_product_id(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -225,26 +225,26 @@ def buyer_interest_details(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
-	buyerParameters = populateBuyerParameters(request, {}, version )
+	parameters = populateBuyerParameters(request, {}, version )
 
 	if request.method == "GET":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.get_buyer_interest_details(request,buyerParameters)
+		return buyer.get_buyer_interest_details(request,parameters)
 	elif request.method == "POST":
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.post_new_buyer_interest(request)
+		return buyer.post_new_buyer_interest(request, parameters)
 	elif request.method == "PUT":
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.update_buyer_interest(request)
+		return buyer.update_buyer_interest(request, parameters)
 	elif request.method == "DELETE":
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.delete_buyer_interest(request)
+		return buyer.delete_buyer_interest(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -253,22 +253,22 @@ def buyer_product_details(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
-	buyerParameters = populateBuyerProductParameters(request, {}, version )
+	parameters = populateBuyerProductParameters(request, {}, version )
 
 	if request.method == "GET":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.get_buyer_product_details(request,buyerParameters)
+		return buyer.get_buyer_product_details(request,parameters)
 	elif request.method == "POST":
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.post_new_buyer_product(request)
+		return buyer.post_new_buyer_product(request, parameters)
 	elif request.method == "PUT":
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.update_buyer_product(request)
+		return buyer.update_buyer_product(request, parameters)
 	#elif request.method == "DELETE":
 	#	return buyer.delete_buyer_interest(request)
 
@@ -279,14 +279,14 @@ def buyer_product_response_details(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
-	buyerParameters = populateBuyerProductParameters(request, {}, version )
+	parameters = populateBuyerProductParameters(request, {}, version )
 
 	if request.method == "GET":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.get_buyer_product_response_details(request,buyerParameters)
+		return buyer.get_buyer_product_response_details(request,parameters)
 	
 
 	return customResponse("4XX", {"error": "Invalid request"})
@@ -295,9 +295,13 @@ def buyer_product_response_details(request, version = "0"):
 def buyer_product_whatsapp_details(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateBuyerProductParameters(request, {}, version )
 	
 	if request.method == "PUT":
-		return buyer.update_buyer_product_whatsapp(request)
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return buyer.update_buyer_product_whatsapp(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -422,7 +426,7 @@ def buyer_address_details(request, version = "0"):
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
 	buyerParameters = populateBuyerParameters(request, {}, version )
-
+	"""
 	if request.method == "POST":
 		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -435,6 +439,7 @@ def buyer_address_details(request, version = "0"):
 		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 		return buyer.delete_buyer(request)
+	"""
 
 	return customResponse("4XX", {"error": "Invalid request"})
 

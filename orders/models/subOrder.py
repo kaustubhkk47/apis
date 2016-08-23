@@ -13,15 +13,17 @@ class SubOrder(models.Model):
 
 	order = models.ForeignKey('orders.Order')
 	seller = models.ForeignKey('users.Seller')
+	subcart = models.ForeignKey('orders.SubCart', null=True, blank=True)
+	seller_address_history = models.ForeignKey('users.SellerAddressHistory', null=True, blank=True)
 
 	pieces = models.PositiveIntegerField(default=1)
 	product_count = models.PositiveIntegerField(default=1)
-	retail_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	edited_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	cod_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+	retail_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	edited_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	cod_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
 	suborder_status = models.IntegerField(default=0)
 	suborder_payment_status = models.IntegerField(default=0)
@@ -47,6 +49,22 @@ class SubOrder(models.Model):
 
 	def __unicode__(self):
 		return "{} - {} - {}".format(self.id,self.display_number,self.seller.name)
+
+	def populateDataFromSubCart(self, subCartPtr):
+		self.subcart = subCartPtr
+		self.seller_id = subCartPtr.seller_id
+		self.product_count = subCartPtr.product_count
+		self.pieces = subCartPtr.pieces
+		self.retail_price = subCartPtr.retail_price
+		self.calculated_price = subCartPtr.calculated_price
+		self.edited_price = subCartPtr.calculated_price
+		self.shipping_charge = subCartPtr.shipping_charge
+		self.cod_charge = subCartPtr.cod_charge
+		self.final_price = subCartPtr.final_price
+		self.suborder_status = 0
+		self.save()
+		self.seller_address_history = self.seller.latest_seller_address_history()
+		self.display_number = "%04d" %(self.seller_id,) + "-" + "1" + "%06d" %(self.order_id,)
 
 class SubOrderAdmin(admin.ModelAdmin):
 	search_fields = ["seller__name", "display_number", "seller__company_name"]
@@ -77,6 +95,7 @@ def populateSubOrderData(subOrderPtr, subOrder,orderID):
 	subOrderPtr.suborder_status = 1
 	subOrderPtr.confirmed_time = timezone.now()
 	subOrderPtr.save()
+	subOrderPtr.seller_address_history = subOrderPtr.seller.latest_seller_address_history()
 	subOrderPtr.display_number = "%04d" %(subOrder["seller"].id,) + "-" + "1" + "%06d" %(orderID,)
 
 def validateSubOrderStatus(status, current_status):

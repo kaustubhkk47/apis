@@ -7,6 +7,7 @@ from .models.businessType import *
 
 admin.site.register(Buyer, BuyerAdmin)
 admin.site.register(BuyerAddress)
+admin.site.register(BuyerAddressHistory)
 admin.site.register(BuyerDetails)
 admin.site.register(BuyerInterest, BuyerInterestAdmin)
 admin.site.register(BuyerInterestHistory)
@@ -21,6 +22,7 @@ admin.site.register(BuyerPanelInstructionsTracking)
 
 admin.site.register(Seller,SellerAdmin)
 admin.site.register(SellerAddress)
+admin.site.register(SellerAddressHistory)
 admin.site.register(SellerDetails)
 admin.site.register(SellerBankDetails)
 

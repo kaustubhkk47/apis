@@ -1,4 +1,4 @@
-from users.serializers.buyer import serialize_buyer
+from users.serializers.buyer import serialize_buyer, serialize_buyer_address
 from ..models.order import OrderStatus, OrderPaymentStatus
 from ..models.subOrder import filterSubOrder
 from ..models.payments import filterBuyerPayment
@@ -29,6 +29,8 @@ def serializeOrder(orderEntry, parameters = {}):
 		"value": orderEntry.order_payment_status,
 		"display_value":OrderPaymentStatus[orderEntry.order_payment_status]["display_value"]
 	}
+
+	order["buyer_address"] = serialize_buyer_address(orderEntry.buyer_address_history)
 
 	if "sub_order_details" in parameters and parameters["sub_order_details"] == 1:
 		subOrderQuerySet = filterSubOrder(parameters)

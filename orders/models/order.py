@@ -17,15 +17,17 @@ import math
 class Order(models.Model):
 
 	buyer = models.ForeignKey('users.Buyer')
+	cart = models.ForeignKey('orders.Cart', null=True, blank=True)
+	buyer_address_history = models.ForeignKey('users.BuyerAddressHistory', null=True, blank=True)
 
 	pieces = models.PositiveIntegerField(default=1)
 	product_count = models.PositiveIntegerField(default=1)
-	retail_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	edited_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	cod_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+	retail_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	edited_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	cod_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 	
 	order_status = models.IntegerField(default=0)
 	order_payment_status = models.IntegerField(default=0)
@@ -48,6 +50,22 @@ class Order(models.Model):
 
 	def __unicode__(self):
 		return "{} - {} - {}".format(self.id,self.display_number,self.buyer.name)
+
+	def populateDataFromCart(self, cartPtr):
+		self.cart = cartPtr
+		self.buyer_id = cartPtr.buyer_id
+		self.product_count = cartPtr.product_count
+		self.pieces = cartPtr.pieces
+		self.retail_price = cartPtr.retail_price
+		self.calculated_price = cartPtr.calculated_price
+		self.edited_price = cartPtr.calculated_price
+		self.shipping_charge = cartPtr.shipping_charge
+		self.cod_charge = cartPtr.cod_charge
+		self.final_price = cartPtr.final_price
+		self.order_status = 0
+		self.save()
+		self.display_number = "1" +"%06d" %(self.id,)
+
 
 class OrderAdmin(admin.ModelAdmin):
 	search_fields = ["buyer__name", "display_number", "buyer__company_name", "buyer__mobile_number"]
@@ -72,6 +90,7 @@ def populateOrderData(orderPtr, order):
 	orderPtr.remarks = order["remarks"]
 	orderPtr.order_status = 1
 	orderPtr.save()
+	orderPtr.buyer_address_history = orderPtr.buyer.latest_buyer_address_history()
 	orderPtr.display_number = "1" +"%06d" %(orderPtr.id,)
 
 def filterOrder(orderParameters):
@@ -172,8 +191,10 @@ def populateBuyerMailDict(OrderPtr, buyerPtr):
 		"total_margin":'{0:.1f}'.format(buyerMargin)
 	}
 
-	buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
-	buyerAddressPtr = buyerAddressPtr[0]
+	#buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
+	#buyerAddressPtr = buyerAddressPtr[0]
+
+	buyerAddressPtr = OrderPtr.buyer_address_history
 
 	buyer_mail_dict["subOrders"] = []
 

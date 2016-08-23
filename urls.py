@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from urlHandlers import catalog_handler, user_handler, order_handler, lead_handler, address_handler, blog_handler
+from urlHandlers import catalog_handler, user_handler, order_handler, lead_handler, address_handler, blog_handler, logistics_handler, general_handler
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -41,7 +41,12 @@ urlpatterns += [
 	url(r'^buyerpayment/$', order_handler.buyer_payment_details),
 	url(r'^sellerpayment/$', order_handler.seller_payment_details),
 	url(r'^cart/$', order_handler.cart_details),
-	url(r'^cart/item/$', order_handler.cart_item_details),
+	url(r'^cart/item/$', order_handler.cart_item_details)
+]
+
+urlpatterns += [
+	url(r'^checkout/$', order_handler.checkout_details),
+	url(r'^checkout/paymentmethod/$', order_handler.checkout_payment_method_details),
 ]
 
 urlpatterns += [
@@ -86,7 +91,12 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-	url(r'^address/state/$', address_handler.state_details)
+	url(r'^address/state/$', address_handler.state_details),
+	url(r'^address/pincode/$', address_handler.pincode_details)
+]
+
+urlpatterns += [
+	url(r'^logistics/pincodeserviceability/$', logistics_handler.pincode_serviceability_details)
 ]
 
 urlpatterns += [
@@ -95,3 +105,9 @@ urlpatterns += [
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+"""
+urlpatterns += [
+	url(r'^', general_handler.invalid_request_details),
+]
+"""

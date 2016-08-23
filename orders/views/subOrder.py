@@ -127,8 +127,9 @@ def cancel_suborder(request):
 			subOrderPtr.order.save()
 
 		buyerPtr = subOrderPtr.order.buyer
-		buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
-		buyerAddressPtr = buyerAddressPtr[0]
+		#buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
+		#buyerAddressPtr = buyerAddressPtr[0]
+		buyerAddressPtr = subOrderPtr.order.buyer_address_history
 		seller_mail_dict = populateSellerMailDict(subOrderPtr, buyerPtr, buyerAddressPtr)
 		seller_mail_dict["suborder"]["summary_title"] = "Order Cancelled"
 		sendSubOrderCancellationMail(subOrderPtr, seller_mail_dict)
