@@ -24,7 +24,7 @@ class Product(models.Model):
 	price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, blank=False)
 	unit = models.CharField(max_length=15, blank=False)
 	tax = models.DecimalField(max_digits=5, decimal_places=2)
-	min_price_per_unit = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
+	min_price_per_unit = models.DecimalField(max_digits=7, decimal_places=2, default=0)
 
 	lot_size = models.PositiveIntegerField(default=1)
 	price_per_lot = models.DecimalField(max_digits=10, decimal_places=2, blank=False)
@@ -99,11 +99,11 @@ class ProductDetails(models.Model):
 	availability = models.TextField(blank=True)
 	dispatched_in = models.TextField(blank=True)
 	lot_description = models.TextField(blank=True)
-	weight_per_unit = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+	weight_per_unit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 	sample_type = models.TextField(blank=True)
 	sample_description = models.TextField(blank=True)
-	sample_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+	sample_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 	manufactured_country = models.CharField(max_length=50, blank=True, default="India")
 	manufactured_city = models.CharField(max_length=50, blank=True)

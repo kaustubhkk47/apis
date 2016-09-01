@@ -1,3 +1,4 @@
+from address.serializers.pincode import serialize_pincode
 
 def parseServiceablePincodes(serviceablePincodeQuerySet, parameters = {}):
 
@@ -18,4 +19,7 @@ def serializeServiceablePincodes(serviceablePincodeEntry, parameters = {}):
 	serviceablePincode["regular_delivery_available"] = serviceablePincodeEntry.regular_delivery_available
 	serviceablePincode["regular_pickup_available"] = serviceablePincodeEntry.regular_pickup_available
 	serviceablePincode["cod_available"] = serviceablePincodeEntry.cod_available
+
+	serviceablePincode["pincode"] = serialize_pincode(serviceablePincodeEntry.pincode)
+	
 	return serviceablePincode

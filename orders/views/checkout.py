@@ -66,7 +66,7 @@ def get_checkout_details(request, parameters):
 		try:
 			checkouts = checkouts.latest('created_at')
 			body = serializeCheckout(checkouts,parameters)
-			response = {"checkouts": body}
+			response = {"checkout": body}
 			statusCode = "2XX"
 		except Exception as e:
 			statusCode = "4XX"
