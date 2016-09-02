@@ -5,7 +5,7 @@ from catalog.views import product
 from scripts.utils import customResponse, get_token_payload, getArrFromString, getStrArrFromString, validate_number, getPaginationParameters, validate_bool, getApiVersion
 import jwt as JsonWebToken
 
-from .user_handler import populateSellerIDParameters, populateInternalUserIDParameters, populateSellerDetailsParameters
+from .user_handler import populateSellerIDParameters, populateInternalUserIDParameters, populateSellerDetailsParameters, populateAllUserIDParameters
 
 @csrf_exempt
 def categories_details(request, version = "0"):
@@ -123,9 +123,7 @@ def populateProductParameters(request, parameters = {}, version = "0"):
 		parameters["min_price_per_unit"] = float(min_price_per_unit)
 		parameters["max_price_per_unit"] = float(max_price_per_unit)
 
-	parameters = populateSellerIDParameters(request, parameters, version)
-
-	parameters = populateInternalUserIDParameters(request, parameters, version)
+	parameters = populateAllUserIDParameters(request, parameters, version)
 
 	parameters = populateProductDetailsParameters(request, parameters, version)
 
