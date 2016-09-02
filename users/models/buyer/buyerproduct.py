@@ -62,6 +62,10 @@ class BuyerProductResponse(models.Model):
 
 	has_swiped = models.BooleanField(default=False)
 
+	#added_from values
+	#0: Tinder, 1 : category_page, 2 : product_page, 3 : shortlist, 4 : homepage, 
+	responded_from = models.IntegerField(default=0)
+
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
@@ -151,6 +155,10 @@ class BuyerProductResponseHistory(models.Model):
 	response_code = models.IntegerField(default=0)
 	has_swiped = models.BooleanField(default=False)
 
+	#added_from values
+	#0: Tinder, 1 : category_page, 2 : product_page, 3 : shortlist, 4 : homepage, 
+	responded_from = models.IntegerField(default=0)
+
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
@@ -173,6 +181,9 @@ def validateBuyerProductData(buyer_product, old_buyer_product, is_new, buyer_pro
 
 	if "has_swiped" in buyer_product and validate_bool(buyer_product["has_swiped"]):
 		buyer_product_populator["has_swiped"] = buyer_product["has_swiped"]
+
+	if "responded_from" in buyer_product and validate_integer(buyer_product["responded_from"]):
+		buyer_product_populator["responded_from"] = buyer_product["responded_from"]
 
 	if "is_active" in buyer_product and validate_bool(buyer_product["is_active"]):
 		if int(buyer_product["is_active"]) != int(old_buyer_product.is_active) and old_buyer_product.responded == 0:
@@ -216,11 +227,15 @@ def populateBuyerProductResponseHistory(buyerProductResponsePtr,buyerProductResp
 	buyerProductResponsePtr.response_code = int(buyerProductResponse["response_code"])
 	if "has_swiped" in buyerProductResponse:
 		buyerProductResponsePtr.has_swiped = int(buyerProductResponse["has_swiped"])
+	if "responded_from" in buyerProductResponse:
+		buyerProductResponsePtr.responded_from = int(buyerProductResponse["responded_from"])
 
 def populateBuyerProductResponse(buyerProductResponsePtr,buyerProductResponse):
 	buyerProductResponsePtr.response_code = int(buyerProductResponse["response_code"])
 	if "has_swiped" in buyerProductResponse:
 		buyerProductResponsePtr.has_swiped = int(buyerProductResponse["has_swiped"])
+	if "responded_from" in buyerProductResponse:
+		buyerProductResponsePtr.responded_from = int(buyerProductResponse["responded_from"])
 
 def filterBuyerSharedProductID(parameters = {}):
 
