@@ -5,6 +5,7 @@ from ..models.productLot import ProductLot
 from ..models.product import Product, filterProducts
 from .category import serialize_categories
 from users.serializers.seller import serialize_seller
+from users.models.buyer import filterBuyerProductResponse
 import ast
 
 def serialize_product_lots(productsItem, parameters = {}):
@@ -95,6 +96,19 @@ def serialize_product(productsItem, parameters = {}):
 		image["image_name"] = productsItem.image_name
 
 		product["image"] = image
+
+	if "isBuyer" in parameters and parameters["isBuyer"] == 1:
+		response = {}
+		buyerProductResponsePtr = filterBuyerProductResponse(parameters)
+		buyerProductResponsePtr = buyerProductResponsePtr.filter(product_id = productsItem.id)
+		if len(buyerProductResponsePtr) == 0:
+			response["response_code"] = 0
+		else:
+			buyerProductResponsePtr = buyerProductResponsePtr[0]
+			response["response_code"] = buyerProductResponsePtr.response_code 
+
+		product["response"] = response
+
 
 	return product
 
