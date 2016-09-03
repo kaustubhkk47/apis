@@ -6,6 +6,7 @@ from ..models.product import Product, filterProducts
 from .category import serialize_categories
 from users.serializers.seller import serialize_seller
 from users.models.buyer import filterBuyerProductResponse
+from orders.models.cart import filterCartItem, CartItem
 import ast
 
 def serialize_product_lots(productsItem, parameters = {}):
@@ -108,6 +109,17 @@ def serialize_product(productsItem, parameters = {}):
 			response["response_code"] = buyerProductResponsePtr.response_code 
 
 		product["response"] = response
+
+		cartitem = {}
+		cartItemPtr =filterCartItem(parameters)
+		cartItemPtr = cartItemPtr.filter(product_id = productsItem.id, status=0)
+		if len(cartItemPtr) == 0:
+			cartitem["lots"] = 0
+		else:
+			cartItemPtr = cartItemPtr[0]
+			cartitem["lots"] = cartItemPtr.lots
+
+		product["cartitem"] = cartitem
 
 
 	return product
