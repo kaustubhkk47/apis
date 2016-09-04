@@ -66,6 +66,12 @@ class Order(models.Model):
 		self.save()
 		self.display_number = "1" +"%06d" %(self.id,)
 
+	def validateOrderStatus(self, status):
+		current_status = self.order_status
+		if current_status == 0 and (status == 1):
+			return True
+		return False
+
 
 class OrderAdmin(admin.ModelAdmin):
 	search_fields = ["buyer__name", "display_number", "buyer__company_name", "buyer__mobile_number"]
@@ -150,7 +156,7 @@ def update_order_completion_status(order):
 
 OrderStatus = {
 	-1:{"display_value":"Cancelled"},
-	0:{"display_value":"Placed"},
+	0:{"display_value":"Unconfirmed"},
 	1:{"display_value":"Confirmed"},
 	2:{"display_value":"Partially Shipped"},
 	3:{"display_value":"Shipped"},
@@ -166,13 +172,14 @@ OrderPaymentStatus = {
 ## Status: Placed, confirmed, shipped, delivered
 ## Payment status : paid, not paid, partially paid
 
-def sendOrderMail(OrderPtr):
+def sendOrderMail(OrderPtr, buyer_subject = ""):
 	from_email = "Wholdus Info <info@wholdus.com>"
 	buyerPtr = OrderPtr.buyer
 
 	if buyerPtr.email != None and buyerPtr.email != "":
 		buyer_mail_template_file = "buyer/new_order.html"
-		buyer_subject = "New order received with order ID " + OrderPtr.display_number
+		if buyer_subject == "":
+			buyer_subject = "New order placed with order ID " + OrderPtr.display_number
 		buyer_to = [buyerPtr.email]
 		buyer_bcc = ["aditya.rana@wholdus.com", "kushagra@wholdus.com"]
 		buyer_mail_dict = populateBuyerMailDict(OrderPtr, buyerPtr)

@@ -99,6 +99,7 @@ def serialize_product(productsItem, parameters = {}):
 		product["image"] = image
 
 	if "isBuyer" in parameters and parameters["isBuyer"] == 1:
+		
 		response = {}
 		buyerProductResponsePtr = filterBuyerProductResponse(parameters)
 		buyerProductResponsePtr = buyerProductResponsePtr.filter(product_id = productsItem.id)
@@ -120,6 +121,7 @@ def serialize_product(productsItem, parameters = {}):
 			cartitem["lots"] = cartItemPtr.lots
 
 		product["cartitem"] = cartitem
+
 
 
 	return product

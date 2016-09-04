@@ -116,23 +116,26 @@ def validateSubOrderStatus(status, current_status):
 
 	return True
 
-def filterSubOrder(subOrderParameters):
+def filterSubOrder(parameters):
 	subOrders = SubOrder.objects.all().select_related('seller','order__buyer')
 		
-	if "subOrderArr" in subOrderParameters:
-		subOrders = subOrders.filter(id__in=subOrderParameters["subOrderArr"])
+	if "subOrderArr" in parameters:
+		subOrders = subOrders.filter(id__in=parameters["subOrderArr"])
 
-	if "subOrderStatusArr" in subOrderParameters:
-		subOrders = subOrders.filter(suborder_status__in=subOrderParameters["subOrderStatusArr"])
+	if "subOrderStatusArr" in parameters:
+		subOrders = subOrders.filter(suborder_status__in=parameters["subOrderStatusArr"])
 
-	if "subOrderPaymentStatusArr" in subOrderParameters:
-		subOrders = subOrders.filter(suborder_payment_status__in=subOrderParameters["subOrderPaymentStatusArr"])
+	if "subOrderPaymentStatusArr" in parameters:
+		subOrders = subOrders.filter(suborder_payment_status__in=parameters["subOrderPaymentStatusArr"])
 
-	if "sellersArr" in subOrderParameters:
-		subOrders = subOrders.filter(seller_id__in=subOrderParameters["sellersArr"])
+	if "sellersArr" in parameters:
+		subOrders = subOrders.filter(seller_id__in=parameters["sellersArr"])
 
-	if "orderArr" in subOrderParameters:
-		subOrders = subOrders.filter(order_id__in=subOrderParameters["orderArr"])
+	if "orderArr" in parameters:
+		subOrders = subOrders.filter(order_id__in=parameters["orderArr"])
+
+	if "isSeller" in parameters and parameters["isSeller"] == 1:
+		subOrders = subOrders.filter(suborder_status__gt=0)
 
 	return subOrders
 
@@ -171,6 +174,8 @@ def sendSubOrderMail(SubOrderPtr, seller_mail_dict):
 	create_email(seller_mail_template_file,seller_mail_dict,seller_subject,from_email,seller_to,bcc=seller_bcc)
 
 def sendSubOrderCancellationMail(SubOrderPtr, seller_mail_dict):
+	if SubOrderPtr.suborder_status == 0:
+		return
 	from_email = "Wholdus Info <info@wholdus.com>"
 	seller_mail_template_file = "seller/suborder_cancelled.html"
 	seller_subject = "Cancellation of order with order ID " + SubOrderPtr.display_number
