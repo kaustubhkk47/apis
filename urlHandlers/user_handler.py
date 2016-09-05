@@ -456,6 +456,18 @@ def populateBuyerIDParameters(request, parameters = {}, version = "0"):
 	elif buyerID != "":
 		parameters["buyersArr"] = getArrFromString(buyerID)
 
+	storeUrl = request.GET.get("store_url", "")
+	try:
+		storeUrlArr = storeUrl.split("-")
+		storeSlug = storeUrlArr[0]
+		buyerID = storeUrlArr[1]
+		buyerPtr = Buyer.objects.get(id=buyerID, store_slug=storeSlug)
+	except Exception as e:
+		pass
+	else:
+		parameters["buyersArr"] = [buyerPtr.id]
+		parameters["isBuyer"] = 1
+
 	return parameters
 
 ### SELLER
