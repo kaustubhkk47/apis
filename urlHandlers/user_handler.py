@@ -46,7 +46,7 @@ def buyer_details(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
-	parameters = populateBuyerParameters(request, {}, version)
+	parameters = populateBuyerProductParameters(request, {}, version)
 
 	if request.method == "GET":
 

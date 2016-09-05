@@ -45,12 +45,13 @@ def serialize_buyer(buyer_entry, parameters = {}):
 	   buyer["buyer_interests"] = parse_buyer_interest(buyerInterestQuerySet,parameters)
 
 	if "buyer_product_details" in parameters and parameters["buyer_product_details"] == 1:
-		tempParameters = parameters
+		tempParameters = parameters.copy()
 		tempParameters["buyer_interest_active"] = True
 		tempParameters["buyer_product_delete_status"] = False
 		tempParameters["buyer_product_is_active"] = True
 		tempParameters["responded"] = 0
 		tempParameters["buyer_product_shared_on_whatsapp"] = False
+		print tempParameters
 		buyerProductQuerySet = filterBuyerProducts(tempParameters)
 		buyerProductQuerySet = buyerProductQuerySet.filter(buyer_id = buyer_entry.id)
 		buyerProductQuerySet = buyerProductQuerySet[:parameters["buyer_product_count"]]
