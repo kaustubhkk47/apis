@@ -82,7 +82,9 @@ def get_product_file(request, productParameters):
 
 		products = products.values_list('id',flat=True)
 
-		filename = getProductFileName("productfile_", ".txt",productParameters)
+		#filename = getProductFileName("productfile_", ".txt",productParameters)
+
+		filename = "productfile.txt"
 
 		return generateProductFile(products, filename)
 
