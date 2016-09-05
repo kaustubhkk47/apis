@@ -56,20 +56,24 @@ def order_details(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
-	orderParameters = populateOrderParameters(request, {}, version)
+	parameters = populateOrderParameters(request, {}, version)
 
 	if request.method == "GET":
-		if orderParameters["isBuyer"] == 0 and orderParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return order.get_order_details(request,orderParameters)
+		return order.get_order_details(request,parameters)
 	elif request.method == "POST":
-		if orderParameters["isInternalUser"] == 0:
+		if parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return order.post_new_order(request)
+		return order.post_new_order(request, parameters)
+	elif request.method == "PUT":
+		if parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return order.update_order(request, parameters)
 	elif request.method == "DELETE":
-		if orderParameters["isInternalUser"] == 0:
+		if parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return order.cancel_order(request)
+		return order.cancel_order(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 

@@ -5,6 +5,7 @@ from decimal import Decimal
 import jwt as JsonWebToken
 import settings
 from address.models.pincode import Pincode
+from django.template.defaultfilters import slugify
 
 class Buyer(models.Model):
 	name = models.CharField(max_length=200, blank=True)
@@ -17,6 +18,8 @@ class Buyer(models.Model):
 	mobile_verification = models.BooleanField(default=False)
 	email_verification = models.BooleanField(default=False)
 	gender = models.CharField(max_length=10, blank=True)
+
+	store_slug = models.TextField(blank=True)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -220,6 +223,10 @@ def validateBuyerAddressData(buyeraddress, oldbuyeraddress):
 def populateBuyer(buyerPtr, buyer):
 	buyerPtr.name = buyer["name"]
 	buyerPtr.company_name = buyer["company_name"]
+	if buyerPtr.company_name != "":
+		buyerPtr.store_slug = slugify(buyerPtr.company_name)
+	else:
+		buyerPtr.store_slug = slugify(buyerPtr.name)
 	buyerPtr.mobile_number = buyer["mobile_number"]
 	buyerPtr.whatsapp_number = buyer["whatsapp_number"]
 	buyerPtr.email = buyer["email"]

@@ -35,7 +35,7 @@ def get_order_details(request, orderParameters):
 	closeDBConnection()
 	return customResponse(statusCode, response)
 
-def post_new_order(request):
+def post_new_order(request, parameters={}):
 	try:
 		requestbody = request.body.decode("utf-8")
 		order = convert_keys_to_string(json.loads(requestbody))
@@ -133,21 +133,76 @@ def post_new_order(request):
 				populateOrderItemData(newOrderItem, orderItem)
 				newOrderItem.save()
 
-	except Exception as e:
-		log.critical(e)
-		closeDBConnection()
-		return customResponse("4XX", {"error": "unable to create entry in db"})
-	else:
 		sendOrderMail(newOrder)
 		subOrders = SubOrder.objects.filter(order_id = newOrder.id)
 		buyerAddressPtr = newOrder.buyer_address_history
 		for SubOrderPtr in subOrders:
 			seller_mail_dict = populateSellerMailDict(SubOrderPtr, buyerPtr, buyerAddressPtr)
 			sendSubOrderMail(SubOrderPtr, seller_mail_dict)
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to create entry in db"})
+	else:
+		
 		closeDBConnection()
 		return customResponse("2XX", {"order": serializeOrder(newOrder)})
 
-def cancel_order(request):
+def update_order(request,parameters={}):
+	try:
+		requestbody = request.body.decode("utf-8")
+		order = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(order) or not "orderID" in order or not validate_integer(order["orderID"]):
+		return customResponse("4XX", {"error": "Id for order not sent"})
+
+	orderPtr = Order.objects.filter(id=int(order["orderID"]))
+
+	if len(orderPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for order sent"})
+
+	orderPtr = orderPtr[0]
+
+	if not "order_status" in order or not validate_integer(order["order_status"]):
+		return customResponse("4XX", {"error": "Current status not sent"})
+
+	status = int(order["order_status"])
+
+	if not orderPtr.validateOrderStatus(status):
+		return customResponse("4XX", {"error": "Improper status sent"})
+
+	try:
+		orderPtr.order_status = 1
+		orderPtr.save()
+		
+		OrderItem.objects.filter(suborder__order_id = orderPtr.id, current_status=0).update(current_status=1)
+		allSubOrders = SubOrder.objects.filter(order_id = orderPtr.id,suborder_status=0)
+		allSubOrders.update(suborder_status=1)
+
+		buyerPtr = orderPtr.buyer
+		#buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
+		#buyerAddressPtr = buyerAddressPtr[0]
+		buyerAddressPtr = orderPtr.buyer_address_history
+
+		buyer_subject = "Order Confirmed with order ID {}".format(orderPtr.display_number)
+		sendOrderMail(orderPtr, buyer_subject)
+		allSubOrders = SubOrder.objects.filter(order_id = orderPtr.id,suborder_status=1)
+		for subOrderPtr in allSubOrders: 
+			seller_mail_dict = populateSellerMailDict(subOrderPtr, buyerPtr, buyerAddressPtr)
+			sendSubOrderMail(subOrderPtr, seller_mail_dict)
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "could not update"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"order": "order updated"})
+
+def cancel_order(request,parameters={}):
 	try:
 		requestbody = request.body.decode("utf-8")
 		order = convert_keys_to_string(json.loads(requestbody))
@@ -185,6 +240,8 @@ def cancel_order(request):
 		#buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
 		#buyerAddressPtr = buyerAddressPtr[0]
 		buyerAddressPtr = orderPtr.buyer_address_history
+
+		allSubOrders = SubOrder.objects.filter(order_id = orderPtr.id,suborder_status=-1)
 
 		for subOrderPtr in allSubOrders:
 			seller_mail_dict = populateSellerMailDict(subOrderPtr, buyerPtr, buyerAddressPtr)

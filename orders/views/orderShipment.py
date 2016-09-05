@@ -53,7 +53,7 @@ def post_new_order_shipment(request):
 	if not "suborderID" in orderShipment or not validate_integer(orderShipment["suborderID"]):
 		return customResponse("4XX", {"error": "Id for sub order not sent"})
 
-	subOrderPtr = SubOrder.objects.filter(id=int(orderShipment["suborderID"])).select_related('order')
+	subOrderPtr = SubOrder.objects.filter(id=int(orderShipment["suborderID"]), suborder_status__gt=0).select_related('order')
 
 	if len(subOrderPtr) == 0:
 		return customResponse("4XX", {"error": "Invalid id for sub order sent"})

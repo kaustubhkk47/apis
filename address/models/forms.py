@@ -20,7 +20,7 @@ class Form(models.Model):
 	is_b2b = models.BooleanField(default=1)
 
 	min_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-	max_amount = models.DecimalField(max_digits=12, decimal_places=2, default=9999999999)
+	max_amount = models.DecimalField(max_digits=10, decimal_places=2, default=9999999999)
 
 	class Meta:
 		verbose_name="Form"
