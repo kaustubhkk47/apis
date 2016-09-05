@@ -23,6 +23,8 @@ def serialize_buyer(buyer_entry, parameters = {}):
 	buyer["created_at"] = buyer_entry.created_at
 	buyer["updated_at"] = buyer_entry.updated_at
 	buyer["buyer_panel_url"] = str(buyer_entry.id) + "-" + str(int(time.mktime(buyer_entry.created_at.timetuple())))
+	buyer["store_url"] = "{}-{}".format(buyer_entry.store_slug, buyer_entry.id)
+
 	
 	if "buyer_details_details" in parameters and parameters["buyer_details_details"] == 1 and hasattr(buyer_entry,'buyerdetails'):
 		buyer_details = {}
