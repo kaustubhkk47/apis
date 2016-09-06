@@ -458,10 +458,7 @@ def populateBuyerIDParameters(request, parameters = {}, version = "0"):
 
 	storeUrl = request.GET.get("store_url", "")
 	try:
-		storeUrlArr = storeUrl.split("-")
-		storeSlug = storeUrlArr[0]
-		buyerID = storeUrlArr[1]
-		buyerPtr = Buyer.objects.get(id=buyerID, store_slug=storeSlug)
+		buyerPtr = Buyer.objects.get(store_url=storeUrl)
 	except Exception as e:
 		pass
 	else:

@@ -17,6 +17,7 @@ from django.template.loader import get_template
 from django.core.files import File
 import pdfkit
 import io
+import requests
 
 def closeDBConnection():
 	connection.close()
@@ -263,3 +264,15 @@ def getApiVersion(text):
 	except Exception as e:
 		pass
 	return version
+
+def send_sms(message, numbers):
+	apiKey = "PHh7HDcKTKY-2FFu2CjWvBcnRdpw02Kq5iwUx4pDbP"
+
+	data = {}
+	data["apiKey"] = apiKey
+	data["sender"] = "TXTLCL"
+	
+	data["message"] = message
+
+	numbers = map(lambda x: "91" + x, map(str, numbers))
+	data["numbers"] = numbers

@@ -20,6 +20,7 @@ class Buyer(models.Model):
 	gender = models.CharField(max_length=10, blank=True)
 
 	store_slug = models.TextField(blank=True)
+	store_url = models.TextField(blank=True)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -236,6 +237,8 @@ def populateBuyer(buyerPtr, buyer):
 	buyerPtr.email_verification = int(buyer["email_verification"])
 	buyerPtr.whatsapp_sharing_active = int(buyer["whatsapp_sharing_active"])
 	buyerPtr.gender = buyer["gender"]
+	buyerPtr.save()
+	buyerPtr.store_url = "{}-{}".buyerPtr.store_slug + buyerPtr.id
 
 def populateBuyerDetails(buyerDetailsPtr, buyerdetails):
 	buyerDetailsPtr.cst = buyerdetails["cst"]

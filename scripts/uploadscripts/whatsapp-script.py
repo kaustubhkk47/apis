@@ -81,7 +81,7 @@ def generateCaption(product, urlPart, buyerProductID):
 def updateProductShownStatus(ids):
 	payload = {}
 	payload['buyerproductID'] = ids
-	url = 'http://api.wholdus.com/users/buyer/buyerproducts/whatsapp/'
+	url = 'http://api.wholdus.com/users/buyer/buyerproducts/whatsapp/?access_token=' + constantValuesInstance.getAccessToken()
 	r = requests.put(url, json=payload)
 
 	if r.status_code == 200:
