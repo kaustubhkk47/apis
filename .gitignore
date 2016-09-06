@@ -16,6 +16,7 @@ settings.py
 ### Whatsapp Script ###
 chromedriver
 *.exe
+*.jpg
 productfile.txt
 
 ### Vim ###
