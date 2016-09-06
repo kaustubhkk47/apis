@@ -20,6 +20,8 @@ admin.site.register(BuyerPurchasingState)
 admin.site.register(BuyerProductLanding, BuyerProductLandingAdmin)
 admin.site.register(BuyerPanelInstructionsTracking)
 
+admin.site.register(BuyerStoreLead, BuyerStoreLeadAdmin)
+
 admin.site.register(Seller,SellerAdmin)
 admin.site.register(SellerAddress)
 admin.site.register(SellerAddressHistory)

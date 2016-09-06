@@ -261,3 +261,29 @@ def serialize_buyer_buys_from(buyer_buys_from_entry, parameters = {}):
 	buyer_buys_from["business_type"] = serialize_business_type(buyer_buys_from_entry.business_type)
 
 	return buyer_buys_from
+
+def parse_buyer_store_lead(buyer_store_leads_queryset, parameters = {}):
+
+	buyer_store_leads = []
+
+	for buyer_store_lead in buyer_store_leads_queryset:
+		buyer_store_lead_entry = serialize_buyer_store_lead(buyer_store_lead, parameters)
+		buyer_store_leads.append(buyer_store_lead_entry)
+
+	return buyer_store_leads
+
+def serialize_buyer_store_lead(buyer_store_lead_entry, parameters = {}):
+
+	buyer_store_lead = {}
+	buyer_store_lead["buyerstoreleadID"] = buyer_store_lead_entry.id
+	buyer_store_lead["buyerID"] = buyer_store_lead_entry.buyer_id
+	buyer_store_lead["name"] = buyer_store_lead_entry.name
+	buyer_store_lead["mobile_number"] = buyer_store_lead_entry.mobile_number
+	buyer_store_lead["email"] = buyer_store_lead_entry.email
+	buyer_store_lead["status"] = buyer_store_lead_entry.status
+	buyer_store_lead["sizes"] = buyer_store_lead_entry.sizes
+	buyer_store_lead["quantity"] = buyer_store_lead_entry.quantity
+	
+	buyer_store_lead["product"] = serialize_product(buyer_store_lead_entry.product, parameters)
+
+	return buyer_store_lead

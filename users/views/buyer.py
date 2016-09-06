@@ -30,6 +30,20 @@ def get_buyer_details(request,parameters = {}):
 		log.critical(e)
 		return customResponse("4XX", {"error": "Invalid request"})
 
+def get_buyer_store_lead_details(request,parameters = {}):
+	try:
+		buyerStoreLeads = filterBuyerStoreLeads(parameters)
+
+		response = {
+			"buyer_store_leads" : parse_buyer_store_lead(buyerStoreLeads, parameters)
+		}
+		closeDBConnection()
+
+		return customResponse("2XX", response)
+	except Exception as e:
+		log.critical(e)
+		return customResponse("4XX", {"error": "Invalid request"})
+
 def get_buyer_purchasing_state_details(request,parameters = {}):
 	try:
 		buyersPurchasingState = filterBuyerPurchasingState(parameters)
@@ -522,6 +536,97 @@ def post_new_buyer_panel_tracking(request, parameters):
 	else:
 		closeDBConnection()
 		return customResponse("2XX", {"buyer_product_tracking":"successfully added"})
+
+def post_new_buyer_store_lead(request, parameters):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_store_lead = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_store_lead) or not "buyerID" in buyer_store_lead or not validate_integer(buyer_store_lead["buyerID"]):
+		return customResponse("4XX", {"error": "Id for buyer not sent"})
+
+	buyerPtr = Buyer.objects.filter(id=int(buyer_store_lead["buyerID"]))
+
+	if not buyerPtr.exists():
+		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
+
+
+	if not "productID" in buyer_store_lead or not validate_integer(buyer_store_lead["productID"]):
+		return customResponse("4XX", {"error": "Id for product not sent"})
+
+	productParameters = {}
+	productParameters["productsArr"] = [int(buyer_store_lead["productID"])]
+
+	productPtr = filterProducts(productParameters)
+
+	if not productPtr.exists():
+		return customResponse("4XX", {"error": "Invalid id for product sent"})
+
+	newBuyerStoreLead = BuyerStoreLead(buyer_id=int(buyer_store_lead["buyerID"]), product_id = int(buyer_store_lead["productID"]))
+
+	if not newBuyerStoreLead.validateBuyerStoreLeadData(buyer_store_lead, 1):
+		return customResponse("4XX", {"error": "Invalid data for buyer store lead sent"})
+
+	try:
+		newBuyerStoreLead.populateBuyerStoreLead(buyer_store_lead)
+		newBuyerStoreLead.save()
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to create entry in db"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer_store_lead":serialize_buyer_store_lead(newBuyerStoreLead)})
+
+
+def update_buyer_store_lead(request, parameters):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_store_lead = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_store_lead):
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if parameters["isBuyer"] == 1:
+		buyer_store_lead["buyerID"] = parameters["buyersArr"][0]
+	elif not "buyerID" in buyer_store_lead  or not validate_integer(buyer_store_lead["buyerID"]):
+		return customResponse("4XX", {"error": "Id for buyer not sent"})
+
+	buyerPtr = Buyer.objects.filter(id=int(buyer_store_lead["buyerID"]))
+
+	if not buyerPtr.exists():
+		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
+
+	if not "buyerstoreleadID" in buyer_store_lead or not validate_integer(buyer_store_lead["buyerstoreleadID"]):
+		return customResponse("4XX", {"error": "Id for buyer store lead not sent"})
+
+	buyerStoreLeadPtr = BuyerStoreLead.objects.filter(id=int(buyer_store_lead["buyerstoreleadID"]), buyer_id=int(buyer_store_lead["buyerID"]))
+
+	if len(buyerStoreLeadPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for buyer store lead sent"})
+
+	
+	buyerStoreLeadPtr = buyerStoreLeadPtr[0]
+
+	if not buyerStoreLeadPtr.validateBuyerStoreLeadData(buyer_store_lead, 0):
+		return customResponse("4XX", {"error": "Invalid data for buyer store lead sent"})
+
+	try:
+		buyerStoreLeadPtr.populateBuyerStoreLead(buyer_store_lead)
+		buyerStoreLeadPtr.save()
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to create entry in db"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer_store_lead":serialize_buyer_store_lead(buyerStoreLeadPtr)})
 
 def update_buyer_interest(request, parameters):
 	try:
