@@ -50,7 +50,7 @@ def buyer_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0 and parameters["isBuyerStore"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return buyer.get_buyer_details(request,parameters)
@@ -84,6 +84,46 @@ def buyer_panel_tracking_details(request, version = "0"):
 		return buyer.post_new_buyer_panel_tracking(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
+def buyer_store_lead_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateBuyerStoreParameters(request, {}, version)
+
+	if request.method == "GET":
+
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return buyer.get_buyer_store_lead_details(request,parameters)
+	elif request.method == "POST":
+
+		return buyer.post_new_buyer_store_lead(request, parameters)
+	elif request.method == "PUT":
+
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return buyer.update_buyer_store_lead(request,parameters)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+def populateBuyerStoreParameters(request, parameters = {}, version = "0"):
+
+	parameters = populateBuyerProductParameters(request, parameters, version)
+
+	buyerStoreLeadID = request.GET.get("buyerstoreleadID", "")
+	if buyerStoreLeadID != "":
+		parameters["buyerStoreLeadsArr"] = getArrFromString(buyerStoreLeadID)
+
+	buyerStoreLeadStatus = request.GET.get("buyer_store_lead_status", None)
+	if buyerStoreLeadStatus:
+		parameters["buyer_store_lead_status"] = getArrFromString(buyerStoreLeadStatus)
+
+	return parameters
+
+
 
 def populateBuyerParameters(request, parameters = {}, version = "0"):
 
@@ -257,7 +297,7 @@ def buyer_product_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0 and parameters["isBuyerStore"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return buyer.get_buyer_product_details(request,parameters)
@@ -455,6 +495,15 @@ def populateBuyerIDParameters(request, parameters = {}, version = "0"):
 		parameters["isBuyer"] = 1
 	elif buyerID != "":
 		parameters["buyersArr"] = getArrFromString(buyerID)
+
+	storeUrl = request.GET.get("store_url", "")
+	try:
+		buyerPtr = Buyer.objects.get(store_url=storeUrl)
+	except Exception as e:
+		pass
+	else:
+		parameters["buyersArr"] = [buyerPtr.id]
+		parameters["isBuyerStore"] = 1
 
 	return parameters
 

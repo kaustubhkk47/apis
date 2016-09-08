@@ -20,6 +20,7 @@ class Buyer(models.Model):
 	gender = models.CharField(max_length=10, blank=True)
 
 	store_slug = models.TextField(blank=True)
+	store_url = models.TextField(blank=True)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -155,7 +156,7 @@ def validateBuyerData(buyer, oldbuyer, is_new):
 		buyer["name"] = oldbuyer.name
 	if not "company_name" in buyer or buyer["company_name"]==None:
 		buyer["company_name"] = oldbuyer.company_name
-	if not "mobile_number" in buyer or buyer["mobile_number"]==None or not validate_mobile_number(buyer["mobile_number"]):
+	if not "mobile_number" in buyer or not validate_mobile_number(buyer["mobile_number"]):
 		flag = 1
 		buyer["mobile_number"] = oldbuyer.mobile_number
 	if not "email" in buyer or buyer["email"]==None or not validate_email(buyer["email"]):
@@ -236,6 +237,8 @@ def populateBuyer(buyerPtr, buyer):
 	buyerPtr.email_verification = int(buyer["email_verification"])
 	buyerPtr.whatsapp_sharing_active = int(buyer["whatsapp_sharing_active"])
 	buyerPtr.gender = buyer["gender"]
+	buyerPtr.save()
+	buyerPtr.store_url = "{}-{}".buyerPtr.store_slug + buyerPtr.id
 
 def populateBuyerDetails(buyerDetailsPtr, buyerdetails):
 	buyerDetailsPtr.cst = buyerdetails["cst"]

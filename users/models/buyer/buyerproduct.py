@@ -106,7 +106,7 @@ BuyerProductResponseCodes = {
 class BuyerProductLanding(models.Model):
 	buyer = models.ForeignKey('users.Buyer')
 	product = models.ForeignKey('catalog.Product')
-	buyer_product = models.ForeignKey('users.BuyerProducts', null = True, blank = True)
+	buyer_product = models.ForeignKey('users.BuyerProducts', null = True, blank = True, on_delete=models.SET_NULL,)
 
 	source = models.IntegerField(default=1)
 
@@ -150,7 +150,7 @@ class BuyerProductResponseHistory(models.Model):
 
 	buyer = models.ForeignKey('users.Buyer')
 	product = models.ForeignKey('catalog.Product')
-	buyer_product = models.ForeignKey('users.BuyerProducts', null = True, blank = True)
+	buyer_product = models.ForeignKey('users.BuyerProducts', null = True, blank = True, on_delete=models.SET_NULL,)
 
 	response_code = models.IntegerField(default=0)
 	has_swiped = models.BooleanField(default=False)
@@ -339,9 +339,9 @@ def filterBuyerInterestProducts(BuyerInterestPtr, parameters = {}):
 	return productPtr
 
 def getIntersectingProducts(leftPtr, rightPtr):
-	leftList = []   # Products to create
-	innerList = []  # Product already present and to be maintained
-	rightList = []  # Products to remove
+	leftList = []   # Products to create, list of product ids
+	innerList = []  # Product already present and to be maintained, list of buyer product ids
+	rightList = []  # Products to remove, list of buyer product ids
 
 	if len(leftPtr) > 0 and len(rightPtr) > 0:
 

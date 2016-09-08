@@ -30,6 +30,20 @@ def get_buyer_details(request,parameters = {}):
 		log.critical(e)
 		return customResponse("4XX", {"error": "Invalid request"})
 
+def get_buyer_store_lead_details(request,parameters = {}):
+	try:
+		buyerStoreLeads = filterBuyerStoreLeads(parameters)
+
+		response = {
+			"buyer_store_leads" : parse_buyer_store_lead(buyerStoreLeads, parameters)
+		}
+		closeDBConnection()
+
+		return customResponse("2XX", response)
+	except Exception as e:
+		log.critical(e)
+		return customResponse("4XX", {"error": "Invalid request"})
+
 def get_buyer_purchasing_state_details(request,parameters = {}):
 	try:
 		buyersPurchasingState = filterBuyerPurchasingState(parameters)
@@ -244,31 +258,28 @@ def post_new_buyer_interest(request, parameters):
 
 	buyerPtr = Buyer.objects.filter(id=int(buyer_interest["buyerID"]))
 
-	if len(buyerPtr) == 0:
+	if not  buyerPtr.exists():
 		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
 
-	buyerPtr = buyerPtr[0]
 
 	if not "categoryID" in buyer_interest or not validate_integer(buyer_interest["categoryID"]):
 		return customResponse("4XX", {"error": "Id for category not sent"})
 
 	categoryPtr = Category.objects.filter(id=int(buyer_interest["categoryID"]))
 
-	if len(categoryPtr) == 0:
+	if not categoryPtr.exists():
 		return customResponse("4XX", {"error": "Invalid id for category sent"})
 
-	categoryPtr = categoryPtr[0]
+	BuyerInterestPtr = BuyerInterest.objects.filter(buyer_id=int(buyer_interest["buyerID"]),category_id=int(buyer_interest["categoryID"]))
 
-	BuyerInterestPtr = BuyerInterest.objects.filter(buyer_id=buyerPtr.id,category_id=categoryPtr.id)
-
-	if len(BuyerInterestPtr)>0:
+	if BuyerInterestPtr.exists():
 		return customResponse("4XX", {"error": "Buyer interest for category already exists"})
 
 	if not validateBuyerInterestData(buyer_interest, BuyerInterest(), 1):
 		return customResponse("4XX", {"error": "Invalid data for buyer interest sent"})
 
 	try:
-		newBuyerInterest = BuyerInterest(buyer=buyerPtr,category=categoryPtr)
+		newBuyerInterest = BuyerInterest(buyer_id=int(buyer_interest["buyerID"]),category_id = int(buyer_interest["categoryID"]))
 		populateBuyerInterest(newBuyerInterest, buyer_interest)
 		newBuyerInterest.save()
 
@@ -278,14 +289,14 @@ def post_new_buyer_interest(request, parameters):
 
 		productPtr = filterBuyerInterestProducts(newBuyerInterest)
 
-		buyerProductPtr = BuyerProducts.objects.filter(buyer_id = buyerPtr.id)
+		buyerProductPtr = BuyerProducts.objects.filter(buyer_id = int(buyer_interest["buyerID"]))
 
 		intersectingProducts = getIntersectingProducts(productPtr, buyerProductPtr)
 
 		buyerProductsToCreate = []
 
 		for product_id in intersectingProducts[0]:
-			buyerProduct = BuyerProducts(buyer=buyerPtr, product_id=product_id, buyer_interest=newBuyerInterest)
+			buyerProduct = BuyerProducts(buyer_id=int(buyer_interest["buyerID"]), product_id=product_id, buyer_interest=newBuyerInterest)
 			buyerProductsToCreate.append(buyerProduct)
 
 		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
@@ -312,22 +323,18 @@ def post_new_buyer_purchasing_state(request):
 
 	buyerPtr = Buyer.objects.filter(id=int(buyer_purchasing_state["buyerID"]))
 
-	if len(buyerPtr) == 0:
+	if not buyerPtr.exists():
 		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
-
-	buyerPtr = buyerPtr[0]
 
 	if not "stateID" in buyer_purchasing_state or not validate_integer(buyer_purchasing_state["stateID"]):
 		return customResponse("4XX", {"error": "Id for state not sent"})
 
 	statePtr = State.objects.filter(id=int(buyer_purchasing_state["stateID"]))
 
-	if len(statePtr) == 0:
+	if not statePtr.exists():
 		return customResponse("4XX", {"error": "Invalid id for state sent"})
 
-	statePtr = statePtr[0]
-
-	BuyerPurchasingStatePtr = BuyerPurchasingState.objects.filter(buyer_id=buyerPtr.id,state_id=statePtr.id)
+	BuyerPurchasingStatePtr = BuyerPurchasingState.objects.filter(buyer_id=int(buyer_purchasing_state["buyerID"]),state_id=int(buyer_purchasing_state["stateID"]))
 
 	if len(BuyerPurchasingStatePtr)>0:
 		BuyerPurchasingStatePtr = BuyerPurchasingStatePtr[0]
@@ -340,7 +347,7 @@ def post_new_buyer_purchasing_state(request):
 			return customResponse("4XX", {"error": "Buyer purchasing_state already exists"})
 
 	try:
-		newBuyerPurchasingState = BuyerPurchasingState(buyer=buyerPtr,state=statePtr)
+		newBuyerPurchasingState = BuyerPurchasingState(buyer_id=int(buyer_purchasing_state["buyerID"]),state_id=int(buyer_purchasing_state["stateID"]))
 		newBuyerPurchasingState.save()
 	except Exception as e:
 		log.critical(e)
@@ -362,22 +369,18 @@ def post_new_buyer_buys_from(request, parameters):
 
 	buyerPtr = Buyer.objects.filter(id=int(buyer_buys_from["buyerID"]))
 
-	if len(buyerPtr) == 0:
+	if not buyerPtr.exists():
 		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
-
-	buyerPtr = buyerPtr[0]
 
 	if not "businesstypeID" in buyer_buys_from or not validate_integer(buyer_buys_from["businesstypeID"]):
 		return customResponse("4XX", {"error": "Id for state not sent"})
 
 	businessTypePtr = BusinessType.objects.filter(id=int(buyer_buys_from["businesstypeID"]), can_buyer_buy_from=True)
 
-	if len(businessTypePtr) == 0:
+	if not businessTypePtr.exists():
 		return customResponse("4XX", {"error": "Invalid id for business type sent"})
 
-	businessTypePtr = businessTypePtr[0]
-
-	BuyerBuysFromPtr = BuyerBuysFrom.objects.filter(buyer_id=buyerPtr.id,business_type_id=businessTypePtr.id)
+	BuyerBuysFromPtr = BuyerBuysFrom.objects.filter(buyer_id=int(buyer_buys_from["buyerID"]),business_type_id=int(buyer_buys_from["businesstypeID"]))
 
 	if len(BuyerBuysFromPtr)>0:
 		BuyerBuysFromPtr = BuyerBuysFromPtr[0]
@@ -390,7 +393,7 @@ def post_new_buyer_buys_from(request, parameters):
 			return customResponse("4XX", {"error": "Buyer buys_from already exists"})
 
 	try:
-		newBuyerBuysFrom = BuyerBuysFrom(buyer=buyerPtr,business_type=businessTypePtr)
+		newBuyerBuysFrom = BuyerBuysFrom(buyer_id=int(buyer_buys_from["buyerID"]),business_type_id=int(buyer_buys_from["businesstypeID"]))
 		newBuyerBuysFrom.save()
 	except Exception as e:
 		log.critical(e)
@@ -443,11 +446,11 @@ def post_new_buyer_product(request, parameters):
 		return customResponse("4XX", {"error" : "Invalid ids for products sent"})
 	allProductsDF = DataFrame(list(allProductsDF))
 
-	buyerProductsPtr = BuyerProducts.objects.filter(buyer_id__in = allBuyersSeries).order_by('buyer_id')
+	#buyerProductsPtr = BuyerProducts.objects.filter(buyer_id__in = allBuyersSeries).order_by('buyer_id')
 
 	buyerProductParameters = {}
 	buyerProductParameters["buyersArr"] = allBuyersSeries
-	buyerProductParameters["responded"] = 0
+	#buyerProductParameters["responded"] = 0
 
 	allBuyerProductsDF = filterBuyerProducts(buyerProductParameters).values('id','buyer_id', 'product_id', 'responded')
 	if len(allBuyerProductsDF) == 0:
@@ -504,15 +507,13 @@ def post_new_buyer_panel_tracking(request, parameters):
 
 	buyerPtr = Buyer.objects.filter(id=int(buyer["buyerID"]))
 
-	if len(buyerPtr) == 0:
+	if not buyerPtr.exists():
 		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
-
-	buyerPtr = buyerPtr[0]
 
 	if not "page_closed" in buyer or buyer["page_closed"] ==None:
 		return customResponse("4XX", {"error": "Page number not sent"})
 	try:
-		newBuyerPanelInstructionsTracking = BuyerPanelInstructionsTracking(buyer=buyerPtr, page_closed=buyer["page_closed"])
+		newBuyerPanelInstructionsTracking = BuyerPanelInstructionsTracking(buyer_id=int(buyer["buyerID"]), page_closed=buyer["page_closed"])
 		newBuyerPanelInstructionsTracking.save()
 
 	except Exception as e:
@@ -522,6 +523,97 @@ def post_new_buyer_panel_tracking(request, parameters):
 	else:
 		closeDBConnection()
 		return customResponse("2XX", {"buyer_product_tracking":"successfully added"})
+
+def post_new_buyer_store_lead(request, parameters):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_store_lead = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_store_lead) or not "buyerID" in buyer_store_lead or not validate_integer(buyer_store_lead["buyerID"]):
+		return customResponse("4XX", {"error": "Id for buyer not sent"})
+
+	buyerPtr = Buyer.objects.filter(id=int(buyer_store_lead["buyerID"]))
+
+	if not buyerPtr.exists():
+		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
+
+
+	if not "productID" in buyer_store_lead or not validate_integer(buyer_store_lead["productID"]):
+		return customResponse("4XX", {"error": "Id for product not sent"})
+
+	productParameters = {}
+	productParameters["productsArr"] = [int(buyer_store_lead["productID"])]
+
+	productPtr = filterProducts(productParameters)
+
+	if not productPtr.exists():
+		return customResponse("4XX", {"error": "Invalid id for product sent"})
+
+	newBuyerStoreLead = BuyerStoreLead(buyer_id=int(buyer_store_lead["buyerID"]), product_id = int(buyer_store_lead["productID"]))
+
+	if not newBuyerStoreLead.validateBuyerStoreLeadData(buyer_store_lead, 1):
+		return customResponse("4XX", {"error": "Invalid data for buyer store lead sent"})
+
+	try:
+		newBuyerStoreLead.populateBuyerStoreLead(buyer_store_lead)
+		newBuyerStoreLead.save()
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to create entry in db"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer_store_lead":serialize_buyer_store_lead(newBuyerStoreLead)})
+
+
+def update_buyer_store_lead(request, parameters):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_store_lead = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_store_lead):
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if parameters["isBuyer"] == 1:
+		buyer_store_lead["buyerID"] = parameters["buyersArr"][0]
+	elif not "buyerID" in buyer_store_lead  or not validate_integer(buyer_store_lead["buyerID"]):
+		return customResponse("4XX", {"error": "Id for buyer not sent"})
+
+	buyerPtr = Buyer.objects.filter(id=int(buyer_store_lead["buyerID"]))
+
+	if not buyerPtr.exists():
+		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
+
+	if not "buyerstoreleadID" in buyer_store_lead or not validate_integer(buyer_store_lead["buyerstoreleadID"]):
+		return customResponse("4XX", {"error": "Id for buyer store lead not sent"})
+
+	buyerStoreLeadPtr = BuyerStoreLead.objects.filter(id=int(buyer_store_lead["buyerstoreleadID"]), buyer_id=int(buyer_store_lead["buyerID"]))
+
+	if len(buyerStoreLeadPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for buyer store lead sent"})
+
+	
+	buyerStoreLeadPtr = buyerStoreLeadPtr[0]
+
+	if not buyerStoreLeadPtr.validateBuyerStoreLeadData(buyer_store_lead, 0):
+		return customResponse("4XX", {"error": "Invalid data for buyer store lead sent"})
+
+	try:
+		buyerStoreLeadPtr.populateBuyerStoreLead(buyer_store_lead)
+		buyerStoreLeadPtr.save()
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to create entry in db"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer_store_lead":serialize_buyer_store_lead(buyerStoreLeadPtr)})
 
 def update_buyer_interest(request, parameters):
 	try:
@@ -550,6 +642,10 @@ def update_buyer_interest(request, parameters):
 
 	forceEvaluation = len(buyerProductPtr)
 
+	buyerAllProductPtr = BuyerProducts.objects.filter(buyer_id = buyerInterestPtr.buyer_id)
+
+	forceEvaluation = len(buyerAllProductPtr)
+
 	try:
 		
 		populateBuyerInterest(buyerInterestPtr, buyer_interest)
@@ -563,9 +659,11 @@ def update_buyer_interest(request, parameters):
 
 		intersectingProducts = getIntersectingProducts(productPtr, buyerProductPtr)
 
+		intersectingProductsAll = getIntersectingProducts(productPtr, buyerAllProductPtr)
+
 		buyerProductsToCreate = []
 
-		for product_id in intersectingProducts[0]:
+		for product_id in intersectingProductsAll[0]:
 			buyerProduct = BuyerProducts(buyer_id=buyerInterestPtr.buyer_id, product_id=product_id, buyer_interest=buyerInterestPtr)
 			buyerProductsToCreate.append(buyerProduct)
 
@@ -607,7 +705,7 @@ def update_buyer_product(request, parameters):
 	if not "productID" in buyer_product or not validate_integer(buyer_product["productID"]):
 		return customResponse("4XX", {"error": "Id for product not sent"})
 
-	productParameters = {"productsArr":[int(buyer_product["productID"])]}
+	#productParameters = {"productsArr":[int(buyer_product["productID"])]}
 	productPtr = Product.objects.filter(id=int(buyer_product["productID"]))
 
 	if not productPtr.exists():

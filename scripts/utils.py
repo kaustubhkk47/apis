@@ -17,6 +17,7 @@ from django.template.loader import get_template
 from django.core.files import File
 import pdfkit
 import io
+import requests
 
 def closeDBConnection():
 	connection.close()
@@ -73,7 +74,10 @@ def validate_number(x):
 	return True
 
 def validate_mobile_number(x):
-	x = str(x)
+	try:
+		x = str(x)
+	except Exception as e:
+		return False
 	if len(x) != 10:
 		return False
 	if not (x[0] == '9' or x[0] == '8' or x[0] == '7'):
@@ -81,6 +85,10 @@ def validate_mobile_number(x):
 	return True
 
 def validate_email(x):
+	try:
+		x =str(x)
+	except Exception as e:
+		return False
 	if not re.match(r"[^@]+@[^@]+\.[^@]+", x):
 		return False
 	return True
@@ -263,3 +271,23 @@ def getApiVersion(text):
 	except Exception as e:
 		pass
 	return version
+
+def send_sms(message, numbers):
+	url = "http://api.textlocal.in/send/"
+	apiKey = "PHh7HDcKTKY-2FFu2CjWvBcnRdpw02Kq5iwUx4pDbP"
+
+	data = {}
+	data["apiKey"] = apiKey
+	data["sender"] = "TXTLCL"
+	
+	data["message"] = message
+
+	numbers = map(lambda x: "91" + x, map(str, numbers))
+	data["numbers"] = numbers
+
+	if not settings.CURRENT_ENVIRONMENT == 'prod':
+		data["test"] = True
+
+	r = requests.post(url, data)
+
+	return r
