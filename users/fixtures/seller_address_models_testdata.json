@@ -1,0 +1,70 @@
+[
+{
+    "model": "users.selleraddress",
+    "pk": 1,
+    "fields": {
+        "seller": 1,
+        "pincode": 1,
+        "address_line": "CK 7/58, Siddeshwari Chowk",
+        "landmark": "Siddeshwari",
+        "city_name": "Abdulrahman Nagar",
+        "state_name": "Andaman and Nicobar Islands",
+        "country_name": "India",
+        "contact_number": "55",
+        "pincode_number": "221001",
+        "created_at": "2016-05-08T15:40:15Z",
+        "updated_at": "2016-06-15T20:42:48Z"
+    }
+},
+{
+    "model": "users.selleraddress",
+    "pk": 2,
+    "fields": {
+        "seller": 2,
+        "pincode": 2,
+        "address_line": "CK 7/58, Siddeshwari Chowk",
+        "landmark": "Siddeshwari",
+        "city_name": "Abohar",
+        "state_name": "Andaman and Nicobar Islands",
+        "country_name": "India",
+        "contact_number": "",
+        "pincode_number": "221001",
+        "created_at": "2016-05-08T15:40:15Z",
+        "updated_at": "2016-05-08T15:40:25Z"
+    }
+},
+{
+    "model": "users.selleraddress",
+    "pk": 3,
+    "fields": {
+        "seller": 3,
+        "pincode": 3,
+        "address_line": "Cloth Market",
+        "landmark": "Near Ganesh Temple",
+        "city_name": "Adbhar",
+        "state_name": "Andhra Pradesh",
+        "country_name": "India",
+        "contact_number": "",
+        "pincode_number": "395003",
+        "created_at": "2016-05-08T15:40:15Z",
+        "updated_at": "2016-06-10T10:16:08Z"
+    }
+},
+{
+    "model": "users.selleraddress",
+    "pk": 4,
+    "fields": {
+        "seller": 4,
+        "pincode": 4,
+        "address_line": "F - 474, Sector - 63",
+        "landmark": "Sector-63",
+        "city_name": "Adbhar",
+        "state_name": "Andhra Pradesh",
+        "country_name": "India",
+        "contact_number": "",
+        "pincode_number": "201301",
+        "created_at": "2016-05-08T15:40:15Z",
+        "updated_at": "2016-05-08T15:40:25Z"
+    }
+}
+]

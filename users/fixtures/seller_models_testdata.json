@@ -1,0 +1,94 @@
+[
+{
+    "model": "users.seller",
+    "pk": 1,
+    "fields": {
+        "name": "Sachin Test",
+        "company_name": "Fabulous India",
+        "mobile_number": "987654321",
+        "email": "batu.aditya007@gmail.com",
+        "password": "fab123",
+        "alternate_phone_number": "987654321",
+        "mobile_verification": false,
+        "email_verification": false,
+        "company_profile": "",
+        "seller_conditions": "",
+        "concerned_person": "",
+        "concerned_person_number": "",
+        "created_at": "2016-04-29T11:10:13Z",
+        "updated_at": "2016-07-06T23:06:12Z",
+        "delete_status": false,
+        "show_online": true,
+        "test_seller": true
+    }
+},
+{
+    "model": "users.seller",
+    "pk": 2,
+    "fields": {
+        "name": "Amit",
+        "company_name": "Glam Kurti Exports",
+        "mobile_number": "9876743210",
+        "email": "kausthegreat@gmail.com",
+        "password": "glam123",
+        "alternate_phone_number": "9876743210",
+        "mobile_verification": false,
+        "email_verification": false,
+        "company_profile": "",
+        "seller_conditions": "",
+        "concerned_person": "",
+        "concerned_person_number": "",
+        "created_at": "2016-04-29T17:52:14Z",
+        "updated_at": "2016-07-06T23:06:37Z",
+        "delete_status": false,
+        "show_online": false,
+        "test_seller": true
+    }
+},
+{
+    "model": "users.seller",
+    "pk": 3,
+    "fields": {
+        "name": "Rashid",
+        "company_name": "ACI Textile",
+        "mobile_number": "7895663453",
+        "email": "ACI@gmail.com",
+        "password": "aci123",
+        "alternate_phone_number": "7895663453",
+        "mobile_verification": false,
+        "email_verification": false,
+        "company_profile": "",
+        "seller_conditions": "",
+        "concerned_person": "",
+        "concerned_person_number": "",
+        "created_at": "2016-04-29T19:13:48Z",
+        "updated_at": "2016-07-30T10:07:14Z",
+        "delete_status": false,
+        "show_online": true,
+        "test_seller": false
+    }
+},
+{
+    "model": "users.seller",
+    "pk": 4,
+    "fields": {
+        "name": "Uttam",
+        "company_name": "Uttam Enterprises",
+        "mobile_number": "8432567243",
+        "email": "uttam@gmail.com",
+        "password": "uttam123",
+        "alternate_phone_number": "8432567243",
+        "mobile_verification": false,
+        "email_verification": false,
+        "company_profile": "",
+        "seller_conditions": "",
+        "concerned_person": "",
+        "concerned_person_number": "",
+        "created_at": "2016-04-30T07:20:56Z",
+        "updated_at": "2016-07-06T23:06:22Z",
+        "delete_status": false,
+        "show_online": false,
+        "test_seller": false
+    }
+}
+]

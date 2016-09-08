@@ -1,0 +1,35 @@
+[
+{
+    "model": "address.city",
+    "pk": 1,
+    "fields": {
+        "state": 1,
+        "name": "Abdulrahman Nagar",
+        "state_name": "Andaman and Nicobar Islands",
+        "created_at": "2016-07-19T22:40:58Z",
+        "updated_at": "2016-07-19T22:41:03Z"
+    }
+},
+{
+    "model": "address.city",
+    "pk": 2,
+    "fields": {
+        "state": 1,
+        "name": "Abohar",
+        "state_name": "Andaman and Nicobar Islands",
+        "created_at": "2016-07-19T22:40:58Z",
+        "updated_at": "2016-07-19T22:41:03Z"
+    }
+},
+{
+    "model": "address.city",
+    "pk": 3,
+    "fields": {
+        "state": 2,
+        "name": "Adbhar",
+        "state_name": "Andhra Pradesh",
+        "created_at": "2016-07-19T22:40:58Z",
+        "updated_at": "2016-07-19T22:41:03Z"
+    }
+}
+]
