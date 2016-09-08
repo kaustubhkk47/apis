@@ -24,6 +24,7 @@ def serialize_buyer(buyer_entry, parameters = {}):
 	buyer["updated_at"] = buyer_entry.updated_at
 	buyer["buyer_panel_url"] = str(buyer_entry.id) + "-" + str(int(time.mktime(buyer_entry.created_at.timetuple())))
 	buyer["store_url"] = buyer_entry.store_url
+	buyer["store_global_discount"] = buyer_entry.store_global_discount
 	
 	if "buyer_details_details" in parameters and parameters["buyer_details_details"] == 1 and hasattr(buyer_entry,'buyerdetails'):
 		buyer_details = {}

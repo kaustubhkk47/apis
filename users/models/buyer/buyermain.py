@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib import admin
-from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString, link_to_foreign_key
+from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString, link_to_foreign_key, validate_percent
 from decimal import Decimal
 import jwt as JsonWebToken
 import settings
@@ -21,6 +21,7 @@ class Buyer(models.Model):
 
 	store_slug = models.TextField(blank=True)
 	store_url = models.TextField(blank=True)
+	store_global_discount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null = True)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -180,6 +181,8 @@ def validateBuyerData(buyer, oldbuyer, is_new):
 			buyer["whatsapp_number"] = oldbuyer.whatsapp_number
 	if not "whatsapp_sharing_active" in buyer or not validate_bool(buyer["whatsapp_sharing_active"]):
 		buyer["whatsapp_sharing_active"] = oldbuyer.whatsapp_sharing_active
+	if not "store_global_discount" in buyer or not validate_percent(buyer["store_global_discount"]):
+		buyer["store_global_discount"] = oldbuyer.store_global_discount
 	if not "password" in buyer or buyer["password"]:
 		if is_new == 1:
 			buyer["password"] = buyer["mobile_number"]
@@ -239,6 +242,7 @@ def populateBuyer(buyerPtr, buyer):
 	buyerPtr.gender = buyer["gender"]
 	buyerPtr.save()
 	buyerPtr.store_url = "{}-{}".buyerPtr.store_slug + buyerPtr.id
+	buyerPtr.store_global_discount = buyer["store_global_discount"]
 
 def populateBuyerDetails(buyerDetailsPtr, buyerdetails):
 	buyerDetailsPtr.cst = buyerdetails["cst"]
