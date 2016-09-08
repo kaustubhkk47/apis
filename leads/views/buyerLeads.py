@@ -46,20 +46,18 @@ def post_new_buyer_lead(request):
 		if "productID" in buyerLead and validate_integer(buyerLead["productID"]):
 			productPtr = Product.objects.filter(id=int(buyerLead["productID"]))
 
-			if len(productPtr) == 0:
+			if not productPtr.exists():
 				return customResponse("4XX", {"error": "invalid product id sent"})
 				
-			productPtr = productPtr[0]
-			newBuyerLead.product = productPtr
+			newBuyerLead.product_id = int(buyerLead["productID"])
 
 		if "categoryID" in buyerLead and validate_integer(buyerLead["categoryID"]):
 			categoryPtr = Category.objects.filter(id=int(buyerLead["categoryID"]))
 
-			if len(categoryPtr) == 0:
+			if not categoryPtr.exists():
 				return customResponse("4XX", {"error": "invalid category id sent"})
 				
-			categoryPtr = categoryPtr[0]
-			newBuyerLead.category = categoryPtr
+			newBuyerLead.category_id = int(buyerLead["categoryID"])
 
 		newBuyerLead.save()
 	except Exception as e:

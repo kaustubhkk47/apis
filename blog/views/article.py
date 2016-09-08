@@ -49,15 +49,13 @@ def post_new_article(request):
 
 	internalUserPtr = InternalUser.objects.filter(id=int(article["internaluserID"]))
 
-	if len(internalUserPtr) == 0:
+	if not internalUserPtr.exists():
 		return customResponse("4XX", {"error": "Invalid ID for author sent"})
-
-	internalUserPtr = internalUserPtr[0]
 
 	article["slug"] = slugify(article["title"])
 
 	try:
-		newArticle = Article(author=internalUserPtr)
+		newArticle = Article(author_id=int(article["internaluserID"]))
 		populateArticleData(newArticle, article)
 		newArticle.save()
 		 

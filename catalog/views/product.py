@@ -130,17 +130,15 @@ def post_new_product(request, parameters = {}):
 		return customResponse("4XX", {"error": "Seller id for product not sent"})
 
 	sellerPtr = Seller.objects.filter(id=int(product["sellerID"]))
-	if len(sellerPtr) == 0:
+	if not sellerPtr.exists():
 		return customResponse("4XX", {"error": "Invalid id for seller sent"})
-	sellerPtr = sellerPtr[0]
 
 	if not "categoryID" in product or not validate_integer(product["categoryID"]):
 		return customResponse("4XX", {"error": "Category id for product not sent"})
 
 	categoryPtr = Category.objects.filter(id=int(product["categoryID"]))
-	if len(categoryPtr) == 0:
+	if not categoryPtr.exists():
 		return customResponse("4XX", {"error": "Invalid id for category sent"})
-	categoryPtr = categoryPtr[0]
 
 	if not "product_lot" in product or not product["product_lot"] or not validateProductLotData(product["product_lot"]):
 		return customResponse("4XX", {"error": "Product lots for product not properly sent"})
@@ -156,7 +154,7 @@ def post_new_product(request, parameters = {}):
 
 	try:
 
-		newProduct = Product(category=categoryPtr,seller=sellerPtr)
+		newProduct = Product(category_id=int(product["categoryID"]),seller_id=int(product["sellerID"]))
 		populateProductData(newProduct, product)
 		newProduct.save()
 

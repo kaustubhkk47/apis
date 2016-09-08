@@ -50,7 +50,7 @@ def buyer_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0 and parameters["isBuyerStore"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return buyer.get_buyer_details(request,parameters)
@@ -297,7 +297,7 @@ def buyer_product_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0 and parameters["isBuyerStore"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return buyer.get_buyer_product_details(request,parameters)
@@ -503,7 +503,7 @@ def populateBuyerIDParameters(request, parameters = {}, version = "0"):
 		pass
 	else:
 		parameters["buyersArr"] = [buyerPtr.id]
-		parameters["isBuyer"] = 1
+		parameters["isBuyerStore"] = 1
 
 	return parameters
 
