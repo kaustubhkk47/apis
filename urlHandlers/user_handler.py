@@ -326,10 +326,17 @@ def buyer_product_response_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0 and parameters["isBuyerStore"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return buyer.get_buyer_product_response_details(request,parameters)
+
+	elif request.method == "PUT":
+
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return buyer.update_buyer_product_response(request,parameters)
 	
 
 	return customResponse("4XX", {"error": "Invalid request"})

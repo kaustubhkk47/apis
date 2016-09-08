@@ -207,10 +207,12 @@ def serialize_buyer_product_response(buyer_product_entry, parameters = {}):
 
 	buyer_product["buyerproductresponseID"] = buyer_product_entry.id
 	buyer_product["buyerID"] = buyer_product_entry.buyer_id
+	buyer_product["buyerproductID"] = buyer_product_entry.buyer_product_id
 	buyer_product["response_code"] = buyer_product_entry.response_code
 	buyer_product["has_swiped"] = buyer_product_entry.has_swiped
 	buyer_product["created_at"] = buyer_product_entry.created_at
 	buyer_product["updated_at"] = buyer_product_entry.updated_at
+	buyer_product["store_discount"] = buyer_product_entry.store_discount
 	
 	buyer_product["product"] = serialize_product(buyer_product_entry.product, parameters)
 
