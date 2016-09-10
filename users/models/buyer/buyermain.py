@@ -241,7 +241,7 @@ def populateBuyer(buyerPtr, buyer):
 	buyerPtr.whatsapp_sharing_active = int(buyer["whatsapp_sharing_active"])
 	buyerPtr.gender = buyer["gender"]
 	buyerPtr.save()
-	buyerPtr.store_url = "{}-{}".buyerPtr.store_slug + buyerPtr.id
+	buyerPtr.store_url = "{}-{}".format(buyerPtr.store_slug,buyerPtr.id)
 	buyerPtr.store_global_discount = buyer["store_global_discount"]
 
 def populateBuyerDetails(buyerDetailsPtr, buyerdetails):
