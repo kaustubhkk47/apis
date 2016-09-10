@@ -100,6 +100,9 @@ def buyer_store_lead_details(request, version = "0"):
 		return buyer.get_buyer_store_lead_details(request,parameters)
 	elif request.method == "POST":
 
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0 and parameters["isBuyerStore"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
 		return buyer.post_new_buyer_store_lead(request, parameters)
 	elif request.method == "PUT":
 
@@ -281,10 +284,10 @@ def buyer_interest_details(request, version = "0"):
 		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 		return buyer.update_buyer_interest(request, parameters)
-	elif request.method == "DELETE":
-		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.delete_buyer_interest(request, parameters)
+	#elif request.method == "DELETE":
+	#	if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+	#		return customResponse("4XX", {"error": "Authentication failure"})
+	#	return buyer.delete_buyer_interest(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -323,10 +326,17 @@ def buyer_product_response_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0 and parameters["isBuyerStore"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return buyer.get_buyer_product_response_details(request,parameters)
+
+	elif request.method == "PUT":
+
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return buyer.update_buyer_product_response(request,parameters)
 	
 
 	return customResponse("4XX", {"error": "Invalid request"})
@@ -490,6 +500,7 @@ def populateBuyerIDParameters(request, parameters = {}, version = "0"):
 	buyerID = request.GET.get("buyerID", "")
 	tokenPayload = convert_keys_to_string(get_token_payload(accessToken, "buyerID"))
 	parameters["isBuyer"] = 0
+	parameters["isBuyerStore"] = 0
 	if "buyerID" in tokenPayload and tokenPayload["buyerID"]!=None:
 		parameters["buyersArr"] = [tokenPayload["buyerID"]]
 		parameters["isBuyer"] = 1

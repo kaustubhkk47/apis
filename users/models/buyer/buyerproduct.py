@@ -66,6 +66,8 @@ class BuyerProductResponse(models.Model):
 	#0: Tinder, 1 : category_page, 2 : product_page, 3 : shortlist, 4 : homepage, 
 	responded_from = models.IntegerField(default=0)
 
+	store_discount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null = True)
+
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
@@ -76,6 +78,20 @@ class BuyerProductResponse(models.Model):
 
 	def __unicode__(self):
 		return "{}".format(self.id)
+
+	def validateBuyerProductResponseData(self, buyer_product_response):
+		flag = 0
+		if not "store_discount" in buyer_product_response or not validate_percent(buyer_product_response["store_discount"]):
+			flag = 1
+			buyer_product_response["store_discount"] = self.store_discount
+
+		if flag == 1:
+			return False
+
+		return True
+
+	def populateBuyerProductResponse(self, buyer_product_response):
+		self.store_discount = Decimal(buyer_product_response["store_discount"])
 
 class BuyerProductResponseAdmin(admin.ModelAdmin):
 	search_fields = ["buyer_id", "buyer__name", "buyer__company_name", "buyer__mobile_number"]

@@ -34,9 +34,18 @@ def get_buyer_store_lead_details(request,parameters = {}):
 	try:
 		buyerStoreLeads = filterBuyerStoreLeads(parameters)
 
+		paginator = Paginator(buyerStoreLeads, parameters["itemsPerPage"])
+
+		try:
+			pageItems = paginator.page(parameters["pageNumber"])
+		except Exception as e:
+			pageItems = []
+
 		response = {
 			"buyer_store_leads" : parse_buyer_store_lead(buyerStoreLeads, parameters)
 		}
+
+		response = responsePaginationParameters(response, paginator, parameters)
 		closeDBConnection()
 
 		return customResponse("2XX", response)
@@ -531,7 +540,12 @@ def post_new_buyer_store_lead(request, parameters):
 	except Exception as e:
 		return customResponse("4XX", {"error": "Invalid data sent in request"})
 
-	if not len(buyer_store_lead) or not "buyerID" in buyer_store_lead or not validate_integer(buyer_store_lead["buyerID"]):
+	if not len(buyer_store_lead):
+		return customResponse("4XX", {"error": "Id for buyer not sent"})
+
+	if parameters["isBuyer"] == 1 or parameters["isBuyerStore"] == 1:
+		buyer_store_lead["buyerID"] = parameters["buyersArr"][0]
+	elif not "buyerID" in buyer_store_lead  or not validate_integer(buyer_store_lead["buyerID"]):
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
 	buyerPtr = Buyer.objects.filter(id=int(buyer_store_lead["buyerID"]))
@@ -680,6 +694,60 @@ def update_buyer_interest(request, parameters):
 	else:
 		closeDBConnection()
 		return customResponse("2XX", {"buyer" : serialize_buyer_interest(buyerInterestPtr)})
+
+def update_buyer_product_response(request, parameters):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_product_response = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(buyer_product_response):
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if parameters["isBuyer"] == 1:
+		buyer_product_response["buyerID"] = parameters["buyersArr"][0]
+	elif not "buyerID" in buyer_product_response or not validate_integer(buyer_product_response["buyerID"]):
+		return customResponse("4XX", {"error": "Id for buyer not sent"})
+
+	buyerParameters = {"buyersArr":[int(buyer_product_response["buyerID"])]}
+	buyerPtr = filterBuyer(buyerParameters)
+
+	if not buyerPtr.exists():
+		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
+
+	if not "productID" in buyer_product_response or not validate_integer(buyer_product_response["productID"]):
+		return customResponse("4XX", {"error": "Id for product not sent"})
+
+	#productParameters = {"productsArr":[int(buyer_product["productID"])]}
+	productPtr = Product.objects.filter(id=int(buyer_product_response["productID"]))
+
+	if not productPtr.exists():
+		return customResponse("4XX", {"error": "Invalid id for product sent"})
+
+	buyerProductResponsePtr = BuyerProductResponse.objects.filter(buyer_id = int(buyer_product_response["buyerID"]), product_id = int(buyer_product_response["productID"]))
+
+	if len(buyerProductResponsePtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for product and buyer sent"})
+
+	buyerProductResponsePtr = buyerProductResponsePtr[0]
+	
+
+	if not buyerProductResponsePtr.validateBuyerProductResponseData(buyer_product_response):
+		return customResponse("4XX", {"error": "Invalid data for buyer product response sent"})
+
+	try:
+		
+		buyerProductResponsePtr.populateBuyerProductResponse(buyer_product_response)
+		buyerProductResponsePtr.save()
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "unable to update"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"buyer_product_response" : serialize_buyer_product_response(buyerProductResponsePtr)})
 
 def update_buyer_product(request, parameters):
 	try:
