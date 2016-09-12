@@ -66,7 +66,7 @@ class BuyerProductResponse(models.Model):
 	#0: Tinder, 1 : category_page, 2 : product_page, 3 : shortlist, 4 : homepage, 
 	responded_from = models.IntegerField(default=0)
 
-	store_discount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null = True)
+	store_discount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null = True,default = None)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)

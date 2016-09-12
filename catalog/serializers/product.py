@@ -5,7 +5,7 @@ from ..models.productLot import ProductLot
 from ..models.product import Product, filterProducts
 from .category import serialize_categories
 from users.serializers.seller import serialize_seller
-from users.models.buyer import filterBuyerProductResponse
+from users.models.buyer import filterBuyerProductResponse, Buyer
 from orders.models.cart import filterCartItem, CartItem
 import ast
 
@@ -123,6 +123,27 @@ def serialize_product(productsItem, parameters = {}):
 		product["cartitem"] = cartitem
 
 
+	if "isBuyerStore" in parameters and parameters["isBuyerStore"] == 1:
+
+		product["buyer_store_discounted_price"] = None
+
+		buyerProductResponsePtr = filterBuyerProductResponse(parameters)
+		buyerProductResponsePtr = buyerProductResponsePtr.filter(product_id = productsItem.id)
+		flag = 0
+		if not len(buyerProductResponsePtr) == 0:
+			buyerProductResponsePtr = buyerProductResponsePtr[0]
+			if buyerProductResponsePtr.store_discount != None:
+				discount_factor =  1 - buyerProductResponsePtr.store_discount/100
+				product["buyer_store_discounted_price"] = productsItem.price_per_unit*discount_factor
+				flag = 1
+
+		if flag == 0:
+			buyerPtr = Buyer.objects.filter(id=parameters["buyersArr"][0])
+			if len(buyerPtr) > 0:
+				buyerPtr = buyerPtr[0]
+				if buyerPtr.store_global_discount != None:
+					discount_factor =  1 - buyerPtr.store_global_discount/100
+					product["buyer_store_discounted_price"] = productsItem.price_per_unit*discount_factor
 
 	return product
 
