@@ -135,12 +135,12 @@ def get_token_payload(access_token, userID):
 
 	return tokenPayload
 
-def create_email(mail_template_file,mail_dict,subject,from_email,to,attachment="",bcc=[]):
+def create_email(mail_template_file,mail_dict,subject,from_email,to_email,attachment="",bcc=[]):
 	mail_template = get_template(mail_template_file)   
 	#mail_context = Context(mail_dict)
 	html_message = mail_template.render(mail_dict)
 		
-	email = EmailMessage(subject=subject,body=html_message,from_email=from_email,to=to,bcc=bcc)
+	email = EmailMessage(subject=subject,body=html_message,from_email=from_email,to=to_email,bcc=bcc)
 
 	if (attachment != "" and os.path.isfile(attachment)):
 		email.attach_file(attachment)
