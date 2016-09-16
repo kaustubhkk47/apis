@@ -7,6 +7,7 @@ from .category import serialize_categories
 from users.serializers.seller import serialize_seller
 from users.models.buyer import filterBuyerProductResponse, Buyer
 from orders.models.cart import filterCartItem, CartItem
+from orders.models.orderItem import OrderItem
 import ast
 
 def serialize_product_lots(productsItem, parameters = {}):
@@ -111,6 +112,7 @@ def serialize_product(productsItem, parameters = {}):
 
 		product["response"] = response
 
+		"""
 		cartitem = {}
 		cartItemPtr =filterCartItem(parameters)
 		cartItemPtr = cartItemPtr.filter(product_id = productsItem.id, status=0)
@@ -121,7 +123,7 @@ def serialize_product(productsItem, parameters = {}):
 			cartitem["lots"] = cartItemPtr.lots
 
 		product["cartitem"] = cartitem
-
+		"""
 
 	if "isBuyerStore" in parameters and parameters["isBuyerStore"] == 1:
 
@@ -144,6 +146,17 @@ def serialize_product(productsItem, parameters = {}):
 				if buyerPtr.store_global_discount != None:
 					discount_factor =  1 - buyerPtr.store_global_discount/100
 					product["buyer_store_discounted_price"] = productsItem.price_per_unit*discount_factor
+
+		orderitem = {}
+		orderItemPtr = OrderItem.objects.filter(product_id = productsItem.id, current_status=11, suborder__order__buyer_id=parameters["buyersArr"][0])
+		if len(orderItemPtr) == 0:
+			orderitem["pieces"] = 0
+		else:
+			orderItemPtr = orderItemPtr[0]
+			orderitem["pieces"] = orderItemPtr.pieces
+
+		product["orderitem"] = orderitem
+
 
 	return product
 

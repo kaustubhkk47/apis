@@ -70,7 +70,7 @@ class BuyerStoreLead(models.Model):
 		mail_dict = serialize_buyer_store_lead(self, parameters)
 
 		bcc = ["manish@wholdus.com","kushagra@wholdus.com"]
-		bcc = []
+		#bcc = []
 
 		create_email(mail_template_file, mail_dict, subject, from_email, to_email, bcc = bcc)
 

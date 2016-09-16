@@ -11,9 +11,6 @@
 			<tr>
 				<td style="background-color: #FFFFFF;padding: 0px 25px;">
 
-					<p> You have received purchase request for <a href="{{product.absolute_path}}"><strong>{{ product.name }}.</strong></a></p>
-					<p><img src="{{product.image.absolute_path}}"></p>
-					
 					<p>Purchase request has been submitted by <strong>{{name}}</strong>.</p>
 					<p>You can contact the customer on</p>
 					<p> Phone number <strong>{{mobile_number}}</strong></p>
@@ -22,6 +19,11 @@
 					{% else %}
 					{% endif %}
 					.</br></p>
+
+					<p> You have received purchase request for <a href="{{product.absolute_path}}"><strong>{{ product.name }}.</strong></a></p>
+					<p><img style="max-width:400px;" src="{{product.image.absolute_path}}"></p>
+					
+					
 					<p>You can check out all purchase requests you have received at <a href="http://www.wholdus.com/account/purchase-requests">www.wholdus.com/account/purchase-requests</a></p>
 					<p>You can manage your account and online store at <a href="http://www.wholdus.com/account/my-store">www.wholdus.com/account/my-store</a></p>
 				</td>
