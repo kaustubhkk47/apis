@@ -127,7 +127,10 @@ def serialize_product(productsItem, parameters = {}):
 
 	if "isBuyerStore" in parameters and parameters["isBuyerStore"] == 1:
 
-		product["buyer_store_discounted_price"] = None
+		buyerstore = {}
+
+		buyerstore["buyer_store_discounted_price"] = None
+		buyerstore["buyer_store_discount"] = None
 
 		buyerProductResponsePtr = filterBuyerProductResponse(parameters)
 		buyerProductResponsePtr = buyerProductResponsePtr.filter(product_id = productsItem.id)
@@ -136,7 +139,8 @@ def serialize_product(productsItem, parameters = {}):
 			buyerProductResponsePtr = buyerProductResponsePtr[0]
 			if buyerProductResponsePtr.store_discount != None:
 				discount_factor =  1 - buyerProductResponsePtr.store_discount/100
-				product["buyer_store_discounted_price"] = productsItem.price_per_unit*discount_factor
+				buyerstore["buyer_store_discounted_price"] = productsItem.price_per_unit*discount_factor
+				buyerstore["buyer_store_discount"] = buyerProductResponsePtr.store_discount
 				flag = 1
 
 		if flag == 0:
@@ -145,7 +149,10 @@ def serialize_product(productsItem, parameters = {}):
 				buyerPtr = buyerPtr[0]
 				if buyerPtr.store_global_discount != None:
 					discount_factor =  1 - buyerPtr.store_global_discount/100
-					product["buyer_store_discounted_price"] = productsItem.price_per_unit*discount_factor
+					buyerstore["buyer_store_discounted_price"] = productsItem.price_per_unit*discount_factor
+					buyerstore["buyer_store_discount"] = buyerPtr.store_global_discount
+
+		product["buyerstore"] = buyerstore
 
 		orderitem = {}
 		orderItemPtr = OrderItem.objects.filter(product_id = productsItem.id, current_status=11, suborder__order__buyer_id=parameters["buyersArr"][0])
