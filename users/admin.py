@@ -27,6 +27,7 @@ admin.site.register(SellerAddress)
 admin.site.register(SellerAddressHistory)
 admin.site.register(SellerDetails)
 admin.site.register(SellerBankDetails)
+admin.site.register(SellerCategory, SellerCategoryAdmin)
 
 admin.site.register(InternalUser)
 
