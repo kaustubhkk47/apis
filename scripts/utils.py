@@ -282,22 +282,3 @@ def getApiVersion(text):
 		pass
 	return version
 
-def send_sms(message, numbers):
-	url = "http://api.textlocal.in/send/"
-	apiKey = "PHh7HDcKTKY-2FFu2CjWvBcnRdpw02Kq5iwUx4pDbP"
-
-	data = {}
-	data["apiKey"] = apiKey
-	data["sender"] = "TXTLCL"
-	
-	data["message"] = message
-
-	numbers = map(lambda x: "91" + x, map(str, numbers))
-	data["numbers"] = numbers
-
-	if not settings.CURRENT_ENVIRONMENT == 'prod':
-		data["test"] = True
-
-	r = requests.post(url, data)
-
-	return r
