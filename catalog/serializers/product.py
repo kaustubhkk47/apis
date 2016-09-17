@@ -125,7 +125,7 @@ def serialize_product(productsItem, parameters = {}):
 		product["cartitem"] = cartitem
 		"""
 
-	if "isBuyerStore" in parameters and parameters["isBuyerStore"] == 1:
+	if ("isBuyerStore" in parameters and parameters["isBuyerStore"] == 1) or ("isBuyer" in parameters and parameters["isBuyer"] == 1):
 
 		buyerstore = {}
 
