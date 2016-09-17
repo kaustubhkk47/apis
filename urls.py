@@ -105,6 +105,10 @@ urlpatterns += [
 	url(r'^blog/articles/coverphoto/$', blog_handler.article_cover_photo_details),
 ]
 
+urlpatterns += [
+	url(r'^general/sentsms/deliveryreport/$', general_handler.delivery_report_details)
+]
+
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 """

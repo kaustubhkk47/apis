@@ -14,11 +14,17 @@ class  SMSSent(models.Model):
 	sms_purpose = models.CharField(max_length = 50,blank=True)
 
 	message_text = models.TextField(blank=True)
+	message_count = models.IntegerField(default=1)
 
 	test_sms = models.BooleanField(default=0)
 
+	sending_success = models.BooleanField(default=0)
+	error_message = models.TextField(blank=True)
+	error_code = models.CharField(max_length = 30, blank=True)
+
 	delivered = models.BooleanField(default=0)
 	delivered_time = models.DateTimeField(blank=True, null=True)
+	delivery_status = models.CharField(max_length = 10,blank=True)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -44,6 +50,8 @@ def send_sms(message_text, mobile_number, user_type, sms_purpose):
 	url = "http://api.textlocal.in/send/"
 	apiKey = "VAWHxD4nf9U-8LcsDTXDL5iMOmSicSvlLiRHw9rJZ0"
 
+	deliveryBaseUrl = "http://api.wholdus.com/general/sentsms/deliveryreport/"
+
 	data = {}
 	data["apiKey"] = apiKey
 	data["sender"] = "TXTLCL"
@@ -60,20 +68,49 @@ def send_sms(message_text, mobile_number, user_type, sms_purpose):
 	newSMSSent.sms_purpose = sms_purpose
 	newSMSSent.message_text = message_text
 	newSMSSent.service_provider = "TextLocal"
+	newSMSSent.save()
 
 	if not settings.CURRENT_ENVIRONMENT == 'prod':
 		data["test"] = True
 		newSMSSent.test_sms = 1
+		deliveryBaseUrl = "http://api-test.wholdus.com/general/sentsms/deliveryreport/"
 
-	r = requests.post(url, data)
+	data["receipt_url"] = deliveryBaseUrl
+	data["custom"] = newSMSSent.id
 
-	if r.status_code == 200:
+	response = requests.post(url, data)
+
+	if response.status_code == 200:
 
 		try:
-			responseJson = r.json()
+			responseJson = response.json()
 		except Exception as e:
-			pass
+			newSMSSent.error_message = "Could not parse response json" 
 		else:
 			if responseJson["status"] == "success":
+				newSMSSent.sending_success = 1
+				newSMSSent.message_count =int(responseJson["num_messages"])
+			elif responseJson["status"] == "failure":
+				error_message = ""
+				error_code = ""
+				for errorobject in responseJson["errors"]:
+					error_message += str(errorobject["message"]) + ","
+					error_code += str(errorobject["code"]) + ","
+				newSMSSent.error_message = error_message
+				newSMSSent.error_code = error_code
+			else:
+				newSMSSent.error_message = "Unknown error" 
+	else:
+		newSMSSent.error_message = "Response status code was not 200" 
 
-				newSMSSent.save()
+	newSMSSent.save()
+
+
+def validateSmsSentData(delivery_report):
+
+	if not "status" in delivery_report or delivery_report["status"] == None:
+		return False
+	#if not "datetime" in delivery_report or delivery_report["datetime"] == None:
+	#	return False
+
+	return True
