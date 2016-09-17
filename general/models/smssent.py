@@ -3,6 +3,8 @@ from django.contrib import admin
 
 from scripts.utils import time_in_ist
 
+import settings
+
 class  SMSSent(models.Model):
 
 	mobile_number = models.CharField(max_length=11, blank=False)
