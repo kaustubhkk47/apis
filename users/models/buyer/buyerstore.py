@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib import admin
 
-from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString, link_to_foreign_key
+from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString, link_to_foreign_key, create_email
 
 class BuyerStoreLead(models.Model):
 	buyer = models.ForeignKey('users.Buyer')
@@ -52,6 +52,28 @@ class BuyerStoreLead(models.Model):
 		self.name = buyer_store_lead["name"]
 		self.mobile_number = buyer_store_lead["mobile_number"]
 		self.email = buyer_store_lead["email"]
+
+	def sendRetailerMail(self, parameters = {}):
+
+		buyerPtr = self.buyer
+
+		if buyerPtr.email == None or buyerPtr.email == "":
+			return
+
+		from_email = "Wholdus Info <info@wholdus.com>"
+		mail_template_file = "buyer_store/buyer_store_lead.html"
+		subject = "New purchase request on your online store on Wholdus"
+		to_email = [buyerPtr.email]
+
+		from users.serializers.buyer import serialize_buyer_store_lead
+
+		mail_dict = serialize_buyer_store_lead(self, parameters)
+
+		bcc = ["manish@wholdus.com","kushagra@wholdus.com"]
+		#bcc = []
+
+		create_email(mail_template_file, mail_dict, subject, from_email, to_email, bcc = bcc)
+
 
 class BuyerStoreLeadAdmin(admin.ModelAdmin):
 	list_display = ["id", "link_to_buyer", "link_to_product", "name", "mobile_number", "status"]

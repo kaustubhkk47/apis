@@ -7,7 +7,7 @@ from ..models.productData import ColourType, FabricType, filterProductFabricType
 
 from ..serializers.product import multiple_products_parser, serialize_product
 from ..serializers.productData import parseProductColourType, parseProductFabricType
-from users.models.seller import Seller
+from users.models.seller import Seller, SellerCategory
 import json
 from django.template.defaultfilters import slugify
 from decimal import Decimal
@@ -139,6 +139,15 @@ def post_new_product(request, parameters = {}):
 	categoryPtr = Category.objects.filter(id=int(product["categoryID"]))
 	if not categoryPtr.exists():
 		return customResponse("4XX", {"error": "Invalid id for category sent"})
+
+	sellerCategoryPtr = SellerCategory.objects.filter(category_id=int(product["categoryID"]), seller_id=int(product["sellerID"]))
+
+	if not sellerCategoryPtr.exists():
+		newSellerCategory = SellerCategory(seller_id=int(product["sellerID"]), category_id=int(product["categoryID"]))
+		try:
+			newSellerCategory.save()
+		except Exception as e:
+			pass
 
 	if not "product_lot" in product or not product["product_lot"] or not validateProductLotData(product["product_lot"]):
 		return customResponse("4XX", {"error": "Product lots for product not properly sent"})
