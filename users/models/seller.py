@@ -377,6 +377,7 @@ def getSellerToken(seller):
 	tokenPayload = {
 		"user": "seller",
 		"sellerID": seller.id,
+		"password":seller.password
 	}
 	encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
 	return encoded.decode("utf-8")
