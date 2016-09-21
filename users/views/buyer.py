@@ -580,6 +580,7 @@ def post_new_buyer_store_lead(request, parameters):
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
 		newBuyerStoreLead.sendRetailerMail(parameters)
+		newBuyerStoreLead.sendCustomerMail(parameters)
 		closeDBConnection()
 		return customResponse("2XX", {"buyer_store_lead":serialize_buyer_store_lead(newBuyerStoreLead)})
 

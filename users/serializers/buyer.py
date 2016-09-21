@@ -97,7 +97,8 @@ def serialize_buyer_address(buyer_address, parameters = {}):
 		"country" : buyer_address.country_name,
 		"contact_number" : buyer_address.contact_number,
 		"pincode" : buyer_address.pincode_number,
-		"priority" : buyer_address.priority
+		"priority" : buyer_address.priority,
+		"pincodeID":buyer_address.pincode_id
 	}
 	return buyer_address_entry
 
@@ -285,6 +286,7 @@ def serialize_buyer_store_lead(buyer_store_lead_entry, parameters = {}):
 	buyer_store_lead["status"] = buyer_store_lead_entry.status
 	buyer_store_lead["sizes"] = buyer_store_lead_entry.sizes
 	buyer_store_lead["quantity"] = buyer_store_lead_entry.quantity
+	buyer_store_lead["product_link"] = buyer_store_lead_entry.get_product_link()
 	
 	buyer_store_lead["product"] = serialize_product(buyer_store_lead_entry.product, parameters)
 

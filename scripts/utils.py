@@ -139,6 +139,8 @@ def create_email(mail_template_file,mail_dict,subject,from_email,to_email,attach
 	mail_template = get_template(mail_template_file)   
 	#mail_context = Context(mail_dict)
 	html_message = mail_template.render(mail_dict)
+
+	print html_message
 		
 	email = EmailMessage(subject=subject,body=html_message,from_email=from_email,to=to_email,bcc=bcc)
 

@@ -46,7 +46,7 @@ def serialize_product(productsItem, parameters = {}):
 	product["display_name"] = productsItem.display_name
 	product["is_catalog"] = productsItem.is_catalog
 	product["delete_status"] = productsItem.delete_status
-	product["absolute_path"] = "http://www.wholdus.com/" + productsItem.category.slug + "-" + str(productsItem.category_id) + "/" +productsItem.slug +"-" + str(productsItem.id)
+	product["absolute_path"] = productsItem.get_absolute_url()
 	product["margin"] = '{0:.1f}'.format((float(productsItem.price_per_unit) - float(productsItem.min_price_per_unit))/float(productsItem.price_per_unit)*100)
 	product["url"] = productsItem.category.slug + "-" + str(productsItem.category.id) + "/" + productsItem.slug+ "-" + str(productsItem.id)
 
@@ -82,15 +82,9 @@ def serialize_product(productsItem, parameters = {}):
 	if "product_image_details" in parameters and parameters["product_image_details"] == 1:
 		image = {}
 
-		image_numbers = str(productsItem.image_numbers)
-		try:
-			image_numbers = ast.literal_eval(image_numbers)
-		except Exception as e:
-			image_numbers = []
-
-		if len(image_numbers) > 0:
-			imageLink = "http://api.wholdus.com/" + productsItem.image_path + "700x700/" + productsItem.image_name + "-" + str(image_numbers[0]) +".jpg"		
-			image["absolute_path"] = imageLink
+		image_numbers = productsItem.get_image_numbers_arr()
+	
+		image["absolute_path"] = productsItem.get_image_url()
 
 		image["image_numbers"] = image_numbers
 		image["image_count"] = len(image_numbers)
