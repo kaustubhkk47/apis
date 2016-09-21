@@ -3,12 +3,14 @@
 		<td style="padding:5px;padding-left:10px;">
 			<img src="http://wholdus.com/images/logo/logo64x64.png">
 		</td>
-		<td style="width:55%; font-size:200%;">
+		<td style="font-size:200%; text-align: left; width: 86%;">
+			
 			{% if buyer.company_name|length > 0 %}
                         			{{ buyer.company_name }}
                     		{% else %}
                         			{{ buyer.name }}
                    		{% endif %}
+                   		
 		</td> 
 		
 	</tr>
