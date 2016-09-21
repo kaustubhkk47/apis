@@ -32,7 +32,7 @@ class BuyerInterest(models.Model):
 		verbose_name_plural = "Buyer Interests"
 
 	def __unicode__(self):
-		return "{} - {} - {} - {}".format(self.id,self.buyer.id,self.buyer.name,self.category.name)
+		return "{} - {}".format(self.buyer,self.category)
 
 class BuyerInterestAdmin(admin.ModelAdmin):
 	search_fields = ["buyer__id","buyer__name", "buyer__company_name", "buyer__mobile_number"]
