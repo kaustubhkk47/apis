@@ -11,6 +11,7 @@ from ..models.orderItem import OrderItem, populateOrderItemData
 from ..serializers.order import parseOrders, serializeOrder
 from decimal import Decimal
 from django.core.paginator import Paginator
+import math
 
 def get_order_details(request, orderParameters):
 	try:
@@ -57,7 +58,11 @@ def post_new_order(request, parameters={}):
 
 	if not "products" in order or order["products"]==None:
 		return customResponse("4XX", {"error": "Products in order not sent"})
-	if not validateOrderProductsData(order["products"]):
+
+	productsHash = {}
+	productIDarr = []
+
+	if not validateOrderProductsData(order["products"], productsHash, productIDarr):
 		return customResponse("4XX", {"error": "Products in order not sent properly sent"})
 
 	orderProducts = order["products"]
@@ -76,10 +81,24 @@ def post_new_order(request, parameters={}):
 	orderCalculatedPrice = Decimal(0.0)
 	orderEditedPrice = Decimal(0.0)
 
-	for orderProduct in orderProducts:
+	allProducts = Product.objects.filter(id__in=productIDarr).select_related('seller')
+
+	if not len(allProducts) == len(productIDarr):
+		return customResponse("4XX", {"error": "Improper product IDs in order sent"})
+
+	for productPtr in allProducts:
 		
-		productPtr = Product.objects.filter(id=int(orderProduct["productID"])).select_related('seller')
-		productPtr = productPtr[0]
+		#productPtr = Product.objects.filter(id=int(orderProduct["productID"])).select_related('seller')
+		#productPtr = productPtr[0]
+
+		orderProduct = orderProducts[productsHash[productPtr.id]]
+
+		orderProduct["retail_price_per_piece"] = productPtr.price_per_unit
+		orderProduct["lot_size"] = productPtr.lot_size
+
+		orderProduct["final_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
+		orderProduct["lots"] = int(math.ceil(float(orderProduct["pieces"])/productPtr.lot_size))
+		orderProduct["calculated_price_per_piece"] = productPtr.getCalculatedPricePerPiece(int(orderProduct["lots"]))
 
 		seller = productPtr.seller
 		sellerID = seller.id
@@ -91,12 +110,13 @@ def post_new_order(request, parameters={}):
 		orderEditedPrice += Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
 
 		if sellerID in sellersHash:
-			subOrders[sellersHash[sellerID]]["order_products"].append(orderProduct)
-			subOrders[sellersHash[sellerID]]["product_count"] += 1
-			subOrders[sellersHash[sellerID]]["pieces"] += int(orderProduct["pieces"])
-			subOrders[sellersHash[sellerID]]["retail_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["retail_price_per_piece"])
-			subOrders[sellersHash[sellerID]]["calculated_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["calculated_price_per_piece"])
-			subOrders[sellersHash[sellerID]]["edited_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])			
+			position = sellersHash[sellerID]
+			subOrders[position]["order_products"].append(orderProduct)
+			subOrders[position]["product_count"] += 1
+			subOrders[position]["pieces"] += int(orderProduct["pieces"])
+			subOrders[position]["retail_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["retail_price_per_piece"])
+			subOrders[position]["calculated_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["calculated_price_per_piece"])
+			subOrders[position]["edited_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])			
 		else:
 			sellersHash[sellerID] = len(sellersHash)
 			subOrderItem = {}
@@ -128,17 +148,23 @@ def post_new_order(request, parameters={}):
 			populateSubOrderData(newSubOrder,subOrder,newOrder.id)
 			newSubOrder.save()
 
+			orderItemstoCreate = []
+
 			for orderItem in subOrder["order_products"]:
 				newOrderItem = OrderItem(suborder=newSubOrder,product_id=int(orderItem["productID"]))
 				populateOrderItemData(newOrderItem, orderItem)
-				newOrderItem.save()
+				#newOrderItem.save()
+				orderItemstoCreate.append(newOrderItem)
 
+			OrderItem.objects.bulk_create(orderItemstoCreate)
+		
 		sendOrderMail(newOrder)
 		subOrders = SubOrder.objects.filter(order_id = newOrder.id)
 		buyerAddressPtr = newOrder.buyer_address_history
 		for SubOrderPtr in subOrders:
 			seller_mail_dict = populateSellerMailDict(SubOrderPtr, buyerPtr, buyerAddressPtr)
 			sendSubOrderMail(SubOrderPtr, seller_mail_dict)
+
 
 	except Exception as e:
 		log.critical(e)

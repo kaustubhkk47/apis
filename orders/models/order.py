@@ -116,17 +116,19 @@ def filterOrder(orderParameters):
 
 	return orders
 
-def validateOrderProductsData(orderProducts):
+def validateOrderProductsData(orderProducts,  productsHash, productIDarr):
 
 	for orderProduct in orderProducts:
 		if not "productID" in orderProduct or not validate_integer(orderProduct["productID"]):
 			return False
 
-		productPtr = Product.objects.filter(id=int(orderProduct["productID"]))
-		if len(productPtr) == 0:
-			return False
+		productID = int(orderProduct["productID"])
 
-		productPtr = productPtr[0]
+		#productPtr = Product.objects.filter(id=productID).select_related('seller')
+		#if len(productPtr) == 0:
+		#	return False
+
+		#productPtr = productPtr[0]
 
 		if not "pieces" in orderProduct or not validate_integer(orderProduct["pieces"]):
 			return False
@@ -135,12 +137,8 @@ def validateOrderProductsData(orderProducts):
 		if not "remarks" in orderProduct or orderProduct["remarks"]==None:
 			orderProduct["remarks"] = ""
 
-		orderProduct["retail_price_per_piece"] = productPtr.price_per_unit
-		orderProduct["lot_size"] = productPtr.lot_size
-
-		orderProduct["final_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
-		orderProduct["lots"] = int(math.ceil(float(orderProduct["pieces"])/productPtr.lot_size))
-		orderProduct["calculated_price_per_piece"] = getCalculatedPricePerPiece(int(orderProduct["productID"]),orderProduct["lots"])
+		productsHash[productID] = len(productsHash)
+		productIDarr.append(productID)
 
 	return True
 
