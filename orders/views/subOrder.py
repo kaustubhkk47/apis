@@ -10,22 +10,22 @@ from users.serializers.buyer import BuyerAddress
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils import timezone
 
-def get_suborder_details(request,subOrderParameters):
+def get_suborder_details(request,parameters):
 	try:
 		
-		subOrders = filterSubOrder(subOrderParameters)
+		subOrders = filterSubOrder(parameters)
 
-		paginator = Paginator(subOrders, subOrderParameters["itemsPerPage"])
+		paginator = Paginator(subOrders, parameters["itemsPerPage"])
 
 		try:
-			pageItems = paginator.page(subOrderParameters["pageNumber"])
+			pageItems = paginator.page(parameters["pageNumber"])
 		except Exception as e:
 			pageItems = []
 
-		body = parseSubOrders(pageItems,subOrderParameters)
+		body = parseSubOrders(pageItems,parameters)
 		statusCode = "2XX"
-		response = {"sub_orders": body,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":subOrderParameters["pageNumber"], "items_per_page":subOrderParameters["itemsPerPage"]}
-
+		response = {"sub_orders": body}
+		responsePaginationParameters(response,paginator, parameters)
 
 	except Exception as e:
 		log.critical(e)

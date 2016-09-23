@@ -503,7 +503,7 @@ def populateBuyerIDParameters(request, parameters = {}, version = "0"):
 	parameters["isBuyerStore"] = 0
 	if "buyerID" in tokenPayload and validate_integer(tokenPayload["buyerID"]) and "password" in tokenPayload:
 		try:
-			buyerPtr = Buyer.objects.get(id=int(tokenPayload["buyerID"]), password=tokenPayload["password"])
+			buyerPtr = Buyer.objects.get(id=int(tokenPayload["buyerID"]), password=tokenPayload["password"], delete_status=False)
 		except:
 			pass
 		else:
@@ -514,7 +514,7 @@ def populateBuyerIDParameters(request, parameters = {}, version = "0"):
 
 	storeUrl = request.GET.get("store_url", "")
 	try:
-		buyerPtr = Buyer.objects.get(store_url=storeUrl)
+		buyerPtr = Buyer.objects.get(store_url=storeUrl, delete_status=False)
 	except Exception as e:
 		pass
 	else:
@@ -570,7 +570,7 @@ def populateSellerIDParameters(request, parameters = {}, version = "0"):
 	parameters["isSeller"] = 0
 	if "sellerID" in tokenPayload and validate_integer(tokenPayload["sellerID"]) and "password" in tokenPayload:
 		try:
-			sellerPtr = Seller.objects.get(id=int(tokenPayload["sellerID"]), password=tokenPayload["password"])
+			sellerPtr = Seller.objects.get(id=int(tokenPayload["sellerID"]), password=tokenPayload["password"], delete_status=False)
 		except:
 			pass
 		else:

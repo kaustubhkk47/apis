@@ -164,6 +164,7 @@ OrderItemStatus = {
 }
 
 OrderItemCompletionStatus = [4, 11, 13, 14]
+OrderItemNonCompletionStatus = [0,1,2,3,5,6,7,8,9,10,12]
 
 def populateMailOrderItem(OrderItemPtr):
 

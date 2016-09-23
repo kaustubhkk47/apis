@@ -4,7 +4,7 @@ from scripts.utils import create_email, link_to_foreign_key
 from users.models.seller import Seller
 from users.serializers.buyer import serialize_buyer_address
 #from orders.models.order import Order
-from orders.models.orderItem import OrderItem, OrderItemCompletionStatus, populateMailOrderItem
+from orders.models.orderItem import OrderItem, OrderItemNonCompletionStatus, populateMailOrderItem
 
 from django.utils import timezone
 from decimal import Decimal
@@ -141,13 +141,11 @@ def filterSubOrder(parameters):
 
 def update_suborder_completion_status(subOrder):
 
-	orderItemQuerySet = OrderItem.objects.filter(suborder_id = subOrder.id)
-	for orderItem in orderItemQuerySet:
-		if orderItem.current_status not in OrderItemCompletionStatus:
-			return
+	orderItemQuerySet = OrderItem.objects.filter(suborder_id = subOrder.id, current_status__in=OrderItemNonCompletionStatus)
 
-	subOrder.suborder_status = 4
-	subOrder.save()
+	if not orderItemQuerySet.exists():
+		subOrder.suborder_status = 4
+		subOrder.save()
 
 SubOrderStatus = {
 	-1:{"display_value":"Cancelled"},

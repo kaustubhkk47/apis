@@ -92,7 +92,7 @@ def create_checkout_details(request, parameters):
 
 	buyerID = parameters["buyersArr"][0]
 
-	buyerPtr = Buyer.objects.filter(id=buyerID)
+	buyerPtr = Buyer.objects.filter(id=buyerID, delete_status=False)
 
 	if not buyerPtr.exists():
 		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
@@ -128,7 +128,7 @@ def update_checkout_details(request, parameters):
 
 	buyerID = parameters["buyersArr"][0]
 
-	buyerPtr = Buyer.objects.filter(id=buyerID)
+	buyerPtr = Buyer.objects.filter(id=buyerID, delete_status=False)
 
 	if len(buyerPtr)==0:
 		return customResponse("4XX", {"error": "Invalid id for buyer sent"})

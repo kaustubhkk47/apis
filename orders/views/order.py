@@ -13,20 +13,21 @@ from decimal import Decimal
 from django.core.paginator import Paginator
 import math
 
-def get_order_details(request, orderParameters):
+def get_order_details(request, parameters):
 	try:
-		orders = filterOrder(orderParameters)
+		orders = filterOrder(parameters)
 
-		paginator = Paginator(orders, orderParameters["itemsPerPage"])
+		paginator = Paginator(orders, parameters["itemsPerPage"])
 
 		try:
-			pageItems = paginator.page(orderParameters["pageNumber"])
+			pageItems = paginator.page(parameters["pageNumber"])
 		except Exception as e:
 			pageItems = []
 
-		body = parseOrders(pageItems,orderParameters)
+		body = parseOrders(pageItems,parameters)
 		statusCode = "2XX"
-		response = {"orders": body,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":orderParameters["pageNumber"], "items_per_page":orderParameters["itemsPerPage"]}
+		response = {"orders": body}
+		responsePaginationParameters(response,paginator, parameters)
 
 	except Exception as e:
 		log.critical(e)
@@ -49,7 +50,7 @@ def post_new_order(request, parameters={}):
 	if not "buyerID" in order or not validate_integer(order["buyerID"]):
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
-	buyerPtr = Buyer.objects.filter(id=int(order["buyerID"]))
+	buyerPtr = Buyer.objects.filter(id=int(order["buyerID"]), delete_status=False)
 
 	if len(buyerPtr) == 0:
 		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
@@ -81,16 +82,13 @@ def post_new_order(request, parameters={}):
 	orderCalculatedPrice = Decimal(0.0)
 	orderEditedPrice = Decimal(0.0)
 
-	allProducts = Product.objects.filter(id__in=productIDarr).select_related('seller')
+	allProducts = Product.objects.filter(id__in=productIDarr, delete_status=False).select_related('seller')
 
 	if not len(allProducts) == len(productIDarr):
 		return customResponse("4XX", {"error": "Improper product IDs in order sent"})
 
 	for productPtr in allProducts:
 		
-		#productPtr = Product.objects.filter(id=int(orderProduct["productID"])).select_related('seller')
-		#productPtr = productPtr[0]
-
 		orderProduct = orderProducts[productsHash[productPtr.id]]
 
 		orderProduct["retail_price_per_piece"] = productPtr.price_per_unit

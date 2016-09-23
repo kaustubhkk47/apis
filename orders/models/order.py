@@ -7,7 +7,7 @@ from users.models.buyer import Buyer, BuyerAddress
 
 from catalog.models.product import Product
 from catalog.models.productLot import getCalculatedPricePerPiece
-from .orderItem import OrderItem, OrderItemCompletionStatus
+from .orderItem import OrderItem, OrderItemNonCompletionStatus
 from .subOrder import SubOrder, populateSellerMailDict
 from users.serializers.buyer import serialize_buyer_address
 
@@ -124,12 +124,6 @@ def validateOrderProductsData(orderProducts,  productsHash, productIDarr):
 
 		productID = int(orderProduct["productID"])
 
-		#productPtr = Product.objects.filter(id=productID).select_related('seller')
-		#if len(productPtr) == 0:
-		#	return False
-
-		#productPtr = productPtr[0]
-
 		if not "pieces" in orderProduct or not validate_integer(orderProduct["pieces"]):
 			return False
 		if not "edited_price_per_piece" in orderProduct or not validate_number(orderProduct["edited_price_per_piece"]):
@@ -144,13 +138,10 @@ def validateOrderProductsData(orderProducts,  productsHash, productIDarr):
 
 def update_order_completion_status(order):
 
-	orderItemQuerySet = OrderItem.objects.filter(suborder__order_id = order.id)
-	for orderItem in orderItemQuerySet:
-		if orderItem.current_status not in OrderItemCompletionStatus:
-			return
-
-	order.order_status = 3
-	order.save()
+	orderItemQuerySet = OrderItem.objects.filter(suborder__order_id = order.id, current_status__in=OrderItemNonCompletionStatus)
+	if not orderItemQuerySet.exists():
+		order.order_status = 3
+		order.save()
 
 OrderStatus = {
 	-1:{"display_value":"Cancelled"},

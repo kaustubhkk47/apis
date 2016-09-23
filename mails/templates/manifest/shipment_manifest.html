@@ -1,61 +1,123 @@
 <!DOCTYPE html>
-<html style= "width: 1200px; height: 1414; font-family:sans-serif;padding:20px 20px; text-align: center">
-<head style="width:100%; min-height: 100px; font-size: 1.3em">
+<html style= "font-family:sans-serif;text-align: center; font-size: 0.6em">
+
+<body style="width:756px; height: 1077px; display:block;padding:10px 10px 10px 10px; ">
+
 	<div style="width:100%">
 		<h2>Wholdus Manifest - Ord No: {{order.display_number}}</h2>
 	</div>
-</head>
-<body style="width:100%; height: 1200px; display:block; font-size: 1.2em">
-	
-	<hr>
-	<h4><u>Buyer Details</u></h4>
-	<div style="width:100%">			
+
+
+	<table style="width: 100%; border-top: dashed 1px grey; border-bottom: dashed 1px grey;">
+
+	<tr>
+	<td>
+	<div>
+		<h3><u>Buyer Details</u></h3>
+		<div style="width:100%; margin-top: 20px; margin-bottom: 20px">			
 		<p>Consignee Name: <strong>{{buyer.name}}</strong></p>
 		<p>Address: <strong>{{buyer_address.address}}{% if buyer_address.landmark|length > 0 %}, {{buyer_address.landmark}}{% else %}{% endif %}</strong></p>
-		<p>City: <strong>{{buyer_address.city}}</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; State: <strong>{{buyer_address.state}}</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pincode: <strong>{{buyer_address.pincode}}</strong></p>
+		<p>
+		City: <strong>{{buyer_address.city}}</strong>
+		<span style="margin-right: 12px"></span>
+		State: <strong>{{buyer_address.state}}</strong>
+		<span style="margin-right: 12px"></span>
+		Pincode: <strong>{{buyer_address.pincode}}</strong>
+		</p>
+		</div>
 	</div>
-	<hr>
-	<h4><u>Seller Details</u></h4>
-	<div style="width:100%">
-		<p>Seller Name: <strong>{{seller.name}}</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Seller Company: <strong>{{seller.company_name}}</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Seller VAT Number: <strong>{{seller.vat_tin}}</strong></p>
+	</td>
+
+	<td>
+	<div style="border-left: dashed 1px grey">
+		<h3><u>Seller Details</u></h3>
+		<div style="width:100%">
+		<p>
+		Name: <strong> {{seller.name}}</strong>
+		<span style="margin-right: 12px"></span>
+		Company: <strong>{{seller.company_name}}</strong>
+		</p>
+		<p>
+		VAT Number: <strong>{{seller.vat_tin}}</strong>
+		</p>
 		<p>Address: <strong>{{seller_address.address}}{% if seller_address.landmark|length > 0 %}, {{seller_address.landmark}}{% else %}{% endif %}</strong></p>
-		<p>City: <strong>{{seller_address.city}}</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;State: <strong>{{seller_address.state}}</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pincode: <strong>{{seller_address.pincode}}</strong></p>
+		<p>
+		City: <strong>{{seller_address.city}}</strong>
+		<span style="margin-right: 12px"></span>
+		State: <strong>{{seller_address.state}}</strong>
+		<span style="margin-right: 12px"></span>
+		Pincode: <strong>{{seller_address.pincode}}</strong>
+		</p>
+		</div>
 	</div>
-	<hr>
-	<h4><u>Shipment Details</u></h4>
-	<div style="width:100%">
-		<p>AWB Number: <strong>{{shipment.waybill_number}}</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shipping Amount: <strong> Rs. {{shipment.shipping_amount}} /-</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shipping Partner: <strong>{{shipment.logistics_partner}}</strong></p>
-		<p>Invoice Number: <strong>{{shipment.invoice_number}}</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Invoice Amount: <strong> Rs. {{shipment.final_price}} /-</strong></p>
-		<p style="font-size: 1.2em">Amount to collect: <strong>{{shipment.amount_to_collect}}</strong></p>
-		<p>Length: <strong>{{shipment.packaged_length}} cm</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Breadth: <strong>{{shipment.packaged_breadth}} cm</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Height: <strong>{{shipment.packaged_height}} cm</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Weight: <strong>{{shipment.packaged_weight}} gm</strong></p>
-	</div>
-	<hr>
-	<h4><u>Shipment Items</u></h4>
-	<table style="width:100%; border-collapse: collapse;">
-		<tr>
-			<td style="border: 1px solid black; padding: 3px 5px 1px 5px; width:10%"><strong>S. No.</strong></td>
-			<td style="border: 1px solid black; padding: 3px 5px 1px 5px; width:70%"><strong>Product Name</strong></td>
-			<td style="border: 1px solid black; padding: 3px 5px 1px 5px; width:20%"><strong>Quantity</strong></td>
-		</tr>
-		{% for orderItem in orderItems %}
-		<tr>
-			<td style="border: 1px solid black; padding: 3px 5px 1px 5px; width:10%">{{forloop.counter}}</td>
-			<td style="border: 1px solid black; padding: 3px 5px 1px 5px; width:70%">{{orderItem.name}}</td>
-			<td style="border: 1px solid black; padding: 3px 5px 1px 5px; width:20%">{{orderItem.pieces}}</td>
-		</tr>
-		{% endfor %}
+	</td></tr>
 	</table>
 
-</body>
+	<h3><u>Shipment Details</u></h3>
+	<div style="width:100%; border-bottom: dashed 1px grey;">
+		<p>
+		AWB Number: <strong>{{shipment.waybill_number}}</strong>
+		<span style="margin-right: 12px"></span>
+		Shipping Amount: <strong> Rs. {{shipment.shipping_amount}} /-</strong>
+		<span style="margin-right: 12px"></span>
+		Shipping Partner: <strong>{{shipment.logistics_partner}}</strong>
+		<span style="margin-right: 12px"></span>
+		Invoice Number: <strong>{{shipment.invoice_number}}</strong>
+		<span style="margin-right: 12px"></span>
+		Invoice Amount: <strong> Rs. {{shipment.final_price}} /-</strong>
+		</p>
+		<p>
+		Amount to collect: <strong>{{shipment.amount_to_collect}}</strong>
+		<span style="margin-right: 12px"></span>	
+		Length: <strong>{{shipment.packaged_length}} cm</strong>
+		<span style="margin-right: 12px"></span>
+		Breadth: <strong>{{shipment.packaged_breadth}} cm</strong>
+		<span style="margin-right: 12px"></span>
+		Height: <strong>{{shipment.packaged_height}} cm</strong>
+		<span style="margin-right: 12px"></span>
+		Weight: <strong>{{shipment.packaged_weight}} gm</strong>
+		</p>
+	</div>
 
-<footer style="width:100%;font-size: 1.1em">
-	<hr>
-	<div style="width:100%">
+	<h3><u>Shipment Items</u></h3>
+	<div style="padding: 0px 30px">
+	<table style="width:100%; border-collapse: collapse;">
+		<tr>
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:10%"><strong>S. No.</strong></td>
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:70%"><strong>Product Name</strong></td>
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:10%"><strong>Quantity</strong></td>
+		</tr>
+		{% for orderItem in orderItems %}
+		<tr >
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:10%">{{forloop.counter}}</td>
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:70%;">
+				<div style="height:10px; overflow:hidden;">
+				{{orderItem.name}}
+				</div>
+			</td>
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:10%">{{orderItem.pieces}}</td>
+		</tr>
+		{% endfor %}
+		{% if extra_order_items > 0 %}
+		<tr>
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:10%;"></td>
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:70%;">
+			<strong> + {{extra_order_items}} MORE ITEMS</strong>
+			</td>
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:10%"></td>
+		</tr>
+		{% else %}
+                    	{% endif %}
+
+	</table>
+	</div>
+
+	<div style="width:100%; border-top: dashed 1px grey; position: absolute; left: 0px; bottom:0px">
+	<div style="width:100%;">
 		<p><strong>For courier personnel:</strong></p>
 		<p>I confirm that I have collected the packages as per the AWBs mentioned on this manifest.</p>
-		<p></p>
 	</div>
-	<table style="width:100%">
+	<table style="width:100%; margin-top: 30px">
 		<tr>
 			<td>___________________</td>
 			<td>___________________</td>
@@ -67,5 +129,8 @@
 			<td><strong>Time and Date</strong></td>
 		</tr>
 	</table>
-</footer>
+	</div>
+
+</body>
+
 </html>
