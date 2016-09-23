@@ -167,7 +167,8 @@ def generate_pdf(template_src, context_dict, output_directory, output_file_name)
 	'no-outline': None,
 	'page-size':'A4',
 	'disable-smart-shrinking':None,
-	'dpi':96
+	'dpi':96,
+	'grayscale':None
 	}
 
 	config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDFPATH)
