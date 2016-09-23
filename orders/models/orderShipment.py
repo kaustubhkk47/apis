@@ -77,7 +77,7 @@ class OrderShipment(models.Model):
 		manifest_dict = {}
 		manifest_dict["orderItems"] = []
 		manifest_dict["extra_order_items"] = 0
-		maxOrderItems = 15
+		maxOrderItems = 35
 
 		subOrderPtr = self.suborder
 
