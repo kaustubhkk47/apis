@@ -1,4 +1,4 @@
-from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_integer, validate_bool, getArrFromString, save_file_from_request
+from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_integer, validate_bool, getArrFromString, save_file_from_request, responsePaginationParameters
 import json
 import settings
 
@@ -22,17 +22,19 @@ def get_article_details(request, parameters):
 		except Exception as e:
 			pageItems = []
 
-		response = parseArticles(pageItems,parameters)
+		body = parseArticles(pageItems,parameters)
 		statusCode = "2XX"
-		body = {"articles": response,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":parameters["pageNumber"], "items_per_page":parameters["itemsPerPage"]}
+		response = {"articles": body}
+
+		responsePaginationParameters(response, paginator, parameters)
 
 	except Exception as e:
 		log.critical(e)
 		statusCode = "4XX"
-		body = {"error": "Invalid article"}
+		response = {"error": "Invalid article"}
 
 	closeDBConnection()
-	return customResponse(statusCode, body)
+	return customResponse(statusCode, response)
 
 def post_new_article(request):
 	try:

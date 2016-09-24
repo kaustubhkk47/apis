@@ -20,6 +20,7 @@ import io
 import requests
 
 def closeDBConnection():
+	return
 	connection.close()
 
 def customResponse(statusCode, body):
@@ -164,6 +165,10 @@ def generate_pdf(template_src, context_dict, output_directory, output_file_name)
 	'margin-bottom': '0in',
 	'margin-left': '0in',
 	'no-outline': None,
+	'page-size':'A4',
+	'disable-smart-shrinking':None,
+	'dpi':96,
+	'grayscale':None
 	}
 
 	config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDFPATH)
@@ -258,7 +263,6 @@ def responsePaginationParameters(response, paginator, parameters):
 	response["total_pages"] = paginator.num_pages
 	response["page_number"] = parameters["pageNumber"]
 	response["items_per_page"] = parameters["itemsPerPage"]
-	return response
 
 def link_to_foreign_key(obj, fk_name):
 	fk_instance = getattr(obj, fk_name)

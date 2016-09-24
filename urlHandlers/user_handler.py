@@ -501,15 +501,20 @@ def populateBuyerIDParameters(request, parameters = {}, version = "0"):
 	tokenPayload = convert_keys_to_string(get_token_payload(accessToken, "buyerID"))
 	parameters["isBuyer"] = 0
 	parameters["isBuyerStore"] = 0
-	if "buyerID" in tokenPayload and tokenPayload["buyerID"]!=None:
-		parameters["buyersArr"] = [tokenPayload["buyerID"]]
-		parameters["isBuyer"] = 1
+	if "buyerID" in tokenPayload and validate_integer(tokenPayload["buyerID"]) and "password" in tokenPayload:
+		try:
+			buyerPtr = Buyer.objects.get(id=int(tokenPayload["buyerID"]), password=tokenPayload["password"], delete_status=False)
+		except:
+			pass
+		else:
+			parameters["buyersArr"] = [buyerPtr.id]
+			parameters["isBuyer"] = 1
 	elif buyerID != "":
 		parameters["buyersArr"] = getArrFromString(buyerID)
 
 	storeUrl = request.GET.get("store_url", "")
 	try:
-		buyerPtr = Buyer.objects.get(store_url=storeUrl)
+		buyerPtr = Buyer.objects.get(store_url=storeUrl, delete_status=False)
 	except Exception as e:
 		pass
 	else:
@@ -563,9 +568,14 @@ def populateSellerIDParameters(request, parameters = {}, version = "0"):
 	sellerID = request.GET.get("sellerID", "")
 	tokenPayload = get_token_payload(accessToken, "sellerID")
 	parameters["isSeller"] = 0
-	if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
-		parameters["sellersArr"] = [tokenPayload["sellerID"]]
-		parameters["isSeller"] = 1
+	if "sellerID" in tokenPayload and validate_integer(tokenPayload["sellerID"]) and "password" in tokenPayload:
+		try:
+			sellerPtr = Seller.objects.get(id=int(tokenPayload["sellerID"]), password=tokenPayload["password"], delete_status=False)
+		except:
+			pass
+		else:
+			parameters["sellersArr"] = [sellerPtr.id]
+			parameters["isSeller"] = 1
 	elif sellerID != "":
 		parameters["sellersArr"] = getArrFromString(sellerID)
 
@@ -659,9 +669,14 @@ def populateInternalUserIDParameters(request, parameters = {}, version = "0"):
 	internalUserID = request.GET.get("internaluserID", "")
 
 	parameters["isInternalUser"] = 0
-	if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
-		parameters["internalusersArr"] = [tokenPayload["internaluserID"]]
-		parameters["isInternalUser"] = 1
+	if "internaluserID" in tokenPayload and validate_integer(tokenPayload["internaluserID"]) and "password" in tokenPayload:
+		try:
+			internalUserPtr = InternalUser.objects.get(id=int(tokenPayload["internaluserID"]), password=tokenPayload["password"])
+		except:
+			pass
+		else:
+			parameters["internalusersArr"] = [internalUserPtr.id]
+			parameters["isInternalUser"] = 1
 	elif internalUserID != "":
 		parameters["internalusersArr"] = getArrFromString(internalUserID)
 

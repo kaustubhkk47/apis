@@ -25,7 +25,7 @@ def get_pincode_serviceability_details(request,parameters = {}):
 
 		response = {"serviceable_pincodes": body}
 
-		response = responsePaginationParameters(response, paginator, parameters)
+		responsePaginationParameters(response, paginator, parameters)
 
 		closeDBConnection()
 

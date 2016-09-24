@@ -9,23 +9,25 @@ from ..serializers.orderItem import parseOrderItem
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-def get_order_item_details(request, orderItemParameters):
+def get_order_item_details(request, parameters):
 	try:
 
-		orderItems = filterOrderItem(orderItemParameters)
+		orderItems = filterOrderItem(parameters)
 
 		statusCode = "2XX"
 
-		paginator = Paginator(orderItems, orderItemParameters["itemsPerPage"])
+		paginator = Paginator(orderItems, parameters["itemsPerPage"])
 
 		try:
-			pageItems = paginator.page(orderItemParameters["pageNumber"])
+			pageItems = paginator.page(parameters["pageNumber"])
 		except Exception as e:
 			pageItems = []
 
-		body = parseOrderItem(pageItems,orderItemParameters)
+		body = parseOrderItem(pageItems,parameters)
 		statusCode = "2XX"
-		response = {"order_items": body,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":orderItemParameters["pageNumber"], "items_per_page":orderItemParameters["itemsPerPage"]}
+		response = {"order_items": body}
+
+		responsePaginationParameters(response,paginator, parameters)
 
 	except Exception as e:
 		log.critical(e)

@@ -13,7 +13,7 @@
         			<p>Thank you for showing interest in our products <strong>{{name}}</strong>!</br></p>
                     {% if product_name|length > 0 %}
                         <p> You have contacted us for <a href="{{product_link}}"><strong>{{ product_name }}.</strong></a></p>
-                        <p><img src="{{image_link}}"></p>
+                        <p><img style="max-width:400px;" src="{{image_link}}"></p>
                     {% else %}
                     {% endif %}
                     {% if category_name|length > 0 %}

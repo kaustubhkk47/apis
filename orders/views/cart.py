@@ -24,7 +24,7 @@ def get_cart_details(request, parameters):
 
 		body = parseCart(pageItems,parameters)
 		response = {"carts": body}
-		response = responsePaginationParameters(response, paginator, parameters)
+		responsePaginationParameters(response, paginator, parameters)
 
 	except Exception as e:
 		log.critical(e)

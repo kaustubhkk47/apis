@@ -7,6 +7,9 @@ ALLOWED_HOSTS = ["*"]
 
 CURRENT_ENVIRONMENT = 'test'
 
+BASE_URL = "http://beta.wholdus.com"
+API_BASE_URL = "http://api-test.wholdus.com"
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

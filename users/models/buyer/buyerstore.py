@@ -3,6 +3,8 @@ from django.contrib import admin
 
 from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString, link_to_foreign_key, create_email
 
+import settings
+
 class BuyerStoreLead(models.Model):
 	buyer = models.ForeignKey('users.Buyer')
 	product = models.ForeignKey('catalog.Product')
@@ -21,6 +23,9 @@ class BuyerStoreLead(models.Model):
 
 	def __unicode__(self):
 		return "{} - {} - {}".format(self.buyer,self.name,self.mobile_number)
+
+	def get_product_link(self):
+		return r"{}/store/{}/{}-{}".format(settings.BASE_URL, self.buyer.store_url,self.product.slug,self.product_id)
 
 	def validateBuyerStoreLeadData(self, buyer_store_lead, is_new):
 		flag = 0
@@ -71,6 +76,38 @@ class BuyerStoreLead(models.Model):
 
 		bcc = ["manish@wholdus.com","kushagra@wholdus.com"]
 		#bcc = []
+
+		create_email(mail_template_file, mail_dict, subject, from_email, to_email, bcc = bcc)
+
+	def sendCustomerMail(self, parameters = {}):
+
+		buyerPtr = self.buyer
+
+		if self.email == None or self.email == "":
+			return
+
+		from_email = "Wholdus Info <info@wholdus.com>"
+		mail_template_file = "buyer_store/customer_store_lead.html"
+
+		if len(buyerPtr.company_name) > 0:
+			subject = buyerPtr.company_name
+		else:
+			subject = buyerPtr.name
+
+		subject += " has received you request"
+		to_email = [self.email]
+
+		from users.serializers.buyer import serialize_buyer, serialize_buyer_store_lead, serialize_buyer_address
+
+		mail_dict = {}
+		mail_dict["buyer"] = serialize_buyer(buyerPtr)
+		mail_dict["buyer_address"] = serialize_buyer_address(buyerPtr.latest_buyer_address_history())
+
+		productParameters = {}
+		productParameters["product_image_details"] = 1
+		mail_dict["buyer_store_lead"] = serialize_buyer_store_lead(self, productParameters)
+
+		bcc = ["manish@wholdus.com","kushagra@wholdus.com"]
 
 		create_email(mail_template_file, mail_dict, subject, from_email, to_email, bcc = bcc)
 

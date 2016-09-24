@@ -35,6 +35,23 @@ class BuyerProducts(models.Model):
 	def __unicode__(self):
 		return "{} - {}".format(str(self.buyer),str(self.product))
 
+class BuyerProductsAdmin(admin.ModelAdmin):
+	list_display = ["id", "link_to_buyer", "link_to_product", "buyer_interest", "responded","shared_on_whatsapp"]
+
+	list_display_links = ["id","link_to_buyer", "link_to_product"]
+
+	list_filter = ["shared_on_whatsapp", "responded", "buyer"] 
+
+	def link_to_buyer(self, obj):
+		return link_to_foreign_key(obj, "buyer")
+	link_to_buyer.short_description = "Buyer"
+	link_to_buyer.allow_tags=True
+
+	def link_to_product(self, obj):
+		return link_to_foreign_key(obj, "product")
+	link_to_product.short_description = "Product"
+	link_to_product.allow_tags=True
+
 class BuyerSharedProductID(models.Model):
 
 	buyer = models.ForeignKey('users.Buyer')

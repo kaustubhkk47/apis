@@ -1,4 +1,4 @@
-from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_integer, generateProductFile, generateProductCatalog, generate_pdf
+from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_integer, generateProductFile, generateProductCatalog, generate_pdf,responsePaginationParameters
 
 from ..models.category import Category
 from ..models.product import Product, validateProductData, ProductDetails, validateProductDetailsData, populateProductData, populateProductDetailsData, filterProducts, getProductFileName
@@ -32,17 +32,19 @@ def get_product_details(request, parameters = {}):
 		except Exception as e:
 			pageProducts = []
 
-		response = multiple_products_parser(pageProducts, parameters)
-		body = {"products": response,"total_products":paginator.count, "total_pages":paginator.num_pages, "page_number":parameters["pageNumber"], "items_per_page":parameters["itemsPerPage"]}
+		body = multiple_products_parser(pageProducts, parameters)
+		response = {"products": body,"total_products":paginator.count}
+
+		responsePaginationParameters(response, paginator, parameters)
 			
 		statusCode = "2XX"
 	except Exception as e:
 		log.critical(e)
 		statusCode = "4XX"
-		body = {"error": "Invalid product"}
+		response = {"error": "Invalid product"}
 
 	closeDBConnection()
-	return customResponse(statusCode, body)
+	return customResponse(statusCode, response)
 
 def get_product_colour_details(request, parameters = {}):
 	try:
@@ -129,7 +131,7 @@ def post_new_product(request, parameters = {}):
 	if not "sellerID" in product or not validate_integer(product["sellerID"]):
 		return customResponse("4XX", {"error": "Seller id for product not sent"})
 
-	sellerPtr = Seller.objects.filter(id=int(product["sellerID"]))
+	sellerPtr = Seller.objects.filter(id=int(product["sellerID"]), delete_status=False)
 	if not sellerPtr.exists():
 		return customResponse("4XX", {"error": "Invalid id for seller sent"})
 
@@ -268,7 +270,7 @@ def delete_product(request):
 	if not len(product) or not "productID" in product or not validate_integer(product["productID"]):
 		return customResponse("4XX", {"error": "Id for product not sent"})
 
-	productPtr = Product.objects.filter(id=int(product["productID"]))
+	productPtr = Product.objects.filter(id=int(product["productID"]), delete_status=False)
 
 	if len(productPtr) == 0:
 		return customResponse("4XX", {"error": "Invalid id for product sent"})

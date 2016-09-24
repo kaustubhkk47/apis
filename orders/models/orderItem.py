@@ -164,14 +164,15 @@ OrderItemStatus = {
 }
 
 OrderItemCompletionStatus = [4, 11, 13, 14]
+OrderItemNonCompletionStatus = [0,1,2,3,5,6,7,8,9,10,12]
 
 def populateMailOrderItem(OrderItemPtr):
 
 	productPtr = Product.objects.filter(id=OrderItemPtr.product_id)
 	productPtr = productPtr[0]
 
-	imageLink = "http://api.wholdus.com/" + productPtr.image_path + "200x200/" + productPtr.image_name + "-1.jpg"
-	productLink = "http://www.wholdus.com/" + productPtr.category.slug + "-" + str(productPtr.category_id) + "/" +productPtr.slug +"-" + str(productPtr.id)
+	imageLink = productPtr.get_image_url(200)
+	productLink = productPtr.get_absolute_url()
 	itemMargin = float((OrderItemPtr.retail_price_per_piece - OrderItemPtr.edited_price_per_piece)/OrderItemPtr.retail_price_per_piece*100)
 
 	mailOrderItem = {

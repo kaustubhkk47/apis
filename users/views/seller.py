@@ -124,7 +124,7 @@ def update_seller(request):
 	if not len(seller) or not "sellerID" in seller or not validate_integer(seller["sellerID"]):
 		return customResponse("4XX", {"error": "Id for seller not sent"})
 
-	sellerPtr = Seller.objects.filter(id=int(seller["sellerID"])).select_related('sellerdetails')
+	sellerPtr = Seller.objects.filter(id=int(seller["sellerID"]), delete_status=False).select_related('sellerdetails')
 
 	if len(sellerPtr) == 0:
 		return customResponse("4XX", {"error": "Invalid id for seller sent"})
@@ -232,7 +232,7 @@ def delete_seller(request):
 	if not len(seller) or not "sellerID" in seller or not validate_integer(seller["sellerID"]):
 		return customResponse("4XX", {"error": "Id for seller not sent"})
 
-	sellerPtr = Seller.objects.filter(id=int(seller["sellerID"]))
+	sellerPtr = Seller.objects.filter(id=int(seller["sellerID"]), delete_status=False)
 
 	if len(sellerPtr) == 0:
 		return customResponse("4XX", {"error": "Invalid id for seller sent"})
