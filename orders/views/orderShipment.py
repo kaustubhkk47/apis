@@ -15,6 +15,7 @@ from users.serializers.buyer import serialize_buyer_address
 import settings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Sum
+from decimal import Decimal
 
 def get_order_shipment_details(request, parameters):
 	try:
@@ -93,7 +94,7 @@ def post_new_order_shipment(request):
 	try:
 		newOrderShipment = OrderShipment(suborder=subOrderPtr, pickup_address=sellerAddressPtr, drop_address=buyerAddressPtr)
 		populateOrderShipment(newOrderShipment, orderShipment)
-		finalPrice = float(allOrderItems.aggregate(Sum('final_price'))["final_price__sum"])
+		finalPrice = allOrderItems.aggregate(Sum('final_price'))["final_price__sum"]
 		newOrderShipment.final_price = finalPrice
 		newOrderShipment.save()
 
@@ -106,11 +107,6 @@ def post_new_order_shipment(request):
 		else:
 			subOrderPtr.suborder_status = 4
 
-		subOrderPtr.cod_charge += newOrderShipment.cod_charge
-		subOrderPtr.shipping_charge += newOrderShipment.shipping_charge
-		subOrderPtr.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
-		subOrderPtr.save()
-
 		OrderItemPtr = OrderItem.objects.filter(suborder__order_id= subOrderPtr.order_id, current_status__in=[0,1,2])
 
 		if OrderItemPtr.exists():
@@ -118,10 +114,38 @@ def post_new_order_shipment(request):
 		else:
 			subOrderPtr.order.order_status = 3
 
-		subOrderPtr.order.cod_charge += newOrderShipment.cod_charge
-		subOrderPtr.order.shipping_charge += newOrderShipment.shipping_charge
-		subOrderPtr.order.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
+		if subOrderPtr.order.placed_by == 0:
+			subOrderPtr.cod_charge += newOrderShipment.cod_charge
+			subOrderPtr.shipping_charge += newOrderShipment.shipping_charge
+			subOrderPtr.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
+			subOrderPtr.save()
+
+			subOrderPtr.order.cod_charge += newOrderShipment.cod_charge
+			subOrderPtr.order.shipping_charge += newOrderShipment.shipping_charge
+			subOrderPtr.order.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
+		else:
+			if subOrderPtr.suborder_status == 4:
+				oldOrderShipments = OrderShipment.objects.filter(suborder_id= subOrderPtr.id).exclude(id=newOrderShipment.id)
+				oldOrderShipmentValues = oldOrderShipments.aggregate(Sum('cod_charge'),Sum('shipping_charge'))
+				oldShippingCharge = oldOrderShipmentValues["shipping_charge__sum"]
+				oldCODCharge = oldOrderShipmentValues["cod_charge__sum"]
+				newOrderShipment.cod_charge = subOrderPtr.cod_charge - oldShippingCharge
+				newOrderShipment.shipping_charge  = subOrderPtr.shipping_charge - oldShippingCharge
+			else:
+				currentOrderItems = OrderItem.objects.filter(order_shipment_id=newOrderShipment.id)
+				oldOrderItems = OrderItem.objects.filter(suborder_id= subOrderPtr.id)
+
+				oldOrderItemPrices = oldOrderItems.aggregate(Sum('final_price'))["final_price__sum"]
+				currentOrderItemPrices = currentOrderItems.aggregate(Sum('final_price'))["final_price__sum"]
+
+				ratio = currentOrderItemPrices/oldOrderItemPrices
+
+				newOrderShipment.cod_charge = subOrderPtr.cod_charge*ratio
+				newOrderShipment.shipping_charge  = subOrderPtr.shipping_charge*ratio
+
+			newOrderShipment.save()
 		
+		subOrderPtr.save()
 		subOrderPtr.order.save()
 		
 		newOrderShipment.create_manifest()

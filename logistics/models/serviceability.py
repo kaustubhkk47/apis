@@ -18,6 +18,8 @@ class PincodeServiceability(models.Model):
 	regular_pickup_available = models.BooleanField(default=False)
 	cod_available = models.BooleanField(default=False)
 
+	ou_code = models.CharField(max_length=15, blank=True)
+
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
@@ -31,7 +33,7 @@ class PincodeServiceability(models.Model):
 
 class PincodeServiceabilityAdmin(admin.ModelAdmin):
 	search_fields = ["pincode__pincode", "pincode__city_name", "pincode__state_name"]
-	list_display = ["id", "link_to_pincode", "logistics_partner", "regular_delivery_available", "cod_available"]
+	list_display = ["id", "link_to_pincode", "logistics_partner", "regular_delivery_available", "cod_available", "ou_code"]
 	list_filter = ["logistics_partner", "regular_delivery_available", "cod_available"]
 
 	list_display_links = ["id", "link_to_pincode"]

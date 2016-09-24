@@ -16,3 +16,5 @@ pytz==2016.4
 beautifulsoup4==4.4.1
 bs4==0.0.1
 requests==2.10.0
+pyBarcode==0.7
+num2words==0.5.3
