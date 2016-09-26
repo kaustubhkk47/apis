@@ -7,7 +7,7 @@ from users.models.buyer import Buyer, BuyerAddress
 
 from catalog.models.product import Product
 from catalog.models.productLot import getCalculatedPricePerPiece
-from .orderItem import OrderItem, OrderItemCompletionStatus
+from .orderItem import OrderItem, OrderItemNonCompletionStatus
 from .subOrder import SubOrder, populateSellerMailDict
 from users.serializers.buyer import serialize_buyer_address
 
@@ -19,6 +19,9 @@ class Order(models.Model):
 	buyer = models.ForeignKey('users.Buyer')
 	cart = models.ForeignKey('orders.Cart', null=True, blank=True)
 	buyer_address_history = models.ForeignKey('users.BuyerAddressHistory', null=True, blank=True)
+
+	# 0 - Admin 1 - Customer
+	placed_by = models.IntegerField(default=0)
 
 	pieces = models.PositiveIntegerField(default=1)
 	product_count = models.PositiveIntegerField(default=1)
@@ -63,6 +66,7 @@ class Order(models.Model):
 		self.cod_charge = cartPtr.cod_charge
 		self.final_price = cartPtr.final_price
 		self.order_status = 0
+		self.placed_by = 1
 		self.save()
 		self.display_number = "1" +"%06d" %(self.id,)
 
@@ -116,17 +120,13 @@ def filterOrder(orderParameters):
 
 	return orders
 
-def validateOrderProductsData(orderProducts):
+def validateOrderProductsData(orderProducts,  productsHash, productIDarr):
 
 	for orderProduct in orderProducts:
 		if not "productID" in orderProduct or not validate_integer(orderProduct["productID"]):
 			return False
 
-		productPtr = Product.objects.filter(id=int(orderProduct["productID"]))
-		if len(productPtr) == 0:
-			return False
-
-		productPtr = productPtr[0]
+		productID = int(orderProduct["productID"])
 
 		if not "pieces" in orderProduct or not validate_integer(orderProduct["pieces"]):
 			return False
@@ -135,24 +135,17 @@ def validateOrderProductsData(orderProducts):
 		if not "remarks" in orderProduct or orderProduct["remarks"]==None:
 			orderProduct["remarks"] = ""
 
-		orderProduct["retail_price_per_piece"] = productPtr.price_per_unit
-		orderProduct["lot_size"] = productPtr.lot_size
-
-		orderProduct["final_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
-		orderProduct["lots"] = int(math.ceil(float(orderProduct["pieces"])/productPtr.lot_size))
-		orderProduct["calculated_price_per_piece"] = getCalculatedPricePerPiece(int(orderProduct["productID"]),orderProduct["lots"])
+		productsHash[productID] = len(productsHash)
+		productIDarr.append(productID)
 
 	return True
 
 def update_order_completion_status(order):
 
-	orderItemQuerySet = OrderItem.objects.filter(suborder__order_id = order.id)
-	for orderItem in orderItemQuerySet:
-		if orderItem.current_status not in OrderItemCompletionStatus:
-			return
-
-	order.order_status = 3
-	order.save()
+	orderItemQuerySet = OrderItem.objects.filter(suborder__order_id = order.id, current_status__in=OrderItemNonCompletionStatus)
+	if not orderItemQuerySet.exists():
+		order.order_status = 3
+		order.save()
 
 OrderStatus = {
 	-1:{"display_value":"Cancelled"},

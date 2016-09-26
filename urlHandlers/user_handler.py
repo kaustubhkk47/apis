@@ -50,7 +50,7 @@ def buyer_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0 and parameters["isBuyerStore"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return buyer.get_buyer_details(request,parameters)
@@ -84,6 +84,49 @@ def buyer_panel_tracking_details(request, version = "0"):
 		return buyer.post_new_buyer_panel_tracking(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
+def buyer_store_lead_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateBuyerStoreParameters(request, {}, version)
+
+	if request.method == "GET":
+
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return buyer.get_buyer_store_lead_details(request,parameters)
+	elif request.method == "POST":
+
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0 and parameters["isBuyerStore"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return buyer.post_new_buyer_store_lead(request, parameters)
+	elif request.method == "PUT":
+
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return buyer.update_buyer_store_lead(request,parameters)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+def populateBuyerStoreParameters(request, parameters = {}, version = "0"):
+
+	parameters = populateBuyerProductParameters(request, parameters, version)
+
+	buyerStoreLeadID = request.GET.get("buyerstoreleadID", "")
+	if buyerStoreLeadID != "":
+		parameters["buyerStoreLeadsArr"] = getArrFromString(buyerStoreLeadID)
+
+	buyerStoreLeadStatus = request.GET.get("buyer_store_lead_status", None)
+	if buyerStoreLeadStatus:
+		parameters["buyer_store_lead_status"] = getArrFromString(buyerStoreLeadStatus)
+
+	return parameters
+
+
 
 def populateBuyerParameters(request, parameters = {}, version = "0"):
 
@@ -241,10 +284,10 @@ def buyer_interest_details(request, version = "0"):
 		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 		return buyer.update_buyer_interest(request, parameters)
-	elif request.method == "DELETE":
-		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.delete_buyer_interest(request, parameters)
+	#elif request.method == "DELETE":
+	#	if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+	#		return customResponse("4XX", {"error": "Authentication failure"})
+	#	return buyer.delete_buyer_interest(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -257,7 +300,7 @@ def buyer_product_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0 and parameters["isBuyerStore"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return buyer.get_buyer_product_details(request,parameters)
@@ -283,10 +326,17 @@ def buyer_product_response_details(request, version = "0"):
 
 	if request.method == "GET":
 
-		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0 and parameters["isBuyerStore"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
 		return buyer.get_buyer_product_response_details(request,parameters)
+
+	elif request.method == "PUT":
+
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return buyer.update_buyer_product_response(request,parameters)
 	
 
 	return customResponse("4XX", {"error": "Invalid request"})
@@ -450,11 +500,26 @@ def populateBuyerIDParameters(request, parameters = {}, version = "0"):
 	buyerID = request.GET.get("buyerID", "")
 	tokenPayload = convert_keys_to_string(get_token_payload(accessToken, "buyerID"))
 	parameters["isBuyer"] = 0
-	if "buyerID" in tokenPayload and tokenPayload["buyerID"]!=None:
-		parameters["buyersArr"] = [tokenPayload["buyerID"]]
-		parameters["isBuyer"] = 1
+	parameters["isBuyerStore"] = 0
+	if "buyerID" in tokenPayload and validate_integer(tokenPayload["buyerID"]) and "password" in tokenPayload:
+		try:
+			buyerPtr = Buyer.objects.get(id=int(tokenPayload["buyerID"]), password=tokenPayload["password"], delete_status=False)
+		except:
+			pass
+		else:
+			parameters["buyersArr"] = [buyerPtr.id]
+			parameters["isBuyer"] = 1
 	elif buyerID != "":
 		parameters["buyersArr"] = getArrFromString(buyerID)
+
+	storeUrl = request.GET.get("store_url", "")
+	try:
+		buyerPtr = Buyer.objects.get(store_url=storeUrl, delete_status=False)
+	except Exception as e:
+		pass
+	else:
+		parameters["buyersArr"] = [buyerPtr.id]
+		parameters["isBuyerStore"] = 1
 
 	return parameters
 
@@ -503,9 +568,14 @@ def populateSellerIDParameters(request, parameters = {}, version = "0"):
 	sellerID = request.GET.get("sellerID", "")
 	tokenPayload = get_token_payload(accessToken, "sellerID")
 	parameters["isSeller"] = 0
-	if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
-		parameters["sellersArr"] = [tokenPayload["sellerID"]]
-		parameters["isSeller"] = 1
+	if "sellerID" in tokenPayload and validate_integer(tokenPayload["sellerID"]) and "password" in tokenPayload:
+		try:
+			sellerPtr = Seller.objects.get(id=int(tokenPayload["sellerID"]), password=tokenPayload["password"], delete_status=False)
+		except:
+			pass
+		else:
+			parameters["sellersArr"] = [sellerPtr.id]
+			parameters["isSeller"] = 1
 	elif sellerID != "":
 		parameters["sellersArr"] = getArrFromString(sellerID)
 
@@ -599,9 +669,14 @@ def populateInternalUserIDParameters(request, parameters = {}, version = "0"):
 	internalUserID = request.GET.get("internaluserID", "")
 
 	parameters["isInternalUser"] = 0
-	if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
-		parameters["internalusersArr"] = [tokenPayload["internaluserID"]]
-		parameters["isInternalUser"] = 1
+	if "internaluserID" in tokenPayload and validate_integer(tokenPayload["internaluserID"]) and "password" in tokenPayload:
+		try:
+			internalUserPtr = InternalUser.objects.get(id=int(tokenPayload["internaluserID"]), password=tokenPayload["password"])
+		except:
+			pass
+		else:
+			parameters["internalusersArr"] = [internalUserPtr.id]
+			parameters["isInternalUser"] = 1
 	elif internalUserID != "":
 		parameters["internalusersArr"] = getArrFromString(internalUserID)
 

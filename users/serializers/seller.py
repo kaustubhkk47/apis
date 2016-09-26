@@ -102,3 +102,30 @@ def parse_seller(seller_queryset, parameters = {}):
 		sellers.append(seller_entry)
 
 	return sellers
+
+def parse_seller_category(seller_category_queryset, parameters = {}):
+
+	seller_categories = []
+
+	for seller_category in seller_category_queryset:
+		seller_category_entry = serialize_seller_category(seller_category, parameters)
+		seller_categories.append(seller_category_entry)
+
+	return seller_categories
+
+def serialize_seller_category(seller_category_entry, parameters):
+
+	seller_category = {}
+
+	seller_category["sellercategoryID"] = seller_category_entry.id
+
+	seller = {}
+	seller["sellerID"] = seller_category_entry.seller.id
+	seller["company_name"] = seller_category_entry.seller.company_name
+	seller_category["seller"] = seller
+
+	#category = {}
+	#category["categoryID"] = seller_category_entry.category_id
+	#seller_category["category"] = category
+
+	return seller_category

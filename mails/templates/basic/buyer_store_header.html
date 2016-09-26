@@ -1,0 +1,24 @@
+<table style="background-color:#512da8; color:#FFFFFF;width:100%">
+	<tr>
+		<td style="padding:5px;padding-left:10px;">
+			<img src="http://wholdus.com/images/logo/logo64x64.png">
+		</td>
+		<td style="font-size:200%; text-align: left; width: 86%;">
+			
+			{% if buyer.company_name|length > 0 %}
+                        			{{ buyer.company_name }}
+                    		{% else %}
+                        			{{ buyer.name }}
+                   		{% endif %}
+                   		
+		</td> 
+		
+	</tr>
+</table>
+
+<table style="width:100%;background-color:#673AB7;height: 15px;">
+	<tr>
+		<td>
+		</td>
+	</tr>
+</table>

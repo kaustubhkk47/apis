@@ -81,7 +81,7 @@ def generateCaption(product, urlPart, buyerProductID):
 def updateProductShownStatus(ids):
 	payload = {}
 	payload['buyerproductID'] = ids
-	url = 'http://api.wholdus.com/users/buyer/buyerproducts/whatsapp/'
+	url = 'http://api.wholdus.com/users/buyer/buyerproducts/whatsapp/?access_token=' + constantValuesInstance.getAccessToken()
 	r = requests.put(url, json=payload)
 
 	if r.status_code == 200:
@@ -149,7 +149,8 @@ class Whatsapp():
 	imageUploadXpath = '//*[@id="main"]/header/div[3]/div/div[1]/span/div/input[2]'
 	#captionXpath = '//*[@id="app"]/div/div[3]/div[1]/span[2]/span/div/div[2]/div/span/div/div[2]/div/div/div/div[2]'
 	captionXpath = '//*[@id="app"]/div/div[3]/div[1]/span[2]/span/div/div[2]/div/span/div/div[2]/div/div[2]/div[1]/div'
-	submitButtonXpath = '//*[@id="app"]/div/div[3]/div[1]/span[2]/span/div/div[2]/span[2]/div/button'
+	#submitButtonXpath = '//*[@id="app"]/div/div[3]/div[1]/span[2]/span/div/div[2]/span[2]/div/button'
+	submitButtonXpath = '//*[@id="app"]/div/div[3]/div[1]/span[2]/span/div/div[2]/div[2]/span/div/button'
 
 	def launchChrome(self):
 		chromeOptions = webdriver.ChromeOptions()
@@ -256,7 +257,7 @@ def main(argv):
 		print 'Enter 0 to run script for default products or 1 to enter script for specific products. If entering 1 keep file with product Ids in same folder with filename productfile.txt'
 
 		while 1:
-			
+
 			productInput = raw_input()
 			productInput = productInput.strip()
 
@@ -271,12 +272,12 @@ def main(argv):
 					print "Enter 1 to try reading file again"
 					continue
 				else:
-					print "Product IDs are {}".format(first_line) 
+					print "Product IDs are {}".format(first_line)
 					specificProducts = first_line
 					break
 			else:
 				break
-			
+
 
 
 		if t == '0':

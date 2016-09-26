@@ -5,11 +5,16 @@ from users.models.seller import SellerAddress
 
 from .orderItem import OrderItem
 
-from scripts.utils import validate_date, validate_number, validate_bool, validate_integer, link_to_foreign_key
+from scripts.utils import validate_date, validate_number, validate_bool, validate_integer, link_to_foreign_key, generate_pdf
 from decimal import Decimal
 from django.utils import timezone
 
 from logistics.models.logisticspartner import LogisticsPartner
+
+from users.serializers.seller import serialize_seller_address
+from users.serializers.buyer import serialize_buyer_address
+
+import settings
 
 
 class OrderShipment(models.Model):
@@ -66,6 +71,85 @@ class OrderShipment(models.Model):
 
 	def __unicode__(self):
 		return "{} - {} - {}".format(self.id,self.suborder.display_number,self.suborder.seller.name)
+
+	def create_manifest(self):
+
+		manifest_dict = {}
+		manifest_dict["orderItems"] = []
+		manifest_dict["extra_order_items"] = 0
+		maxOrderItems = 34
+
+		subOrderPtr = self.suborder
+
+		buyerPtr = subOrderPtr.order.buyer
+		sellerPtr = subOrderPtr.seller
+
+		sellerAddressPtr = subOrderPtr.seller_address_history
+
+		buyerAddressPtr = subOrderPtr.order.buyer_address_history
+
+		allOrderItems = OrderItem.objects.filter(order_shipment_id=self.id)
+
+		orderItemCount = len(allOrderItems)
+
+		extraOrderItems = orderItemCount - maxOrderItems
+
+		if extraOrderItems > 0:
+			manifest_dict["extra_order_items"] = extraOrderItems
+			orderItemCount = maxOrderItems
+
+		for i in range(orderItemCount):
+
+			orderItemPtr = allOrderItems[i]
+			manifestOrderItem = {
+				"name":orderItemPtr.product.display_name,
+				"pieces":orderItemPtr.pieces
+			}
+
+			manifest_dict["orderItems"].append(manifestOrderItem)
+
+		outputLink = "media/generateddocs/shipmentmanifest/{}/{}/".format(sellerPtr.id,subOrderPtr.display_number) 
+		outputDirectory = settings.STATIC_ROOT + outputLink
+		outputFileName = "WholdusManifest-{}-{}.pdf".format(self.id,subOrderPtr.display_number)
+
+		self.manifest_link = outputLink + outputFileName
+		self.save()
+
+		manifest_dict["order"] = {
+			"display_number": subOrderPtr.display_number
+		}
+
+		manifest_dict["buyer"] = {
+			"name": buyerPtr.name
+		}
+
+		manifest_dict["buyer_address"] = serialize_buyer_address(buyerAddressPtr)
+
+		manifest_dict["seller"] = {
+			"name": sellerPtr.name,
+			"company_name": sellerPtr.company_name,
+			"vat_tin": sellerPtr.sellerdetails.vat_tin
+		}
+
+		manifest_dict["seller_address"] = serialize_seller_address(sellerAddressPtr)
+
+		manifest_dict["shipment"] = {
+			"waybill_number": self.waybill_number,
+			"shipping_amount": '{0:.0f}'.format(self.cod_charge + self.shipping_charge),
+			"logistics_partner": self.logistics_partner_name,
+			"invoice_number": self.invoice_number,
+			"final_price": '{0:.0f}'.format(self.final_price),
+			"amount_to_collect":'{0:.0f}'.format(float(self.cod_charge) + float(self.shipping_charge) + float(self.final_price)),
+			"packaged_length": '{0:.0f}'.format(self.packaged_length),
+			"packaged_breadth": '{0:.0f}'.format(self.packaged_breadth),
+			"packaged_height": '{0:.0f}'.format(self.packaged_height),
+			"packaged_weight": '{0:.2f}'.format(self.packaged_weight)
+		}
+
+		
+		template_file = "manifest/shipment_manifest.html"
+
+		generate_pdf(template_file, manifest_dict, outputDirectory, outputFileName)
 
 class OrderShipmentAdmin(admin.ModelAdmin):
 	search_fields = ["suborder__display_number"]
@@ -169,27 +253,14 @@ def filterOrderShipment(orderShipmentParameters):
 
 	return orderShipments
 
-def validateOrderShipmentItemsData(orderItems, subOrderID):
+def validateOrderShipmentItemsData(orderItems, sentOrderItems):
 
 	for orderItem in orderItems:
 
 		if not "orderitemID" in orderItem or not validate_integer(orderItem["orderitemID"]):
 			return False
 
-		orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"]))
-		if len(orderItemPtr) == 0:
-			return False
-
-		orderItemPtr = orderItemPtr[0]
-
-		if orderItemPtr.current_status >= 4:
-			return False
-
-		if orderItemPtr.order_shipment != None:
-			return False
-
-		if orderItemPtr.suborder_id != subOrderID:
-			return False
+		sentOrderItems.append(int(orderItem["orderitemID"]))
 
 	return True
 

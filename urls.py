@@ -68,6 +68,7 @@ urlpatterns += [
 	url(r'^users/buyer/buyerproducts/masterupdate/$', user_handler.buyer_product_master_update),
 	url(r'^users/buyer/buyersharedproductid/$', user_handler.buyer_shared_product_id_details),
 	url(r'^users/buyer/buyerpanel/instructionstracking/$', user_handler.buyer_panel_tracking_details),
+	url(r'^users/buyer/store/lead/$', user_handler.buyer_store_lead_details),
 ]
 
 urlpatterns += [
@@ -102,6 +103,10 @@ urlpatterns += [
 urlpatterns += [
 	url(r'^blog/articles/$', blog_handler.article_details),
 	url(r'^blog/articles/coverphoto/$', blog_handler.article_cover_photo_details),
+]
+
+urlpatterns += [
+	url(r'^general/sentsms/deliveryreport/$', general_handler.delivery_report_details)
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

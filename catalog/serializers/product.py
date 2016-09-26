@@ -5,8 +5,9 @@ from ..models.productLot import ProductLot
 from ..models.product import Product, filterProducts
 from .category import serialize_categories
 from users.serializers.seller import serialize_seller
-from users.models.buyer import filterBuyerProductResponse
+from users.models.buyer import filterBuyerProductResponse, Buyer
 from orders.models.cart import filterCartItem, CartItem
+from orders.models.orderItem import OrderItem
 import ast
 
 def serialize_product_lots(productsItem, parameters = {}):
@@ -45,7 +46,7 @@ def serialize_product(productsItem, parameters = {}):
 	product["display_name"] = productsItem.display_name
 	product["is_catalog"] = productsItem.is_catalog
 	product["delete_status"] = productsItem.delete_status
-	product["absolute_path"] = "http://www.wholdus.com/" + productsItem.category.slug + "-" + str(productsItem.category_id) + "/" +productsItem.slug +"-" + str(productsItem.id)
+	product["absolute_path"] = productsItem.get_absolute_url()
 	product["margin"] = '{0:.1f}'.format((float(productsItem.price_per_unit) - float(productsItem.min_price_per_unit))/float(productsItem.price_per_unit)*100)
 	product["url"] = productsItem.category.slug + "-" + str(productsItem.category.id) + "/" + productsItem.slug+ "-" + str(productsItem.id)
 
@@ -81,15 +82,9 @@ def serialize_product(productsItem, parameters = {}):
 	if "product_image_details" in parameters and parameters["product_image_details"] == 1:
 		image = {}
 
-		image_numbers = str(productsItem.image_numbers)
-		try:
-			image_numbers = ast.literal_eval(image_numbers)
-		except Exception as e:
-			image_numbers = []
-
-		if len(image_numbers) > 0:
-			imageLink = "http://api.wholdus.com/" + productsItem.image_path + "700x700/" + productsItem.image_name + "-" + str(image_numbers[0]) +".jpg"		
-			image["absolute_path"] = imageLink
+		image_numbers = productsItem.get_image_numbers_arr()
+	
+		image["absolute_path"] = productsItem.get_image_url()
 
 		image["image_numbers"] = image_numbers
 		image["image_count"] = len(image_numbers)
@@ -111,6 +106,7 @@ def serialize_product(productsItem, parameters = {}):
 
 		product["response"] = response
 
+		"""
 		cartitem = {}
 		cartItemPtr =filterCartItem(parameters)
 		cartItemPtr = cartItemPtr.filter(product_id = productsItem.id, status=0)
@@ -121,7 +117,46 @@ def serialize_product(productsItem, parameters = {}):
 			cartitem["lots"] = cartItemPtr.lots
 
 		product["cartitem"] = cartitem
+		"""
 
+	if ("isBuyerStore" in parameters and parameters["isBuyerStore"] == 1) or ("isBuyer" in parameters and parameters["isBuyer"] == 1):
+
+		buyerstore = {}
+
+		buyerstore["buyer_store_discounted_price"] = None
+		buyerstore["buyer_store_discount"] = None
+
+		buyerProductResponsePtr = filterBuyerProductResponse(parameters)
+		buyerProductResponsePtr = buyerProductResponsePtr.filter(product_id = productsItem.id)
+		flag = 0
+		if not len(buyerProductResponsePtr) == 0:
+			buyerProductResponsePtr = buyerProductResponsePtr[0]
+			if buyerProductResponsePtr.store_discount != None and buyerProductResponsePtr.store_discount != 0:
+				discount_factor =  1 - buyerProductResponsePtr.store_discount/100
+				buyerstore["buyer_store_discounted_price"] = productsItem.price_per_unit*discount_factor
+				buyerstore["buyer_store_discount"] = buyerProductResponsePtr.store_discount
+				flag = 1
+
+		if flag == 0:
+			buyerPtr = Buyer.objects.filter(id=parameters["buyersArr"][0])
+			if len(buyerPtr) > 0:
+				buyerPtr = buyerPtr[0]
+				if buyerPtr.store_global_discount != None and buyerPtr.store_global_discount != 0:
+					discount_factor =  1 - buyerPtr.store_global_discount/100
+					buyerstore["buyer_store_discounted_price"] = productsItem.price_per_unit*discount_factor
+					buyerstore["buyer_store_discount"] = buyerPtr.store_global_discount
+
+		product["buyerstore"] = buyerstore
+
+		orderitem = {}
+		orderItemPtr = OrderItem.objects.filter(product_id = productsItem.id, current_status=11, suborder__order__buyer_id=parameters["buyersArr"][0])
+		if len(orderItemPtr) == 0:
+			orderitem["pieces"] = 0
+		else:
+			orderItemPtr = orderItemPtr[0]
+			orderitem["pieces"] = orderItemPtr.pieces
+
+		product["orderitem"] = orderitem
 
 
 	return product

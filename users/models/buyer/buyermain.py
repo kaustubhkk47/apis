@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib import admin
-from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString, link_to_foreign_key
+from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString, link_to_foreign_key, validate_percent
 from decimal import Decimal
 import jwt as JsonWebToken
 import settings
@@ -20,6 +20,8 @@ class Buyer(models.Model):
 	gender = models.CharField(max_length=10, blank=True)
 
 	store_slug = models.TextField(blank=True)
+	store_url = models.TextField(blank=True)
+	store_global_discount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null = True)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -155,7 +157,7 @@ def validateBuyerData(buyer, oldbuyer, is_new):
 		buyer["name"] = oldbuyer.name
 	if not "company_name" in buyer or buyer["company_name"]==None:
 		buyer["company_name"] = oldbuyer.company_name
-	if not "mobile_number" in buyer or buyer["mobile_number"]==None or not validate_mobile_number(buyer["mobile_number"]):
+	if not "mobile_number" in buyer or not validate_mobile_number(buyer["mobile_number"]):
 		flag = 1
 		buyer["mobile_number"] = oldbuyer.mobile_number
 	if not "email" in buyer or buyer["email"]==None or not validate_email(buyer["email"]):
@@ -179,6 +181,8 @@ def validateBuyerData(buyer, oldbuyer, is_new):
 			buyer["whatsapp_number"] = oldbuyer.whatsapp_number
 	if not "whatsapp_sharing_active" in buyer or not validate_bool(buyer["whatsapp_sharing_active"]):
 		buyer["whatsapp_sharing_active"] = oldbuyer.whatsapp_sharing_active
+	if not "store_global_discount" in buyer or not validate_percent(buyer["store_global_discount"]):
+		buyer["store_global_discount"] = oldbuyer.store_global_discount
 	if not "password" in buyer or buyer["password"]:
 		if is_new == 1:
 			buyer["password"] = buyer["mobile_number"]
@@ -236,6 +240,9 @@ def populateBuyer(buyerPtr, buyer):
 	buyerPtr.email_verification = int(buyer["email_verification"])
 	buyerPtr.whatsapp_sharing_active = int(buyer["whatsapp_sharing_active"])
 	buyerPtr.gender = buyer["gender"]
+	buyerPtr.save()
+	buyerPtr.store_url = "{}-{}".format(buyerPtr.store_slug,buyerPtr.id)
+	buyerPtr.store_global_discount = buyer["store_global_discount"]
 
 def populateBuyerDetails(buyerDetailsPtr, buyerdetails):
 	buyerDetailsPtr.cst = buyerdetails["cst"]
@@ -319,6 +326,7 @@ def getBuyerToken(buyer):
 	tokenPayload = {
 		"user": "buyer",
 		"buyerID": buyer.id,
+		"password":buyer.password,
 	}
 	encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
 	return encoded.decode("utf-8")

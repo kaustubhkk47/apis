@@ -166,6 +166,49 @@ class SellerBankDetails(models.Model):
 
 	def __unicode__(self):
 		return str(self.seller)
+
+class SellerCategory(models.Model):
+
+	seller = models.ForeignKey('users.Seller')
+	category = models.ForeignKey('catalog.Category')
+
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name="Seller Category"
+		verbose_name_plural = "Seller Categories"
+
+	def __unicode__(self):
+		return str(self.category) + str(self.seller)
+
+class SellerCategoryAdmin(admin.ModelAdmin):
+	list_display = ["id", "link_to_seller", "link_to_category"]
+	list_display_links = ["id", "link_to_seller", "link_to_category"]
+	list_filter = ["seller", "category"]
+
+	def link_to_seller(self, obj):
+		return link_to_foreign_key(obj, "seller")
+	link_to_seller.short_description = "Seller"
+	link_to_seller.allow_tags=True
+
+	def link_to_category(self, obj):
+		return link_to_foreign_key(obj, "category")
+	link_to_category.short_description = "Category"
+	link_to_category.allow_tags=True
+
+def filterSellerCategory(parameters):
+
+	sellerCategories =  SellerCategory.objects.filter(seller__delete_status=False,category__delete_status=False)
+
+	if "categoriesArr" in parameters:
+		sellerCategories = sellerCategories.filter(category_id__in=parameters["categoriesArr"])
+
+	if "sellersArr" in parameters:
+		sellerCategories = sellerCategories.filter(seller_id__in=parameters["sellersArr"])
+
+	return sellerCategories
+
 		
 def validateSellerData(seller, oldseller, isnew):
 
@@ -334,6 +377,7 @@ def getSellerToken(seller):
 	tokenPayload = {
 		"user": "seller",
 		"sellerID": seller.id,
+		"password":seller.password
 	}
 	encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
 	return encoded.decode("utf-8")

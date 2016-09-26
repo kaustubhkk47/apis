@@ -38,6 +38,7 @@ def getInternalUserToken(internaluser):
 	tokenPayload = {
 		"user": "internaluser",
 		"internaluserID": internaluser.id,
+		"password":internaluser.password
 	}
 	encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
 	return encoded.decode("utf-8")

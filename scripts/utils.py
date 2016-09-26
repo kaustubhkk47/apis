@@ -17,8 +17,10 @@ from django.template.loader import get_template
 from django.core.files import File
 import pdfkit
 import io
+import requests
 
 def closeDBConnection():
+	return
 	connection.close()
 
 def customResponse(statusCode, body):
@@ -72,8 +74,21 @@ def validate_number(x):
 		return False
 	return True
 
+def validate_percent(x):
+	try:
+		x = float(x)
+	except Exception, e:
+		return False
+	if 0 <= x <= 100:
+		return True
+	else:
+		return False
+
 def validate_mobile_number(x):
-	x = str(x)
+	try:
+		x = str(x)
+	except Exception as e:
+		return False
 	if len(x) != 10:
 		return False
 	if not (x[0] == '9' or x[0] == '8' or x[0] == '7'):
@@ -81,6 +96,10 @@ def validate_mobile_number(x):
 	return True
 
 def validate_email(x):
+	try:
+		x =str(x)
+	except Exception as e:
+		return False
 	if not re.match(r"[^@]+@[^@]+\.[^@]+", x):
 		return False
 	return True
@@ -117,12 +136,12 @@ def get_token_payload(access_token, userID):
 
 	return tokenPayload
 
-def create_email(mail_template_file,mail_dict,subject,from_email,to,attachment="",bcc=[]):
+def create_email(mail_template_file,mail_dict,subject,from_email,to_email,attachment="",bcc=[]):
 	mail_template = get_template(mail_template_file)   
 	#mail_context = Context(mail_dict)
 	html_message = mail_template.render(mail_dict)
 		
-	email = EmailMessage(subject=subject,body=html_message,from_email=from_email,to=to,bcc=bcc)
+	email = EmailMessage(subject=subject,body=html_message,from_email=from_email,to=to_email,bcc=bcc)
 
 	if (attachment != "" and os.path.isfile(attachment)):
 		email.attach_file(attachment)
@@ -130,7 +149,7 @@ def create_email(mail_template_file,mail_dict,subject,from_email,to,attachment="
 	email.content_subtype = "html"
 	email.send(fail_silently=True)
 
-def generate_pdf(template_src, context_dict, output_directory, output_file_name):
+def generate_pdf(template_src, context_dict, output_directory, output_file_name, grayscale = True):
 	template = get_template(template_src)
 	html  = template.render(context_dict)
 
@@ -146,7 +165,13 @@ def generate_pdf(template_src, context_dict, output_directory, output_file_name)
 	'margin-bottom': '0in',
 	'margin-left': '0in',
 	'no-outline': None,
+	'page-size':'A4',
+	'disable-smart-shrinking':None,
+	'dpi':96
 	}
+
+	if grayscale == True:
+		options["grayscale"] = None
 
 	config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDFPATH)
 
@@ -240,7 +265,6 @@ def responsePaginationParameters(response, paginator, parameters):
 	response["total_pages"] = paginator.num_pages
 	response["page_number"] = parameters["pageNumber"]
 	response["items_per_page"] = parameters["itemsPerPage"]
-	return response
 
 def link_to_foreign_key(obj, fk_name):
 	fk_instance = getattr(obj, fk_name)
@@ -263,3 +287,4 @@ def getApiVersion(text):
 	except Exception as e:
 		pass
 	return version
+

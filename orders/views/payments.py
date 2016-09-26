@@ -11,20 +11,22 @@ from ..models.payments import BuyerPayment, SellerPayment, filterSellerPayment, 
 from ..serializers.payments import parseSellerPayments, parseBuyerPayments, serializeBuyerPayment, serializeSellerPayment
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-def get_seller_payment_details(request, sellerPaymentParameters):
+def get_seller_payment_details(request, parameters):
 	try:
-		sellerPayments = filterSellerPayment(sellerPaymentParameters)
+		sellerPayments = filterSellerPayment(parameters)
 
-		paginator = Paginator(sellerPayments, sellerPaymentParameters["itemsPerPage"])
+		paginator = Paginator(sellerPayments, parameters["itemsPerPage"])
 
 		try:
-			pageItems = paginator.page(sellerPaymentParameters["pageNumber"])
+			pageItems = paginator.page(parameters["pageNumber"])
 		except Exception as e:
 			pageItems = []
 
-		body = parseSellerPayments(pageItems,sellerPaymentParameters)
+		body = parseSellerPayments(pageItems,parameters)
 		statusCode = "2XX"
-		response = {"seller_payments": body,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":sellerPaymentParameters["pageNumber"], "items_per_page":sellerPaymentParameters["itemsPerPage"]}
+		response = {"seller_payments": body}
+
+		responsePaginationParameters(response,paginator, parameters)
 
 	except Exception as e:
 		log.critical(e)
@@ -34,21 +36,23 @@ def get_seller_payment_details(request, sellerPaymentParameters):
 	closeDBConnection()
 	return customResponse(statusCode, response)
 
-def get_buyer_payment_details(request, buyerPaymentParameters):
+def get_buyer_payment_details(request, parameters):
 	try:
 
-		buyerPayments = filterBuyerPayment(buyerPaymentParameters)
+		buyerPayments = filterBuyerPayment(parameters)
 		
-		paginator = Paginator(buyerPayments, buyerPaymentParameters["itemsPerPage"])
+		paginator = Paginator(buyerPayments, parameters["itemsPerPage"])
 
 		try:
-			pageItems = paginator.page(buyerPaymentParameters["pageNumber"])
+			pageItems = paginator.page(parameters["pageNumber"])
 		except Exception as e:
 			pageItems = []
 
-		body = parseBuyerPayments(pageItems,buyerPaymentParameters)
+		body = parseBuyerPayments(pageItems,parameters)
 		statusCode = "2XX"
-		response = {"buyer_payments": body,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":buyerPaymentParameters["pageNumber"], "items_per_page":buyerPaymentParameters["itemsPerPage"]}
+		response = {"buyer_payments": body}
+
+		responsePaginationParameters(response,paginator, parameters)
 
 
 	except Exception as e:

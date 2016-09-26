@@ -48,18 +48,18 @@ def post_new_buyer_lead(request):
 
 			if len(productPtr) == 0:
 				return customResponse("4XX", {"error": "invalid product id sent"})
-				
+
 			productPtr = productPtr[0]
-			newBuyerLead.product = productPtr
+				
+			newBuyerLead.product_id = int(buyerLead["productID"])
 
 		if "categoryID" in buyerLead and validate_integer(buyerLead["categoryID"]):
 			categoryPtr = Category.objects.filter(id=int(buyerLead["categoryID"]))
 
-			if len(categoryPtr) == 0:
+			if not categoryPtr.exists():
 				return customResponse("4XX", {"error": "invalid category id sent"})
 				
-			categoryPtr = categoryPtr[0]
-			newBuyerLead.category = categoryPtr
+			newBuyerLead.category_id = int(buyerLead["categoryID"])
 
 		newBuyerLead.save()
 	except Exception as e:
@@ -79,10 +79,8 @@ def post_new_buyer_lead(request):
 			
 			if newBuyerLead.product_id != None:
 				mail_dict["product_name"] = newBuyerLead.product.display_name
-				imageLink = "http://api.wholdus.com/" + newBuyerLead.product.image_path + "400x400/" + newBuyerLead.product.image_name + "-1.jpg"
-				productLink = "http://www.wholdus.com/" + newBuyerLead.product.category.slug + "-" + str(newBuyerLead.product.category_id) + "/" +newBuyerLead.product.slug +"-" + str(newBuyerLead.product.id)
-				mail_dict["product_link"] = productLink
-				mail_dict["image_link"] = imageLink
+				mail_dict["product_link"] = productPtr.get_absolute_url()
+				mail_dict["image_link"] = productPtr.get_image_url(400)
 
 			if newBuyerLead.category_id != None:
 				mail_dict["category_name"] = newBuyerLead.category.display_name
