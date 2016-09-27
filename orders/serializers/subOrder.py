@@ -13,6 +13,7 @@ def serializeSubOrder(subOrderEntry, parameters = {}):
 	subOrder["orderID"]=subOrderEntry.order_id
 	subOrder["suborderID"]=subOrderEntry.id
 	subOrder["product_count"] = subOrderEntry.product_count
+	subOrder["pieces"] = subOrderEntry.pieces
 	subOrder["retail_price"] = '{0:.0f}'.format(float(subOrderEntry.retail_price))
 	subOrder["calculated_price"] = '{0:.0f}'.format(float(subOrderEntry.calculated_price))
 	subOrder["edited_price"] = '{0:.0f}'.format(float(subOrderEntry.edited_price))

@@ -10,12 +10,15 @@ from decimal import Decimal
 from django.utils import timezone
 
 from logistics.models.logisticspartner import LogisticsPartner
+from logistics.models.serviceability import PincodeServiceability
 
-from users.serializers.seller import serialize_seller_address
-from users.serializers.buyer import serialize_buyer_address
+from users.serializers.seller import serialize_seller_address, serialize_seller
+from users.serializers.buyer import serialize_buyer_address, serialize_buyer
 
 import settings
 
+import barcode
+from num2words import num2words
 
 class OrderShipment(models.Model):
 
@@ -38,6 +41,8 @@ class OrderShipment(models.Model):
 
 	cod_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
 	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+	pieces = models.PositiveIntegerField(default=1)
+	product_count = models.PositiveIntegerField(default=1)
 	final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
 
 	remarks = models.TextField(blank=True)
@@ -62,6 +67,7 @@ class OrderShipment(models.Model):
 	updated_at = models.DateTimeField(auto_now=True)
 
 	manifest_link = models.TextField(blank=True)
+	label_link = models.TextField(blank=True)
 
 	class Meta:
 		ordering = ["-id"]
@@ -80,12 +86,9 @@ class OrderShipment(models.Model):
 		maxOrderItems = 34
 
 		subOrderPtr = self.suborder
-
 		buyerPtr = subOrderPtr.order.buyer
 		sellerPtr = subOrderPtr.seller
-
 		sellerAddressPtr = subOrderPtr.seller_address_history
-
 		buyerAddressPtr = subOrderPtr.order.buyer_address_history
 
 		allOrderItems = OrderItem.objects.filter(order_shipment_id=self.id)
@@ -108,6 +111,20 @@ class OrderShipment(models.Model):
 
 			manifest_dict["orderItems"].append(manifestOrderItem)
 
+		from orders.serializers.subOrder import serializeSubOrder
+		manifest_dict["sub_order"] = serializeSubOrder(subOrderPtr)
+
+		manifest_dict["buyer"] = serialize_buyer(buyerPtr)
+		manifest_dict["buyer_address"] = serialize_buyer_address(buyerAddressPtr)
+
+		manifest_dict["seller"] = serialize_seller(sellerPtr, {"seller_details_details":1})
+		manifest_dict["seller_address"] = serialize_seller_address(sellerAddressPtr)
+
+		from orders.serializers.orderShipment import serializeOrderShipment
+		manifest_dict["shipment"] = serializeOrderShipment(self)
+		
+		template_file = "shipment/shipment_manifest.html"
+
 		outputLink = "media/generateddocs/shipmentmanifest/{}/{}/".format(sellerPtr.id,subOrderPtr.display_number) 
 		outputDirectory = settings.STATIC_ROOT + outputLink
 		outputFileName = "WholdusManifest-{}-{}.pdf".format(self.id,subOrderPtr.display_number)
@@ -115,41 +132,58 @@ class OrderShipment(models.Model):
 		self.manifest_link = outputLink + outputFileName
 		self.save()
 
-		manifest_dict["order"] = {
-			"display_number": subOrderPtr.display_number
-		}
+		generate_pdf(template_file, manifest_dict, outputDirectory, outputFileName)
 
-		manifest_dict["buyer"] = {
-			"name": buyerPtr.name
-		}
+	def create_label(self):
+		subOrderPtr = self.suborder
+		buyerPtr = subOrderPtr.order.buyer
+		sellerPtr = subOrderPtr.seller
+		sellerAddressPtr = subOrderPtr.seller_address_history
+		buyerAddressPtr = subOrderPtr.order.buyer_address_history
 
+		outputLink = "media/generateddocs/shipmentlabel/{}/{}/".format(sellerPtr.id,subOrderPtr.display_number) 
+		outputDirectory = settings.STATIC_ROOT + outputLink
+		outputFileName = "WholdusLabel-{}-{}.pdf".format(self.id,subOrderPtr.display_number)
+
+		barcodeObj = barcode.codex.Code39(code = self.waybill_number,add_checksum=False)
+		barcodeFileName = "barcode-{}-{}".format(self.id,subOrderPtr.display_number)
+		barcodeOptions = {"module_width":0.4, "font_size":12}
+		barcodeFullPath = barcodeObj.save(outputDirectory + barcodeFileName, barcodeOptions)
+
+		self.label_link = outputLink + outputFileName
+		self.save()
+
+		manifest_dict = {}
+
+		from orders.serializers.subOrder import serializeSubOrder
+		manifest_dict["sub_order"] = serializeSubOrder(subOrderPtr)
+
+		manifest_dict["buyer"] = serialize_buyer(buyerPtr)
 		manifest_dict["buyer_address"] = serialize_buyer_address(buyerAddressPtr)
 
-		manifest_dict["seller"] = {
-			"name": sellerPtr.name,
-			"company_name": sellerPtr.company_name,
-			"vat_tin": sellerPtr.sellerdetails.vat_tin
-		}
-
+		manifest_dict["seller"] = serialize_seller(sellerPtr, {"seller_details_details":1})
 		manifest_dict["seller_address"] = serialize_seller_address(sellerAddressPtr)
 
-		manifest_dict["shipment"] = {
-			"waybill_number": self.waybill_number,
-			"shipping_amount": '{0:.0f}'.format(self.cod_charge + self.shipping_charge),
-			"logistics_partner": self.logistics_partner_name,
-			"invoice_number": self.invoice_number,
-			"final_price": '{0:.0f}'.format(self.final_price),
-			"amount_to_collect":'{0:.0f}'.format(float(self.cod_charge) + float(self.shipping_charge) + float(self.final_price)),
-			"packaged_length": '{0:.0f}'.format(self.packaged_length),
-			"packaged_breadth": '{0:.0f}'.format(self.packaged_breadth),
-			"packaged_height": '{0:.0f}'.format(self.packaged_height),
-			"packaged_weight": '{0:.2f}'.format(self.packaged_weight)
-		}
+		from orders.serializers.orderShipment import serializeOrderShipment
+		manifest_dict["shipment"] = serializeOrderShipment(self)
 
-		
-		template_file = "manifest/shipment_manifest.html"
+		manifest_dict["barcode_full_path"] = barcodeFullPath
 
-		generate_pdf(template_file, manifest_dict, outputDirectory, outputFileName)
+		manifest_dict["pageDataArr"] = []
+		manifest_dict["pageDataArr"].append({"page_copy_label":"Original Customer's Copy"})
+		manifest_dict["pageDataArr"].append({"page_copy_label":"Duplicate Copy"})
+		manifest_dict["pageDataArr"].append({"page_copy_label":"Triplicate Copy"})
+		manifest_dict["total_pages"] = len(manifest_dict["pageDataArr"])
+
+		pincodeServiceabilityPtr = PincodeServiceability.objects.filter(logistics_partner_id=self.logistics_partner_id, pincode=buyerAddressPtr.pincode_id)
+
+		if len(pincodeServiceabilityPtr) > 0:
+			pincodeServiceabilityPtr = pincodeServiceabilityPtr[0]
+			manifest_dict["ou_code"] = pincodeServiceabilityPtr.ou_code
+
+		template_file = "shipment/shipment_label.html"
+
+		generate_pdf(template_file, manifest_dict, outputDirectory, outputFileName, landscape=True)
 
 class OrderShipmentAdmin(admin.ModelAdmin):
 	search_fields = ["suborder__display_number"]

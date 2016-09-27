@@ -94,8 +94,10 @@ def post_new_order_shipment(request):
 	try:
 		newOrderShipment = OrderShipment(suborder=subOrderPtr, pickup_address=sellerAddressPtr, drop_address=buyerAddressPtr)
 		populateOrderShipment(newOrderShipment, orderShipment)
-		finalPrice = allOrderItems.aggregate(Sum('final_price'))["final_price__sum"]
-		newOrderShipment.final_price = finalPrice
+		allOrderItemsValues = allOrderItems.aggregate(Sum('final_price'), Sum('pieces'))
+		newOrderShipment.pieces = allOrderItemsValues["pieces__sum"]
+		newOrderShipment.final_price = allOrderItemsValues["final_price__sum"]
+		newOrderShipment.product_count = len(allOrderItems)
 		newOrderShipment.save()
 
 		allOrderItems.update(current_status=8, order_shipment_id=newOrderShipment.id)
@@ -149,6 +151,7 @@ def post_new_order_shipment(request):
 		subOrderPtr.order.save()
 		
 		newOrderShipment.create_manifest()
+		newOrderShipment.create_label()
 
 	except Exception as e:
 		log.critical(e)

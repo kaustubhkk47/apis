@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html style= "font-family:sans-serif;text-align: center; font-size: 0.6em">
+<body >
+
+{% for pagedata in pageDataArr %}
+<div style= "width:1077 px; height: 756px; display:block;padding:10px 40px 10px 40px; "> 
+
+	<div style="width: 45%; ">
+
+	<div style="width: 100%; border-bottom: dashed 1px grey;">
+	<table style="margin: auto">
+	<tr>
+		<td >
+		<img src="http://wholdus.com/images/logo/logo64x64.png" style="width: 30px; height:auto; ">
+		</td>
+		<td >
+		<p style="font-size: 1.4em">
+		<strong>WHOLDUS LABEL - ORDER ID: {{sub_order.display_number}}</strong>
+		</p>
+		</td>
+	</tr>
+	</table>
+	</div>
+
+
+	<table style="width: 100%; border-bottom: solid 1px black;">
+	<tr>
+
+	<td style="text-align: left; text-transform: uppercase">
+		<h3><u>Buyer Details</u></h3>
+		<p style="font-size: 1.2em">
+		<strong>{{buyer.name}}</strong>
+		</p>
+		<p>{{buyer_address.address}}
+		{% if buyer_address.landmark|length > 0 %}
+			, {{buyer_address.landmark}}
+		{% else %}
+		{% endif %}
+		</br>
+		City: <strong>{{buyer_address.city}}</strong>
+		<span style="margin-right: 12px"></span>
+		State: <strong>{{buyer_address.state}}</strong>
+		</br>
+		Pincode: <strong>{{buyer_address.pincode}}</strong></br>
+		Mobile: <strong>{{buyer_address.contact_number}}</strong>
+		</p>
+	</td>
+
+	<td>
+		<div style="font-size: 2em; text-align: right; margin-bottom: 60px; text-align: center;">
+			{{ou_code}}
+			<div style="background: #333333; color: #FFF; margin-top: 3px">{{ou_code}}</div>
+		</div>
+	</td>
+	
+	</tr>	
+	</table>
+
+	<div style="width: 100%; font-size:1.6em;">
+	<table style="width: 100%; margin-left:50px;">
+	<tr>
+
+	<td style="text-transform: uppercase">
+		<strong>{{shipment.logistics_partner}}</strong>
+	</td>
+
+	<td style="text-transform: uppercase">
+		<strong>Cash on Delivery</strong>
+	</td>
+	
+	</tr>	
+	</table>
+	</div>
+
+	<div style="width: 100%; border-bottom: solid 1px black;">
+		<img src="{{barcode_full_path}}" margin-bottom="-3px">
+	</div>
+
+	<table style="width: 100%; border-bottom: solid 1px black;">
+	<tr>
+
+	<td style="text-align: left; text-transform: uppercase">
+		<h3><u>Order Details</u></h3>
+		<p style="font-size: 1.2em">
+		Order ID: <strong>{{sub_order.display_number}}</strong>
+		</p>
+		<p>
+		Qty: <strong>{{shipment.pieces}} units women's apparel</strong>
+		</br>
+		Order Value: <strong>Rs. {{shipment.final_price}} /-</strong>
+		</br>
+		COD Charge: <strong>Rs. {{shipment.cod_charge}} /-</strong>
+		<span style="margin-right: 10px"></span>
+		Shipping Charge: <strong>Rs. {{shipment.shipping_charge}} /-</strong>
+		
+		</p>
+	</td>
+
+	<td>
+		<div style="font-size: 1.4em; text-align: right; margin-bottom: 40px; ">
+			<p>
+			Collect:
+			</br>
+			<span style="font-size: 1.2em;">
+			<strong>Rs. {{shipment.amount_to_collect}} /-</strong>
+			</span>
+			</p>
+		</div>
+	</td>
+	
+	</tr>	
+	</table>
+	
+
+	<div style="width: 100%; text-align: right; text-transform: uppercase; border-bottom: dashed 1px grey;">
+		<h3><u>Seller Details</u></h3>
+		<div style="width:100%">
+		<p style="font-size: 1.2em">
+		<strong>{{seller.company_name}}</strong>
+		</p>
+		<p>
+		VAT number: <strong>{{seller.details.vat_tin}}</strong>
+		</br>
+		{{seller_address.address}}
+		{% if seller_address.landmark|length > 0 %}
+			, {{seller_address.landmark}}
+		{% else %}
+		{% endif %}
+		</br>
+		City: <strong>{{seller_address.city}}</strong>
+		<span style="margin-right: 12px"></span>
+		State: <strong>{{seller_address.state}}</strong>
+		</br>
+		Pincode: <strong>{{seller_address.pincode}}</strong>
+		</p>
+		</div>
+		
+	</div>
+
+	<div style="width: 100%; text-align: right;">
+		<p>
+			ordered via <strong>Wholdus.com</strong></br>
+			({{pagedata.page_copy_label}})</br>
+			copy {{forloop.counter}} of {{total_pages}}
+		</p>
+		
+	</div>
+	</div>
+</div>
+{% endfor %}
+</body>
+</html>

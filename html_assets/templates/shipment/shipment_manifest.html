@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html style= "font-family:sans-serif;text-align: center; font-size: 0.6em">
 
-<body style="width:756px; height: 1077px; display:block;padding:10px 10px 10px 10px; ">
-
+<body >
+	<div style="width:756px; height: 1077px; display:block;padding:10px 10px 10px 10px; "> 
 	<div style="width: 100%; ">
 	<table style="margin: auto">
 	<tr>
@@ -10,7 +10,7 @@
 		<img src="http://wholdus.com/images/logo/logo64x64.png" style="width: 30px; height:auto; ">
 		</td>
 		<td >
-		<h2 >Wholdus Manifest - Ord No: {{order.display_number}}</h2>
+		<h2 >Wholdus Manifest - Ord No: {{sub_order.display_number}}</h2>
 		</td>
 	</tr>
 	</table>
@@ -66,7 +66,7 @@
 		<p>
 		AWB Number: <strong>{{shipment.waybill_number}}</strong>
 		<span style="margin-right: 12px"></span>
-		Shipping Amount: <strong> Rs. {{shipment.shipping_amount}} /-</strong>
+		Amount to collect: <strong>{{shipment.amount_to_collect}}</strong>
 		<span style="margin-right: 12px"></span>
 		Shipping Partner: <strong>{{shipment.logistics_partner}}</strong>
 		<span style="margin-right: 12px"></span>
@@ -75,7 +75,9 @@
 		Invoice Amount: <strong> Rs. {{shipment.final_price}} /-</strong>
 		</p>
 		<p>
-		Amount to collect: <strong>{{shipment.amount_to_collect}}</strong>
+		COD Charge: <strong> Rs. {{shipment.cod_charge}} /-</strong>
+		<span style="margin-right: 12px"></span>
+		Shipping Charge: <strong> Rs. {{shipment.shipping_charge}} /-</strong>
 		<span style="margin-right: 12px"></span>	
 		Length: <strong>{{shipment.packaged_length}} cm</strong>
 		<span style="margin-right: 12px"></span>
@@ -138,7 +140,7 @@
 		</tr>
 	</table>
 	</div>
-
+	</div>
 </body>
 
 </html>
