@@ -151,7 +151,7 @@ def post_new_order_shipment(request):
 		subOrderPtr.order.save()
 		
 		newOrderShipment.create_manifest()
-		newOrderShipment.create_label()
+		#newOrderShipment.create_label()
 
 	except Exception as e:
 		log.critical(e)

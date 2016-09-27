@@ -17,8 +17,8 @@ from users.serializers.buyer import serialize_buyer_address, serialize_buyer
 
 import settings
 
-import barcode
-from num2words import num2words
+#import barcode
+#from num2words import num2words
 
 class OrderShipment(models.Model):
 
