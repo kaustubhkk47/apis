@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html style= "font-family:sans-serif;text-align: center; font-size: 0.6em">
+<html style= "font-family:sans-serif;text-align: center; font-size: 0.45em; margin:0px; padding:0px">
 
-<body style="width:756px; height: 1077px; display:block;padding:10px 10px 10px 10px; ">
-
+<body style="margin:0px; padding:0px">
+	<div style="width:593px; height: 850px; margin:10px 10px 10px 10px; padding:0px"> 
 	<div style="width: 100%; ">
 	<table style="margin: auto">
 	<tr>
 		<td >
-		<img src="http://wholdus.com/images/logo/logo64x64.png" style="width: 30px; height:auto; ">
+		<img src="http://wholdus.com/images/logo/logo64x64.png" style="width: 25px; height:auto; ">
 		</td>
 		<td >
-		<h2 >Wholdus Manifest - Ord No: {{order.display_number}}</h2>
+		<h2 >Wholdus Manifest - Ord No: {{sub_order.display_number}}</h2>
 		</td>
 	</tr>
 	</table>
@@ -24,7 +24,7 @@
 		<h3><u>Buyer Details</u></h3>
 		<div style="width:100%; margin-top: 20px; margin-bottom: 20px">			
 		<p>Consignee Name: <strong>{{buyer.name}}</strong></p>
-		<p>Address: <strong>{{buyer_address.address}}{% if buyer_address.landmark|length > 0 %}, {{buyer_address.landmark}}{% else %}{% endif %}</strong></p>
+		<p>{{buyer_address.address}}{% if buyer_address.landmark|length > 0 %}, {{buyer_address.landmark}}{% else %}{% endif %}</p>
 		<p>
 		City: <strong>{{buyer_address.city}}</strong>
 		<span style="margin-right: 12px"></span>
@@ -48,7 +48,7 @@
 		<p>
 		VAT Number: <strong>{{seller.vat_tin}}</strong>
 		</p>
-		<p>Address: <strong>{{seller_address.address}}{% if seller_address.landmark|length > 0 %}, {{seller_address.landmark}}{% else %}{% endif %}</strong></p>
+		<p>{{seller_address.address}}{% if seller_address.landmark|length > 0 %}, {{seller_address.landmark}}{% else %}{% endif %}</p>
 		<p>
 		City: <strong>{{seller_address.city}}</strong>
 		<span style="margin-right: 12px"></span>
@@ -66,7 +66,7 @@
 		<p>
 		AWB Number: <strong>{{shipment.waybill_number}}</strong>
 		<span style="margin-right: 12px"></span>
-		Shipping Amount: <strong> Rs. {{shipment.shipping_amount}} /-</strong>
+		Amount to collect: <strong>{{shipment.amount_to_collect}}</strong>
 		<span style="margin-right: 12px"></span>
 		Shipping Partner: <strong>{{shipment.logistics_partner}}</strong>
 		<span style="margin-right: 12px"></span>
@@ -75,7 +75,9 @@
 		Invoice Amount: <strong> Rs. {{shipment.final_price}} /-</strong>
 		</p>
 		<p>
-		Amount to collect: <strong>{{shipment.amount_to_collect}}</strong>
+		COD Charge: <strong> Rs. {{shipment.cod_charge}} /-</strong>
+		<span style="margin-right: 12px"></span>
+		Shipping Charge: <strong> Rs. {{shipment.shipping_charge}} /-</strong>
 		<span style="margin-right: 12px"></span>	
 		Length: <strong>{{shipment.packaged_length}} cm</strong>
 		<span style="margin-right: 12px"></span>
@@ -120,7 +122,7 @@
 	</table>
 	</div>
 
-	<div style="width:100%; border-top: dashed 1px grey; position: absolute; left: 0px; bottom:0px">
+	<div style="width:100%; border-top: dashed 1px grey; position: absolute; left: 0px; bottom:10px">
 	<div style="width:100%;">
 		<p><strong>For courier personnel:</strong></p>
 		<p>I confirm that I have collected the packages as per the AWBs mentioned on this manifest.</p>
@@ -138,7 +140,7 @@
 		</tr>
 	</table>
 	</div>
-
+	</div>
 </body>
 
 </html>

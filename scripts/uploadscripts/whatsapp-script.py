@@ -9,7 +9,7 @@ import os, time, platform, sys
 class ConstantValues():
 	env = 'production'
 	operatingSystem = ''
-	accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiaW50ZXJuYWx1c2VyIiwiaW50ZXJuYWx1c2VySUQiOjF9.O2uFNT9QzwY6L064s4u60cevLwXxOxjG_vKldIr0yOo'
+	accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZCI6Imtrd2hvbGR1czQ3IiwidXNlciI6ImludGVybmFsdXNlciIsImludGVybmFsdXNlcklEIjozfQ.iiLyMzVh_bEnjEvqRuMMU_4bZq5xMbPsh6C8NLi12Ig'
 
 	productFileName = "./productfile.txt"
 

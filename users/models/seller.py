@@ -47,6 +47,16 @@ class Seller(models.Model):
 		except Exception, e:
 			return None
 
+	def send_registration_mail(self):
+		mail_template_file = "seller/registration_success.html"
+		mail_dict = {"email":self.email,"password":self.password}
+		subject = "{} congratulations on your successful registration as a seller".format(self.name)
+		to = [self.email]
+		from_email = "Wholdus Info <info@wholdus.com>"
+		attachment = settings.MEDIA_ROOT + "/files/SellerTNC.pdf"
+
+		create_email(mail_template_file,mail_dict,subject,from_email,to,attachment)
+
 class SellerDetails(models.Model):
 
 	seller = models.OneToOneField('users.Seller')
