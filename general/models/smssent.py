@@ -50,7 +50,7 @@ def send_sms(message_text, mobile_number, user_type, sms_purpose):
 	url = "http://api.textlocal.in/send/"
 	apiKey = "VAWHxD4nf9U-8LcsDTXDL5iMOmSicSvlLiRHw9rJZ0"
 
-	deliveryBaseUrl = "http://api.wholdus.com/general/sentsms/deliveryreport/"
+	deliveryBaseUrl = settings.API_BASE_URL + "/general/sentsms/deliveryreport/"
 
 	data = {}
 	data["apiKey"] = apiKey
@@ -73,7 +73,6 @@ def send_sms(message_text, mobile_number, user_type, sms_purpose):
 	if not settings.CURRENT_ENVIRONMENT == 'prod':
 		data["test"] = True
 		newSMSSent.test_sms = 1
-		deliveryBaseUrl = "http://api-test.wholdus.com/general/sentsms/deliveryreport/"
 
 	data["receipt_url"] = deliveryBaseUrl
 	data["custom"] = newSMSSent.id

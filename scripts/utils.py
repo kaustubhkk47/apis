@@ -149,7 +149,7 @@ def create_email(mail_template_file,mail_dict,subject,from_email,to_email,attach
 	email.content_subtype = "html"
 	email.send(fail_silently=True)
 
-def generate_pdf(template_src, context_dict, output_directory, output_file_name, grayscale = True):
+def generate_pdf(template_src, context_dict, output_directory, output_file_name, grayscale = True, landscape= False):
 	template = get_template(template_src)
 	html  = template.render(context_dict)
 
@@ -172,6 +172,9 @@ def generate_pdf(template_src, context_dict, output_directory, output_file_name,
 
 	if grayscale == True:
 		options["grayscale"] = None
+
+	if landscape == True:
+		options["orientation"] = "Landscape"
 
 	config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDFPATH)
 
