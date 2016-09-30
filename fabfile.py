@@ -19,6 +19,7 @@ def restart_mysql():
 	run("~/webapps/mysql/bin/start")
 #run("$HOME/webapps/mysql/bin/stop; $HOME/webapps/mysql/bin/start",pty=True)
 #run("$HOME/webapps/probzip_apis/apache2/bin/restart")
+#just testing
 
 def restart_server():
 	run(PROD_APP_DIR + "apache2/bin/restart")
@@ -36,7 +37,7 @@ def push_to_master(message):
 	local("git add --all")
 	local("git commit -m " + message)
 	local("git checkout master")
-	local("git merge develop")
+	local("git merge develop --quiet")
 	local("git push origin master")
 	local("git checkout develop")
 
