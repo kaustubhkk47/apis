@@ -28,7 +28,7 @@ def run_local_test():
 
 def deploy(message):
 	#run_local_test()
-	push_to_develop(message)
+	#push_to_develop(message)
 	deploy_test_server()
 
 def push_to_develop(message):
@@ -39,6 +39,6 @@ def push_to_develop(message):
 
 def deploy_test_server():
 	run("cd " + PROD_APP_DIR + " && git checkout .")
-	run("cd " + PROD_APP_DIR + " && git pull kaustubh develop")
+	run("cd " + PROD_APP_DIR + " && git pull kaustubh develop --quiet")
 	run("cd " + PROD_APP_DIR + " && python manage.py migrate")
 	run("echo 'Wholdus_prod@0987' | sudo -S service apache2 restart")
