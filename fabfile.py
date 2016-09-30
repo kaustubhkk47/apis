@@ -37,8 +37,8 @@ def push_to_master(message):
 	local("git add --all")
 	local("git commit -m " + message)
 	local("git checkout master")
-	local("git merge develop --quiet")
-	local("git push origin master")
+	local("git merge develop --no-edit")
+	#local("git push origin master")
 	local("git checkout develop")
 
 def deploy_prod_server():
