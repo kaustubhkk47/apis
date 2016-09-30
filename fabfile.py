@@ -19,6 +19,7 @@ def restart_mysql():
 	run("~/webapps/mysql/bin/start")
 #run("$HOME/webapps/mysql/bin/stop; $HOME/webapps/mysql/bin/start",pty=True)
 #run("$HOME/webapps/probzip_apis/apache2/bin/restart")
+#just testing
 
 def restart_server():
 	run(PROD_APP_DIR + "apache2/bin/restart")
@@ -28,17 +29,20 @@ def run_local_test():
 
 def deploy(message):
 	#run_local_test()
-	push_to_develop(message)
-	deploy_test_server()
-
-def push_to_develop(message):
 	message = "'" + message + "'"
+	push_to_master(message)
+	deploy_prod_server()
+
+def push_to_master(message):
 	local("git add --all")
 	local("git commit -m " + message)
-	local("git push origin develop")
+	local("git checkout master")
+	local("git merge develop --no-edit")
+	local("git push origin master")
+	local("git checkout develop")
 
-def deploy_test_server():
+def deploy_prod_server():
 	run("cd " + PROD_APP_DIR + " && git checkout .")
-	run("cd " + PROD_APP_DIR + " && git pull kaustubh develop")
+	run("cd " + PROD_APP_DIR + " && git pull kaustubh master")
 	run("cd " + PROD_APP_DIR + " && python manage.py migrate")
 	run("echo 'Wholdus_prod@0987' | sudo -S service apache2 restart")
