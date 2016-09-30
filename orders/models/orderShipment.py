@@ -226,6 +226,10 @@ class OrderShipment(models.Model):
 		softDataFileName = "WholdusSoftDataCSV-{}-{}.csv".format(self.id,subOrderPtr.display_number)
 		vendorPickupFileName = "WholdusVendorPickupCSV-{}-{}.csv".format(self.id,subOrderPtr.display_number)
 
+		self.soft_data_csv_link = outputLink + softDataFileName
+		self.vendor_pickup_csv_link = outputLink + vendorPickupFileName
+		self.save()
+
 		softDataFile = open(outputDirectory+ softDataFileName, "wt")
 		softDataWriter = csv.writer(softDataFile)
 		softDataHeaders = ['Docket_No', 'Delivery_Stn', 'Goods_Code', 'DECL_CARGO_VAL', 'Actual_Wt', 'Charged_Wt', 'SHIPPER_CODE', 'Order_No.', 'COD_AMT', 'COD_IN_FAVOUR_OF', 'Receiver_Code', 'Receiver_Name', 'Receiver_Add1', 'Receiver_Add2', 'City', 'State', 'Receiver_Phone_No', 'Receiver_Email', 'Receiver_Pincode', 'No_Of_PKGS', 'From_PKG_NO', 'TO_PKG_NO', 'Receiver_Mobile', 'Cust_Date_Delivery', 'SPL_Instruction', 'CUST_VEND_CODE', 'PROD_SERV_CODE']
