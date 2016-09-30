@@ -29,11 +29,11 @@ def run_local_test():
 
 def deploy(message):
 	#run_local_test()
+	message = "'" + message + "'"
 	push_to_master(message)
 	deploy_prod_server()
 
 def push_to_master(message):
-	message = "'" + message + "'"
 	local("git add --all")
 	local("git commit -m " + message)
 	local("git checkout master")
@@ -43,6 +43,6 @@ def push_to_master(message):
 
 def deploy_prod_server():
 	run("cd " + PROD_APP_DIR + " && git checkout .")
-	run("cd " + PROD_APP_DIR + " && git pull kaustubh develop --quiet")
+	run("cd " + PROD_APP_DIR + " && git pull kaustubh master")
 	run("cd " + PROD_APP_DIR + " && python manage.py migrate")
 	run("echo 'Wholdus_prod@0987' | sudo -S service apache2 restart")
