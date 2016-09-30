@@ -16,6 +16,7 @@ from users.serializers.seller import serialize_seller_address, serialize_seller
 from users.serializers.buyer import serialize_buyer_address, serialize_buyer
 
 import settings
+import os
 
 import barcode
 from num2words import num2words
@@ -148,6 +149,8 @@ class OrderShipment(models.Model):
 		barcodeObj = barcode.codex.Code39(code = self.waybill_number,add_checksum=False)
 		barcodeFileName = "barcode-{}-{}".format(self.id,subOrderPtr.display_number)
 		barcodeOptions = {"module_width":0.36, "font_size":12}
+		if not os.path.exists(outputDirectory):
+			os.makedirs(outputDirectory)
 		barcodeFullPath = barcodeObj.save(outputDirectory + barcodeFileName, barcodeOptions)
 
 		self.label_link = outputLink + outputFileName
