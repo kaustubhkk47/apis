@@ -104,7 +104,7 @@ def get_product_catalog(request, productParameters):
 		products = filterProducts(productParameters)
 		products = products.filter(verification=True,show_online=True,seller__show_online=True)
 
-		products = {"products":multiple_products_parser(products)}
+		products = {"products":multiple_products_parser(products, productParameters)}
 
 		filename = getProductFileName("productcatalog_", ".pdf",productParameters)
 
