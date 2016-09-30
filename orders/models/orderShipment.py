@@ -17,6 +17,7 @@ from users.serializers.buyer import serialize_buyer_address, serialize_buyer
 
 import settings
 import os
+import csv
 
 import barcode
 from num2words import num2words
@@ -69,6 +70,8 @@ class OrderShipment(models.Model):
 
 	manifest_link = models.TextField(blank=True)
 	label_link = models.TextField(blank=True)
+	vendor_pickup_csv_link = models.TextField(blank=True)
+	soft_data_csv_link = models.TextField(blank=True)
 
 	class Meta:
 		ordering = ["-id"]
@@ -193,6 +196,60 @@ class OrderShipment(models.Model):
 		template_file = "shipment/shipment_label.html"
 
 		generate_pdf(template_file, manifest_dict, outputDirectory, outputFileName, landscape=True)
+
+	def create_csv(self):
+
+		subOrderPtr = self.suborder
+		buyerPtr = subOrderPtr.order.buyer
+		sellerPtr = subOrderPtr.seller
+		sellerAddressPtr = subOrderPtr.seller_address_history
+		buyerAddressPtr = subOrderPtr.order.buyer_address_history
+
+		buyer_ou_code = ""
+		pincodeServiceabilityPtr = PincodeServiceability.objects.filter(logistics_partner_id=self.logistics_partner_id, pincode=buyerAddressPtr.pincode_id)
+		if len(pincodeServiceabilityPtr) > 0:
+			pincodeServiceabilityPtr = pincodeServiceabilityPtr[0]
+			buyer_ou_code = pincodeServiceabilityPtr.ou_code
+
+		seller_ou_code = ""
+		pincodeServiceabilityPtr = PincodeServiceability.objects.filter(logistics_partner_id=self.logistics_partner_id, pincode=sellerAddressPtr.pincode_id)
+
+		if len(pincodeServiceabilityPtr) > 0:
+			pincodeServiceabilityPtr = pincodeServiceabilityPtr[0]
+			seller_ou_code = pincodeServiceabilityPtr.ou_code
+
+		outputLink = "media/generateddocs/shipmentcsv/{}/{}/".format(sellerPtr.id,subOrderPtr.display_number) 
+		outputDirectory = settings.STATIC_ROOT + outputLink
+		if not os.path.exists(outputDirectory):
+			os.makedirs(outputDirectory)
+
+		softDataFileName = "WholdusSoftDataCSV-{}-{}.csv".format(self.id,subOrderPtr.display_number)
+		vendorPickupFileName = "WholdusVendorPickupCSV-{}-{}.csv".format(self.id,subOrderPtr.display_number)
+
+		softDataFile = open(outputDirectory+ softDataFileName, "wt")
+		softDataWriter = csv.writer(softDataFile)
+		softDataHeaders = ['Docket_No', 'Delivery_Stn', 'Goods_Code', 'DECL_CARGO_VAL', 'Actual_Wt', 'Charged_Wt', 'SHIPPER_CODE', 'Order_No.', 'COD_AMT', 'COD_IN_FAVOUR_OF', 'Receiver_Code', 'Receiver_Name', 'Receiver_Add1', 'Receiver_Add2', 'City', 'State', 'Receiver_Phone_No', 'Receiver_Email', 'Receiver_Pincode', 'No_Of_PKGS', 'From_PKG_NO', 'TO_PKG_NO', 'Receiver_Mobile', 'Cust_Date_Delivery', 'SPL_Instruction', 'CUST_VEND_CODE', 'PROD_SERV_CODE']
+
+		softDataActual = [self.waybill_number, buyer_ou_code, "", self.final_price, "{} KG".format(self.packaged_weight/1000), "", "55781501", subOrderPtr.display_number, self.shipping_charge + self.cod_charge + self.final_price, self.logistics_partner_name, "", buyerPtr.name, buyerAddressPtr.address_line, buyerAddressPtr.landmark, buyerAddressPtr.city_name, buyerAddressPtr.state_name, buyerAddressPtr.contact_number, buyerPtr.email, buyerAddressPtr.pincode_number, 1, "" , "", buyerPtr.mobile_number, "", "", "", "Surface"]
+
+		softDataWriter.writerow(softDataHeaders)
+		softDataWriter.writerow(softDataActual)
+		softDataFile.close()
+
+		vendorPickupFile = open(outputDirectory+ vendorPickupFileName, "wt")
+		vendorPickupWriter = csv.writer(vendorPickupFile)
+
+		vendorPickupHeaders = ['PICKUP_OU', 'CUSTOMER CODE', 'CUSTOMER NAME', 'ADD1', 'ADD2', 'ADD3 ', 'PINCODE', 'MOBILE _NO', 'PICKUP_DT', 'NO_ OF_PKGS', 'ACTUAL_WT', 'PROD_SER_CODE', 'ASSIGNED_TO', 'CUST_VEND_CODE', 'ORDER_NO']
+
+		vendorPickupActual = [seller_ou_code, "55781501", sellerPtr.name,sellerAddressPtr.address_line, sellerAddressPtr.landmark,sellerAddressPtr.city_name, sellerAddressPtr.pincode_number, sellerPtr.mobile_number, self.created_at.strftime("%d/%m/%Y"), 1, "{} KG".format(self.packaged_weight/1000),"Surface", "", "", subOrderPtr.display_number]
+
+		vendorPickupWriter.writerow(vendorPickupHeaders)
+		vendorPickupWriter.writerow(vendorPickupActual)
+		vendorPickupFile.close()
+
+
+
+		
 
 class OrderShipmentAdmin(admin.ModelAdmin):
 	search_fields = ["suborder__display_number"]
