@@ -3,13 +3,13 @@ from fabtools import service
  
 # Define sets of servers as roles
 TEST_APP_DIR = "/home/probzip/webapps/wholdus_api_test_app/"
-PROD_APP_DIR = "/home/probzip/webapps/probzip_apis/"
-SERVER_USER = "probzip@probzip.webfactional.com"
+PROD_APP_DIR = "/home/aditya/webapps/wholdus-apis/apis/"
+SERVER_USER = "aditya@52.187.33.84"
  
 # Set the user to use for ssh
-env.user = "probzip"
-env.password = "Probzip@1234"
-env.hosts = ["probzip.webfactional.com"]
+env.user = "aditya"
+env.password = "Wholdus_prod@0987"
+env.hosts = ["52.187.33.84"]
 #env.always_use_pty = False
  
 # Restrict the function to the 'web' role
@@ -38,7 +38,7 @@ def push_to_develop(message):
 	local("git push origin develop")
 
 def deploy_test_server():
-	run("cd " + TEST_APP_DIR + "src/ && git checkout .")
-	run("cd " + TEST_APP_DIR + "src/ && git pull origin develop --no-edit")
-	run("cd " + TEST_APP_DIR + "src/ && python manage.py migrate")
-	run(TEST_APP_DIR + "apache2/bin/restart")
+	run("cd " + PROD_APP_DIR + " && git checkout .")
+	run("cd " + PROD_APP_DIR + " && git pull kaustubh develop")
+	run("cd " + PROD_APP_DIR + " && python manage.py migrate")
+	run("echo 'Wholdus_prod@0987' | sudo -S service apache2 restart")

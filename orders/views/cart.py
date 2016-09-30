@@ -6,6 +6,33 @@ log = logging.getLogger("django")
 from scripts.utils import *
 from users.models.buyer import filterBuyer
 from catalog.models.product import filterProducts
+from django.core.paginator import Paginator
+
+def get_cart_details(request, parameters):
+	try:
+
+		carts = filterCarts(parameters)
+
+		paginator = Paginator(carts, parameters["itemsPerPage"])
+
+		try:
+			pageItems = paginator.page(parameters["pageNumber"])
+		except Exception as e:
+			pageItems = []
+
+		statusCode = "2XX"
+
+		body = parseCart(pageItems,parameters)
+		response = {"carts": body}
+		responsePaginationParameters(response, paginator, parameters)
+
+	except Exception as e:
+		log.critical(e)
+		statusCode = "4XX"
+		response = {"error": "Invalid request"}
+
+	closeDBConnection()
+	return customResponse(statusCode, response)
 
 def get_cart_item_details(request, parameters):
 	try:
@@ -61,28 +88,74 @@ def post_new_cart_item(request, parameters):
 
 	productPtr = productPtr[0]
 
+	isCartNew = 1
+	isSubCartNew = 1
+	isCartItemNew = 1
+
 	cartPtr = Cart.objects.filter(buyer_id=buyerID, status = 0)
 
 	if len(cartPtr) == 0:
 		cartPtr = Cart(buyer_id = buyerID)
-	else:
-		cartPtr = cartPtr[0]
-
-	cartItemPtr = CartItem.objects.filter(buyer_id=buyerID, product = productPtr, status = 0)
-
-	if len(cartItemPtr) == 0:
+		subCartPtr = SubCart(seller_id =productPtr.seller_id)
 		cartItemPtr = CartItem(buyer_id = buyerID, product = productPtr)
 	else:
-		cartItemPtr = cartItemPtr[0]
+		isCartNew = 0
+		cartPtr = cartPtr[0]
+
+		subCartPtr = SubCart.objects.filter(cart=cartPtr, seller_id = productPtr.seller_id)
+
+		if len(subCartPtr) == 0:
+			subCartPtr = SubCart(seller_id=productPtr.seller_id)
+			cartItemPtr = CartItem(buyer_id = buyerID, product = productPtr)
+		else:
+			isSubCartNew = 0
+			subCartPtr = subCartPtr[0]
+
+			cartItemPtr = CartItem.objects.filter(buyer_id=buyerID, product = productPtr, status = 0)
+
+			if len(cartItemPtr) == 0:
+				cartItemPtr = CartItem(buyer_id = buyerID, product = productPtr)
+			else:
+				isCartItemNew = 0
+				cartItemPtr = cartItemPtr[0]
 
 	if not cartItemPtr.validateCartItemData(cartitem):
 		return customResponse("4XX", {"error": " Invalid data for cart item sent"})
 
+	if isCartItemNew == 1 and int(cartitem["lots"]) == 0:
+		return customResponse("4XX", {"error": "Zero lots sent for new cart item"})
+
 	try:
-		cartPtr.save()
-		cartItemPtr.cart = cartPtr
+		initialPrices = cartItemPtr.getPrices()
 		cartItemPtr.populateCartItemData(cartitem)
+		finalPrices =  cartItemPtr.getPrices()
+		
+		cartPtr.populateCartData(initialPrices, finalPrices)
+		subCartPtr.populateSubCartData(initialPrices, finalPrices)
+
+		if subCartPtr.shipping_charge < 175:
+			extra_shipping_charge = (175-subCartPtr.shipping_charge)
+			cartPtr.shipping_charge += extra_shipping_charge
+			cartPtr.final_price += extra_shipping_charge
+			subCartPtr.shipping_charge += extra_shipping_charge
+			subCartPtr.final_price += extra_shipping_charge
+
+		cartPtr.save()
+		
+		subCartPtr.cart = cartPtr
+		subCartPtr.save()
+
+		cartItemPtr.subcart = subCartPtr
 		cartItemPtr.save()
+
+		if not CartItem.objects.filter(subcart=subCartPtr, status=0).exists():
+			extra_shipping_charge = subCartPtr.shipping_charge
+			cartPtr.shipping_charge -= extra_shipping_charge
+			cartPtr.final_price -= extra_shipping_charge
+			subCartPtr.shipping_charge -= extra_shipping_charge
+			subCartPtr.final_price -= extra_shipping_charge
+			cartPtr.save()
+			subCartPtr.save()
 
 		cartItemHistoryPtr = CartItemHistory()
 		cartItemHistoryPtr.populateCartItemHistoryData(cartItemPtr)
@@ -94,4 +167,7 @@ def post_new_cart_item(request, parameters):
 		return customResponse("4XX", {"error": "could not update"})
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"cart_items": serializeCartItem(cartItemPtr, parameters)})
+		return customResponse("2XX", {"carts": serializeCart(cartItemPtr.subcart.cart, parameters)})
+
+
+

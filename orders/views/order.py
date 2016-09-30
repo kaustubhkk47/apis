@@ -11,21 +11,23 @@ from ..models.orderItem import OrderItem, populateOrderItemData
 from ..serializers.order import parseOrders, serializeOrder
 from decimal import Decimal
 from django.core.paginator import Paginator
+import math
 
-def get_order_details(request, orderParameters):
+def get_order_details(request, parameters):
 	try:
-		orders = filterOrder(orderParameters)
+		orders = filterOrder(parameters)
 
-		paginator = Paginator(orders, orderParameters["itemsPerPage"])
+		paginator = Paginator(orders, parameters["itemsPerPage"])
 
 		try:
-			pageItems = paginator.page(orderParameters["pageNumber"])
+			pageItems = paginator.page(parameters["pageNumber"])
 		except Exception as e:
 			pageItems = []
 
-		body = parseOrders(pageItems,orderParameters)
+		body = parseOrders(pageItems,parameters)
 		statusCode = "2XX"
-		response = {"orders": body,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":orderParameters["pageNumber"], "items_per_page":orderParameters["itemsPerPage"]}
+		response = {"orders": body}
+		responsePaginationParameters(response,paginator, parameters)
 
 	except Exception as e:
 		log.critical(e)
@@ -35,7 +37,7 @@ def get_order_details(request, orderParameters):
 	closeDBConnection()
 	return customResponse(statusCode, response)
 
-def post_new_order(request):
+def post_new_order(request, parameters={}):
 	try:
 		requestbody = request.body.decode("utf-8")
 		order = convert_keys_to_string(json.loads(requestbody))
@@ -48,7 +50,7 @@ def post_new_order(request):
 	if not "buyerID" in order or not validate_integer(order["buyerID"]):
 		return customResponse("4XX", {"error": "Id for buyer not sent"})
 
-	buyerPtr = Buyer.objects.filter(id=int(order["buyerID"]))
+	buyerPtr = Buyer.objects.filter(id=int(order["buyerID"]), delete_status=False)
 
 	if len(buyerPtr) == 0:
 		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
@@ -57,7 +59,11 @@ def post_new_order(request):
 
 	if not "products" in order or order["products"]==None:
 		return customResponse("4XX", {"error": "Products in order not sent"})
-	if not validateOrderProductsData(order["products"]):
+
+	productsHash = {}
+	productIDarr = []
+
+	if not validateOrderProductsData(order["products"], productsHash, productIDarr):
 		return customResponse("4XX", {"error": "Products in order not sent properly sent"})
 
 	orderProducts = order["products"]
@@ -76,10 +82,21 @@ def post_new_order(request):
 	orderCalculatedPrice = Decimal(0.0)
 	orderEditedPrice = Decimal(0.0)
 
-	for orderProduct in orderProducts:
+	allProducts = Product.objects.filter(id__in=productIDarr, delete_status=False).select_related('seller')
+
+	if not len(allProducts) == len(productIDarr):
+		return customResponse("4XX", {"error": "Improper product IDs in order sent"})
+
+	for productPtr in allProducts:
 		
-		productPtr = Product.objects.filter(id=int(orderProduct["productID"])).select_related('seller')
-		productPtr = productPtr[0]
+		orderProduct = orderProducts[productsHash[productPtr.id]]
+
+		orderProduct["retail_price_per_piece"] = productPtr.price_per_unit
+		orderProduct["lot_size"] = productPtr.lot_size
+
+		orderProduct["final_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
+		orderProduct["lots"] = int(math.ceil(float(orderProduct["pieces"])/productPtr.lot_size))
+		orderProduct["calculated_price_per_piece"] = productPtr.getCalculatedPricePerPiece(int(orderProduct["lots"]))
 
 		seller = productPtr.seller
 		sellerID = seller.id
@@ -91,12 +108,13 @@ def post_new_order(request):
 		orderEditedPrice += Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
 
 		if sellerID in sellersHash:
-			subOrders[sellersHash[sellerID]]["order_products"].append(orderProduct)
-			subOrders[sellersHash[sellerID]]["product_count"] += 1
-			subOrders[sellersHash[sellerID]]["pieces"] += int(orderProduct["pieces"])
-			subOrders[sellersHash[sellerID]]["retail_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["retail_price_per_piece"])
-			subOrders[sellersHash[sellerID]]["calculated_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["calculated_price_per_piece"])
-			subOrders[sellersHash[sellerID]]["edited_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])			
+			position = sellersHash[sellerID]
+			subOrders[position]["order_products"].append(orderProduct)
+			subOrders[position]["product_count"] += 1
+			subOrders[position]["pieces"] += int(orderProduct["pieces"])
+			subOrders[position]["retail_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["retail_price_per_piece"])
+			subOrders[position]["calculated_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["calculated_price_per_piece"])
+			subOrders[position]["edited_price"] += Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])			
 		else:
 			sellersHash[sellerID] = len(sellersHash)
 			subOrderItem = {}
@@ -108,9 +126,6 @@ def post_new_order(request):
 			subOrderItem["edited_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
 			subOrderItem["seller"] = seller
 			subOrders.append(subOrderItem)	
-
-	buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
-	buyerAddressPtr = buyerAddressPtr[0]
 
 	orderData = {}
 	orderData["product_count"] = orderProductCount
@@ -131,25 +146,87 @@ def post_new_order(request):
 			populateSubOrderData(newSubOrder,subOrder,newOrder.id)
 			newSubOrder.save()
 
+			orderItemstoCreate = []
+
 			for orderItem in subOrder["order_products"]:
 				newOrderItem = OrderItem(suborder=newSubOrder,product_id=int(orderItem["productID"]))
 				populateOrderItemData(newOrderItem, orderItem)
-				newOrderItem.save()
+				#newOrderItem.save()
+				orderItemstoCreate.append(newOrderItem)
+
+			OrderItem.objects.bulk_create(orderItemstoCreate)
+		
+		sendOrderMail(newOrder)
+		subOrders = SubOrder.objects.filter(order_id = newOrder.id)
+		buyerAddressPtr = newOrder.buyer_address_history
+		for SubOrderPtr in subOrders:
+			seller_mail_dict = populateSellerMailDict(SubOrderPtr, buyerPtr, buyerAddressPtr)
+			sendSubOrderMail(SubOrderPtr, seller_mail_dict)
+
 
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
 		return customResponse("4XX", {"error": "unable to create entry in db"})
 	else:
-		sendOrderMail(newOrder)
-		subOrders = SubOrder.objects.filter(order_id = newOrder.id)
-		for SubOrderPtr in subOrders:
-			seller_mail_dict = populateSellerMailDict(SubOrderPtr, buyerPtr, buyerAddressPtr)
-			sendSubOrderMail(SubOrderPtr, seller_mail_dict)
+		
 		closeDBConnection()
 		return customResponse("2XX", {"order": serializeOrder(newOrder)})
 
-def cancel_order(request):
+def update_order(request,parameters={}):
+	try:
+		requestbody = request.body.decode("utf-8")
+		order = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse("4XX", {"error": "Invalid data sent in request"})
+
+	if not len(order) or not "orderID" in order or not validate_integer(order["orderID"]):
+		return customResponse("4XX", {"error": "Id for order not sent"})
+
+	orderPtr = Order.objects.filter(id=int(order["orderID"]))
+
+	if len(orderPtr) == 0:
+		return customResponse("4XX", {"error": "Invalid id for order sent"})
+
+	orderPtr = orderPtr[0]
+
+	if not "order_status" in order or not validate_integer(order["order_status"]):
+		return customResponse("4XX", {"error": "Current status not sent"})
+
+	status = int(order["order_status"])
+
+	if not orderPtr.validateOrderStatus(status):
+		return customResponse("4XX", {"error": "Improper status sent"})
+
+	try:
+		orderPtr.order_status = 1
+		orderPtr.save()
+		
+		OrderItem.objects.filter(suborder__order_id = orderPtr.id, current_status=0).update(current_status=1)
+		allSubOrders = SubOrder.objects.filter(order_id = orderPtr.id,suborder_status=0)
+		allSubOrders.update(suborder_status=1)
+
+		buyerPtr = orderPtr.buyer
+		#buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
+		#buyerAddressPtr = buyerAddressPtr[0]
+		buyerAddressPtr = orderPtr.buyer_address_history
+
+		buyer_subject = "Order Confirmed with order ID {}".format(orderPtr.display_number)
+		sendOrderMail(orderPtr, buyer_subject)
+		allSubOrders = SubOrder.objects.filter(order_id = orderPtr.id,suborder_status=1)
+		for subOrderPtr in allSubOrders: 
+			seller_mail_dict = populateSellerMailDict(subOrderPtr, buyerPtr, buyerAddressPtr)
+			sendSubOrderMail(subOrderPtr, seller_mail_dict)
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse("4XX", {"error": "could not update"})
+	else:
+		closeDBConnection()
+		return customResponse("2XX", {"order": "order updated"})
+
+def cancel_order(request,parameters={}):
 	try:
 		requestbody = request.body.decode("utf-8")
 		order = convert_keys_to_string(json.loads(requestbody))
@@ -184,8 +261,11 @@ def cancel_order(request):
 		allSubOrders.update(suborder_status=-1, cancellation_time=nowDateTime)
 
 		buyerPtr = orderPtr.buyer
-		buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
-		buyerAddressPtr = buyerAddressPtr[0]
+		#buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
+		#buyerAddressPtr = buyerAddressPtr[0]
+		buyerAddressPtr = orderPtr.buyer_address_history
+
+		allSubOrders = SubOrder.objects.filter(order_id = orderPtr.id,suborder_status=-1)
 
 		for subOrderPtr in allSubOrders:
 			seller_mail_dict = populateSellerMailDict(subOrderPtr, buyerPtr, buyerAddressPtr)

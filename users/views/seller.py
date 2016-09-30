@@ -84,6 +84,10 @@ def post_new_seller(request):
 		newAddress.save()
 		newBankDetails.save()
 
+		newSellerAddressHistory = SellerAddressHistory()
+		newSellerAddressHistory.populateFromSellerAddress(newAddress)
+		newSellerAddressHistory.save()
+
 		sellerLeadsQuerySet = SellerLeads.objects.filter(email = newSeller.email)
 
 		for sellerLead in sellerLeadsQuerySet:
@@ -97,16 +101,7 @@ def post_new_seller(request):
 	else:
 		closeDBConnection()
 		
-		seller_email = str(newSeller.email)
-		seller_password = str(newSeller.password)
-		mail_template_file = "seller/registration_success.html"
-		mail_dict = {"email":seller_email,"password":seller_password}
-		subject = str(newSeller.name) + " congratulations on your successful registration as a seller"
-		to = [seller_email]
-		from_email = "Wholdus Info <info@wholdus.com>"
-		#attachment = "/home/probzip/webapps/wholdus_website/build/files/SellerTNC.pdf"
-
-		create_email(mail_template_file,mail_dict,subject,from_email,to,attachment)		
+		newSeller.send_registration_mail()
 
 		return customResponse("2XX", {"seller" : serialize_seller(newSeller)})
 
@@ -120,7 +115,7 @@ def update_seller(request):
 	if not len(seller) or not "sellerID" in seller or not validate_integer(seller["sellerID"]):
 		return customResponse("4XX", {"error": "Id for seller not sent"})
 
-	sellerPtr = Seller.objects.filter(id=int(seller["sellerID"])).select_related('sellerdetails')
+	sellerPtr = Seller.objects.filter(id=int(seller["sellerID"]), delete_status=False).select_related('sellerdetails')
 
 	if len(sellerPtr) == 0:
 		return customResponse("4XX", {"error": "Invalid id for seller sent"})
@@ -204,6 +199,9 @@ def update_seller(request):
 			newSellerDetails.save()
 		if addressSent == 1:
 			sellerAddressPtr.save()
+			newSellerAddressHistory = SellerAddressHistory()
+			newSellerAddressHistory.populateFromSellerAddress(sellerAddressPtr)
+			newSellerAddressHistory.save()
 		if bankdetailsSent == 1:
 			sellerBankDetailsPtr.save()
 
@@ -225,7 +223,7 @@ def delete_seller(request):
 	if not len(seller) or not "sellerID" in seller or not validate_integer(seller["sellerID"]):
 		return customResponse("4XX", {"error": "Id for seller not sent"})
 
-	sellerPtr = Seller.objects.filter(id=int(seller["sellerID"]))
+	sellerPtr = Seller.objects.filter(id=int(seller["sellerID"]), delete_status=False)
 
 	if len(sellerPtr) == 0:
 		return customResponse("4XX", {"error": "Invalid id for seller sent"})

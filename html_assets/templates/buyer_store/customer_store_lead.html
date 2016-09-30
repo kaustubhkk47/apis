@@ -1,0 +1,35 @@
+{%extends "basic/buyer_store_base.html"%}
+
+{% block content %}
+
+		<table style="width:100%;text-align:center;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);margin-bottom: 10px">
+			<tr>
+				<td style="background-color:#512da8;color:#FFFFFF;font-size:20px;padding: 8px 15px;">
+					Greetings from
+					{% if buyer.company_name|length > 0 %}
+						{{ buyer.company_name }}
+					{% else %}
+						{{ buyer.name }}
+					{% endif %}
+				</td>
+			</tr>
+			<tr>
+				<td style="background-color: #FFFFFF;padding: 0px 25px;">
+
+					<p>Thank you for showing interest in my product <strong>{{buyer_store_lead.name}}</strong>!</br></p>
+					
+					<p> You have contacted me for <a href="{{buyer_store_lead.product_link}}"><strong>{{ buyer_store_lead.product.name }}.</strong></a></p>
+						<p><img style="max-width:400px;" src="{{buyer_store_lead.product.image.absolute_path}}"></p>
+					
+					
+					{% if buyer_store_lead.mobile_number|length > 0 %}
+					<p>I will get back to you soon on your phone number <strong>{{buyer_store_lead.mobile_number}}</strong>
+					.</br></p>
+					{% else %}
+					{% endif %}
+
+				</td>
+			</tr>
+		</table>
+	  
+{% endblock %}

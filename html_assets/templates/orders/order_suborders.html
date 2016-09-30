@@ -1,0 +1,69 @@
+{% for subOrder in subOrders %}
+
+<table style="width:100%;text-align:center;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);margin-bottom: 10px;background-color: #FFFFFF">
+
+    <tr>
+      <td style="background-color:#512da8   ;color:#FFFFFF;font-size:20px;padding: 8px 15px;">
+        {{subOrder.suborder.items_title}}
+    </td>
+</tr>
+
+{% for orderItem in subOrder.orderItems %}
+
+<tr>
+  <td>
+
+    <table style="width:100%">
+
+      <tr>
+        <td>
+          <table style="width:100%;color:#512da8">
+            <td><div style="background-color:#512da8;height:1px"></div></td>
+            <td style="text-align:center;width:50px;"><strong>{{ forloop.counter }}</strong></td> 
+            <td><div style="background-color:#512da8;height:1px"></div></td>  
+        </table>
+    </td>
+</tr>
+
+<tr>
+    <td>
+      <table style="width:100%">
+      
+        <tr align="center">
+          <td>
+            <img style="max-width:400px;" src="{{orderItem.image_link}}">
+        </td>
+        <td style="width:100%;vertical-align:center">
+            <table style="text-align:center">
+              <tr>
+                <td>
+                    <p><strong>Product Name</strong> : <a href="{{orderItem.product_link}}">{{orderItem.name}}</a> </br></p>
+                    {% if orderItem.remarks|length > 0 %}
+                    <p><strong>Remarks</strong> : {{orderItem.remarks}}</br></p>
+                    {% else %}
+                    {% endif %}
+                    <p><strong>Pieces ordered</strong> : <font size="3">{{orderItem.pieces}}</font></br></p>
+                    <p><strong>Price per piece</strong> : <font size="3">{{orderItem.price_per_piece}} Rs.</font> </br></p>
+                    <p><strong>Your margin</strong> : <font size="4">{{orderItem.margin}} %</font></br></p>
+                    <p><strong>Final price</strong> : <font size="4">{{orderItem.final_price}} Rs.</font></p>
+                    
+                </td>
+            </tr>
+        </table>
+    </td>
+</tr>
+</table>
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% endfor %}

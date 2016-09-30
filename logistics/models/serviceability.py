@@ -18,6 +18,8 @@ class PincodeServiceability(models.Model):
 	regular_pickup_available = models.BooleanField(default=False)
 	cod_available = models.BooleanField(default=False)
 
+	ou_code = models.CharField(max_length=15, blank=True)
+
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
@@ -31,7 +33,7 @@ class PincodeServiceability(models.Model):
 
 class PincodeServiceabilityAdmin(admin.ModelAdmin):
 	search_fields = ["pincode__pincode", "pincode__city_name", "pincode__state_name"]
-	list_display = ["id", "link_to_pincode", "logistics_partner", "regular_delivery_available", "cod_available"]
+	list_display = ["id", "link_to_pincode", "logistics_partner", "regular_delivery_available", "cod_available", "ou_code"]
 	list_filter = ["logistics_partner", "regular_delivery_available", "cod_available"]
 
 	list_display_links = ["id", "link_to_pincode"]
@@ -40,3 +42,27 @@ class PincodeServiceabilityAdmin(admin.ModelAdmin):
 		return link_to_foreign_key(obj, "pincode")
 	link_to_pincode.short_description = "Pincode"
 	link_to_pincode.allow_tags=True
+
+def filterServiceablePincodes(parameters):
+
+	serviceablePincodes = PincodeServiceability.objects.all()
+
+	if "pincodesArr" in parameters:
+		serviceablePincodes = serviceablePincodes.filter(pincode_id__in=parameters["pincodesArr"])
+
+	if "pincodesCodesArr" in parameters:
+		serviceablePincodes = serviceablePincodes.filter(pincode__pincode__in=parameters["pincodesCodesArr"])
+
+	if "logisticsPartnersArr" in parameters:
+		serviceablePincodes = serviceablePincodes.filter(logistics_partner_id__in=parameters["logisticsPartnersArr"])
+
+	if "regular_delivery_available" in parameters:
+		serviceablePincodes = serviceablePincodes.filter(regular_delivery_available=parameters["regular_delivery_available"])
+
+	if "regular_pickup_available" in parameters:
+		serviceablePincodes = serviceablePincodes.filter(regular_pickup_available=parameters["regular_pickup_available"])
+
+	if "cod_available" in parameters:
+		serviceablePincodes = serviceablePincodes.filter(cod_available=parameters["cod_available"])
+
+	return serviceablePincodes

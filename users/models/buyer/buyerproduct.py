@@ -35,6 +35,23 @@ class BuyerProducts(models.Model):
 	def __unicode__(self):
 		return "{} - {}".format(str(self.buyer),str(self.product))
 
+class BuyerProductsAdmin(admin.ModelAdmin):
+	list_display = ["id", "link_to_buyer", "link_to_product", "buyer_interest", "responded","shared_on_whatsapp"]
+
+	list_display_links = ["id","link_to_buyer", "link_to_product"]
+
+	list_filter = ["shared_on_whatsapp", "responded", "buyer"] 
+
+	def link_to_buyer(self, obj):
+		return link_to_foreign_key(obj, "buyer")
+	link_to_buyer.short_description = "Buyer"
+	link_to_buyer.allow_tags=True
+
+	def link_to_product(self, obj):
+		return link_to_foreign_key(obj, "product")
+	link_to_product.short_description = "Product"
+	link_to_product.allow_tags=True
+
 class BuyerSharedProductID(models.Model):
 
 	buyer = models.ForeignKey('users.Buyer')
@@ -62,6 +79,12 @@ class BuyerProductResponse(models.Model):
 
 	has_swiped = models.BooleanField(default=False)
 
+	#added_from values
+	#0: Tinder, 1 : category_page, 2 : product_page, 3 : shortlist, 4 : homepage, 
+	responded_from = models.IntegerField(default=0)
+
+	store_discount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null = True,default = None)
+
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
@@ -72,6 +95,20 @@ class BuyerProductResponse(models.Model):
 
 	def __unicode__(self):
 		return "{}".format(self.id)
+
+	def validateBuyerProductResponseData(self, buyer_product_response):
+		flag = 0
+		if not "store_discount" in buyer_product_response or not validate_percent(buyer_product_response["store_discount"]):
+			flag = 1
+			buyer_product_response["store_discount"] = self.store_discount
+
+		if flag == 1:
+			return False
+
+		return True
+
+	def populateBuyerProductResponse(self, buyer_product_response):
+		self.store_discount = Decimal(buyer_product_response["store_discount"])
 
 class BuyerProductResponseAdmin(admin.ModelAdmin):
 	search_fields = ["buyer_id", "buyer__name", "buyer__company_name", "buyer__mobile_number"]
@@ -102,7 +139,7 @@ BuyerProductResponseCodes = {
 class BuyerProductLanding(models.Model):
 	buyer = models.ForeignKey('users.Buyer')
 	product = models.ForeignKey('catalog.Product')
-	buyer_product = models.ForeignKey('users.BuyerProducts', null = True, blank = True)
+	buyer_product = models.ForeignKey('users.BuyerProducts', null = True, blank = True, on_delete=models.SET_NULL,)
 
 	source = models.IntegerField(default=1)
 
@@ -146,10 +183,14 @@ class BuyerProductResponseHistory(models.Model):
 
 	buyer = models.ForeignKey('users.Buyer')
 	product = models.ForeignKey('catalog.Product')
-	buyer_product = models.ForeignKey('users.BuyerProducts', null = True, blank = True)
+	buyer_product = models.ForeignKey('users.BuyerProducts', null = True, blank = True, on_delete=models.SET_NULL,)
 
 	response_code = models.IntegerField(default=0)
 	has_swiped = models.BooleanField(default=False)
+
+	#added_from values
+	#0: Tinder, 1 : category_page, 2 : product_page, 3 : shortlist, 4 : homepage, 
+	responded_from = models.IntegerField(default=0)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -173,6 +214,9 @@ def validateBuyerProductData(buyer_product, old_buyer_product, is_new, buyer_pro
 
 	if "has_swiped" in buyer_product and validate_bool(buyer_product["has_swiped"]):
 		buyer_product_populator["has_swiped"] = buyer_product["has_swiped"]
+
+	if "responded_from" in buyer_product and validate_integer(buyer_product["responded_from"]):
+		buyer_product_populator["responded_from"] = buyer_product["responded_from"]
 
 	if "is_active" in buyer_product and validate_bool(buyer_product["is_active"]):
 		if int(buyer_product["is_active"]) != int(old_buyer_product.is_active) and old_buyer_product.responded == 0:
@@ -216,11 +260,15 @@ def populateBuyerProductResponseHistory(buyerProductResponsePtr,buyerProductResp
 	buyerProductResponsePtr.response_code = int(buyerProductResponse["response_code"])
 	if "has_swiped" in buyerProductResponse:
 		buyerProductResponsePtr.has_swiped = int(buyerProductResponse["has_swiped"])
+	if "responded_from" in buyerProductResponse:
+		buyerProductResponsePtr.responded_from = int(buyerProductResponse["responded_from"])
 
 def populateBuyerProductResponse(buyerProductResponsePtr,buyerProductResponse):
 	buyerProductResponsePtr.response_code = int(buyerProductResponse["response_code"])
 	if "has_swiped" in buyerProductResponse:
 		buyerProductResponsePtr.has_swiped = int(buyerProductResponse["has_swiped"])
+	if "responded_from" in buyerProductResponse:
+		buyerProductResponsePtr.responded_from = int(buyerProductResponse["responded_from"])
 
 def filterBuyerSharedProductID(parameters = {}):
 
@@ -324,9 +372,9 @@ def filterBuyerInterestProducts(BuyerInterestPtr, parameters = {}):
 	return productPtr
 
 def getIntersectingProducts(leftPtr, rightPtr):
-	leftList = []   # Products to create
-	innerList = []  # Product already present and to be maintained
-	rightList = []  # Products to remove
+	leftList = []   # Products to create, list of product ids
+	innerList = []  # Product already present and to be maintained, list of buyer product ids
+	rightList = []  # Products to remove, list of buyer product ids
 
 	if len(leftPtr) > 0 and len(rightPtr) > 0:
 

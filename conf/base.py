@@ -64,7 +64,7 @@ ROOT_URLCONF = 'urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [(os.path.join(BASE_DIR,"mails","templates"))],
+        'DIRS': [(os.path.join(BASE_DIR,"html_assets","templates"))],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -130,3 +130,7 @@ DATE_TODAY = str(dt.year) + "-" + str("%02d" %(dt.month)) + "-" + str("%02d" %(d
 
 if not os.path.exists(LOG_FILE_PATH):
     os.makedirs(LOG_FILE_PATH)
+
+
+BASE_URL = "http://www.wholdus.com"
+API_BASE_URL = "http://api.wholdus.com"

@@ -1,6 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
 
-from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool, getPaginationParameters
+from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool, getPaginationParameters, getApiVersion
 
 from blog.views import article
 
@@ -8,6 +8,7 @@ from .user_handler import populateInternalUserIDParameters
 
 @csrf_exempt
 def article_details(request, version = "0"):
+    version = getApiVersion(request.META["HTTP_ACCEPT"])
     parameters = getArticleParameters(request, {}, version)
 
     if request.method == 'GET':
@@ -33,6 +34,7 @@ def article_details(request, version = "0"):
 
 @csrf_exempt
 def article_cover_photo_details(request, version = "0"):
+    version = getApiVersion(request.META["HTTP_ACCEPT"])
  
     if request.method == 'POST':
         parameters = getArticleParameters(request, {}, version)

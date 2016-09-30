@@ -14,24 +14,28 @@ from users.serializers.seller import serialize_seller_address
 from users.serializers.buyer import serialize_buyer_address
 import settings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Sum
+from decimal import Decimal
 
-def get_order_shipment_details(request, orderShipmentParameters):
+def get_order_shipment_details(request, parameters):
 	try:
 
-		orderShipments = filterOrderShipment(orderShipmentParameters)
+		orderShipments = filterOrderShipment(parameters)
 		
 		statusCode = "2XX"
 
-		paginator = Paginator(orderShipments, orderShipmentParameters["itemsPerPage"])
+		paginator = Paginator(orderShipments, parameters["itemsPerPage"])
 
 		try:
-			pageItems = paginator.page(orderShipmentParameters["pageNumber"])
+			pageItems = paginator.page(parameters["pageNumber"])
 		except Exception as e:
 			pageItems = []
 
-		body = parseOrderShipments(pageItems,orderShipmentParameters)
+		body = parseOrderShipments(pageItems,parameters)
 		statusCode = "2XX"
-		response = {"order_shipments": body,"total_items":paginator.count, "total_pages":paginator.num_pages, "page_number":orderShipmentParameters["pageNumber"], "items_per_page":orderShipmentParameters["itemsPerPage"]}
+		response = {"order_shipments": body}
+
+		responsePaginationParameters(response,paginator, parameters)
 
 	except Exception as e:
 		log.critical(e)
@@ -53,37 +57,36 @@ def post_new_order_shipment(request):
 	if not "suborderID" in orderShipment or not validate_integer(orderShipment["suborderID"]):
 		return customResponse("4XX", {"error": "Id for sub order not sent"})
 
-	subOrderPtr = SubOrder.objects.filter(id=int(orderShipment["suborderID"])).select_related('order')
+	subOrderPtr = SubOrder.objects.filter(id=int(orderShipment["suborderID"]), suborder_status__gt=0).select_related('order')
 
 	if len(subOrderPtr) == 0:
 		return customResponse("4XX", {"error": "Invalid id for sub order sent"})
 
 	subOrderPtr = subOrderPtr[0]
 
-	sellerAddressPtr = SellerAddress.objects.filter(seller_id=subOrderPtr.seller_id)
-	sellerAddressPtr = sellerAddressPtr[0]
+	sellerAddressPtr = subOrderPtr.seller_address_history
 
-	buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=subOrderPtr.order.buyer_id)
-	buyerAddressPtr = buyerAddressPtr[0]
+	buyerAddressPtr = subOrderPtr.order.buyer_address_history
 
 	if (int(orderShipment["all_items"]) == 0):
 		if not "order_items" in orderShipment or orderShipment["order_items"]==None:
 			return customResponse("4XX", {"error": "Order items in order shipment not sent"})
 
-		if not validateOrderShipmentItemsData(orderShipment["order_items"], subOrderPtr.id):
-			return customResponse("4XX", {"error": "Inappropriate order items in order shipment sent"})
-
 		sentOrderItems = []
-		for orderItem in orderShipment["order_items"]:
-			sentOrderItems.append(int(orderItem["orderitemID"]))
 
-		if len(sentOrderItems) == 0:
+		if len(orderShipment["order_items"]) == 0:
 			return customResponse("4XX", {"error": "No order items in order shipment sent"})
 
-		allOrderItems = OrderItem.objects.filter(id__in=sentOrderItems)
+		if not validateOrderShipmentItemsData(orderShipment["order_items"], sentOrderItems):
+			return customResponse("4XX", {"error": "Inappropriate order items in order shipment sent"})
+
+		allOrderItems = OrderItem.objects.filter(id__in=sentOrderItems, current_status__in=[0,1,2], suborder_id=subOrderID)
+
+		if not len(allOrderItems) == len(orderItems):
+			return customResponse("4XX", {"error": "Inappropriate order items in order shipment sent"})
 
 	elif (int(orderShipment["all_items"]) == 1):
-		allOrderItems = OrderItem.objects.filter(suborder_id= subOrderPtr.id, current_status__in=[0,1,2,3])
+		allOrderItems = OrderItem.objects.filter(suborder_id= subOrderPtr.id, current_status__in=[0,1,2])
 		if len(allOrderItems) == 0:
 			return customResponse("4XX", {"error": "No order items left to ship"})
 	else:
@@ -91,112 +94,64 @@ def post_new_order_shipment(request):
 	try:
 		newOrderShipment = OrderShipment(suborder=subOrderPtr, pickup_address=sellerAddressPtr, drop_address=buyerAddressPtr)
 		populateOrderShipment(newOrderShipment, orderShipment)
+		allOrderItemsValues = allOrderItems.aggregate(Sum('final_price'), Sum('pieces'))
+		newOrderShipment.pieces = allOrderItemsValues["pieces__sum"]
+		newOrderShipment.final_price = allOrderItemsValues["final_price__sum"]
+		newOrderShipment.product_count = len(allOrderItems)
 		newOrderShipment.save()
 
-		finalPrice = 0.0
-		manifest_dict = {}
-		manifest_dict["orderItems"] = []
+		allOrderItems.update(current_status=8, order_shipment_id=newOrderShipment.id)
 
-		for orderItemPtr in allOrderItems:
-			orderItemPtr.order_shipment = newOrderShipment
-			orderItemPtr.current_status = 8
-			finalPrice += float(orderItemPtr.final_price)
-			orderItemPtr.save()
+		OrderItemPtr = OrderItem.objects.filter(suborder_id= subOrderPtr.id, current_status__in=[0,1,2])
 
-			manifestOrderItem = {
-				"name":orderItemPtr.product.display_name,
-				"pieces":orderItemPtr.pieces
-			}
-
-			manifest_dict["orderItems"].append(manifestOrderItem)
-
-		isSubOrderShipped = 1
-
-		if orderShipment["all_items"] == 0:
-			OrderItemPtr = OrderItem.objects.filter(suborder_id= subOrderPtr.id)
-
-			for orderItem in OrderItemPtr:
-				if orderItem.current_status in [0,1,2]:
-					isSubOrderShipped = 0
-					break
-
-		isOrderShipped = 1
-
-		OrderItemPtr = OrderItem.objects.filter(suborder__order_id= subOrderPtr.order_id)
-
-		for orderItem in OrderItemPtr:
-			if orderItem.current_status in [0,1,2]:
-				isOrderShipped = 0
-				break
-
-		if isSubOrderShipped == 1:
-			subOrderPtr.suborder_status = 4
-		else:
+		if OrderItemPtr.exists():
 			subOrderPtr.suborder_status = 3
+		else:
+			subOrderPtr.suborder_status = 4
 
-		subOrderPtr.cod_charge += newOrderShipment.cod_charge
-		subOrderPtr.shipping_charge += newOrderShipment.shipping_charge
-		subOrderPtr.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
+		OrderItemPtr = OrderItem.objects.filter(suborder__order_id= subOrderPtr.order_id, current_status__in=[0,1,2])
+
+		if OrderItemPtr.exists():
+			subOrderPtr.order.order_status = 2
+		else:
+			subOrderPtr.order.order_status = 3
+
+		if subOrderPtr.order.placed_by == 0:
+			subOrderPtr.cod_charge += newOrderShipment.cod_charge
+			subOrderPtr.shipping_charge += newOrderShipment.shipping_charge
+			subOrderPtr.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
+			subOrderPtr.save()
+
+			subOrderPtr.order.cod_charge += newOrderShipment.cod_charge
+			subOrderPtr.order.shipping_charge += newOrderShipment.shipping_charge
+			subOrderPtr.order.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
+		else:
+			if subOrderPtr.suborder_status == 4:
+				oldOrderShipments = OrderShipment.objects.filter(suborder_id= subOrderPtr.id).exclude(id=newOrderShipment.id)
+				oldOrderShipmentValues = oldOrderShipments.aggregate(Sum('cod_charge'),Sum('shipping_charge'))
+				oldShippingCharge = oldOrderShipmentValues["shipping_charge__sum"]
+				oldCODCharge = oldOrderShipmentValues["cod_charge__sum"]
+				newOrderShipment.cod_charge = subOrderPtr.cod_charge - oldShippingCharge
+				newOrderShipment.shipping_charge  = subOrderPtr.shipping_charge - oldShippingCharge
+			else:
+				currentOrderItems = OrderItem.objects.filter(order_shipment_id=newOrderShipment.id)
+				oldOrderItems = OrderItem.objects.filter(suborder_id= subOrderPtr.id)
+
+				oldOrderItemPrices = oldOrderItems.aggregate(Sum('final_price'))["final_price__sum"]
+				currentOrderItemPrices = currentOrderItems.aggregate(Sum('final_price'))["final_price__sum"]
+
+				ratio = currentOrderItemPrices/oldOrderItemPrices
+
+				newOrderShipment.cod_charge = subOrderPtr.cod_charge*ratio
+				newOrderShipment.shipping_charge  = subOrderPtr.shipping_charge*ratio
+
+			newOrderShipment.save()
 		
 		subOrderPtr.save()
-
-		if isOrderShipped == 1:
-			subOrderPtr.order.order_status = 3
-		else:
-			subOrderPtr.order.order_status = 2
-
-		subOrderPtr.order.cod_charge += newOrderShipment.cod_charge
-		subOrderPtr.order.shipping_charge += newOrderShipment.shipping_charge
-		subOrderPtr.order.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)
-		
 		subOrderPtr.order.save()
-
-		buyerPtr = subOrderPtr.order.buyer
-		sellerPtr = subOrderPtr.seller
-
-		outputLink = "media/generateddocs/shipmentmanifest/" + str(sellerPtr.id) +"/" + str(subOrderPtr.display_number) + "/"
-		outputDirectory = settings.STATIC_ROOT + outputLink
-		outputFileName = "WholdusManifest-" + str(newOrderShipment.id) + "-" + str(subOrderPtr.display_number) + ".pdf"
-
-		newOrderShipment.final_price = finalPrice
-		newOrderShipment.manifest_link = outputLink + outputFileName
-		newOrderShipment.save()
-
-		manifest_dict["order"] = {
-			"display_number": subOrderPtr.display_number
-		}
-
-		manifest_dict["buyer"] = {
-			"name": buyerPtr.name
-		}
-
-		manifest_dict["buyer_address"] = serialize_buyer_address(buyerAddressPtr)
-
-		manifest_dict["seller"] = {
-			"name": sellerPtr.name,
-			"company_name": sellerPtr.company_name,
-			"vat_tin": sellerPtr.sellerdetails.vat_tin
-		}
-
-		manifest_dict["seller_address"] = serialize_seller_address(sellerAddressPtr)
-
-		manifest_dict["shipment"] = {
-			"waybill_number": newOrderShipment.waybill_number,
-			"shipping_amount": '{0:.0f}'.format(newOrderShipment.cod_charge + newOrderShipment.shipping_charge),
-			"logistics_partner": newOrderShipment.logistics_partner_name,
-			"invoice_number": newOrderShipment.invoice_number,
-			"final_price": '{0:.0f}'.format(newOrderShipment.final_price),
-			"amount_to_collect":'{0:.0f}'.format(float(newOrderShipment.cod_charge) + float(newOrderShipment.shipping_charge) + float(newOrderShipment.final_price)),
-			"packaged_length": '{0:.0f}'.format(newOrderShipment.packaged_length),
-			"packaged_breadth": '{0:.0f}'.format(newOrderShipment.packaged_breadth),
-			"packaged_height": '{0:.0f}'.format(newOrderShipment.packaged_height),
-			"packaged_weight": '{0:.2f}'.format(newOrderShipment.packaged_weight)
-		}
-
 		
-		template_file = "manifest/shipment_manifest.html"
-
-		generate_pdf(template_file, manifest_dict, outputDirectory, outputFileName)
+		newOrderShipment.create_manifest()
+		#newOrderShipment.create_label()
 
 	except Exception as e:
 		log.critical(e)

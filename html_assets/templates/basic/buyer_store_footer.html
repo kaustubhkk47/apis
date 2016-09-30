@@ -1,0 +1,76 @@
+<table style="width:100%;background-color:#673AB7;height:15px;">
+	<tr>
+		<td>
+		</td>
+	</tr>
+</table>
+
+<table style="background-color:#512da8;font-size:100%;color:#FFFFFF;width:100%;text-align:center;padding:0px 20px">
+	<tr>
+		<td>
+			<p>
+			<b>
+			{% if buyer.company_name|length > 0 %}
+				{{buyer.company_name}}
+			{% else %}
+				{{buyer.name}}
+			{% endif %}
+			</b>
+			</p>
+			{% if not buyer_address.pincodeID %}
+			<p>
+				<b>Address: </b>
+
+				{% if buyer_address.address|length > 0 %}
+					{{buyer_address.address}}, 
+				{% else %}
+				{% endif %}
+				{% if buyer_address.landmark|length > 0 %}
+					{{buyer_address.landmark}}, 
+				{% else %}
+				{% endif %}
+
+				</br>
+
+				{% if buyer_address.city|length > 0 %}
+					{{buyer_address.city}}, 
+				{% else %}
+				{% endif %}
+				{% if buyer_address.state|length > 0 %}
+					{{buyer_address.state}} - 
+				{% else %}
+				{% endif %}
+				{%if buyer_address.pincode|length > 0 %}
+					{{buyer_address.pincode}},
+				{% else %}
+				{% endif %}
+			</p>
+			{% else %}
+			{% endif %}
+			<p>
+				<b>You can call me on:</b></br>
+				{{buyer.mobile_number}}</br>
+			</p>
+			
+			{% if buyer.email|length > 0 %}
+			<p style="color:#FFFFFF">
+				<b>Drop me a mail at: </b>{{buyer.email}}
+			</p>
+			{% else %}
+			{% endif %}
+			<p style="color:#DDD">
+				Powered by
+			<a href="http://www.wholdus.com" style="color:#DDD">
+				Wholdus
+			</a>
+			</p>
+		</td>
+	</tr>
+</table>
+
+<table style="width:100%;background-color:#673AB7;height:15px;">
+	<tr>
+		<td>
+		</td>
+	</tr>
+</table>

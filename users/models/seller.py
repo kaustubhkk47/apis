@@ -41,6 +41,22 @@ class Seller(models.Model):
 	def __unicode__(self):
 		return "{} - {} - {}".format(self.id,self.name,self.company_name)
 
+	def latest_seller_address_history(self):
+		try:
+			return SellerAddressHistory.objects.filter(seller=self).latest('created_at')
+		except Exception, e:
+			return None
+
+	def send_registration_mail(self):
+		mail_template_file = "seller/registration_success.html"
+		mail_dict = {"email":self.email,"password":self.password}
+		subject = "{} congratulations on your successful registration as a seller".format(self.name)
+		to = [self.email]
+		from_email = "Wholdus Info <info@wholdus.com>"
+		attachment = settings.MEDIA_ROOT + "/files/SellerTNC.pdf"
+
+		create_email(mail_template_file,mail_dict,subject,from_email,to,attachment)
+
 class SellerDetails(models.Model):
 
 	seller = models.OneToOneField('users.Seller')
@@ -102,7 +118,41 @@ class SellerAddress(models.Model):
 	def __unicode__(self):
 		return str(self.seller)
 
+class SellerAddressHistory(models.Model):
+	seller = models.ForeignKey('users.Seller')
+	selleraddress = models.ForeignKey('users.SellerAddress', blank=True,null=True)
+	pincode = models.ForeignKey('address.Pincode', blank=True,null=True)
 
+	address_line = models.CharField(max_length=255, blank=True, null=False)
+	landmark = models.CharField(max_length=50, blank=True)
+	city_name = models.CharField(max_length=50, blank=True)
+	state_name = models.CharField(max_length=50, blank=True)
+	country_name = models.CharField(max_length=50, blank=True, default="India")
+	contact_number = models.CharField(max_length=11, blank=True)
+	pincode_number = models.CharField(max_length=6, blank=True)
+
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name="Seller Address History"
+		verbose_name_plural = "Seller Address History"
+
+	def __unicode__(self):
+		return str(self.seller)
+
+	def populateFromSellerAddress(self,sellerAddressPtr):
+		self.seller_id = sellerAddressPtr.seller_id
+		self.selleraddress = sellerAddressPtr
+		self.pincode = sellerAddressPtr.pincode
+		self.address_line = sellerAddressPtr.address_line
+		self.landmark = sellerAddressPtr.landmark
+		self.city_name = sellerAddressPtr.city_name
+		self.state_name = sellerAddressPtr.state_name
+		self.country_name = sellerAddressPtr.country_name
+		self.contact_number = sellerAddressPtr.contact_number
+		self.pincode_number = sellerAddressPtr.pincode_number
+		
 class SellerBankDetails(models.Model):
 
 	seller = models.ForeignKey('users.Seller')
@@ -126,6 +176,49 @@ class SellerBankDetails(models.Model):
 
 	def __unicode__(self):
 		return str(self.seller)
+
+class SellerCategory(models.Model):
+
+	seller = models.ForeignKey('users.Seller')
+	category = models.ForeignKey('catalog.Category')
+
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name="Seller Category"
+		verbose_name_plural = "Seller Categories"
+
+	def __unicode__(self):
+		return str(self.category) + str(self.seller)
+
+class SellerCategoryAdmin(admin.ModelAdmin):
+	list_display = ["id", "link_to_seller", "link_to_category"]
+	list_display_links = ["id", "link_to_seller", "link_to_category"]
+	list_filter = ["seller", "category"]
+
+	def link_to_seller(self, obj):
+		return link_to_foreign_key(obj, "seller")
+	link_to_seller.short_description = "Seller"
+	link_to_seller.allow_tags=True
+
+	def link_to_category(self, obj):
+		return link_to_foreign_key(obj, "category")
+	link_to_category.short_description = "Category"
+	link_to_category.allow_tags=True
+
+def filterSellerCategory(parameters):
+
+	sellerCategories =  SellerCategory.objects.filter(seller__delete_status=False,category__delete_status=False)
+
+	if "categoriesArr" in parameters:
+		sellerCategories = sellerCategories.filter(category_id__in=parameters["categoriesArr"])
+
+	if "sellersArr" in parameters:
+		sellerCategories = sellerCategories.filter(seller_id__in=parameters["sellersArr"])
+
+	return sellerCategories
+
 		
 def validateSellerData(seller, oldseller, isnew):
 
@@ -294,6 +387,7 @@ def getSellerToken(seller):
 	tokenPayload = {
 		"user": "seller",
 		"sellerID": seller.id,
+		"password":seller.password
 	}
 	encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
 	return encoded.decode("utf-8")

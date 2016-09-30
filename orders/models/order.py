@@ -7,7 +7,7 @@ from users.models.buyer import Buyer, BuyerAddress
 
 from catalog.models.product import Product
 from catalog.models.productLot import getCalculatedPricePerPiece
-from .orderItem import OrderItem, OrderItemCompletionStatus
+from .orderItem import OrderItem, OrderItemNonCompletionStatus
 from .subOrder import SubOrder, populateSellerMailDict
 from users.serializers.buyer import serialize_buyer_address
 
@@ -17,15 +17,20 @@ import math
 class Order(models.Model):
 
 	buyer = models.ForeignKey('users.Buyer')
+	cart = models.ForeignKey('orders.Cart', null=True, blank=True)
+	buyer_address_history = models.ForeignKey('users.BuyerAddressHistory', null=True, blank=True)
+
+	# 0 - Admin 1 - Customer
+	placed_by = models.IntegerField(default=0)
 
 	pieces = models.PositiveIntegerField(default=1)
 	product_count = models.PositiveIntegerField(default=1)
-	retail_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	edited_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	cod_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+	retail_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	edited_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	cod_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 	
 	order_status = models.IntegerField(default=0)
 	order_payment_status = models.IntegerField(default=0)
@@ -48,6 +53,29 @@ class Order(models.Model):
 
 	def __unicode__(self):
 		return "{} - {} - {}".format(self.id,self.display_number,self.buyer.name)
+
+	def populateDataFromCart(self, cartPtr):
+		self.cart = cartPtr
+		self.buyer_id = cartPtr.buyer_id
+		self.product_count = cartPtr.product_count
+		self.pieces = cartPtr.pieces
+		self.retail_price = cartPtr.retail_price
+		self.calculated_price = cartPtr.calculated_price
+		self.edited_price = cartPtr.calculated_price
+		self.shipping_charge = cartPtr.shipping_charge
+		self.cod_charge = cartPtr.cod_charge
+		self.final_price = cartPtr.final_price
+		self.order_status = 0
+		self.placed_by = 1
+		self.save()
+		self.display_number = "1" +"%06d" %(self.id,)
+
+	def validateOrderStatus(self, status):
+		current_status = self.order_status
+		if current_status == 0 and (status == 1):
+			return True
+		return False
+
 
 class OrderAdmin(admin.ModelAdmin):
 	search_fields = ["buyer__name", "display_number", "buyer__company_name", "buyer__mobile_number"]
@@ -72,6 +100,7 @@ def populateOrderData(orderPtr, order):
 	orderPtr.remarks = order["remarks"]
 	orderPtr.order_status = 1
 	orderPtr.save()
+	orderPtr.buyer_address_history = orderPtr.buyer.latest_buyer_address_history()
 	orderPtr.display_number = "1" +"%06d" %(orderPtr.id,)
 
 def filterOrder(orderParameters):
@@ -91,17 +120,13 @@ def filterOrder(orderParameters):
 
 	return orders
 
-def validateOrderProductsData(orderProducts):
+def validateOrderProductsData(orderProducts,  productsHash, productIDarr):
 
 	for orderProduct in orderProducts:
 		if not "productID" in orderProduct or not validate_integer(orderProduct["productID"]):
 			return False
 
-		productPtr = Product.objects.filter(id=int(orderProduct["productID"]))
-		if len(productPtr) == 0:
-			return False
-
-		productPtr = productPtr[0]
+		productID = int(orderProduct["productID"])
 
 		if not "pieces" in orderProduct or not validate_integer(orderProduct["pieces"]):
 			return False
@@ -110,28 +135,21 @@ def validateOrderProductsData(orderProducts):
 		if not "remarks" in orderProduct or orderProduct["remarks"]==None:
 			orderProduct["remarks"] = ""
 
-		orderProduct["retail_price_per_piece"] = productPtr.price_per_unit
-		orderProduct["lot_size"] = productPtr.lot_size
-
-		orderProduct["final_price"] = Decimal(orderProduct["pieces"])*Decimal(orderProduct["edited_price_per_piece"])
-		orderProduct["lots"] = int(math.ceil(float(orderProduct["pieces"])/productPtr.lot_size))
-		orderProduct["calculated_price_per_piece"] = getCalculatedPricePerPiece(int(orderProduct["productID"]),orderProduct["lots"])
+		productsHash[productID] = len(productsHash)
+		productIDarr.append(productID)
 
 	return True
 
 def update_order_completion_status(order):
 
-	orderItemQuerySet = OrderItem.objects.filter(suborder__order_id = order.id)
-	for orderItem in orderItemQuerySet:
-		if orderItem.current_status not in OrderItemCompletionStatus:
-			return
-
-	order.order_status = 3
-	order.save()
+	orderItemQuerySet = OrderItem.objects.filter(suborder__order_id = order.id, current_status__in=OrderItemNonCompletionStatus)
+	if not orderItemQuerySet.exists():
+		order.order_status = 3
+		order.save()
 
 OrderStatus = {
 	-1:{"display_value":"Cancelled"},
-	0:{"display_value":"Placed"},
+	0:{"display_value":"Unconfirmed"},
 	1:{"display_value":"Confirmed"},
 	2:{"display_value":"Partially Shipped"},
 	3:{"display_value":"Shipped"},
@@ -147,13 +165,14 @@ OrderPaymentStatus = {
 ## Status: Placed, confirmed, shipped, delivered
 ## Payment status : paid, not paid, partially paid
 
-def sendOrderMail(OrderPtr):
+def sendOrderMail(OrderPtr, buyer_subject = ""):
 	from_email = "Wholdus Info <info@wholdus.com>"
 	buyerPtr = OrderPtr.buyer
 
 	if buyerPtr.email != None and buyerPtr.email != "":
 		buyer_mail_template_file = "buyer/new_order.html"
-		buyer_subject = "New order received with order ID " + OrderPtr.display_number
+		if buyer_subject == "":
+			buyer_subject = "New order placed with order ID " + OrderPtr.display_number
 		buyer_to = [buyerPtr.email]
 		buyer_bcc = ["aditya.rana@wholdus.com", "kushagra@wholdus.com"]
 		buyer_mail_dict = populateBuyerMailDict(OrderPtr, buyerPtr)
@@ -172,8 +191,10 @@ def populateBuyerMailDict(OrderPtr, buyerPtr):
 		"total_margin":'{0:.1f}'.format(buyerMargin)
 	}
 
-	buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
-	buyerAddressPtr = buyerAddressPtr[0]
+	#buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
+	#buyerAddressPtr = buyerAddressPtr[0]
+
+	buyerAddressPtr = OrderPtr.buyer_address_history
 
 	buyer_mail_dict["subOrders"] = []
 

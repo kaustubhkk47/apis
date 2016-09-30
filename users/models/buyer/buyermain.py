@@ -1,10 +1,11 @@
 from django.db import models
 from django.contrib import admin
-from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString, link_to_foreign_key
+from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString, link_to_foreign_key, validate_percent
 from decimal import Decimal
 import jwt as JsonWebToken
 import settings
 from address.models.pincode import Pincode
+from django.template.defaultfilters import slugify
 
 class Buyer(models.Model):
 	name = models.CharField(max_length=200, blank=True)
@@ -17,6 +18,10 @@ class Buyer(models.Model):
 	mobile_verification = models.BooleanField(default=False)
 	email_verification = models.BooleanField(default=False)
 	gender = models.CharField(max_length=10, blank=True)
+
+	store_slug = models.TextField(blank=True)
+	store_url = models.TextField(blank=True)
+	store_global_discount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null = True)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -36,6 +41,13 @@ class Buyer(models.Model):
 
 	def __unicode__(self):
 		return "{} - {} - {}".format(self.id,self.name,self.mobile_number)
+
+	def latest_buyer_address_history(self):
+		try:
+			return BuyerAddressHistory.objects.filter(buyer=self).latest('created_at')
+		except Exception, e:
+			return None
+		
 
 
 class BuyerAddress(models.Model):
@@ -61,6 +73,43 @@ class BuyerAddress(models.Model):
 
 	def __unicode__(self):
 		return str(self.buyer)
+
+class BuyerAddressHistory(models.Model):
+	buyer = models.ForeignKey('users.Buyer')
+	buyeraddress = models.ForeignKey('users.BuyerAddress', blank=True,null=True)
+	pincode = models.ForeignKey('address.Pincode', blank=True,null=True)
+
+	address_line = models.CharField(max_length=255, blank=True, null=False)
+	landmark = models.CharField(max_length=50, blank=True)
+	city_name = models.CharField(max_length=50, blank=True)
+	state_name = models.CharField(max_length=50, blank=True)
+	country_name = models.CharField(max_length=50, blank=True, default="India")
+	contact_number = models.CharField(max_length=11, blank=True)
+	pincode_number = models.CharField(max_length=6, blank=True)
+	priority = models.IntegerField(default=1)
+
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name="Buyer Address History"
+		verbose_name_plural = "Buyer Address History"
+
+	def __unicode__(self):
+		return str(self.buyer)
+
+	def populateFromBuyerAddress(self, buyerAddressPtr):
+		self.buyer_id = buyerAddressPtr.buyer_id
+		self.buyeraddress = buyerAddressPtr
+		self.pincode = buyerAddressPtr.pincode
+		self.address_line = buyerAddressPtr.address_line
+		self.landmark = buyerAddressPtr.landmark
+		self.city_name = buyerAddressPtr.city_name
+		self.state_name = buyerAddressPtr.state_name
+		self.country_name = buyerAddressPtr.country_name
+		self.contact_number = buyerAddressPtr.contact_number
+		self.pincode_number = buyerAddressPtr.pincode_number
+		self.priority = buyerAddressPtr.priority
 
 class BuyerDetails(models.Model):
 	buyer = models.OneToOneField('users.Buyer')
@@ -108,7 +157,7 @@ def validateBuyerData(buyer, oldbuyer, is_new):
 		buyer["name"] = oldbuyer.name
 	if not "company_name" in buyer or buyer["company_name"]==None:
 		buyer["company_name"] = oldbuyer.company_name
-	if not "mobile_number" in buyer or buyer["mobile_number"]==None or not validate_mobile_number(buyer["mobile_number"]):
+	if not "mobile_number" in buyer or not validate_mobile_number(buyer["mobile_number"]):
 		flag = 1
 		buyer["mobile_number"] = oldbuyer.mobile_number
 	if not "email" in buyer or buyer["email"]==None or not validate_email(buyer["email"]):
@@ -132,6 +181,8 @@ def validateBuyerData(buyer, oldbuyer, is_new):
 			buyer["whatsapp_number"] = oldbuyer.whatsapp_number
 	if not "whatsapp_sharing_active" in buyer or not validate_bool(buyer["whatsapp_sharing_active"]):
 		buyer["whatsapp_sharing_active"] = oldbuyer.whatsapp_sharing_active
+	if not "store_global_discount" in buyer or not validate_percent(buyer["store_global_discount"]):
+		buyer["store_global_discount"] = oldbuyer.store_global_discount
 	if not "password" in buyer or buyer["password"]:
 		if is_new == 1:
 			buyer["password"] = buyer["mobile_number"]
@@ -176,6 +227,10 @@ def validateBuyerAddressData(buyeraddress, oldbuyeraddress):
 def populateBuyer(buyerPtr, buyer):
 	buyerPtr.name = buyer["name"]
 	buyerPtr.company_name = buyer["company_name"]
+	if buyerPtr.company_name != "":
+		buyerPtr.store_slug = slugify(buyerPtr.company_name)
+	else:
+		buyerPtr.store_slug = slugify(buyerPtr.name)
 	buyerPtr.mobile_number = buyer["mobile_number"]
 	buyerPtr.whatsapp_number = buyer["whatsapp_number"]
 	buyerPtr.email = buyer["email"]
@@ -185,6 +240,9 @@ def populateBuyer(buyerPtr, buyer):
 	buyerPtr.email_verification = int(buyer["email_verification"])
 	buyerPtr.whatsapp_sharing_active = int(buyer["whatsapp_sharing_active"])
 	buyerPtr.gender = buyer["gender"]
+	buyerPtr.save()
+	buyerPtr.store_url = "{}-{}".format(buyerPtr.store_slug,buyerPtr.id)
+	buyerPtr.store_global_discount = buyer["store_global_discount"]
 
 def populateBuyerDetails(buyerDetailsPtr, buyerdetails):
 	buyerDetailsPtr.cst = buyerdetails["cst"]
@@ -268,6 +326,7 @@ def getBuyerToken(buyer):
 	tokenPayload = {
 		"user": "buyer",
 		"buyerID": buyer.id,
+		"password":buyer.password,
 	}
 	encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
 	return encoded.decode("utf-8")

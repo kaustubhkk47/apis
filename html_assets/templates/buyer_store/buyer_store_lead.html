@@ -1,0 +1,33 @@
+{%extends "basic/base.html"%}
+
+{% block content %}
+
+		<table style="width:100%;text-align:center;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);margin-bottom: 10px">
+			<tr>
+				<td style="background-color:#512da8;color:#FFFFFF;font-size:20px;padding: 8px 15px;">
+					Purchase request on your online store
+				</td>
+			</tr>
+			<tr>
+				<td style="background-color: #FFFFFF;padding: 0px 25px;">
+
+					<p>Purchase request has been submitted by <strong>{{name}}</strong>.</p>
+					<p>You can contact the customer on</p>
+					<p> Phone number <strong>{{mobile_number}}</strong></p>
+					{% if email|length > 0 %}
+						<p> or on email <strong>{{email }}</strong></p>
+					{% else %}
+					{% endif %}
+					.</br></p>
+
+					<p> You have received purchase request for <a href="{{product.absolute_path}}"><strong>{{ product.name }}.</strong></a></p>
+					<p><img style="max-width:400px;" src="{{product.image.absolute_path}}"></p>
+					
+					
+					<p>You can check out all purchase requests you have received at <a href="http://www.wholdus.com/account/purchase-requests">www.wholdus.com/account/purchase-requests</a></p>
+					<p>You can manage your account and online store at <a href="http://www.wholdus.com/account/my-store">www.wholdus.com/account/my-store</a></p>
+				</td>
+			</tr>
+		</table>
+	  
+{% endblock %}

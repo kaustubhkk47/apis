@@ -23,6 +23,8 @@ def serialize_buyer(buyer_entry, parameters = {}):
 	buyer["created_at"] = buyer_entry.created_at
 	buyer["updated_at"] = buyer_entry.updated_at
 	buyer["buyer_panel_url"] = str(buyer_entry.id) + "-" + str(int(time.mktime(buyer_entry.created_at.timetuple())))
+	buyer["store_url"] = buyer_entry.store_url
+	buyer["store_global_discount"] = buyer_entry.store_global_discount
 	
 	if "buyer_details_details" in parameters and parameters["buyer_details_details"] == 1 and hasattr(buyer_entry,'buyerdetails'):
 		buyer_details = {}
@@ -43,7 +45,7 @@ def serialize_buyer(buyer_entry, parameters = {}):
 	   buyer["buyer_interests"] = parse_buyer_interest(buyerInterestQuerySet,parameters)
 
 	if "buyer_product_details" in parameters and parameters["buyer_product_details"] == 1:
-		tempParameters = parameters
+		tempParameters = parameters.copy()
 		tempParameters["buyer_interest_active"] = True
 		tempParameters["buyer_product_delete_status"] = False
 		tempParameters["buyer_product_is_active"] = True
@@ -95,7 +97,8 @@ def serialize_buyer_address(buyer_address, parameters = {}):
 		"country" : buyer_address.country_name,
 		"contact_number" : buyer_address.contact_number,
 		"pincode" : buyer_address.pincode_number,
-		"priority" : buyer_address.priority
+		"priority" : buyer_address.priority,
+		"pincodeID":buyer_address.pincode_id
 	}
 	return buyer_address_entry
 
@@ -204,10 +207,12 @@ def serialize_buyer_product_response(buyer_product_entry, parameters = {}):
 
 	buyer_product["buyerproductresponseID"] = buyer_product_entry.id
 	buyer_product["buyerID"] = buyer_product_entry.buyer_id
+	buyer_product["buyerproductID"] = buyer_product_entry.buyer_product_id
 	buyer_product["response_code"] = buyer_product_entry.response_code
 	buyer_product["has_swiped"] = buyer_product_entry.has_swiped
 	buyer_product["created_at"] = buyer_product_entry.created_at
 	buyer_product["updated_at"] = buyer_product_entry.updated_at
+	buyer_product["store_discount"] = buyer_product_entry.store_discount
 	
 	buyer_product["product"] = serialize_product(buyer_product_entry.product, parameters)
 
@@ -259,3 +264,30 @@ def serialize_buyer_buys_from(buyer_buys_from_entry, parameters = {}):
 	buyer_buys_from["business_type"] = serialize_business_type(buyer_buys_from_entry.business_type)
 
 	return buyer_buys_from
+
+def parse_buyer_store_lead(buyer_store_leads_queryset, parameters = {}):
+
+	buyer_store_leads = []
+
+	for buyer_store_lead in buyer_store_leads_queryset:
+		buyer_store_lead_entry = serialize_buyer_store_lead(buyer_store_lead, parameters)
+		buyer_store_leads.append(buyer_store_lead_entry)
+
+	return buyer_store_leads
+
+def serialize_buyer_store_lead(buyer_store_lead_entry, parameters = {}):
+
+	buyer_store_lead = {}
+	buyer_store_lead["buyerstoreleadID"] = buyer_store_lead_entry.id
+	buyer_store_lead["buyerID"] = buyer_store_lead_entry.buyer_id
+	buyer_store_lead["name"] = buyer_store_lead_entry.name
+	buyer_store_lead["mobile_number"] = buyer_store_lead_entry.mobile_number
+	buyer_store_lead["email"] = buyer_store_lead_entry.email
+	buyer_store_lead["status"] = buyer_store_lead_entry.status
+	buyer_store_lead["sizes"] = buyer_store_lead_entry.sizes
+	buyer_store_lead["quantity"] = buyer_store_lead_entry.quantity
+	buyer_store_lead["product_link"] = buyer_store_lead_entry.get_product_link()
+	
+	buyer_store_lead["product"] = serialize_product(buyer_store_lead_entry.product, parameters)
+
+	return buyer_store_lead

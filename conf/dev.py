@@ -7,6 +7,9 @@ CURRENT_ENVIRONMENT = 'dev'
 
 WKHTMLTOPDFPATH = '/usr/local/bin/wkhtmltopdf'
 
+BASE_URL = "http://beta.wholdus.com"
+API_BASE_URL = "http://api-test.wholdus.com"
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

@@ -1,7 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 
 from users.views import user, buyer, seller, internaluser, businesstype
-from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool, validate_integer, getPaginationParameters, convert_keys_to_string
+from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool, validate_integer, getPaginationParameters, convert_keys_to_string, getApiVersion
 from users.models.buyer import *
 from users.serializers.buyer import *
 from users.models.seller import *
@@ -16,6 +16,8 @@ import settings
 ### ALL USERS
 @csrf_exempt
 def user_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
 	parameters = populateAllUserIDParameters(request, {}, version)
 
@@ -42,42 +44,89 @@ def populateAllUserIDParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def buyer_details(request, version = "0"):
 
-	buyerParameters = populateBuyerParameters(request, {}, version)
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateBuyerProductParameters(request, {}, version)
 
 	if request.method == "GET":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0 and parameters["isBuyerStore"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.get_buyer_details(request,buyerParameters)
+		return buyer.get_buyer_details(request,parameters)
 	elif request.method == "POST":
 		return buyer.post_new_buyer(request)
 	elif request.method == "PUT":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.update_buyer(request)
+		return buyer.update_buyer(request, parameters)
 	elif request.method == "DELETE":
 
-		if buyerParameters["isInternalUser"] == 0:
+		if parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.delete_buyer(request)
+		return buyer.delete_buyer(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
 def buyer_panel_tracking_details(request, version = "0"):
 
-	buyerParameters = populateBuyerParameters(request, {}, version)
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateBuyerParameters(request, {}, version)
 
 	if request.method == "POST":
-		if buyerParameters["isBuyer"] == 0:
+		if parameters["isBuyer"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.post_new_buyer_panel_tracking(request)
+		return buyer.post_new_buyer_panel_tracking(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
+def buyer_store_lead_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateBuyerStoreParameters(request, {}, version)
+
+	if request.method == "GET":
+
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return buyer.get_buyer_store_lead_details(request,parameters)
+	elif request.method == "POST":
+
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0 and parameters["isBuyerStore"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return buyer.post_new_buyer_store_lead(request, parameters)
+	elif request.method == "PUT":
+
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return buyer.update_buyer_store_lead(request,parameters)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+def populateBuyerStoreParameters(request, parameters = {}, version = "0"):
+
+	parameters = populateBuyerProductParameters(request, parameters, version)
+
+	buyerStoreLeadID = request.GET.get("buyerstoreleadID", "")
+	if buyerStoreLeadID != "":
+		parameters["buyerStoreLeadsArr"] = getArrFromString(buyerStoreLeadID)
+
+	buyerStoreLeadStatus = request.GET.get("buyer_store_lead_status", None)
+	if buyerStoreLeadStatus:
+		parameters["buyer_store_lead_status"] = getArrFromString(buyerStoreLeadStatus)
+
+	return parameters
+
+
 
 def populateBuyerParameters(request, parameters = {}, version = "0"):
 
@@ -122,61 +171,67 @@ def populateBuyerParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def buyer_purchasing_state_details(request, version = "0"):
 
-	buyerParameters = populateBuyerParameters(request, {}, version)
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateBuyerParameters(request, {}, version)
 
 	if request.method == "GET":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.get_buyer_purchasing_state_details(request,buyerParameters)
+		return buyer.get_buyer_purchasing_state_details(request,parameters)
 	elif request.method == "POST":
 
-		if buyerParameters["isInternalUser"] == 0:
+		if parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.post_new_buyer_purchasing_state(request)
+		return buyer.post_new_buyer_purchasing_state(request, parameters)
 	#elif request.method == "PUT":
 	#	return buyer.update_buyer_purchasing_state(request)
 	elif request.method == "DELETE":
 
-		if buyerParameters["isInternalUser"] == 0:
+		if parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.delete_buyer_purchasing_state(request)
+		return buyer.delete_buyer_purchasing_state(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
 def buyer_buys_from_details(request, version = "0"):
 
-	buyerParameters = populateBuyerParameters(request, {}, version)
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateBuyerParameters(request, {}, version)
 
 	if request.method == "GET":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.get_buyer_buys_from_details(request,buyerParameters)
+		return buyer.get_buyer_buys_from_details(request,parameters)
 	elif request.method == "POST":
 
-		if buyerParameters["isInternalUser"] == 0:
+		if parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.post_new_buyer_buys_from(request)
+		return buyer.post_new_buyer_buys_from(request, parameters)
 	#elif request.method == "PUT":
 	#	return buyer.update_buyer_purchasing_state(request)
 	elif request.method == "DELETE":
 
-		if buyerParameters["isInternalUser"] == 0:
+		if parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.delete_buyer_buys_from(request)
+		return buyer.delete_buyer_buys_from(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
 
 @csrf_exempt
 def buyer_access_token_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
 	if request.method == "GET":
 		parameters = {}
@@ -189,68 +244,74 @@ def buyer_access_token_details(request, version = "0"):
 @csrf_exempt
 def buyer_shared_product_id_details(request, version = "0"):
 
-	buyerParameters = populateBuyerParameters(request, {}, version)
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateBuyerParameters(request, {}, version)
 
 	if request.method == "GET":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.get_buyer_shared_product_id_details(request,buyerParameters)
+		return buyer.get_buyer_shared_product_id_details(request,parameters)
 	elif request.method == "DELETE":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.delete_buyer_shared_product_id(request)
+		return buyer.delete_buyer_shared_product_id(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
 def buyer_interest_details(request, version = "0"):
 
-	buyerParameters = populateBuyerParameters(request, {}, version )
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateBuyerParameters(request, {}, version )
 
 	if request.method == "GET":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.get_buyer_interest_details(request,buyerParameters)
+		return buyer.get_buyer_interest_details(request,parameters)
 	elif request.method == "POST":
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.post_new_buyer_interest(request)
+		return buyer.post_new_buyer_interest(request, parameters)
 	elif request.method == "PUT":
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.update_buyer_interest(request)
-	elif request.method == "DELETE":
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.delete_buyer_interest(request)
+		return buyer.update_buyer_interest(request, parameters)
+	#elif request.method == "DELETE":
+	#	if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+	#		return customResponse("4XX", {"error": "Authentication failure"})
+	#	return buyer.delete_buyer_interest(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
 def buyer_product_details(request, version = "0"):
 
-	buyerParameters = populateBuyerProductParameters(request, {}, version )
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateBuyerProductParameters(request, {}, version )
 
 	if request.method == "GET":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0 and parameters["isBuyerStore"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.get_buyer_product_details(request,buyerParameters)
+		return buyer.get_buyer_product_details(request,parameters)
 	elif request.method == "POST":
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.post_new_buyer_product(request)
+		return buyer.post_new_buyer_product(request, parameters)
 	elif request.method == "PUT":
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.update_buyer_product(request)
+		return buyer.update_buyer_product(request, parameters)
 	#elif request.method == "DELETE":
 	#	return buyer.delete_buyer_interest(request)
 
@@ -259,28 +320,45 @@ def buyer_product_details(request, version = "0"):
 @csrf_exempt
 def buyer_product_response_details(request, version = "0"):
 
-	buyerParameters = populateBuyerProductParameters(request, {}, version )
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateBuyerProductParameters(request, {}, version )
 
 	if request.method == "GET":
 
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0 and parameters["isBuyerStore"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 
-		return buyer.get_buyer_product_response_details(request,buyerParameters)
+		return buyer.get_buyer_product_response_details(request,parameters)
+
+	elif request.method == "PUT":
+
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+
+		return buyer.update_buyer_product_response(request,parameters)
 	
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
 def buyer_product_whatsapp_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateBuyerProductParameters(request, {}, version )
 	
 	if request.method == "PUT":
-		return buyer.update_buyer_product_whatsapp(request)
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return buyer.update_buyer_product_whatsapp(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
 def buyer_product_landing_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 	
 	if request.method == "POST":
 		return buyer.post_buyer_product_landing(request)
@@ -289,6 +367,8 @@ def buyer_product_landing_details(request, version = "0"):
 
 @csrf_exempt
 def buyer_product_master_update(request,version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
 	if request.method == "POST":
 		return buyer.master_update_buyer_product(request)
@@ -393,8 +473,10 @@ def populateBuyerDetailsParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def buyer_address_details(request, version = "0"):
 
-	buyerParameters = populateBuyerParameters(request, {}, version )
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
+	buyerParameters = populateBuyerParameters(request, {}, version )
+	"""
 	if request.method == "POST":
 		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
@@ -407,6 +489,7 @@ def buyer_address_details(request, version = "0"):
 		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
 		return buyer.delete_buyer(request)
+	"""
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
@@ -417,11 +500,26 @@ def populateBuyerIDParameters(request, parameters = {}, version = "0"):
 	buyerID = request.GET.get("buyerID", "")
 	tokenPayload = convert_keys_to_string(get_token_payload(accessToken, "buyerID"))
 	parameters["isBuyer"] = 0
-	if "buyerID" in tokenPayload and tokenPayload["buyerID"]!=None:
-		parameters["buyersArr"] = [tokenPayload["buyerID"]]
-		parameters["isBuyer"] = 1
+	parameters["isBuyerStore"] = 0
+	if "buyerID" in tokenPayload and validate_integer(tokenPayload["buyerID"]) and "password" in tokenPayload:
+		try:
+			buyerPtr = Buyer.objects.get(id=int(tokenPayload["buyerID"]), password=tokenPayload["password"], delete_status=False)
+		except:
+			pass
+		else:
+			parameters["buyersArr"] = [buyerPtr.id]
+			parameters["isBuyer"] = 1
 	elif buyerID != "":
 		parameters["buyersArr"] = getArrFromString(buyerID)
+
+	storeUrl = request.GET.get("store_url", "")
+	try:
+		buyerPtr = Buyer.objects.get(store_url=storeUrl, delete_status=False)
+	except Exception as e:
+		pass
+	else:
+		parameters["buyersArr"] = [buyerPtr.id]
+		parameters["isBuyerStore"] = 1
 
 	return parameters
 
@@ -429,6 +527,8 @@ def populateBuyerIDParameters(request, parameters = {}, version = "0"):
 
 @csrf_exempt
 def seller_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
 	parameters = populateSellerParameters(request, {}, version)
 
@@ -468,9 +568,14 @@ def populateSellerIDParameters(request, parameters = {}, version = "0"):
 	sellerID = request.GET.get("sellerID", "")
 	tokenPayload = get_token_payload(accessToken, "sellerID")
 	parameters["isSeller"] = 0
-	if "sellerID" in tokenPayload and tokenPayload["sellerID"]!=None:
-		parameters["sellersArr"] = [tokenPayload["sellerID"]]
-		parameters["isSeller"] = 1
+	if "sellerID" in tokenPayload and validate_integer(tokenPayload["sellerID"]) and "password" in tokenPayload:
+		try:
+			sellerPtr = Seller.objects.get(id=int(tokenPayload["sellerID"]), password=tokenPayload["password"], delete_status=False)
+		except:
+			pass
+		else:
+			parameters["sellersArr"] = [sellerPtr.id]
+			parameters["isSeller"] = 1
 	elif sellerID != "":
 		parameters["sellersArr"] = getArrFromString(sellerID)
 
@@ -514,6 +619,8 @@ def populateSellerDetailsParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def business_type_details(request, version = "0"):
 
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
 	if request.method == "GET":
 
 		parameters = populateBusinessTypeParameters(request, {}, version)
@@ -543,6 +650,8 @@ def populateBusinessTypeParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def internal_user_details(request, version = "0"):
 
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
 	if request.method == "GET":
 
 		parameters = populateInternalUserIDParameters(request, {}, version)
@@ -560,9 +669,14 @@ def populateInternalUserIDParameters(request, parameters = {}, version = "0"):
 	internalUserID = request.GET.get("internaluserID", "")
 
 	parameters["isInternalUser"] = 0
-	if "internaluserID" in tokenPayload and tokenPayload["internaluserID"]!=None:
-		parameters["internalusersArr"] = [tokenPayload["internaluserID"]]
-		parameters["isInternalUser"] = 1
+	if "internaluserID" in tokenPayload and validate_integer(tokenPayload["internaluserID"]) and "password" in tokenPayload:
+		try:
+			internalUserPtr = InternalUser.objects.get(id=int(tokenPayload["internaluserID"]), password=tokenPayload["password"])
+		except:
+			pass
+		else:
+			parameters["internalusersArr"] = [internalUserPtr.id]
+			parameters["isInternalUser"] = 1
 	elif internalUserID != "":
 		parameters["internalusersArr"] = getArrFromString(internalUserID)
 
@@ -572,6 +686,8 @@ def populateInternalUserIDParameters(request, parameters = {}, version = "0"):
 
 @csrf_exempt
 def buyer_login(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
 	response = {}
 	if request.method == 'POST':
@@ -603,6 +719,8 @@ def buyer_login(request, version = "0"):
 @csrf_exempt
 def seller_login(request, version = "0"):
 
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
 	response = {}
 	if request.method == 'POST':
 		email = request.POST.get('email', '')
@@ -632,6 +750,8 @@ def seller_login(request, version = "0"):
 
 @csrf_exempt
 def internaluser_login(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
 	response = {}
 	if request.method == 'POST':

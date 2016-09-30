@@ -13,6 +13,11 @@ db.sqlite3
 media
 settings.py
 
+### Whatsapp Script ###
+chromedriver
+*.exe
+*.jpg
+productfile.txt
 
 ### Vim ###
 # swap

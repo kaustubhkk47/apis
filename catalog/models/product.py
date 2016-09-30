@@ -12,6 +12,9 @@ from scripts.utils import validate_integer, validate_number, validate_bool, arrT
 
 import operator
 from django.db.models import Q
+
+import settings
+import ast
 #Make changes in model, validate, populate and serializer 
 #Also make changes in upload script
 
@@ -24,7 +27,7 @@ class Product(models.Model):
 	price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, blank=False)
 	unit = models.CharField(max_length=15, blank=False)
 	tax = models.DecimalField(max_digits=5, decimal_places=2)
-	min_price_per_unit = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
+	min_price_per_unit = models.DecimalField(max_digits=7, decimal_places=2, default=0)
 
 	lot_size = models.PositiveIntegerField(default=1)
 	price_per_lot = models.DecimalField(max_digits=10, decimal_places=2, blank=False)
@@ -48,7 +51,26 @@ class Product(models.Model):
 	is_catalog = models.BooleanField(default=False)
 
 	def get_absolute_url(self):
-		return r"http://www.wholdus.com/{}-{}/{}-{}".format(self.category.slug,self.category.id,self.slug,self.id)
+		return r"{}/{}-{}/{}-{}".format(settings.BASE_URL, self.category.slug,self.category.id,self.slug,self.id)
+
+	def get_image_url(self, resolution="700"):
+		resolutionString = "{}x{}".format(resolution,resolution)
+		image_numbers_arr = self.get_image_numbers_arr()
+		if len(image_numbers_arr) > 0:
+			return r"{}/{}{}/{}-{}.jpg".format(settings.API_BASE_URL, self.image_path,resolutionString,self.image_name,image_numbers_arr[0])
+		else:
+			return settings.BASE_URL
+
+	def get_image_numbers_arr(self):
+		image_numbers = str(self.image_numbers)
+		try:
+			image_numbers_arr = ast.literal_eval(image_numbers)
+		except Exception as e:
+			print e
+			image_numbers_arr = []
+
+		return image_numbers_arr
+
 
 	class Meta:
 		ordering = ["-id"]
@@ -67,6 +89,12 @@ class Product(models.Model):
 			if lots <= productLot.lot_size_to:
 				return productLot.price_per_unit
 		return productLotsQuerySet[len(productLotsQuerySet)-1].price_per_unit
+
+	def getShippingPerPiece(self):
+		try:
+			return float((self.productdetails.weight_per_unit+50)/1000*35)
+		except Exception as e:
+			return  (float(350))/1000*35
 
 
 class ProductDetails(models.Model):
@@ -93,11 +121,11 @@ class ProductDetails(models.Model):
 	availability = models.TextField(blank=True)
 	dispatched_in = models.TextField(blank=True)
 	lot_description = models.TextField(blank=True)
-	weight_per_unit = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+	weight_per_unit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 	sample_type = models.TextField(blank=True)
 	sample_description = models.TextField(blank=True)
-	sample_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+	sample_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 	manufactured_country = models.CharField(max_length=50, blank=True, default="India")
 	manufactured_city = models.CharField(max_length=50, blank=True)

@@ -1,7 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 
-from orders.views import order, orderItem, orderShipment, payments, subOrder, cart
-from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool, getPaginationParameters
+from orders.views import order, orderItem, orderShipment, payments, subOrder, cart, checkout
+from scripts.utils import customResponse, get_token_payload, getArrFromString, validate_bool, getPaginationParameters, getApiVersion
 import jwt as JsonWebToken
 
 from .user_handler import populateBuyerDetailsParameters, populateSellerDetailsParameters, populateAllUserIDParameters
@@ -9,6 +9,8 @@ from .catalog_handler import populateProductDetailsParameters
 
 @csrf_exempt
 def order_shipment_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
 	orderShipmentParameters = populateOrderParameters(request, {}, version)
 
@@ -30,6 +32,8 @@ def order_shipment_details(request, version = "0"):
 @csrf_exempt
 def suborder_details(request, version = "0"):
 
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
 	subOrderParameters = populateOrderParameters(request, {},version)
 
 	if request.method == "GET":
@@ -50,25 +54,33 @@ def suborder_details(request, version = "0"):
 @csrf_exempt
 def order_details(request, version = "0"):
 
-	orderParameters = populateOrderParameters(request, {}, version)
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateOrderParameters(request, {}, version)
 
 	if request.method == "GET":
-		if orderParameters["isBuyer"] == 0 and orderParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return order.get_order_details(request,orderParameters)
+		return order.get_order_details(request,parameters)
 	elif request.method == "POST":
-		if orderParameters["isInternalUser"] == 0:
+		if parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return order.post_new_order(request)
+		return order.post_new_order(request, parameters)
+	elif request.method == "PUT":
+		if parameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return order.update_order(request, parameters)
 	elif request.method == "DELETE":
-		if orderParameters["isInternalUser"] == 0:
+		if parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return order.cancel_order(request)
+		return order.cancel_order(request, parameters)
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
 @csrf_exempt
 def order_item_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
 	orderItemParameters = populateOrderParameters(request, {}, version)
 
@@ -87,6 +99,8 @@ def order_item_details(request, version = "0"):
 
 @csrf_exempt
 def buyer_payment_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
 	buyerPaymentParameters = populateOrderParameters(request, {}, version)
 
@@ -109,6 +123,8 @@ def buyer_payment_details(request, version = "0"):
 @csrf_exempt
 def seller_payment_details(request, version = "0"):
 
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
 	sellerPaymentParameters = populateOrderParameters(request, {}, version)
 
 	if request.method == "GET":
@@ -129,6 +145,8 @@ def seller_payment_details(request, version = "0"):
 @csrf_exempt
 def cart_item_details(request, version = "0"):
 
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
 	cartParameters = populateCartParameters(request, {}, version)
 
 	if request.method == "GET":
@@ -142,7 +160,75 @@ def cart_item_details(request, version = "0"):
 
 	return customResponse("4XX", {"error": "Invalid request"})
 
+@csrf_exempt
+def cart_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	cartParameters = populateCartParameters(request, {}, version)
+
+	if request.method == "GET":
+		if cartParameters["isBuyer"] == 0 and cartParameters["isInternalUser"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return cart.get_cart_details(request,cartParameters)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
+def checkout_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateCheckoutParameters(request, {}, version)
+
+	if request.method == "GET":
+		if parameters["isBuyer"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return checkout.get_checkout_details(request, parameters)
+
+	elif request.method == "POST":
+		if parameters["isBuyer"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return checkout.create_checkout_details(request, parameters)
+
+	elif request.method == "PUT":
+		if parameters["isBuyer"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return checkout.update_checkout_details(request, parameters)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+@csrf_exempt
+def checkout_payment_method_details(request, version = "0"):
+
+	version = getApiVersion(request.META["HTTP_ACCEPT"])
+
+	parameters = populateCheckoutParameters(request, {}, version)
+
+	if request.method == "GET":
+		if parameters["isBuyer"] == 0:
+			return customResponse("4XX", {"error": "Authentication failure"})
+		return checkout.get_payment_method(request, parameters)
+
+	return customResponse("4XX", {"error": "Invalid request"})
+
+def populateCheckoutParameters(request, parameters = {}, version = "0"):
+
+	defaultValue = 1
+
+	if version == "1":
+		defaultValue = 0
+
+	parameters = populateAllUserIDParameters(request, parameters, version)
+
+	return parameters
+
 def populateCartParameters(request, parameters = {}, version = "0"):
+
+	defaultValue = 1
+
+	if version == "1":
+		defaultValue = 0
 
 	parameters = populateAllUserIDParameters(request, parameters, version)
 
@@ -159,7 +245,22 @@ def populateCartParameters(request, parameters = {}, version = "0"):
 		parameters["cartItemStatusArr"] = getArrFromString(cartItemStatus)
 
 	parameters = populateBuyerDetailsParameters(request, parameters, version)
+	parameters = populateSellerDetailsParameters(request, parameters, version)
 	parameters = populateProductDetailsParameters(request, parameters, version)
+
+	parameters = getPaginationParameters(request, parameters, 10, version)
+
+	cartItemDetails = request.GET.get("cart_item_details", None)
+	if validate_bool(cartItemDetails):
+		parameters["cart_item_details"] = int(cartItemDetails)
+	else:
+		parameters["cart_item_details"] = defaultValue
+
+	subCartDetails = request.GET.get("sub_cart_details", None)
+	if validate_bool(subCartDetails):
+		parameters["sub_cart_details"] = int(subCartDetails)
+	else:
+		parameters["sub_cart_details"] = defaultValue
 
 	return parameters
 

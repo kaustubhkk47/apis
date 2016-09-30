@@ -1,10 +1,20 @@
 from django.db import models
 from django.contrib import admin
-from scripts.utils import validate_integer, link_to_foreign_key, validate_bool
+from scripts.utils import validate_integer, link_to_foreign_key, validate_bool, time_in_ist
+from decimal import Decimal
 
 class Cart(models.Model):
 
 	buyer = models.ForeignKey('users.Buyer')
+
+	pieces = models.PositiveIntegerField(default=0)
+	product_count = models.PositiveIntegerField(default=0)
+	retail_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	
+	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	cod_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -18,6 +28,24 @@ class Cart(models.Model):
 	def __unicode__(self):
 		return "{} - {}".format(str(self.buyer), self.status)
 
+	def populateCartData(self,  initialPrices, finalPrices):
+		self.pieces += finalPrices["pieces"] - initialPrices["pieces"]
+		self.product_count +=  finalPrices["product_count"] - initialPrices["product_count"]
+		self.retail_price +=  finalPrices["retail_price"] - initialPrices["retail_price"]
+		self.calculated_price +=  finalPrices["calculated_price"] - initialPrices["calculated_price"]
+		self.shipping_charge +=  finalPrices["shipping_charge"] - initialPrices["shipping_charge"]
+		self.final_price +=  finalPrices["final_price"] - initialPrices["final_price"]
+
+	def setCODPaymentMethod(self, CODextracost):
+		self.cod_charge = Decimal(CODextracost*float(self.calculated_price))
+		self.final_price += self.cod_charge
+		self.save()
+		parameters = {}
+		subCarts = filterSubCarts(parameters)
+		subCarts = subCarts.filter(cart_id = self.id)
+		for subCartPtr in subCarts:
+			subCartPtr.setCODPaymentMethod(CODextracost)
+
 CartStatus = {
 	0:{"display_value":"Active"},
 	1:{"display_value":"Checked Out"},
@@ -27,20 +55,72 @@ CartStatusValues = [0,1]
 
 class CartAdmin(admin.ModelAdmin):
 
-	list_display = ["id", "buyer", "created_at"]
+	list_display = ["id", "buyer", "created_at_ist"]
+
+	def created_at_ist(self, obj):
+		return time_in_ist(obj.created_at)
+
+class SubCart(models.Model):
+
+	cart = models.ForeignKey(Cart, null=True, blank=True)
+	seller = models.ForeignKey('users.Seller')
+
+	pieces = models.PositiveIntegerField(default=0)
+	product_count = models.PositiveIntegerField(default=0)
+	retail_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	
+	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	cod_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	status = models.IntegerField(default=0)
+
+	class Meta:
+		verbose_name="Sub Cart"
+		verbose_name_plural = "Sub Cart"
+
+	def __unicode__(self):
+		return "{} - {}".format(str(self.seller), self.status)
+
+	def populateSubCartData(self, initialPrices, finalPrices):
+		self.pieces += finalPrices["pieces"] - initialPrices["pieces"]
+		self.product_count +=  finalPrices["product_count"] - initialPrices["product_count"]
+		self.retail_price +=  finalPrices["retail_price"] - initialPrices["retail_price"]
+		self.calculated_price +=  finalPrices["calculated_price"] - initialPrices["calculated_price"]
+		self.shipping_charge +=  finalPrices["shipping_charge"] - initialPrices["shipping_charge"]
+		self.final_price +=  finalPrices["final_price"] - initialPrices["final_price"]
+
+	def setCODPaymentMethod(self, CODextracost):
+		self.cod_charge = Decimal(CODextracost*float(self.calculated_price))
+		self.final_price += self.cod_charge
+		self.save()
+
+SubCartStatus = {
+	0:{"display_value":"Active"},
+	1:{"display_value":"Checked Out"},
+}
+
+SubCartStatusValues = [0,1]
 
 class CartItem(models.Model):
 
 	buyer = models.ForeignKey('users.Buyer')
-	cart =models.ForeignKey(Cart, null=True, blank=True)
+	subcart =models.ForeignKey(SubCart, null=True, blank=True)
 	product = models.ForeignKey('catalog.Product')
 
 	lots = models.PositiveIntegerField(default=0)
 	pieces = models.PositiveIntegerField(default=0)
 	lot_size = models.PositiveIntegerField(default=1)
-	retail_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	calculated_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	final_price = models.DecimalField(max_digits=10, decimal_places=2)
+	retail_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	calculated_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+
+	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+
+	final_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True, db_index=True)
@@ -77,6 +157,20 @@ class CartItem(models.Model):
 		self.calculated_price_per_piece = self.product.getCalculatedPricePerPiece(self.lots)
 		self.final_price = self.pieces*self.calculated_price_per_piece
 		self.added_from = int(cartitem["added_from"])
+		self.shipping_charge = Decimal(self.product.getShippingPerPiece()*self.pieces)
+
+	def getPrices(self):
+		initialPrices = {}
+		initialPrices["pieces"] = self.pieces 
+		if self.pieces > 0:
+			initialPrices["product_count"] = 1
+		else:
+			initialPrices["product_count"] = 0
+		initialPrices["retail_price"] = Decimal(self.retail_price_per_piece*self.pieces)
+		initialPrices["calculated_price"] = Decimal(self.final_price)
+		initialPrices["shipping_charge"] = Decimal(self.shipping_charge)
+		initialPrices["final_price"] = Decimal(self.final_price + self.shipping_charge)
+		return initialPrices
 
 CartItemStatus = {
 	0:{"display_value":"Active"},
@@ -105,15 +199,18 @@ class CartItemAdmin(admin.ModelAdmin):
 class CartItemHistory(models.Model):
 
 	buyer = models.ForeignKey('users.Buyer')
-	cart =models.ForeignKey(Cart, null=True, blank=True)
+	subcart =models.ForeignKey(SubCart, null=True, blank=True)
 	cartitem =models.ForeignKey(CartItem, null=True, blank=True)
 	product = models.ForeignKey('catalog.Product')
 
 	lots = models.PositiveIntegerField(default=0)
 	pieces = models.PositiveIntegerField(default=0)
 	lot_size = models.PositiveIntegerField(default=1)
-	retail_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-	calculated_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+	retail_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	calculated_price_per_piece = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+
+	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+
 	final_price = models.DecimalField(max_digits=10, decimal_places=2)
 
 	created_at = models.DateTimeField(auto_now_add=True)
@@ -132,7 +229,7 @@ class CartItemHistory(models.Model):
 
 	def populateCartItemHistoryData(self, cartItemPtr):
 		self.buyer = cartItemPtr.buyer
-		self.cart = cartItemPtr.cart
+		self.subcart = cartItemPtr.subcart
 		self.cartitem = cartItemPtr
 		self.product = cartItemPtr.product
 		self.lots = cartItemPtr.lots
@@ -140,13 +237,14 @@ class CartItemHistory(models.Model):
 		self.lot_size = cartItemPtr.lot_size
 		self.retail_price_per_piece = cartItemPtr.retail_price_per_piece
 		self.calculated_price_per_piece = cartItemPtr.calculated_price_per_piece
+		self.shipping_charge = cartItemPtr.shipping_charge
 		self.final_price = cartItemPtr.final_price
 		self.status = cartItemPtr.status
 		self.added_from = cartItemPtr.added_from
 
 def filterCartItem(parameters):
 
-	cartItems = CartItem.objects.filter(cart__status=0).select_related('product')
+	cartItems = CartItem.objects.filter(subcart__status=0, status=0).select_related('product')
 
 	if "cartItemsArr" in parameters:
 		cartItems = cartItems.filter(id__in=parameters["cartItemsArr"])
@@ -162,4 +260,17 @@ def filterCartItem(parameters):
 
 	return cartItems
 
+def filterCarts(parameters):
 
+	carts = Cart.objects.filter(status=0)
+
+	if "buyersArr" in parameters:
+		carts = carts.filter(buyer_id__in=parameters["buyersArr"])
+
+	return carts
+
+def filterSubCarts(parameters):
+
+	subcarts = SubCart.objects.filter(status=0)
+
+	return subcarts

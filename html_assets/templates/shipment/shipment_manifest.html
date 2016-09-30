@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html style= "font-family:sans-serif;text-align: center; font-size: 0.45em; margin:0px; padding:0px">
+
+<body style="margin:0px; padding:0px">
+	<div style="width:598px; height: 850px; margin:10px; padding:0px"> 
+	<div style="width: 100%; ">
+	<table style="margin: auto">
+	<tr>
+		<td >
+		<img src="http://www.wholdus.com/images/logo/logo64x64.png" style="width: 25px; height:auto; ">
+		</td>
+		<td >
+		<h2 >Wholdus Manifest - Ord No: {{sub_order.display_number}}</h2>
+		</td>
+	</tr>
+	</table>
+	</div>
+
+	<table style="width: 100%; border-top: dashed 1px grey; border-bottom: dashed 1px grey;">
+
+	<tr>
+	<td>
+	<div>
+		<h3><u>Buyer Details</u></h3>
+		<div style="width:100%; margin-top: 20px; margin-bottom: 20px">			
+		<p>Consignee Name: <strong>{{buyer.name}}</strong></p>
+		<p>{{buyer_address.address}}{% if buyer_address.landmark|length > 0 %}, {{buyer_address.landmark}}{% else %}{% endif %}</p>
+		<p>
+		City: <strong>{{buyer_address.city}}</strong>
+		<span style="margin-right: 12px"></span>
+		State: <strong>{{buyer_address.state}}</strong>
+		<span style="margin-right: 12px"></span>
+		Pincode: <strong>{{buyer_address.pincode}}</strong>
+		</p>
+		</div>
+	</div>
+	</td>
+
+	<td>
+	<div style="border-left: dashed 1px grey">
+		<h3><u>Seller Details</u></h3>
+		<div style="width:100%">
+		<p>
+		Name: <strong> {{seller.name}}</strong>
+		<span style="margin-right: 12px"></span>
+		Company: <strong>{{seller.company_name}}</strong>
+		</p>
+		<p>
+		VAT Number: <strong>{{seller.vat_tin}}</strong>
+		</p>
+		<p>{{seller_address.address}}{% if seller_address.landmark|length > 0 %}, {{seller_address.landmark}}{% else %}{% endif %}</p>
+		<p>
+		City: <strong>{{seller_address.city}}</strong>
+		<span style="margin-right: 12px"></span>
+		State: <strong>{{seller_address.state}}</strong>
+		<span style="margin-right: 12px"></span>
+		Pincode: <strong>{{seller_address.pincode}}</strong>
+		</p>
+		</div>
+	</div>
+	</td></tr>
+	</table>
+
+	<h3><u>Shipment Details</u></h3>
+	<div style="width:100%; border-bottom: dashed 1px grey;">
+		<p>
+		AWB Number: <strong>{{shipment.waybill_number}}</strong>
+		<span style="margin-right: 12px"></span>
+		Amount to collect: <strong>{{shipment.amount_to_collect}}</strong>
+		<span style="margin-right: 12px"></span>
+		Shipping Partner: <strong>{{shipment.logistics_partner}}</strong>
+		<span style="margin-right: 12px"></span>
+		Invoice Number: <strong>{{shipment.invoice_number}}</strong>
+		<span style="margin-right: 12px"></span>
+		Invoice Amount: <strong> Rs. {{shipment.final_price}} /-</strong>
+		</p>
+		<p>
+		COD Charge: <strong> Rs. {{shipment.cod_charge}} /-</strong>
+		<span style="margin-right: 12px"></span>
+		Shipping Charge: <strong> Rs. {{shipment.shipping_charge}} /-</strong>
+		<span style="margin-right: 12px"></span>	
+		Length: <strong>{{shipment.packaged_length}} cm</strong>
+		<span style="margin-right: 12px"></span>
+		Breadth: <strong>{{shipment.packaged_breadth}} cm</strong>
+		<span style="margin-right: 12px"></span>
+		Height: <strong>{{shipment.packaged_height}} cm</strong>
+		<span style="margin-right: 12px"></span>
+		Weight: <strong>{{shipment.packaged_weight}} gm</strong>
+		</p>
+	</div>
+
+	<h3><u>Shipment Items</u></h3>
+	<div style="padding: 0px 30px">
+	<table style="width:100%; border-collapse: collapse;">
+		<tr>
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:10%"><strong>S. No.</strong></td>
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:70%"><strong>Product Name</strong></td>
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:10%"><strong>Quantity</strong></td>
+		</tr>
+		{% for orderItem in orderItems %}
+		<tr >
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:10%">{{forloop.counter}}</td>
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:70%;">
+				<div style="height:10px; overflow:hidden;">
+				{{orderItem.name}}
+				</div>
+			</td>
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:10%">{{orderItem.pieces}}</td>
+		</tr>
+		{% endfor %}
+		{% if extra_order_items > 0 %}
+		<tr>
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:10%;"></td>
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:70%;">
+			<strong> + {{extra_order_items}} MORE ITEMS</strong>
+			</td>
+			<td style="border: 1px dotted black; padding: 3px 5px 1px 5px; width:10%"></td>
+		</tr>
+		{% else %}
+                    	{% endif %}
+
+	</table>
+	</div>
+
+	<div style="width:100%; border-top: dashed 1px grey; position: absolute; left: 0px; bottom:0px">
+	<div style="width:100%;">
+		<p><strong>For courier personnel:</strong></p>
+		<p>I confirm that I have collected the packages as per the AWBs mentioned on this manifest.</p>
+	</div>
+	<table style="width:100%; margin-top: 30px">
+		<tr>
+			<td>___________________</td>
+			<td>___________________</td>
+			<td>___________________</td>
+		</tr>
+		<tr>
+			<td><strong>Name</strong></td>
+			<td><strong>Signature</strong></td>
+			<td><strong>Time and Date</strong></td>
+		</tr>
+	</table>
+	</div>
+	</div>
+</body>
+
+</html>

@@ -1,6 +1,6 @@
 from scripts.utils import customResponse, closeDBConnection, convert_keys_to_string, validate_integer
 
-from ..models.category import Category, validateCategoryData, populateCategoryData
+from ..models.category import Category, validateCategoryData, populateCategoryData, filterCategories
 from ..models.product import Product
 from ..models.productLot import ProductLot
 from ..serializers.category import categories_parser, serialize_categories
@@ -10,15 +10,13 @@ import json
 import logging
 log = logging.getLogger("django")
 
-def get_categories_details(request, categoriesParameters):
+def get_categories_details(request, parameters):
 	try:
-		categories = Category.objects.filter(delete_status=False)
 
-		if "categoriesArr" in categoriesParameters:
-			categories = categories.filter(id__in=categoriesParameters["categoriesArr"])
+		categories = filterCategories(parameters)
 
 		statusCode = "2XX"
-		body = {"categories": categories_parser(categories)}
+		body = {"categories": categories_parser(categories, parameters)}
 
 	except Exception as e:
 		log.critical(e)
