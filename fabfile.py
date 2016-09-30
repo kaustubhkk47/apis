@@ -28,16 +28,19 @@ def run_local_test():
 
 def deploy(message):
 	#run_local_test()
-	#push_to_develop(message)
-	deploy_test_server()
+	push_to_master(message)
+	deploy_prod_server()
 
-def push_to_develop(message):
+def push_to_master(message):
 	message = "'" + message + "'"
 	local("git add --all")
 	local("git commit -m " + message)
-	local("git push origin develop")
+	local("git checkout master")
+	local("git merge develop")
+	local("git push origin master")
+	local("git checkout develop")
 
-def deploy_test_server():
+def deploy_prod_server():
 	run("cd " + PROD_APP_DIR + " && git checkout .")
 	run("cd " + PROD_APP_DIR + " && git pull kaustubh develop --quiet")
 	run("cd " + PROD_APP_DIR + " && python manage.py migrate")
