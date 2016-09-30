@@ -3,7 +3,7 @@
 <body  style="margin:0px; padding:0px; ">
 
 {% for pagedata in pageDataArr %}
-<div style= "width:810 px; height: 606px; display:block;margin:10px 40px; padding:0px;"> 
+<div style= "width:810 px; height: 610px; display:block;margin:10px 40px; padding:0px;"> 
 
 	<div style="width: 45%; ">
 
@@ -27,7 +27,7 @@
 	<tr>
 
 	<td style="text-align: left; text-transform: uppercase">
-		<h3><u>Buyer Details</u></h3>
+		<h3><u>Delivery Address</u></h3>
 		<p style="font-size: 1.2em">
 		<strong>{{buyer.name}}</strong>
 		</p>
@@ -48,8 +48,8 @@
 
 	<td>
 		<div style="font-size: 2em; text-align: right; margin-bottom: 60px; text-align: center;">
-			{{ou_code}}
-			<div style="background: #333333; color: #FFF; margin-top: 3px">{{ou_code}}</div>
+			{{buyer_ou_code}}
+			<div style="background: #333333; color: #FFF; margin-top: 3px">{{buyer_ou_code}}</div>
 		</div>
 	</td>
 	
@@ -85,6 +85,8 @@
 		Order ID: <strong>{{sub_order.display_number}}</strong>
 		</p>
 		<p>
+		Order Date: <strong>{{sub_order.created_at|date}}</strong>
+		</br>
 		Qty: <strong>{{shipment.pieces}} units women's apparel</strong>
 		</br>
 		Order Value: <strong>Rs. {{shipment.final_price}} /-</strong>
@@ -111,8 +113,17 @@
 	</tr>	
 	</table>
 	
+	<table style="width: 100%; border-bottom: solid 1px black;">
+	<tr>
 
-	<div style="width: 100%; text-align: right; text-transform: uppercase; border-bottom: dashed 1px grey;">
+	<td>
+		<div style="font-size: 2em; text-align: left; margin-bottom: 60px; text-align: center;">
+			{{seller_ou_code}}
+			<div style="background: #333333; color: #FFF; margin-top: 3px">{{seller_ou_code}}</div>
+		</div>
+	</td>
+
+	<td style="text-align: right; text-transform: uppercase; ">
 		<h3><u>Seller Details</u></h3>
 		<div style="width:100%">
 		<p style="font-size: 1.2em">
@@ -135,15 +146,44 @@
 		</p>
 		</div>
 		
+	</td>
+
+	</tr>
+	</table>
+
+	<div style="width: 100%; border-bottom: dashed 1px grey; text-align: left">
+		<p>
+		<strong>DECLARATION</strong>
+		</br>
+		We declare that this label shows actual price of the goods described and that all particulars are true and correct.
+		</br>
+		<strong>CUSTOMER ACKNOWLEDGEMENT</strong>
+		</br>
+		I hereby confirm that the above said products(s) are being purchased for my internal / personal consumption and not for re-sale.
+		</p>
 	</div>
 
 	<div style="width: 100%; text-align: right;">
+
+	<table style="width: 100%">
+	<tr>
+
+	<td style="text-align: left;">
 		<p>
 			ordered via <strong>Wholdus.com</strong></br>
+			<strong>Probzip Business Solutions Pvt.Ltd.</strong>
+		</p>
+	</td>
+
+	<td style="text-align: right;">
+		<p>
 			({{pagedata.page_copy_label}})</br>
 			copy {{forloop.counter}} of {{total_pages}}
 		</p>
-		
+	</td>
+
+	</tr>
+	</table>
 	</div>
 	</div>
 </div>
