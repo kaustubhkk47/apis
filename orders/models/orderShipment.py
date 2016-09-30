@@ -182,7 +182,13 @@ class OrderShipment(models.Model):
 
 		if len(pincodeServiceabilityPtr) > 0:
 			pincodeServiceabilityPtr = pincodeServiceabilityPtr[0]
-			manifest_dict["ou_code"] = pincodeServiceabilityPtr.ou_code
+			manifest_dict["buyer_ou_code"] = pincodeServiceabilityPtr.ou_code
+
+		pincodeServiceabilityPtr = PincodeServiceability.objects.filter(logistics_partner_id=self.logistics_partner_id, pincode=sellerAddressPtr.pincode_id)
+
+		if len(pincodeServiceabilityPtr) > 0:
+			pincodeServiceabilityPtr = pincodeServiceabilityPtr[0]
+			manifest_dict["seller_ou_code"] = pincodeServiceabilityPtr.ou_code
 
 		template_file = "shipment/shipment_label.html"
 
