@@ -14,6 +14,7 @@ class BuyerLeads(models.Model):
 	name = models.CharField(max_length=200, blank=True)
 	email = models.EmailField(max_length=255, blank=True)
 	mobile_number = models.CharField(max_length=11, blank=True)
+	signup = models.BooleanField(default=True)
 
 	status = models.IntegerField(default=0)
 	comments = models.TextField(blank=True)
@@ -51,6 +52,8 @@ def validateBuyerLeadData(buyerlead, oldbuyerlead, is_new):
 		buyerlead["email"] = oldbuyerlead.email
 	if not "status" in buyerlead or not validate_bool(buyerlead["status"]):
 		buyerlead["status"] = oldbuyerlead.status
+	if not "signup" in buyerlead or not validate_bool(buyerlead["signup"]):
+		buyerlead["signup"] = oldbuyerlead.signup
 	if not "comments" in buyerlead or buyerlead["comments"]==None:
 		buyerlead["comments"] = oldbuyerlead.comments
 
@@ -64,6 +67,7 @@ def populateBuyerLead(buyerleadPtr, buyerlead):
 	buyerleadPtr.email = buyerlead["email"]
 	buyerleadPtr.mobile_number = buyerlead["mobile_number"]
 	buyerleadPtr.status = int(buyerlead["status"])
+	buyerleadPtr.signup = int(buyerlead["signup"])
 	buyerleadPtr.comments = buyerlead["comments"]
 
 BuyerLeadStatus = {
