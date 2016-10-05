@@ -249,11 +249,7 @@ class OrderShipment(models.Model):
 
 		vendorPickupWriter.writerow(vendorPickupHeaders)
 		vendorPickupWriter.writerow(vendorPickupActual)
-		vendorPickupFile.close()
-
-
-
-		
+		vendorPickupFile.close()		
 
 class OrderShipmentAdmin(admin.ModelAdmin):
 	search_fields = ["suborder__display_number"]
