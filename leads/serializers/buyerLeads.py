@@ -10,6 +10,7 @@ def serialize_buyer_lead(buyerlead_entry):
 		"name" : buyerlead_entry.name,
 		"email" : buyerlead_entry.email,
 		"mobile_number" : buyerlead_entry.mobile_number,
+		"signup" : buyerlead_entry.signup,
 		"comments" : buyerlead_entry.comments,
 		"created_at" : buyerlead_entry.created_at,
 		"updated_at" : buyerlead_entry.updated_at
