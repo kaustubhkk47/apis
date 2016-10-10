@@ -38,6 +38,7 @@ def serializeOrderShipment(orderShipmentEntry, parameters = {}):
 	orderShipment["created_at"] = orderShipmentEntry.created_at
 	orderShipment["updated_at"] = orderShipmentEntry.updated_at
 	orderShipment["manifest_link"] = orderShipmentEntry.manifest_link
+	orderShipment["label_link"] = orderShipmentEntry.label_link
 	orderShipment["soft_data_csv_link"] = orderShipmentEntry.soft_data_csv_link
 	orderShipment["vendor_pickup_csv_link"] = orderShipmentEntry.vendor_pickup_csv_link
 	orderShipment["final_price"] = '{0:.0f}'.format(float(orderShipmentEntry.final_price))
