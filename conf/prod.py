@@ -22,13 +22,13 @@ LOGGING = {
         'file_warn': {
             'level': 'WARNING',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(LOG_FILE_PATH,DATE_TODAY + "warn.log"),
+            'filename': WARN_LOG_FILE_PATH,
             'formatter':'simple'
         },
         'file_critical': {
             'level': 'CRITICAL',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(LOG_FILE_PATH,DATE_TODAY + "critical.log"),
+            'filename': CRITICAL_LOG_FILE_PATH,
             'formatter':'simple'
         },
         'console': {
