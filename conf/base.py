@@ -131,6 +131,16 @@ DATE_TODAY = str(dt.year) + "-" + str("%02d" %(dt.month)) + "-" + str("%02d" %(d
 if not os.path.exists(LOG_FILE_PATH):
     os.makedirs(LOG_FILE_PATH)
 
+CRITICAL_LOG_FILE_PATH = os.path.join(LOG_FILE_PATH,DATE_TODAY + "critical.log")
+WARN_LOG_FILE_PATH = os.path.join(LOG_FILE_PATH,DATE_TODAY + "warn.log")
+
+if not os.path.exists(CRITICAL_LOG_FILE_PATH):
+    open(CRITICAL_LOG_FILE_PATH, 'a+', 0o777).close()
+    os.chmod(CRITICAL_LOG_FILE_PATH, 0o777)
+
+if not os.path.exists(WARN_LOG_FILE_PATH):
+    open(WARN_LOG_FILE_PATH, 'a+', 0o777).close()
+    os.chmod(WARN_LOG_FILE_PATH, 0o777)
 
 BASE_URL = "http://www.wholdus.com"
 API_BASE_URL = "http://api.wholdus.com"
