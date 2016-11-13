@@ -12,40 +12,58 @@ def categories_details(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
+	parameters = populateCategoryParameters(request, {}, version)
+
 	if request.method == "GET":
 
-		categoriesParameters = {}
-
-		categoryID = request.GET.get("categoryID", "")
-		if categoryID != "":
-			categoriesParameters["categoriesArr"] = getArrFromString(categoryID)
-
-		return categories.get_categories_details(request,categoriesParameters)
+		return categories.get_categories_details(request,parameters)
 	elif request.method == "POST":
+		if parameters["isInternalUser"] == 0:
+			return customResponse(403, error_code = 8)
 		return categories.post_new_category(request)
 	elif request.method == "PUT":
+		if parameters["isInternalUser"] == 0:
+			return customResponse(403, error_code = 8)
 		return categories.update_category(request)
 	elif request.method == "DELETE":
+		if parameters["isInternalUser"] == 0:
+			return customResponse(403, error_code = 8)
 		return categories.delete_category(request)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
+
+def populateCategoryParameters(request, parameters = {}, version = "0"):
+
+	categoryID = request.GET.get("categoryID", "")
+	if categoryID != "":
+		parameters["categoriesArr"] = getArrFromString(categoryID)
+
+	parameters = populateAllUserIDParameters(request, parameters, version)
+
+	return parameters
 
 
 @csrf_exempt
 def product_details(request, version = "0"):
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
-	productParameters = populateProductParameters(request, {}, version)
+	parameters = populateProductParameters(request, {}, version)
 
 	if request.method == "GET":
-		return product.get_product_details(request,productParameters)
+		return product.get_product_details(request,parameters)
 	elif request.method == "POST":
-		return product.post_new_product(request, productParameters)
+		if parameters["isSeller"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse(403, error_code = 8)
+		return product.post_new_product(request, parameters)
 	elif request.method == "PUT":
-		return product.update_product(request, productParameters)
+		if parameters["isSeller"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse(403, error_code = 8)
+		return product.update_product(request, parameters)
 	elif request.method == "DELETE":
+		if parameters["isSeller"] == 0 and parameters["isInternalUser"] == 0:
+			return customResponse(403, error_code = 8)
 		return product.delete_product(request)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 @csrf_exempt
 def product_colour_details(request, version = "0"):
@@ -56,7 +74,7 @@ def product_colour_details(request, version = "0"):
 
 		return product.get_product_colour_details(request)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 @csrf_exempt
 def product_fabric_details(request, version = "0"):
@@ -67,33 +85,39 @@ def product_fabric_details(request, version = "0"):
 
 		return product.get_product_fabric_details(request)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 @csrf_exempt
 def product_file(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
+	parameters = populateProductParameters(request, {}, version)
+
 	if request.method == "GET":
 
-		productParameters = populateProductParameters(request, {}, version)
+		if parameters["isInternalUser"] == 0:
+			return customResponse(403, error_code = 8)
 
-		return product.get_product_file(request,productParameters)
+		return product.get_product_file(request,parameters)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 @csrf_exempt
 def product_catalog(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
+	parameters = populateProductParameters(request, {}, version)
+
 	if request.method == "GET":
 
-		productParameters = populateProductParameters(request, {}, version)
+		if parameters["isInternalUser"] == 0:
+			return customResponse(403, error_code = 8)
 
-		return product.get_product_catalog(request,productParameters)
+		return product.get_product_catalog(request,parameters)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 def populateProductParameters(request, parameters = {}, version = "0"):
 

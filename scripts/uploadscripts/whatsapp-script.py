@@ -127,10 +127,9 @@ class Products():
 
 		print url
 		r = requests.get(url)
-		data = r.json()
 
-		if data['statusCode'] == '2XX':
-			data = data['body']
+		if r.status_code == 200:
+			data = r.json()
 			self.parseProductsData(data)
 			return data
 		else:

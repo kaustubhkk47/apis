@@ -19,26 +19,26 @@ def get_seller_details(request,sellerParameters):
 
 		closeDBConnection()
 
-		return customResponse("2XX", response)
+		return customResponse(200, response)
 	except Exception as e:
 		log.critical(e)
-		return customResponse("4XX", {"error": "Invalid request"})
+		return customResponse(500)
 
 def post_new_seller(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		seller = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(seller) or not validateSellerData(seller, Seller(), 1):
-		return customResponse("4XX", {"error": "Invalid data for seller sent"})
+		return customResponse(400, error_code=5,  error_details= "Invalid data for seller sent")
 
 	if sellerEmailExists(seller["email"]):
-		return customResponse("4XX", {"error": "seller email already exists"})
+		return customResponse(400, error_code=6,  error_details= "seller email already exists")
 
 	if sellerMobileNumberExists(seller["mobile_number"]):
-		return customResponse("4XX", {"error": "seller phone number already exists"})
+		return customResponse(400, error_code=6,  error_details= "seller phone number already exists")
 
 	if not "address" in seller or seller["address"]==None:
 		seller["address"] = {}
@@ -97,28 +97,28 @@ def post_new_seller(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "unable to create entry in db"})
+		return customResponse(500, error_code = 1)
 	else:
 		closeDBConnection()
 		
 		newSeller.send_registration_mail()
 
-		return customResponse("2XX", {"seller" : serialize_seller(newSeller)})
+		return customResponse(200, {"seller" : serialize_seller(newSeller)})
 
 def update_seller(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		seller = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(seller) or not "sellerID" in seller or not validate_integer(seller["sellerID"]):
-		return customResponse("4XX", {"error": "Id for seller not sent"})
+		return customResponse(400, error_code=5,  error_details="Id for seller not sent")
 
 	sellerPtr = Seller.objects.filter(id=int(seller["sellerID"]), delete_status=False).select_related('sellerdetails')
 
 	if len(sellerPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid id for seller sent"})
+		return customResponse(400, error_code=6,  error_details="Invalid id for seller sent")
 
 	sellerPtr = sellerPtr[0]
 
@@ -128,7 +128,7 @@ def update_seller(request):
 	bankdetailsSent = 0
 
 	if not validateSellerData(seller, sellerPtr, 0):
-		return customResponse("4XX", {"error": "Invalid data for seller sent"})
+		return customResponse(400, error_code=5,  error_details="Invalid data for seller sent")
 
 	try:
 		populateSellerData(sellerPtr, seller)
@@ -159,16 +159,16 @@ def update_seller(request):
 			addressSent = 1
 			selleraddress = seller["address"]
 			if not "addressID" in selleraddress or not validate_integer(selleraddress["addressID"]):
-				return customResponse("4XX", {"error": "Address id not sent"})
+				return customResponse(400, error_code=5,  error_details="Address id not sent")
 			sellerAddressPtr = SellerAddress.objects.filter(id = int(selleraddress["addressID"]))
 
 			if len(sellerAddressPtr) == 0:
-				return customResponse("4XX", {"error": "Invalid address id sent"})
+				return customResponse(400, error_code=6,  error_details="Invalid address id sent")
 
 			sellerAddressPtr = sellerAddressPtr[0]
 
 			if(sellerAddressPtr.seller_id != sellerPtr.id):
-				return customResponse("4XX", {"error": "Address id for incorrect seller sent"})
+				return customResponse(400, error_code=6,  error_details="Address id for incorrect seller sent")
 
 			validateSellerAddressData(selleraddress, sellerAddressPtr)
 			populateSellerAddressData(sellerAddressPtr, selleraddress)
@@ -178,16 +178,16 @@ def update_seller(request):
 			bankdetailsSent = 1
 			sellerbankdetails = seller["bank_details"]
 			if not "bank_detailsID" in sellerbankdetails or not validate_integer(sellerbankdetails["bank_detailsID"]):
-				return customResponse("4XX", {"error": "Bank details id not sent"})
+				return customResponse(400, error_code=5,  error_details= "Bank details id not sent")
 			sellerBankDetailsPtr = SellerBankDetails.objects.filter(id = int(sellerbankdetails["bank_detailsID"]))
 
 			if len(sellerBankDetailsPtr) == 0:
-				return customResponse("4XX", {"error": "Invalid bankdetails id sent"})
+				return customResponse(400, error_code=6,  error_details="Invalid bankdetails id sent")
 
 			sellerBankDetailsPtr = sellerBankDetailsPtr[0]
 
 			if(sellerBankDetailsPtr.seller_id != sellerPtr.id):
-				return customResponse("4XX", {"error": "Bank details id for incorrect seller sent"})
+				return customResponse(400, error_code=6,  error_details="Bank details id for incorrect seller sent")
 
 			validateSellerBankdetailsData(sellerbankdetails, sellerBankDetailsPtr)
 			populateSellerBankDetailsData(sellerBankDetailsPtr,sellerbankdetails)
@@ -208,25 +208,25 @@ def update_seller(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "could not update"})
+		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"seller": serialize_seller(sellerPtr)})
+		return customResponse(200, {"seller": serialize_seller(sellerPtr)})
 
 def delete_seller(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		seller = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(seller) or not "sellerID" in seller or not validate_integer(seller["sellerID"]):
-		return customResponse("4XX", {"error": "Id for seller not sent"})
+		return customResponse(400, error_code=5,  error_details= "Id for seller not sent")
 
 	sellerPtr = Seller.objects.filter(id=int(seller["sellerID"]), delete_status=False)
 
 	if len(sellerPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid id for seller sent"})
+		return customResponse(400, error_code=5,  error_details= "Invalid id for seller sent")
 
 	sellerPtr = sellerPtr[0]
 
@@ -236,7 +236,7 @@ def delete_seller(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "could not delete"})
+		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"seller": "seller deleted"})
+		return customResponse(200, {"seller": "seller deleted"})

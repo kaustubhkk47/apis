@@ -50,14 +50,14 @@ def get_payment_method(request, parameters):
 		body.append(CreditDict)
 
 		response = {"payment_methods": body}
-		statusCode = "2XX"
+		statusCode = 200
 	except Exception as e:
 		log.critical(e)
-		statusCode = "4XX"
-		response = {"error": "Invalid request"}
+		statusCode = 500
+		response = {}
 
 	closeDBConnection()
-	return customResponse(statusCode, response)
+	return customResponse(statusCode, response, error_code=0)
 
 def get_checkout_details(request, parameters):
 
@@ -67,25 +67,24 @@ def get_checkout_details(request, parameters):
 			checkouts = checkouts.latest('created_at')
 			body = serializeCheckout(checkouts,parameters)
 			response = {"checkout": body}
-			statusCode = "2XX"
+			statusCode = 200
 		except Exception as e:
-			statusCode = "4XX"
-			response = {"error": "No checkout for buyer"}
+			return customResponse(400, error_code=6, error_details ="No checkout for buyer")
 
 	except Exception as e:
 		log.critical(e)
-		statusCode = "4XX"
-		response = {"error": "Invalid request"}
+		statusCode = 500
+		response = {}
 
 	closeDBConnection()
-	return customResponse(statusCode, response)
+	return customResponse(statusCode, response, error_code=0)
 
 def create_checkout_details(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
 		checkout = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	#if len(checkout) == 0:
 	#	return customResponse("4XX", {"error": "Invalid data sent in request"})
@@ -95,12 +94,12 @@ def create_checkout_details(request, parameters):
 	buyerPtr = Buyer.objects.filter(id=buyerID, delete_status=False)
 
 	if not buyerPtr.exists():
-		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
+		return customResponse(400, error_code=6, error_details = "Invalid id for buyer sent")
 
 	cartPtr = Cart.objects.filter(buyer_id=buyerID, product_count__gt=0, status=0)
 
 	if len(cartPtr) ==0:
-		return customResponse("4XX", {"error": "No product in cart"})
+		return customResponse(400, error_code=6, error_details = "No product in cart")
 
 	cartPtr = cartPtr[0]
 
@@ -111,48 +110,48 @@ def create_checkout_details(request, parameters):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "unable to create entry in db"})
+		return customResponse(500, error_code = 1)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"checkout": serializeCheckout(newCheckout)})
+		return customResponse(200, {"checkout": serializeCheckout(newCheckout)})
 
 def update_checkout_details(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
 		checkout = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(checkout):
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=5,  error_details="Invalid data sent in request")
 
 	buyerID = parameters["buyersArr"][0]
 
 	buyerPtr = Buyer.objects.filter(id=buyerID, delete_status=False)
 
 	if len(buyerPtr)==0:
-		return customResponse("4XX", {"error": "Invalid id for buyer sent"})
+		return customResponse(400, error_code=6, error_details ="Invalid id for buyer sent")
 
 	buyerPtr = buyerPtr[0]
 
 	if not "checkoutID" in checkout or not validate_integer(checkout["checkoutID"]):
-		return customResponse("4XX", {"error": "Id for checkout not sent"})
+		return customResponse(400, error_code=5,  error_details="Id for checkout not sent")
 
 	checkoutPtr = Checkout.objects.filter(id=int(checkout["checkoutID"]))
 
 	if len(checkoutPtr) ==0:
-		return customResponse("4XX", {"error": "Invalid id for checkout sent"})
+		return customResponse(400, error_code=6, error_details = "Invalid id for checkout sent")
 
 	checkoutPtr = checkoutPtr[0]
 
 	if not checkoutPtr.cart.status ==0:
-		return customResponse("4XX", {"error": "Checkout for cart already completed"})
+		return customResponse(400, error_code=6,  error_details="Checkout for cart already completed")
 
 	if not "status" in checkout or not validate_integer(checkout["status"]):
-		return customResponse("4XX", {"error": "Status not sent"})
+		return customResponse(400, error_code=5,  error_details="Status not sent")
 
 	if not checkoutPtr.validateCheckoutData(checkout):
-		return customResponse("4XX", {"error": "Invalid status sent"})
+		return customResponse(400, error_code=6,  error_details= "Invalid status sent")
 
 	orderBody = {}
 
@@ -178,13 +177,13 @@ def update_checkout_details(request, parameters):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "unable to create entry in db"})
+		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
 		body = {"checkout": serializeCheckout(checkoutPtr)}
 		if status ==3:
 			body["order"] = orderBody
-		return customResponse("2XX", body)
+		return customResponse(200, body)
 
 def checkout_new_order(checkoutPtr, parameters):
 	

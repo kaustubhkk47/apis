@@ -6,7 +6,7 @@ from general.views import smssent
 @csrf_exempt
 def invalid_request_details(request):
 
-	return customResponse("4XX", {"error": "Invalid request url"})
+	return customResponse(404, error_code = 7)
 
 @csrf_exempt
 def delivery_report_details(request, version = "0"):
@@ -15,4 +15,4 @@ def delivery_report_details(request, version = "0"):
 	
 		return smssent.post_delivery_report(request)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)

@@ -16,18 +16,18 @@ def order_shipment_details(request, version = "0"):
 
 	if request.method == "GET":
 		if orderShipmentParameters["isSeller"] == 0 and orderShipmentParameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return orderShipment.get_order_shipment_details(request,orderShipmentParameters)
 	elif request.method == "POST":
 		if orderShipmentParameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return orderShipment.post_new_order_shipment(request)
 	elif request.method == "PUT":
 		if orderShipmentParameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return orderShipment.update_order_shipment(request)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 @csrf_exempt
 def suborder_details(request, version = "0"):
@@ -39,17 +39,17 @@ def suborder_details(request, version = "0"):
 	if request.method == "GET":
 
 		if subOrderParameters["isSeller"] == 0 and subOrderParameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 
 		return subOrder.get_suborder_details(request,subOrderParameters)
 	#elif request.method == "PUT":
 	#	return subOrder.update_suborder(request)
 	elif request.method == "DELETE":
 		if subOrderParameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return subOrder.cancel_suborder(request)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 @csrf_exempt
 def order_details(request, version = "0"):
@@ -60,22 +60,22 @@ def order_details(request, version = "0"):
 
 	if request.method == "GET":
 		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return order.get_order_details(request,parameters)
 	elif request.method == "POST":
 		if parameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return order.post_new_order(request, parameters)
 	elif request.method == "PUT":
 		if parameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return order.update_order(request, parameters)
 	elif request.method == "DELETE":
 		if parameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return order.cancel_order(request, parameters)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 @csrf_exempt
 def order_item_details(request, version = "0"):
@@ -87,15 +87,14 @@ def order_item_details(request, version = "0"):
 	if request.method == "GET":
 
 		if orderItemParameters["isSeller"] == 0 and orderItemParameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
-
+			return customResponse(403, error_code = 8)
 		return orderItem.get_order_item_details(request,orderItemParameters)
 	elif request.method == "DELETE":
 		if orderItemParameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return orderItem.cancel_order_item(request)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 @csrf_exempt
 def buyer_payment_details(request, version = "0"):
@@ -107,18 +106,18 @@ def buyer_payment_details(request, version = "0"):
 	if request.method == "GET":
 
 		if buyerPaymentParameters["isBuyer"] == 0 and buyerPaymentParameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 
 		return payments.get_buyer_payment_details(request,buyerPaymentParameters)
 	elif request.method == "POST":
 
 		if buyerPaymentParameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 
 		return payments.post_new_buyer_payment(request)
 
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 @csrf_exempt
 def seller_payment_details(request, version = "0"):
@@ -130,17 +129,17 @@ def seller_payment_details(request, version = "0"):
 	if request.method == "GET":
 
 		if sellerPaymentParameters["isSeller"] == 0 and sellerPaymentParameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 
 		return payments.get_seller_payment_details(request,sellerPaymentParameters)
 	elif request.method == "POST":
 
 		if sellerPaymentParameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 
 		return payments.post_new_seller_payment(request)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 @csrf_exempt
 def cart_item_details(request, version = "0"):
@@ -151,14 +150,14 @@ def cart_item_details(request, version = "0"):
 
 	if request.method == "GET":
 		if cartParameters["isBuyer"] == 0 and cartParameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return cart.get_cart_item_details(request,cartParameters)
 	elif request.method == "POST":
 		if cartParameters["isBuyer"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return cart.post_new_cart_item(request, cartParameters)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 @csrf_exempt
 def cart_details(request, version = "0"):
@@ -169,10 +168,10 @@ def cart_details(request, version = "0"):
 
 	if request.method == "GET":
 		if cartParameters["isBuyer"] == 0 and cartParameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return cart.get_cart_details(request,cartParameters)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 @csrf_exempt
 def checkout_details(request, version = "0"):
@@ -183,20 +182,20 @@ def checkout_details(request, version = "0"):
 
 	if request.method == "GET":
 		if parameters["isBuyer"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return checkout.get_checkout_details(request, parameters)
 
 	elif request.method == "POST":
 		if parameters["isBuyer"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return checkout.create_checkout_details(request, parameters)
 
 	elif request.method == "PUT":
 		if parameters["isBuyer"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return checkout.update_checkout_details(request, parameters)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 @csrf_exempt
 def checkout_payment_method_details(request, version = "0"):
@@ -207,10 +206,10 @@ def checkout_payment_method_details(request, version = "0"):
 
 	if request.method == "GET":
 		if parameters["isBuyer"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return checkout.get_payment_method(request, parameters)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 def populateCheckoutParameters(request, parameters = {}, version = "0"):
 

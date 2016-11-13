@@ -4,6 +4,10 @@ from catalog.serializers.product import serialize_product
 from address.serializers.state import serialize_state
 from .businesstype import serialize_business_type
 import time
+import jwt as JsonWebToken
+import settings
+from scripts.utils import getTimeStamp
+
 def serialize_buyer(buyer_entry, parameters = {}):
 
 	buyer = {}
@@ -75,6 +79,22 @@ def serialize_buyer(buyer_entry, parameters = {}):
 
 	return buyer
 
+def serialize_buyer_registration(buyer_registration_entry, parameters = {}):
+
+	buyer_registration = {}
+
+	tokenPayload = {
+		"exp": buyer_registration_entry.getExpiryTimeStamp(),
+		"iat": getTimeStamp(buyer_registration_entry.created_at),
+		"sub":"buyer registration",
+		"jti": buyer_registration_entry.id
+	}
+
+	encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
+	
+	buyer_registration["registration_token"] = encoded
+
+	return buyer_registration
 
 def parse_buyer_address(buyer_addresses_queryset, parameters = {}):
 

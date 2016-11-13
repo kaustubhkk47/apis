@@ -18,18 +18,58 @@ from django.core.files import File
 import pdfkit
 import io
 import requests
+from django.utils import dateformat, timezone
 
 def closeDBConnection():
 	return
 	connection.close()
 
-def customResponse(statusCode, body):
-	response = {}
-	response["statusCode"] = statusCode
-	response["body"] = body
+def customResponse(statusCode, body={}, error_code = 0, error_details=""):
 
-	return JsonResponse(response)
+	ERROR_MESSAGES = {
+		0 : "Unknown error",
+		1 : "unable to create entry in db",
+		2 : "Could not save",
+		3 : "could not update",
+		4 : "Malformed json sent",
+		5 : "Invalid data sent in request",
+		6 : "Inappropriate data sent in request",
+		7 : "Not found",
+		8 : "Forbidden",
+		9 : "Invalid credentials",
+		10 : "Resource expired",
+		11 : "Tries exceeded"
+	}
 
+	if not statusCode == 200 and body == {}:
+
+		body = {"error":
+				{"message": ERROR_MESSAGES[error_code],
+				"code":error_code,
+				"details":error_details}
+			}
+
+	response = JsonResponse(body, safe=False)
+	response.status_code = statusCode
+
+	""" Status codes in use
+	200 - Success
+
+	400 - Bad request
+	401 - Unauthorised
+	403 - Forbidden
+	404 - Not Found
+	409 - Conflict
+	
+	500 - Internal Server Error
+	"""
+
+
+	return response
+
+def getAccessToken(request):
+	return request.GET.get("access_token", "")
+	
 def convert_keys_to_string(dictionary):
 	"""Recursively converts dictionary keys to strings."""
 	if not isinstance(dictionary, dict):
@@ -291,3 +331,11 @@ def getApiVersion(text):
 		pass
 	return version
 
+def getTimeStamp(dateTimeObject):
+	return dateformat.format(dateTimeObject, 'U')
+
+def getCurrentTimeStamp():
+	return dateformat.format(timezone.now(), 'U')
+
+def checkTokenTimeValidity(timeStampObj):
+	return getCurrentTimeStamp() < timeStampObj

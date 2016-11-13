@@ -56,6 +56,9 @@ urlpatterns += [
 urlpatterns += [
 	url(r'^users/buyer/$', user_handler.buyer_details),
 	url(r'^users/buyer/login/$', user_handler.buyer_login),
+	url(r'^users/buyer/register/$', user_handler.buyer_registration),
+	url(r'^users/buyer/register/resend_sms/$', user_handler.buyer_registration_resend_sms),
+	url(r'^users/buyer/register/verify/$', user_handler.buyer_registration_verify),
 	url(r'^users/buyer/accesstoken/$', user_handler.buyer_access_token_details),
 	url(r'^users/buyer/address/$', user_handler.buyer_address_details),
 	url(r'^users/buyer/purchasingstate/$', user_handler.buyer_purchasing_state_details),

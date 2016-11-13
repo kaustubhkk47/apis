@@ -16,7 +16,7 @@ def state_details(request, version = "0"):
 
 		return state.get_state_details(request,parameters)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 
 def populateAddressParameters(request, parameters = {}, version = "0"):
@@ -32,4 +32,4 @@ def pincode_details(request, version = "0"):
 
 		return state.get_state_details(request,parameters)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)

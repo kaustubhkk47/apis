@@ -20,7 +20,7 @@ def get_cart_details(request, parameters):
 		except Exception as e:
 			pageItems = []
 
-		statusCode = "2XX"
+		statusCode = 200
 
 		body = parseCart(pageItems,parameters)
 		response = {"carts": body}
@@ -28,52 +28,50 @@ def get_cart_details(request, parameters):
 
 	except Exception as e:
 		log.critical(e)
-		statusCode = "4XX"
-		response = {"error": "Invalid request"}
+		statusCode = 500
+		response = {}
 
 	closeDBConnection()
-	return customResponse(statusCode, response)
+	return customResponse(statusCode, response, error_code=0)
 
 def get_cart_item_details(request, parameters):
 	try:
 
 		cartItems = filterCartItem(parameters)
 
-		statusCode = "2XX"
-
 		body = parseCartItem(cartItems,parameters)
-		statusCode = "2XX"
+		statusCode = 200
 		response = {"cart_items": body}
 
 	except Exception as e:
 		log.critical(e)
-		statusCode = "4XX"
-		response = {"error": "Invalid request"}
+		statusCode = 500
+		response = {}
 
 	closeDBConnection()
-	return customResponse(statusCode, response)
+	return customResponse(statusCode, response, error_code=0)
 
 def post_new_cart_item(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
 		cartitem = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(cartitem):
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=5)
 
 	buyerID = 0
 
 	try:
 		if not filterBuyer(parameters).exists():
-			return customResponse("4XX", {"error": "Invalid buyer id sent"})
+			return customResponse(400, error_code=6, error_details=  "Invalid buyer id sent")
 		buyerID = parameters["buyersArr"][0]
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid buyer id sent"})
+		return customResponse(400, error_code=6, error_details= "Invalid buyer id sent")
 
 	if not "productID" in cartitem or not validate_integer(cartitem["productID"]):
-		return customResponse("4XX", {"error": "Product id not properly sent"})
+		return customResponse(400, error_code=5, error_details= "Product id not sent")
 
 	productParameters = {}
 	productParameters["product_show_online"] = True
@@ -84,7 +82,7 @@ def post_new_cart_item(request, parameters):
 	productPtr = filterProducts(productParameters)
 
 	if len(productPtr) == 0:
-		return customResponse("4XX", {"error": " Invalid product id sent"})
+		return customResponse(400, error_code=6, error_details= " Invalid product id sent")
 
 	productPtr = productPtr[0]
 
@@ -120,10 +118,10 @@ def post_new_cart_item(request, parameters):
 				cartItemPtr = cartItemPtr[0]
 
 	if not cartItemPtr.validateCartItemData(cartitem):
-		return customResponse("4XX", {"error": " Invalid data for cart item sent"})
+		return customResponse(400, error_code=5, error_details= " Invalid data for cart item sent")
 
 	if isCartItemNew == 1 and int(cartitem["lots"]) == 0:
-		return customResponse("4XX", {"error": "Zero lots sent for new cart item"})
+		return customResponse(400, error_code=6, error_details= "Zero lots sent for new cart item")
 
 	try:
 		initialPrices = cartItemPtr.getPrices()
@@ -164,10 +162,10 @@ def post_new_cart_item(request, parameters):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "could not update"})
+		return customResponse(500, error_code = 1)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"carts": serializeCart(cartItemPtr.subcart.cart, parameters)})
+		return customResponse(200, {"carts": serializeCart(cartItemPtr.subcart.cart, parameters)})
 
 
 

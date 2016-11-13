@@ -13,7 +13,7 @@ class Buyer(models.Model):
 	mobile_number = models.CharField(max_length=11, blank=False, db_index=True)
 	whatsapp_number = models.CharField(max_length=11, blank=True, null = True)
 	email = models.EmailField(max_length=255, blank=True, null = True)
-	password = models.CharField(max_length=255, blank=True)
+	password = models.CharField(max_length=255, blank=True, null = True, default = None)
 	alternate_phone_number = models.CharField(max_length=11, blank=True)
 	mobile_verification = models.BooleanField(default=False)
 	email_verification = models.BooleanField(default=False)
@@ -47,8 +47,6 @@ class Buyer(models.Model):
 			return BuyerAddressHistory.objects.filter(buyer=self).latest('created_at')
 		except Exception, e:
 			return None
-		
-
 
 class BuyerAddress(models.Model):
 	buyer = models.ForeignKey('users.Buyer')
@@ -243,6 +241,8 @@ def populateBuyer(buyerPtr, buyer):
 	buyerPtr.save()
 	buyerPtr.store_url = "{}-{}".format(buyerPtr.store_slug,buyerPtr.id)
 	buyerPtr.store_global_discount = buyer["store_global_discount"]
+	buyerPtr.save()
+	buyerPtr.whatsapp_contact_name = str(buyerPtr.id) + " Wholdus " + buyerPtr.name
 
 def populateBuyerDetails(buyerDetailsPtr, buyerdetails):
 	buyerDetailsPtr.cst = buyerdetails["cst"]

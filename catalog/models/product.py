@@ -218,7 +218,13 @@ def validateProductData(product, oldproduct, is_new):
 		product["is_catalog"] = oldproduct.is_catalog
 	if not "delete_status" in product or not validate_bool(product["delete_status"]):
 		product["delete_status"] = oldproduct.delete_status
-		
+	
+	if not float(product["min_price_per_unit"]) > 0 or not float(product["price_per_lot"]) > 0 or not float(product["price_per_unit"]) > 0:
+		return False
+
+	if not float(product["price_per_unit"]) >= float(product["min_price_per_unit"]) or not  float(product["price_per_lot"]) >= float(product["price_per_unit"]) :
+		return False
+
 	if is_new == 1 and flag == 1:
 		return False
 

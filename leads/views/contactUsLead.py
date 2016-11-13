@@ -19,23 +19,23 @@ def get_contactus_leads(request,contactUsLeadParameters):
 
 		closeDBConnection()
 		body = parseContactUsLeads(contactUsLeads)
-		statusCode = "2XX"
+		statusCode = 200
 		response = {"contactus_leads": body}
 	except Exception, e:
 		log.critical(e)
-		statusCode = "4XX"
-		response = {"error": "Invalid request"}
-	return customResponse(statusCode, response)
+		statusCode = 500
+		response = {}
+	return customResponse(statusCode, response, error_code=0)
 
 def post_new_contactus_lead(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		contactUsLead = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(contactUsLead) or not validateContactUsLeadData(contactUsLead, ContactUsLead(), 1):
-		return customResponse("4XX", {"error": "Invalid data for contactUs lead sent"})
+		return customResponse(400, error_code=5, error_details=  "Invalid data for contactUs lead sent")
 
 	try:
 		newcontactUsLead = ContactUsLead()
@@ -46,7 +46,7 @@ def post_new_contactus_lead(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "unable to create entry in db"})
+		return customResponse(500, error_code = 1)
 	else:
 		closeDBConnection()
 
@@ -64,27 +64,27 @@ def post_new_contactus_lead(request):
 			bcc = ["manish@wholdus.com","kushagra@wholdus.com","aditya.rana@wholdus.com"]
 			create_email(mail_template_file,mail_dict,subject,from_email,to,bcc=bcc)
 
-		return customResponse("2XX", {"contactus_lead" : serialize_contactus_lead(newcontactUsLead)})
+		return customResponse(200, {"contactus_lead" : serialize_contactus_lead(newcontactUsLead)})
 
 def update_contactus_lead(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		contactusLead = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(contactusLead) or not "contactusleadID" in contactusLead or not validate_integer(contactusLead["contactusleadID"]):
-		return customResponse("4XX", {"error": "Id for contactus lead not sent"})
+		return customResponse(400, error_code=5,  error_details=  "Id for contactus lead not sent")
 
 	contactusLeadPtr = ContactUsLead.objects.filter(id=int(contactusLead["contactusleadID"]))
 
 	if len(contactusLeadPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid id for contactus lead sent"})
+		return customResponse(400, error_code=6, error_details = "Invalid id for contactus lead sent")
 
 	contactusLeadPtr = contactusLeadPtr[0]
 
 	if not validateContactUsLeadData(contactusLead, contactusLeadPtr, 0):
-		return customResponse("4XX", {"error": "Invalid data for contactus lead sent"})
+		return customResponse(400, error_code=5, error_details=  "Invalid data for contactus lead sent")
 
 	try:
 		populateContactUsLead(contactusLeadPtr, contactusLead)
@@ -93,7 +93,7 @@ def update_contactus_lead(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "unable to update contactus lead"})
+		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"contactus_lead" : serialize_contactus_lead(contactusLeadPtr)})
+		return customResponse(200, {"contactus_lead" : serialize_contactus_lead(contactusLeadPtr)})

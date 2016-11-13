@@ -9,17 +9,22 @@ def buyer_leads(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
+	parameters = getBuyerLeadParameters(request, {}, version)
+
 	if request.method == "GET":
 
-		buyerLeadParameters = getBuyerLeadParameters(request, {}, version)
+		if parameters["isInternalUser"] == 0:
+			return customResponse(403, error_code = 8)
 
-		return buyerLeads.get_buyer_leads(request,buyerLeadParameters)
+		return buyerLeads.get_buyer_leads(request,parameters)
 	if request.method == "POST":
 		return buyerLeads.post_new_buyer_lead(request)
 	elif request.method == "PUT":
+		if parameters["isInternalUser"] == 0:
+			return customResponse(403, error_code = 8)
 		return buyerLeads.update_buyer_lead(request)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 def getBuyerLeadParameters(request, parameters = {}, version = "0"):
 
@@ -40,17 +45,22 @@ def seller_leads(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
+	parameters = getSellerLeadParameters(request, {}, version)
+
 	if request.method == "GET":
 
-		sellerLeadParameters = getSellerLeadParameters(request, {}, version)
+		if parameters["isInternalUser"] == 0:
+			return customResponse(403, error_code = 8)
 
-		return sellerLeads.get_seller_leads(request,sellerLeadParameters)
+		return sellerLeads.get_seller_leads(request,parameters)
 	elif request.method == "POST":
 		return sellerLeads.post_new_seller_lead(request)
 	elif request.method == "PUT":
+		if parameters["isInternalUser"] == 0:
+			return customResponse(403, error_code = 8)
 		return sellerLeads.update_seller_lead(request)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 def getSellerLeadParameters(request, parameters = {}, version = "0"):
 
@@ -71,22 +81,22 @@ def contactus_leads(request, version = "0"):
 
 	version = getApiVersion(request.META["HTTP_ACCEPT"])
 
+	parameters = getContactUsLeadParameters(request, {}, version)
+
 	if request.method == "GET":
 
-		contactUsLeadParameters = getContactUsLeadParameters(request, {}, version)
+		if parameters["isInternalUser"] == 0:
+			return customResponse(403, error_code = 8)
 
-		contactUsLeadID = request.GET.get("contactusleadID", "")
-
-		if contactUsLeadID != "":
-			contactUsLeadParameters["contactUsLeadsArr"] = getArrFromString(contactUsLeadID)
-
-		return contactUsLead.get_contactus_leads(request,contactUsLeadParameters)
+		return contactUsLead.get_contactus_leads(request,parameters)
 	if request.method == "POST":
 		return contactUsLead.post_new_contactus_lead(request)
 	elif request.method == "PUT":
+		if parameters["isInternalUser"] == 0:
+			return customResponse(403, error_code = 8)
 		return contactUsLead.update_contactus_lead(request)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 def getContactUsLeadParameters(request, parameters = {}, version = "0"):
 

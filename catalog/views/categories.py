@@ -15,26 +15,26 @@ def get_categories_details(request, parameters):
 
 		categories = filterCategories(parameters)
 
-		statusCode = "2XX"
+		statusCode = 200
 		body = {"categories": categories_parser(categories, parameters)}
 
 	except Exception as e:
 		log.critical(e)
-		statusCode = "4XX"
-		body = {"error": "Invalid category"}
+		statusCode = 500
+		body = {}
 		
 	closeDBConnection()
-	return customResponse(statusCode, body)
+	return customResponse(statusCode, body,  error_code=0)
 
 def post_new_category(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		category = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(category) or not validateCategoryData(category, Category(), 1):
-		return customResponse("4XX", {"error": "Invalid data for category sent"})
+		return customResponse(400, error_code=5, error_details= "Invalid data for category sent")
 
 	category["slug"] = slugify(category["name"])
 
@@ -46,10 +46,10 @@ def post_new_category(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "unable to create entry in db"})
+		return customResponse(500, error_code = 1)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"categories" : serialize_categories(newCategory)})
+		return customResponse(200, {"categories" : serialize_categories(newCategory)})
 
 
 def update_category(request):
@@ -57,20 +57,20 @@ def update_category(request):
 		requestbody = request.body.decode("utf-8")
 		category = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(category) or not "categoryID" in category or not validate_integer(category["categoryID"]):
-		return customResponse("4XX", {"error": "Id for category not sent"})
+		return customResponse(400, error_code=5,  error_details= "Id for category not sent")
 
 	categoryPtr = Category.objects.filter(id=int(category["categoryID"]))
 
 	if len(categoryPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid id for category sent"})
+		return customResponse(400, error_code=6, error_details = "Invalid id for category sent")
 
 	categoryPtr = categoryPtr[0]
 
 	if not validateCategoryData(category, categoryPtr, 0):
-		return customResponse("4XX", {"error": "Invalid data for category sent"})
+		return customResponse(400, error_code=5, error_details= "Invalid data for category sent")
 
 	category["slug"] = slugify(category["name"])
 
@@ -81,30 +81,27 @@ def update_category(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "could not update"})
+		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"categories": serialize_categories(categoryPtr)})
+		return customResponse(200, {"categories": serialize_categories(categoryPtr)})
 
 def delete_category(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		category = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(category) or not "categoryID" in category or not validate_integer(category["categoryID"]):
-		return customResponse("4XX", {"error": "Id for category not sent"})
+		return customResponse(400, error_code=5,  error_details= "Id for category not sent")
 
-	categoryPtr = Category.objects.filter(id=int(category["categoryID"]))
+	categoryPtr = Category.objects.filter(id=int(category["categoryID"]), delete_status=False)
 
 	if len(categoryPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid id for category sent"})
+		return customResponse(400, error_code=6, error_details = "Invalid id for category sent")
 
 	categoryPtr = categoryPtr[0]
-
-	if categoryPtr.delete_status == True:
-		return customResponse("4XX", {"error": "Already deleted"})
 
 	try:
 		categoryPtr.delete_status = True
@@ -112,7 +109,7 @@ def delete_category(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "could not delete"})
+		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"success": "category deleted"})
+		return customResponse(200, {"success": "category deleted"})

@@ -29,11 +29,11 @@ def get_pincode_serviceability_details(request,parameters = {}):
 
 		closeDBConnection()
 
-		statusCode = "2XX"
+		statusCode = 200
 		
 	except Exception as e:
 		log.critical(e)
-		statusCode = "4XX"
-		body = {"error": "Invalid pincode serviceability"}
+		statusCode = 500
+		body = {}
 
-	return customResponse(statusCode, response)
+	return customResponse(statusCode, response, error_code=0)

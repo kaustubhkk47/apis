@@ -14,8 +14,6 @@ def get_order_item_details(request, parameters):
 
 		orderItems = filterOrderItem(parameters)
 
-		statusCode = "2XX"
-
 		paginator = Paginator(orderItems, parameters["itemsPerPage"])
 
 		try:
@@ -24,33 +22,33 @@ def get_order_item_details(request, parameters):
 			pageItems = []
 
 		body = parseOrderItem(pageItems,parameters)
-		statusCode = "2XX"
+		statusCode = 200
 		response = {"order_items": body}
 
 		responsePaginationParameters(response,paginator, parameters)
 
 	except Exception as e:
 		log.critical(e)
-		statusCode = "4XX"
-		response = {"error": "Invalid request"}
+		statusCode = 500
+		response = {}
 
 	closeDBConnection()
-	return customResponse(statusCode, response)
+	return customResponse(statusCode, response, error_code=0)
 
 def cancel_order_item(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		orderItem = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(orderItem) or not "orderitemID" in orderItem or not validate_integer(orderItem["orderitemID"]):
-		return customResponse("4XX", {"error": "Id for order item not sent"})
+		return customResponse(400, error_code=5,  error_details= "Id for order item not sent")
 
 	orderItemPtr = OrderItem.objects.filter(id=int(orderItem["orderitemID"])).select_related('suborder', 'suborder__order')
 
 	if len(orderItemPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid id for order item sent"})
+		return customResponse(400, error_code=6, error_details = "Invalid id for order item sent")
 
 	orderItemPtr = orderItemPtr[0]
 
@@ -58,7 +56,7 @@ def cancel_order_item(request):
 		orderItem["cancellation_remarks"] = ""
 
 	if orderItemPtr.current_status == 4:
-		return customResponse("4XX", {"error": "Already cancelled"})
+		return customResponse(400, error_code=6, error_details = "Already cancelled")
 
 	try:
 		orderItemPtr.current_status = 4
@@ -122,7 +120,7 @@ def cancel_order_item(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "could not update"})
+		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"order": "order updated"})
+		return customResponse(200, {"order": "order updated"})
