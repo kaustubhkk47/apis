@@ -89,6 +89,7 @@ def post_new_buyer(request):
 		newBuyer = Buyer()
 
 		populateBuyer(newBuyer, buyer)
+		newBuyer.password = buyer["mobile_number"]
 		newBuyer.save()
 		
 		buyeraddress = buyer["address"]

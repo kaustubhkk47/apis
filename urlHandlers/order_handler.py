@@ -10,7 +10,7 @@ from .catalog_handler import populateProductDetailsParameters
 @csrf_exempt
 def order_shipment_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	orderShipmentParameters = populateOrderParameters(request, {}, version)
 
@@ -32,7 +32,7 @@ def order_shipment_details(request, version = "0"):
 @csrf_exempt
 def suborder_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	subOrderParameters = populateOrderParameters(request, {},version)
 
@@ -54,7 +54,7 @@ def suborder_details(request, version = "0"):
 @csrf_exempt
 def order_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateOrderParameters(request, {}, version)
 
@@ -80,7 +80,7 @@ def order_details(request, version = "0"):
 @csrf_exempt
 def order_item_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	orderItemParameters = populateOrderParameters(request, {}, version)
 
@@ -99,7 +99,7 @@ def order_item_details(request, version = "0"):
 @csrf_exempt
 def buyer_payment_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	buyerPaymentParameters = populateOrderParameters(request, {}, version)
 
@@ -122,7 +122,7 @@ def buyer_payment_details(request, version = "0"):
 @csrf_exempt
 def seller_payment_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	sellerPaymentParameters = populateOrderParameters(request, {}, version)
 
@@ -144,7 +144,7 @@ def seller_payment_details(request, version = "0"):
 @csrf_exempt
 def cart_item_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	cartParameters = populateCartParameters(request, {}, version)
 
@@ -162,7 +162,7 @@ def cart_item_details(request, version = "0"):
 @csrf_exempt
 def cart_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	cartParameters = populateCartParameters(request, {}, version)
 
@@ -176,7 +176,7 @@ def cart_details(request, version = "0"):
 @csrf_exempt
 def checkout_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateCheckoutParameters(request, {}, version)
 
@@ -200,7 +200,7 @@ def checkout_details(request, version = "0"):
 @csrf_exempt
 def checkout_payment_method_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateCheckoutParameters(request, {}, version)
 

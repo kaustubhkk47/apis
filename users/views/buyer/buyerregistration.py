@@ -118,6 +118,7 @@ def post_buyer_registration_verify(request, parameters):
 		newBuyer = Buyer()
 
 		populateBuyer(newBuyer, buyer)
+		newBuyer.password = buyer["password"]
 		newBuyer.save()
 		
 		buyeraddress = buyer["address"]
@@ -135,10 +136,24 @@ def post_buyer_registration_verify(request, parameters):
 		newBuyerAddressHistory.populateFromBuyerAddress(newAddress)
 		newBuyerAddressHistory.save()
 
+		newBuyerRefreshToken = BuyerRefreshToken()
+		newBuyerRefreshToken.populateFromBuyer(newBuyer)
+		newBuyerRefreshToken.save()
+
+		newBuyerAccessToken = BuyerAccessToken()
+		newBuyerAccessToken.populateFromRefreshToken(newBuyerRefreshToken)
+		newBuyerAccessToken.save()
+
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
 		return customResponse(500, error_code = 1)
 	else:
 		closeDBConnection()
-		return customResponse(200, {"buyer" : serialize_buyer(newBuyer)})
+
+		response_body = {}
+		response_body["access_token"] = serialize_buyer_access_token(newBuyerAccessToken, parameters)
+		response_body["refresh_token"] = serialize_buyer_refresh_token(newBuyerRefreshToken, parameters)
+		response_body["buyer"] = serialize_buyer(newBuyer, parameters)
+
+		return customResponse(200, response_body)

@@ -35,7 +35,7 @@ class BuyerRegistration(models.Model):
 		self.email = buyer["email"]
 		self.mobile_number = buyer["mobile_number"]
 		self.password = buyer["password"]
-		self.otp_number = random.randint(0, 999999)
+		self.otp_number = "{0:06d}".format(random.randint(0, 999999))
 
 	def sendVerificationSMS(self):
 		message_text = "OTP is {} for registration on Wholdus.com. Use it to complete registration process".format(self.otp_number)
@@ -63,7 +63,7 @@ class BuyerRegistrationAdmin(admin.ModelAdmin):
 
 def validateBuyerRegistrationData(buyer):
 
-	if not "password" in buyer or buyer["password"]==None:
+	if not "password" in buyer or not validate_password(buyer["password"]):
 		return False
 	if not "mobile_number" in buyer or not validate_mobile_number(buyer["mobile_number"]):
 		return False

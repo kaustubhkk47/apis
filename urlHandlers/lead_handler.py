@@ -7,7 +7,7 @@ from .user_handler import populateInternalUserIDParameters
 @csrf_exempt
 def buyer_leads(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = getBuyerLeadParameters(request, {}, version)
 
@@ -43,7 +43,7 @@ def getBuyerLeadParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def seller_leads(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = getSellerLeadParameters(request, {}, version)
 
@@ -79,7 +79,7 @@ def getSellerLeadParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def contactus_leads(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = getContactUsLeadParameters(request, {}, version)
 

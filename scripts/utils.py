@@ -31,7 +31,7 @@ def customResponse(statusCode, body={}, error_code = 0, error_details=""):
 		1 : "unable to create entry in db",
 		2 : "Could not save",
 		3 : "could not update",
-		4 : "Malformed json sent",
+		4 : "Malformed json sent in request body",
 		5 : "Invalid data sent in request",
 		6 : "Inappropriate data sent in request",
 		7 : "Not found",
@@ -64,11 +64,28 @@ def customResponse(statusCode, body={}, error_code = 0, error_details=""):
 	500 - Internal Server Error
 	"""
 
-
+	### Think about saving every single request response info here
 	return response
 
-def getAccessToken(request):
-	return request.GET.get("access_token", "")
+def getAccessToken(request, token_name="access_token"):
+	access_token = ""
+	try:
+		text = request.META["HTTP_AUTHORIZATION"]
+		access_token = findPatternInString(token_name, text)
+	except Exception as e:
+		pass
+
+	if access_token == "" or access_token == None:
+		access_token = request.GET.get(token_name, "")
+
+	return access_token
+
+def findPatternInString(parameter, text, pattern = "\S*"):
+	searchText = "{}=({})".format(parameter, pattern)
+	foundString = re.search(searchText, text).group(1)
+	if foundString == None:
+		foundString = ""
+	return foundString
 	
 def convert_keys_to_string(dictionary):
 	"""Recursively converts dictionary keys to strings."""
@@ -132,6 +149,15 @@ def validate_mobile_number(x):
 	if len(x) != 10:
 		return False
 	if not (x[0] == '9' or x[0] == '8' or x[0] == '7'):
+		return False
+	return True
+
+def validate_password(x):
+	try:
+		x = str(x)
+	except Exception as e:
+		return False
+	if not len(x) >= 6:
 		return False
 	return True
 
@@ -323,12 +349,14 @@ def djangoEncodedTime(obj):
 	t = json.dumps(obj, cls=DjangoJSONEncoder)
 	return t[1:len(t)-1]
 
-def getApiVersion(text):
+def getApiVersion(request):
 	version = "0"
 	try:
-		version = re.search("version=(.+?)", text).group(1)
+		text = request.META["HTTP_ACCEPT"]
+		version = findPatternInString("version", text)
 	except Exception as e:
 		pass
+
 	return version
 
 def getTimeStamp(dateTimeObject):

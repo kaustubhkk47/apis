@@ -8,7 +8,7 @@ from .user_handler import populateInternalUserIDParameters
 
 @csrf_exempt
 def article_details(request, version = "0"):
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 	parameters = getArticleParameters(request, {}, version)
 
 	if request.method == 'GET':
@@ -34,7 +34,7 @@ def article_details(request, version = "0"):
 
 @csrf_exempt
 def article_cover_photo_details(request, version = "0"):
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
  
 	if request.method == 'POST':
 		parameters = getArticleParameters(request, {}, version)

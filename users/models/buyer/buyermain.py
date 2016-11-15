@@ -162,8 +162,6 @@ def validateBuyerData(buyer, oldbuyer, is_new):
 		buyer["email"] = oldbuyer.email
 		if is_new == 1:
 			buyer["email"] = None
-	if not "password" in buyer or buyer["password"]==None:
-		buyer["password"] = oldbuyer.password
 	if not "alternate_phone_number" in buyer or buyer["alternate_phone_number"]==None:
 		buyer["alternate_phone_number"] = oldbuyer.alternate_phone_number
 	if not "mobile_verification" in buyer or not validate_bool(buyer["mobile_verification"]):
@@ -181,11 +179,6 @@ def validateBuyerData(buyer, oldbuyer, is_new):
 		buyer["whatsapp_sharing_active"] = oldbuyer.whatsapp_sharing_active
 	if not "store_global_discount" in buyer or not validate_percent(buyer["store_global_discount"]):
 		buyer["store_global_discount"] = oldbuyer.store_global_discount
-	if not "password" in buyer or buyer["password"]:
-		if is_new == 1:
-			buyer["password"] = buyer["mobile_number"]
-		else:
-			buyer["password"] = oldbuyer.password
 
 	if is_new == 1 and flag == 1:
 		return False
@@ -232,7 +225,6 @@ def populateBuyer(buyerPtr, buyer):
 	buyerPtr.mobile_number = buyer["mobile_number"]
 	buyerPtr.whatsapp_number = buyer["whatsapp_number"]
 	buyerPtr.email = buyer["email"]
-	buyerPtr.password = buyer["mobile_number"]
 	buyerPtr.alternate_phone_number = buyer["alternate_phone_number"]
 	buyerPtr.mobile_verification = int(buyer["mobile_verification"])
 	buyerPtr.email_verification = int(buyer["email_verification"])

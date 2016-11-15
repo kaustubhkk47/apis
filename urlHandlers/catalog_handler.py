@@ -10,7 +10,7 @@ from .user_handler import populateSellerIDParameters, populateInternalUserIDPara
 @csrf_exempt
 def categories_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateCategoryParameters(request, {}, version)
 
@@ -45,7 +45,7 @@ def populateCategoryParameters(request, parameters = {}, version = "0"):
 
 @csrf_exempt
 def product_details(request, version = "0"):
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 	parameters = populateProductParameters(request, {}, version)
 
 	if request.method == "GET":
@@ -68,7 +68,7 @@ def product_details(request, version = "0"):
 @csrf_exempt
 def product_colour_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	if request.method == "GET":
 
@@ -79,7 +79,7 @@ def product_colour_details(request, version = "0"):
 @csrf_exempt
 def product_fabric_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	if request.method == "GET":
 
@@ -90,7 +90,7 @@ def product_fabric_details(request, version = "0"):
 @csrf_exempt
 def product_file(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateProductParameters(request, {}, version)
 
@@ -106,7 +106,7 @@ def product_file(request, version = "0"):
 @csrf_exempt
 def product_catalog(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateProductParameters(request, {}, version)
 

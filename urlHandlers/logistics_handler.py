@@ -8,7 +8,7 @@ from .user_handler import populateAllUserIDParameters
 @csrf_exempt
 def pincode_serviceability_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateLogisticsParameters(request, {}, version)
 

@@ -24,6 +24,10 @@ admin.site.register(BuyerStoreLead, BuyerStoreLeadAdmin)
 
 admin.site.register(BuyerRegistration, BuyerRegistrationAdmin)
 
+admin.site.register(BuyerRefreshToken, BuyerRefreshTokenAdmin)
+admin.site.register(BuyerAccessToken, BuyerAccessTokenAdmin)
+admin.site.register(BuyerForgotPasswordToken, BuyerForgotPasswordTokenAdmin)
+
 admin.site.register(Seller,SellerAdmin)
 admin.site.register(SellerAddress)
 admin.site.register(SellerAddressHistory)

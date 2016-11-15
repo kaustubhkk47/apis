@@ -96,6 +96,54 @@ def serialize_buyer_registration(buyer_registration_entry, parameters = {}):
 
 	return buyer_registration
 
+def serialize_buyer_refresh_token(buyer_refresh_token_entry, parameters = {}):
+
+	tokenPayload = {
+		"exp": buyer_refresh_token_entry.getExpiryTimeStamp(),
+		"iat": getTimeStamp(buyer_refresh_token_entry.created_at),
+		"sub":"buyer refresh token",
+		"jti": buyer_refresh_token_entry.id,
+		"user":"buyer",
+		"buyerID":buyer_refresh_token_entry.buyer_id,
+	}
+
+	encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
+
+	return encoded
+
+def serialize_buyer_forgot_password_token(buyer_forgot_password_token_entry, parameters = {}):
+
+	buyer_forgot_password = {}
+
+	tokenPayload = {
+		"exp": buyer_forgot_password_token_entry.getExpiryTimeStamp(),
+		"iat": getTimeStamp(buyer_forgot_password_token_entry.created_at),
+		"sub":"buyer forgot password",
+		"jti": buyer_forgot_password_token_entry.id,
+		"user":"buyer",
+	}
+
+	encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
+
+	buyer_forgot_password["forgot_password_token"] = encoded
+
+	return buyer_forgot_password
+
+def serialize_buyer_access_token(buyer_access_token_entry, parameters = {}):
+
+	tokenPayload = {
+		"exp": buyer_access_token_entry.getExpiryTimeStamp(),
+		"iat": getTimeStamp(buyer_access_token_entry.created_at),
+		"sub":"buyer access token",
+		"jti": buyer_access_token_entry.id,
+		"buyerID":buyer_access_token_entry.buyer_id,
+		"user":"buyer"
+	}
+
+	encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
+
+	return encoded
+
 def parse_buyer_address(buyer_addresses_queryset, parameters = {}):
 
 	buyer_addresses =[]

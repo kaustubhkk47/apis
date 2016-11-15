@@ -17,7 +17,7 @@ import settings
 @csrf_exempt
 def user_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateAllUserIDParameters(request, {}, version)
 
@@ -44,7 +44,7 @@ def populateAllUserIDParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def buyer_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateBuyerProductParameters(request, {}, version)
 
@@ -55,6 +55,8 @@ def buyer_details(request, version = "0"):
 
 		return buyer.get_buyer_details(request,parameters)
 	elif request.method == "POST":
+		if parameters["isInternalUser"] == 0:
+			return customResponse(403, error_code = 8)
 		return buyer.post_new_buyer(request)
 	elif request.method == "PUT":
 
@@ -74,7 +76,7 @@ def buyer_details(request, version = "0"):
 @csrf_exempt
 def buyer_panel_tracking_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateBuyerParameters(request, {}, version)
 
@@ -88,7 +90,7 @@ def buyer_panel_tracking_details(request, version = "0"):
 @csrf_exempt
 def buyer_store_lead_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateBuyerStoreParameters(request, {}, version)
 
@@ -171,7 +173,7 @@ def populateBuyerParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def buyer_purchasing_state_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateBuyerParameters(request, {}, version)
 
@@ -200,7 +202,7 @@ def buyer_purchasing_state_details(request, version = "0"):
 @csrf_exempt
 def buyer_buys_from_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateBuyerParameters(request, {}, version)
 
@@ -231,20 +233,21 @@ def buyer_buys_from_details(request, version = "0"):
 @csrf_exempt
 def buyer_access_token_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
-
+	version = getApiVersion(request)
+	"""
 	if request.method == "GET":
 		parameters = {}
 		parameters["buyer_panel_url"] = request.GET.get("buyer_panel_url", "")
 
 		return buyer.get_buyer_access_token_details(request, parameters)
+	"""
 
 	return customResponse(404, error_code = 7)
 
 @csrf_exempt
 def buyer_shared_product_id_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateBuyerParameters(request, {}, version)
 
@@ -266,7 +269,7 @@ def buyer_shared_product_id_details(request, version = "0"):
 @csrf_exempt
 def buyer_interest_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateBuyerParameters(request, {}, version )
 
@@ -294,7 +297,7 @@ def buyer_interest_details(request, version = "0"):
 @csrf_exempt
 def buyer_product_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateBuyerProductParameters(request, {}, version )
 
@@ -320,7 +323,7 @@ def buyer_product_details(request, version = "0"):
 @csrf_exempt
 def buyer_product_response_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateBuyerProductParameters(request, {}, version )
 
@@ -344,7 +347,7 @@ def buyer_product_response_details(request, version = "0"):
 @csrf_exempt
 def buyer_product_whatsapp_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateBuyerProductParameters(request, {}, version )
 	
@@ -358,7 +361,7 @@ def buyer_product_whatsapp_details(request, version = "0"):
 @csrf_exempt
 def buyer_product_landing_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 	
 	if request.method == "POST":
 		return buyer.post_buyer_product_landing(request)
@@ -368,7 +371,7 @@ def buyer_product_landing_details(request, version = "0"):
 @csrf_exempt
 def buyer_product_master_update(request,version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateInternalUserIDParameters(request, parameters, version)
 
@@ -477,7 +480,7 @@ def populateBuyerDetailsParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def buyer_address_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	buyerParameters = populateBuyerParameters(request, {}, version )
 	"""
@@ -502,17 +505,12 @@ def populateBuyerIDParameters(request, parameters = {}, version = "0"):
 	accessToken = getAccessToken(request)
 
 	buyerID = request.GET.get("buyerID", "")
-	tokenPayload = convert_keys_to_string(get_token_payload(accessToken, "buyerID"))
+	tokenPayload = validateBuyerAccessToken(accessToken)
 	parameters["isBuyer"] = 0
 	parameters["isBuyerStore"] = 0
-	if "buyerID" in tokenPayload and validate_integer(tokenPayload["buyerID"]) and "password" in tokenPayload:
-		try:
-			buyerPtr = Buyer.objects.get(id=int(tokenPayload["buyerID"]), password=tokenPayload["password"], delete_status=False)
-		except:
-			pass
-		else:
-			parameters["buyersArr"] = [buyerPtr.id]
-			parameters["isBuyer"] = 1
+	if "buyerID" in tokenPayload:
+		parameters["buyersArr"] = [int(tokenPayload["buyerID"])]
+		parameters["isBuyer"] = 1
 	elif buyerID != "":
 		parameters["buyersArr"] = getArrFromString(buyerID)
 
@@ -527,12 +525,14 @@ def populateBuyerIDParameters(request, parameters = {}, version = "0"):
 
 	return parameters
 
+
+
 ### SELLER
 
 @csrf_exempt
 def seller_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateSellerParameters(request, {}, version)
 
@@ -623,7 +623,7 @@ def populateSellerDetailsParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def business_type_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateBusinessTypeParameters(request, {}, version)
 
@@ -659,7 +659,7 @@ def populateBusinessTypeParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def internal_user_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateInternalUserIDParameters(request, {}, version)
 
@@ -696,37 +696,102 @@ def populateInternalUserIDParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def buyer_login(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
-	response = {}
+	parameters = {}
+
 	if request.method == 'POST':
-		mobile_number = request.POST.get('mobile_number', '')
-		password = request.POST.get('password', '')
 
-		if not mobile_number or not password:
-			return customResponse(400, error_code=5, error_details= "Either mobile number or password was empty")
+		return buyer.post_buyer_login(request,parameters)
 
-		# if check_token(request)
-		try:
-			buyer = Buyer.objects.get(mobile_number=mobile_number, delete_status=False, blocked = False)
-		except Buyer.DoesNotExist:
-			return customResponse(401, error_code=9, error_details="Invalid buyer credentials")
+	return customResponse(404, error_code = 7)
 
-		if password == buyer.password:
-			response = {
-				"token": getBuyerToken(buyer),
-				"buyer": serialize_buyer(buyer)
-			}
-			return customResponse(200, response)
-		else:
-			return customResponse(401, error_code=9, error_details="Invalid buyer credentials")
+@csrf_exempt
+def buyer_logout(request, version = "0"):
+
+	version = getApiVersion(request)
+
+	parameters = {}
+
+	if request.method == 'POST':
+
+		return buyer.post_buyer_logout(request,parameters)
+
+	return customResponse(404, error_code = 7)
+
+@csrf_exempt
+def buyer_change_password(request, version = "0"):
+
+	version = getApiVersion(request)
+
+	parameters = populateBuyerIDParameters(request, {}, version)
+
+	if request.method == 'POST':
+
+		if  parameters["isBuyer"] == 0:
+			return customResponse(403, error_code = 8)
+
+		return buyer.post_buyer_change_password(request,parameters)
+
+	return customResponse(404, error_code = 7)
+
+@csrf_exempt
+def buyer_forgot_password(request, version = "0"):
+
+	version = getApiVersion(request)
+
+	parameters = {}
+
+	if request.method == 'POST':
+
+		return buyer.post_buyer_forgot_password(request,parameters)
+
+	return customResponse(404, error_code = 7)
+
+@csrf_exempt
+def buyer_forgot_password_resend_sms(request, version = "0"):
+
+	version = getApiVersion(request)
+
+	parameters = {}
+
+	if request.method == 'POST':
+
+		return buyer.post_buyer_forgot_password_resend_sms(request,parameters)
+
+	return customResponse(404, error_code = 7)
+
+@csrf_exempt
+def buyer_forgot_password_verify(request, version = "0"):
+
+	version = getApiVersion(request)
+
+	parameters = {}
+
+	if request.method == 'POST':
+
+		return buyer.post_buyer_forgot_password_verify(request,parameters)
+
+	return customResponse(404, error_code = 7)
+
+
+@csrf_exempt
+def buyer_renew_access_token(request, version = "0"):
+
+	version = getApiVersion(request)
+
+	parameters = {}
+
+	if request.method == 'GET':
+
+		return buyer.get_buyer_renew_access_token(request,parameters)
 
 	return customResponse(404, error_code = 7)
 
 @csrf_exempt
 def buyer_registration(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = {}
 
@@ -739,7 +804,7 @@ def buyer_registration(request, version = "0"):
 @csrf_exempt
 def buyer_registration_resend_sms(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = {}
 
@@ -752,7 +817,7 @@ def buyer_registration_resend_sms(request, version = "0"):
 @csrf_exempt
 def buyer_registration_verify(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = {}
 
@@ -767,7 +832,7 @@ def buyer_registration_verify(request, version = "0"):
 @csrf_exempt
 def seller_login(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	response = {}
 	if request.method == 'POST':
@@ -799,7 +864,7 @@ def seller_login(request, version = "0"):
 @csrf_exempt
 def internaluser_login(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	response = {}
 	if request.method == 'POST':
