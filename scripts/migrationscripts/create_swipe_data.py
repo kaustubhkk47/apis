@@ -39,8 +39,8 @@ def getDaySwipeStartTime(swipingDay):
 	minTime = 3
 	maxTime = 17
 	hour = random.randint(minTime, maxTime)
-	minute = random.randint(0, 60)
-	second = random.randint(0, 60)
+	minute = random.randint(0, 59)
+	second = random.randint(0, 59)
 	actualTime = datetime.datetime(year = swipingDay.year, month = swipingDay.month, day = swipingDay.day, hour = hour, minute = minute, second = second, tzinfo = nowTime.tzinfo)
 	return actualTime
 
