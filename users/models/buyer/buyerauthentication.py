@@ -123,8 +123,8 @@ def validateBuyerAccessToken(accessToken):
 
 	if not "sub" in tokenPayload or not tokenPayload["sub"] == "buyer access token":
 		tokenPayload = {}
-	if not "exp" in tokenPayload or not checkTokenTimeValidity(tokenPayload["exp"]):
-		tokenPayload = {}
+	#if not "exp" in tokenPayload or not checkTokenTimeValidity(tokenPayload["exp"]):
+	#	tokenPayload = {}
 	if not "jti" in tokenPayload or not validate_integer(tokenPayload["jti"]):
 		tokenPayload = {}
 
@@ -165,6 +165,13 @@ def validateBuyerForgotPasswordData(buyer):
 
 def validateBuyerForgotPasswordResendSMSData(buyer):
 	if not "forgot_password_token" in buyer or buyer["forgot_password_token"]==None:
+		return False
+	return True
+
+def validateBuyerLoginData(buyer):
+	if not "mobile_number" in buyer or not  validate_mobile_number(buyer["mobile_number"]):
+		return False
+	if not "password" in buyer or not validate_password(buyer["password"]):
 		return False
 	return True
 

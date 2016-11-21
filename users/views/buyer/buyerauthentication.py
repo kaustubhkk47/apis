@@ -8,8 +8,20 @@ log = logging.getLogger("django")
 
 def post_buyer_login(request, parameters):
 
-	mobile_number = request.POST.get('mobile_number', '')
-	password = request.POST.get('password', '')
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse(400, error_code=4)
+
+	if not len(buyer) or not validateBuyerLoginData(buyer):
+		return customResponse(400, error_code=5, error_details=  "Invalid data sent in request")
+
+	#mobile_number = request.POST.get('mobile_number', '')
+	#password = request.POST.get('password', '')
+
+	mobile_number = buyer["mobile_number"]
+	password = buyer["password"]
 
 	## Instead take mobile number and password from request body
 
