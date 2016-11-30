@@ -166,7 +166,8 @@ def serialize_buyer_address(buyer_address, parameters = {}):
 		"contact_number" : buyer_address.contact_number,
 		"pincode" : buyer_address.pincode_number,
 		"priority" : buyer_address.priority,
-		"pincodeID":buyer_address.pincode_id
+		"pincodeID":buyer_address.pincode_id,
+		"alias":buyer_address.alias
 	}
 	return buyer_address_entry
 

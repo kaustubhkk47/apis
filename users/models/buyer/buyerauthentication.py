@@ -59,7 +59,8 @@ class BuyerAccessToken(models.Model):
 		return "{}".format(self.buyer)
 
 	def getExpiryTimeStamp(self):
-		return getTimeStamp(self.created_at + timedelta(minutes=30))
+		# TODO: Change expiry time of buyer access token
+		return getTimeStamp(self.created_at + timedelta(days=30))
 
 	def populateFromRefreshToken(self, buyerRefreshToken):
 		self.buyer_id = buyerRefreshToken.buyer_id

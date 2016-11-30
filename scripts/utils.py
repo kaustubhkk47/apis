@@ -188,7 +188,6 @@ def check_token_validity(access_token):
 	try:
 		tokenPayload = JsonWebToken.decode(access_token, settings.SECRET_KEY, algorithms=['HS256'])
 	except Exception as ex:
-		## log the exception into db
 		return {}
 
 	return tokenPayload

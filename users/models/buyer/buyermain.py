@@ -60,6 +60,7 @@ class BuyerAddress(models.Model):
 	contact_number = models.CharField(max_length=11, blank=True)
 	pincode_number = models.CharField(max_length=6, blank=True)
 	priority = models.IntegerField(default=1)
+	alias = models.CharField(max_length=255, blank=True, null=False)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -85,6 +86,7 @@ class BuyerAddressHistory(models.Model):
 	contact_number = models.CharField(max_length=11, blank=True)
 	pincode_number = models.CharField(max_length=6, blank=True)
 	priority = models.IntegerField(default=1)
+	alias = models.CharField(max_length=255, blank=True, null=False)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -108,6 +110,7 @@ class BuyerAddressHistory(models.Model):
 		self.contact_number = buyerAddressPtr.contact_number
 		self.pincode_number = buyerAddressPtr.pincode_number
 		self.priority = buyerAddressPtr.priority
+		self.alias = buyerAddressPtr.alias
 
 class BuyerDetails(models.Model):
 	buyer = models.OneToOneField('users.Buyer')
@@ -214,6 +217,8 @@ def validateBuyerAddressData(buyeraddress, oldbuyeraddress):
 		buyeraddress["contact_number"] = oldbuyeraddress.contact_number
 	if not "pincode" in buyeraddress or buyeraddress["pincode"]==None or not validate_pincode(buyeraddress["pincode"]):
 		buyeraddress["pincode"] = oldbuyeraddress.pincode_number
+	if not "alias" in buyeraddress or buyeraddress["alias"]==None:
+		buyeraddress["alias"] = oldbuyeraddress.alias
 
 def populateBuyer(buyerPtr, buyer):
 	buyerPtr.name = buyer["name"]
@@ -248,6 +253,7 @@ def populateBuyerAddress(buyerAddressPtr, buyeraddress):
 	buyerAddressPtr.landmark = buyeraddress["landmark"]
 	buyerAddressPtr.contact_number = buyeraddress["contact_number"]
 	buyerAddressPtr.pincode_number = buyeraddress["pincode"]
+	buyerAddressPtr.alias = buyeraddress["alias"]
 
 	try:
 		pincode = Pincode.objects.get(pincode=buyeraddress["pincode"])
