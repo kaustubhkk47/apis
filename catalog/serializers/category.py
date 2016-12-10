@@ -11,9 +11,10 @@ def serialize_categories(categoriesItem, parameters = {}):
 	category["id"]= categoriesItem.id
 	category["url"]= categoriesItem.slug + "-" + str(categoriesItem.id)
 
-	sellerCategoryPtr = filterSellerCategory(parameters)
-	sellerCategoryPtr = sellerCategoryPtr.filter(category_id=categoriesItem.id)
-	category["seller_categories"] = parse_seller_category(sellerCategoryPtr, parameters)
+	if "seller_category_details" in parameters and parameters["seller_category_details"] == 1:
+		sellerCategoryPtr = filterSellerCategory(parameters)
+		sellerCategoryPtr = sellerCategoryPtr.filter(category_id=categoriesItem.id)
+		category["seller_categories"] = parse_seller_category(sellerCategoryPtr, parameters)
 	
 	return category
 

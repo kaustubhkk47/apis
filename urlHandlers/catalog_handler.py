@@ -33,12 +33,29 @@ def categories_details(request, version = "0"):
 	return customResponse(404, error_code = 7)
 
 def populateCategoryParameters(request, parameters = {}, version = "0"):
-
+	version = getApiVersion(request)
 	categoryID = request.GET.get("categoryID", "")
 	if categoryID != "":
 		parameters["categoriesArr"] = getArrFromString(categoryID)
 
 	parameters = populateAllUserIDParameters(request, parameters, version)
+
+	parameters = populateCategorytDetailsParameters(request, parameters, version)
+
+	return parameters
+
+def populateCategorytDetailsParameters(request, parameters = {}, version = "0"):
+
+	defaultValue = 1
+
+	if version == "1":
+		defaultValue = 0
+
+	sellerCategoryDetails = request.GET.get("seller_category_details", None)
+	if validate_bool(sellerCategoryDetails):
+		parameters["seller_category_details"] = int(sellerCategoryDetails)
+	else:
+		parameters["seller_category_details"] = defaultValue
 
 	return parameters
 

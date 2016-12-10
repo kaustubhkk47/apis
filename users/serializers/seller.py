@@ -68,7 +68,9 @@ def serialize_seller_address(seller_address, parameters = {}):
 		"state" : seller_address.state_name,
 		"country" : seller_address.country_name,
 		"contact_number" : seller_address.contact_number,
-		"pincode" : seller_address.pincode_number
+		"pincode" : seller_address.pincode_number,
+		"created_at":seller_address.created_at,
+		"updated_at":seller_address.updated_at
 	}
 	return seller_address_entry
 
