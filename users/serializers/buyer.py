@@ -158,6 +158,7 @@ def parse_buyer_address(buyer_addresses_queryset, parameters = {}):
 def serialize_buyer_address(buyer_address, parameters = {}):
 	buyer_address_entry = {
 		"addressID" : buyer_address.id,
+		"buyerID" : buyer_address.buyer_id,
 		"address" : buyer_address.address_line,
 		"landmark" : buyer_address.landmark,
 		"city" : buyer_address.city_name,

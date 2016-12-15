@@ -62,6 +62,7 @@ def serialize_seller_addresses(seller_addresses_queryset, parameters = {}):
 def serialize_seller_address(seller_address, parameters = {}):
 	seller_address_entry = {
 		"addressID" : seller_address.id,
+		"sellerID" : seller_address.seller_id,
 		"address" : seller_address.address_line,
 		"landmark" : seller_address.landmark,
 		"city" : seller_address.city_name,
