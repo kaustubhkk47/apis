@@ -169,6 +169,7 @@ def serialize_buyer_address(buyer_address, parameters = {}):
 		"priority" : buyer_address.priority,
 		"pincodeID":buyer_address.pincode_id,
 		"alias":buyer_address.alias,
+		"client_id":buyer_address.client_id,
 		"created_at":buyer_address.created_at,
 		"updated_at":buyer_address.updated_at
 	}
