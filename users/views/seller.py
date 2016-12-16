@@ -11,6 +11,9 @@ log = logging.getLogger("django")
 
 def get_seller_details(request,sellerParameters):
 	try:
+		if "isSeller" in parameters and parameters["isSeller"] == 1:
+			parameters["seller_show_online"] = 1
+			
 		sellers = filterSeller(sellerParameters)
 
 		response = {

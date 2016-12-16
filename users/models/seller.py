@@ -365,6 +365,9 @@ def filterSeller(sellerParameters):
 	if "sellersArr" in sellerParameters:
 		sellers = sellers.filter(id__in=sellerParameters["sellersArr"])
 
+	if "seller_show_online" in sellerParameters:
+		sellers = sellers.filter(show_online=sellerParameters["seller_show_online"])
+
 	return sellers
 
 def sellerEmailExists(email):

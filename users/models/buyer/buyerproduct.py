@@ -350,6 +350,7 @@ def filterBuyerInterestProducts(BuyerInterestPtr, parameters = {}):
 	parameters["product_verification"] = True
 	parameters["product_show_online"] = True
 	parameters["seller_show_online"] = True
+	parameters["category_show_online"] = True
 
 	if BuyerInterestPtr.price_filter_applied == True:
 		parameters["price_filter_applied"] = True

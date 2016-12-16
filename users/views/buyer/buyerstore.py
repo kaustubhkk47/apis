@@ -65,6 +65,10 @@ def post_new_buyer_store_lead(request, parameters):
 
 	productParameters = {}
 	productParameters["productsArr"] = [int(buyer_store_lead["productID"])]
+	productParameters["product_verification"] = True
+	productParameters["product_show_online"] = True
+	productParameters["seller_show_online"] = True
+	productParameters["category_show_online"] = True
 
 	productPtr = filterProducts(productParameters)
 

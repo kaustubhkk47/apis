@@ -12,6 +12,16 @@ log = logging.getLogger("django")
 
 def get_categories_details(request, parameters):
 	try:
+		if "isBuyer" in parameters and parameters["isBuyer"] == 1:
+			parameters["category_show_online"] = 1
+		elif "isBuyerStore" in parameters and parameters["isBuyerStore"] == 1:
+			parameters["category_show_online"] = 1
+		elif "isSeller" in parameters and parameters["isSeller"] == 1:
+			pass
+		elif "isInternalUser" in parameters and parameters["isInternalUser"] == 1:
+			pass
+		else:
+			parameters["category_show_online"] = 1
 
 		categories = filterCategories(parameters)
 

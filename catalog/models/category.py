@@ -12,6 +12,7 @@ class Category(models.Model):
 	priority = models.PositiveIntegerField(default=0)
 
 	delete_status = models.BooleanField(default=False)
+	show_online = models.BooleanField(default=True)
 
 	class Meta:
 		ordering = ["priority","id"]
@@ -52,5 +53,8 @@ def filterCategories(parameters):
 
 	if "categoriesArr" in parameters:
 		categories = categories.filter(id__in=parameters["categoriesArr"])
+
+	if "category_show_online" in parameters:
+		categories = categories.filter(show_online=parameters["category_show_online"])
 
 	return categories

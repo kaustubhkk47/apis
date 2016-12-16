@@ -366,6 +366,9 @@ def filterProducts(parameters = {}):
 	if "seller_show_online" in parameters:
 		products = products.filter(seller__show_online=parameters["seller_show_online"])
 
+	if "category_show_online" in parameters:
+		products = products.filter(category__show_online=parameters["category_show_online"])
+
 	if "product_new_in_product_matrix" in parameters:
 		products = products.filter(new_in_product_matrix=parameters["product_new_in_product_matrix"])
 

@@ -583,6 +583,10 @@ def populateSellerIDParameters(request, parameters = {}, version = "0"):
 	elif sellerID != "":
 		parameters["sellersArr"] = getArrFromString(sellerID)
 
+	sellerShowOnline = request.GET.get("seller_show_online", "")
+	if sellerShowOnline != "" and validate_bool(sellerShowOnline):
+		parameters["seller_show_online"] = int(sellerShowOnline)
+
 	return parameters
 
 def populateSellerDetailsParameters(request, parameters = {}, version = "0"):

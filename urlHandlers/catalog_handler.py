@@ -38,6 +38,10 @@ def populateCategoryParameters(request, parameters = {}, version = "0"):
 	if categoryID != "":
 		parameters["categoriesArr"] = getArrFromString(categoryID)
 
+	categoryShowOnline = request.GET.get("category_show_online", "")
+	if categoryShowOnline != "" and validate_bool(categoryShowOnline):
+		parameters["category_show_online"] = int(categoryShowOnline)
+
 	parameters = populateAllUserIDParameters(request, parameters, version)
 
 	parameters = populateCategorytDetailsParameters(request, parameters, version)
@@ -144,6 +148,8 @@ def populateProductParameters(request, parameters = {}, version = "0"):
 	colour = request.GET.get("colour", "")
 	min_price_per_unit = request.GET.get("min_price_per_unit", "")
 	max_price_per_unit = request.GET.get("max_price_per_unit", "")
+	productShowOnline = request.GET.get("product_show_online", "")
+	productVerification = request.GET.get("product_verification", "")
 
 	parameters = getPaginationParameters(request, parameters, 10)
 
@@ -158,6 +164,12 @@ def populateProductParameters(request, parameters = {}, version = "0"):
 
 	if colour != "" and colour != None:
 		parameters["colourArr"] = getStrArrFromString(colour)
+
+	if productShowOnline != "" and validate_bool(productShowOnline):
+		parameters["product_show_online"] = int(productShowOnline)
+
+	if productVerification != "" and validate_bool(productVerification):
+		parameters["product_verification"] = int(productVerification)
 
 	if validate_number(min_price_per_unit) and validate_number(max_price_per_unit) and float(min_price_per_unit) >= 0 and float(max_price_per_unit) > float(min_price_per_unit):
 		parameters["price_filter_applied"] = True
