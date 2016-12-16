@@ -10,6 +10,7 @@ def serialize_categories(categoriesItem, parameters = {}):
 	category["categoryID"]= categoriesItem.id
 	category["id"]= categoriesItem.id
 	category["url"]= categoriesItem.slug + "-" + str(categoriesItem.id)
+	category["show_online"]= categoriesItem.show_online
 
 	if "seller_category_details" in parameters and parameters["seller_category_details"] == 1:
 		sellerCategoryPtr = filterSellerCategory(parameters)

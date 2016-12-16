@@ -75,9 +75,7 @@ def post_new_cart_item(request, parameters):
 
 	productParameters = {}
 	productParameters["product_show_online"] = True
-	productParameters["seller_show_online"] = True
 	productParameters["product_verification"] = True
-	productParameters["category_show_online"] = True
 	productParameters["productsArr"] = [int(cartitem["productID"])]
 	productPtr = filterProducts(productParameters)
 

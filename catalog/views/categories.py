@@ -5,6 +5,7 @@ from ..models.product import Product
 from ..models.productLot import ProductLot
 from ..serializers.category import categories_parser, serialize_categories
 from django.template.defaultfilters import slugify
+from django.utils import timezone
 import json
 
 import logging
@@ -85,6 +86,9 @@ def update_category(request):
 	category["slug"] = slugify(category["name"])
 
 	try:
+		if categoryPtr.show_online != int(category["show_online"]):
+			Product.objects.filter(category_id = categoryPtr.id).update(show_online= int(category["show_online"]), updated_at=timezone.now())
+
 		populateCategoryData(categoryPtr, category)
 		categoryPtr.save()
 
@@ -115,6 +119,7 @@ def delete_category(request):
 
 	try:
 		categoryPtr.delete_status = True
+		Product.objects.filter(category_id = categoryPtr.id).update(delete_status=True, updated_at=timezone.now())
 		categoryPtr.save()
 	except Exception as e:
 		log.critical(e)

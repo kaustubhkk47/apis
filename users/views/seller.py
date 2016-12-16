@@ -3,11 +3,13 @@ import json
 from ..models.seller import *
 from ..serializers.seller import parse_seller, serialize_seller
 from ..models.businessType import BusinessType
-
+from catalog.models.product import Product
 from leads.models.sellerLeads import SellerLeads
 
 import logging
 log = logging.getLogger("django")
+
+from django.utils import timezone
 
 def get_seller_details(request,sellerParameters):
 	try:
@@ -134,6 +136,9 @@ def update_seller(request):
 		return customResponse(400, error_code=5,  error_details="Invalid data for seller sent")
 
 	try:
+		if sellerPtr.show_online != int(seller["show_online"]):
+			Product.objects.filter(seller_id = sellerPtr.id).update(show_online= int(seller["show_online"]), updated_at=timezone.now())
+
 		populateSellerData(sellerPtr, seller)
 		
 		if "details" in seller and seller["details"]!=None:
@@ -235,6 +240,7 @@ def delete_seller(request):
 
 	try:
 		sellerPtr.delete_status = True
+		Product.objects.filter(seller_id = sellerPtr.id).update(delete_status=True, updated_at=timezone.now())
 		sellerPtr.save()
 	except Exception as e:
 		log.critical(e)

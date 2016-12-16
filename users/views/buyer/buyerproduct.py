@@ -119,8 +119,6 @@ def post_new_buyer_product(request, parameters):
 	productParameters = {}
 	productParameters["product_verification"] = True
 	productParameters["product_show_online"] = True
-	productParameters["seller_show_online"] = True
-	productParameters["category_show_online"] = True
 	productParameters["productsArr"] = getArrFromString(buyer_product["productID"])
 
 	allProductsDF = filterProducts(productParameters).values('id')
@@ -389,8 +387,6 @@ def master_update_buyer_product(request):
 		productParameters = {}
 		productParameters["product_verification"] = True
 		productParameters["product_show_online"] = True
-		productParameters["seller_show_online"] = True
-		productParameters["category_show_online"] = True
 		productParameters["product_new_in_product_matrix"] = True
 
 		allProductsDF = filterProducts(productParameters).values('id','category_id','min_price_per_unit', 'productdetails__fabric_gsm')

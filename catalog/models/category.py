@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib import admin
 
+from scripts.utils import validate_bool
+
 class Category(models.Model):
 	name = models.CharField(max_length=50, blank=False)
 	display_name = models.CharField(max_length=50, blank=False)
@@ -37,6 +39,8 @@ def validateCategoryData(category, oldcategory, is_new):
 			category["display_name"] = oldcategory.display_name
 		else:
 			category["display_name"] = category["name"]
+	if not "show_online" in category or  not validate_bool(category["show_online"]):
+		category["show_online"] = oldcategory.show_online
 
 	if is_new == 1 and flag == 1:
 		return False
@@ -46,6 +50,7 @@ def validateCategoryData(category, oldcategory, is_new):
 def populateCategoryData(categoryPtr, category):
 	categoryPtr.name = category["name"]
 	categoryPtr.display_name = category["display_name"]
+	categoryPtr.show_online = int(category["show_online"])
 	categoryPtr.slug = category["slug"]
 
 def filterCategories(parameters):

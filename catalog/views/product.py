@@ -31,8 +31,6 @@ def get_product_details(request, parameters = {}):
 			# Might have to change in case consumer website is made
 			parameters["product_verification"] = True
 			parameters["product_show_online"] = True
-			parameters["category_show_online"] = True
-			parameters["seller_show_online"] = True
 		
 		products = filterProducts(parameters)
 
@@ -92,8 +90,6 @@ def get_product_file(request, productParameters):
 	try:
 		parameters["product_show_online"] = True
 		parameters["product_verification"] = True
-		parameters["seller_show_online"] = True
-		parameters["category_show_online"] = True
 		products = filterProducts(productParameters)
 
 		products = products.values_list('id',flat=True)
@@ -117,8 +113,6 @@ def get_product_catalog(request, productParameters):
 	try:
 		parameters["product_show_online"] = True
 		parameters["product_verification"] = True
-		parameters["seller_show_online"] = True
-		parameters["category_show_online"] = True
 		products = filterProducts(productParameters)
 
 		products = {"products":multiple_products_parser(products, productParameters)}
