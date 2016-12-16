@@ -10,6 +10,7 @@ from ..models.orderShipment import OrderShipment
 from ..models.payments import BuyerPayment, SellerPayment, filterSellerPayment, filterBuyerPayment, validateBuyerPaymentData, validateSellerPaymentData, populateBuyerPayment, populateSellerPayment, validateSellerPaymentItemsData
 from ..serializers.payments import parseSellerPayments, parseBuyerPayments, serializeBuyerPayment, serializeSellerPayment
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.utils import timezone
 
 def get_seller_payment_details(request, parameters):
 	try:
@@ -105,7 +106,7 @@ def post_new_buyer_payment(request):
 
 		if int(buyerPayment["fully_paid"]) == 1:
 			OrderPtr.order_payment_status = 1
-			OrderItem.objects.filter(suborder__order_id=OrderPtr.id).exclude(current_status__in=[4]).update(buyer_payment_status=True)
+			OrderItem.objects.filter(suborder__order_id=OrderPtr.id).exclude(current_status__in=[4]).update(buyer_payment_status=True, updated_at = timezone.now())
 		else:
 			OrderPtr.order_payment_status = 2
 		OrderPtr.save()
@@ -152,7 +153,7 @@ def post_new_seller_payment(request):
 
 		if int(sellerPayment["fully_paid"]) == 1:
 			SubOrderPtr.suborder_payment_status = 1
-			OrderItem.objects.filter(suborder_id = SubOrderPtr.id).exclude(current_status = 4).update(seller_payment_id=newSellerPayment.id)
+			OrderItem.objects.filter(suborder_id = SubOrderPtr.id).exclude(current_status = 4).update(seller_payment_id=newSellerPayment.id, updated_at = timezone.now())
 		else:
 			SubOrderPtr.suborder_payment_status = 2
 

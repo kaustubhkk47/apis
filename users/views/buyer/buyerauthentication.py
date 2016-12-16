@@ -6,6 +6,8 @@ from ...serializers.buyer import *
 import logging
 log = logging.getLogger("django")
 
+from django.utils import timezone
+
 def post_buyer_login(request, parameters):
 
 	try:
@@ -165,7 +167,7 @@ def post_buyer_change_password(request, parameters):
 	try:
 		buyerPtr.password = buyer["new_password"]
 		buyerPtr.save()
-		BuyerRefreshToken.objects.filter(buyer_id=buyerPtr.id).update(is_active=False)
+		BuyerRefreshToken.objects.filter(buyer_id=buyerPtr.id).update(is_active=False, updated_at = timezone.now())
 
 	except Exception as e:
 		log.critical(e)
@@ -192,7 +194,7 @@ def post_buyer_forgot_password(request, parameters):
 
 	buyerPtr = buyerPtr[0]
 	## Invalidate all registrations with same email or mobile number
-	BuyerForgotPasswordToken.objects.filter(mobile_number=buyer["mobile_number"]).update(is_active=False)
+	BuyerForgotPasswordToken.objects.filter(mobile_number=buyer["mobile_number"]).update(is_active=False,  updated_at = timezone.now())
 
 	try:
 		newBuyerForgotPasswordToken = BuyerForgotPasswordToken()
@@ -279,7 +281,7 @@ def post_buyer_forgot_password_verify(request, parameters):
 
 		buyerPtr.password = buyer["new_password"]
 		buyerPtr.save()
-		BuyerForgotPasswordToken.objects.filter(mobile_number=buyerForgotPasswordTokenPtr.mobile_number).update(is_active=False)
+		BuyerForgotPasswordToken.objects.filter(mobile_number=buyerForgotPasswordTokenPtr.mobile_number).update(is_active=False,  updated_at = timezone.now())
 
 		newBuyerRefreshToken = BuyerRefreshToken()
 		newBuyerRefreshToken.populateFromBuyer(buyerPtr)

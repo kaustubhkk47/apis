@@ -8,6 +8,7 @@ from address.models.state import State
 from ...serializers.buyer import *
 from ...models.businessType import *
 from django.core.paginator import Paginator
+from django.utils import timezone
 
 import logging
 log = logging.getLogger("django")
@@ -183,7 +184,7 @@ def delete_buyer_purchasing_state(request, parameters):
 		return customResponse(400, error_code=6,  error_details= "Invalid id for buyer purchasing_state sent")
 
 	try:
-		buyerPurchasingStatePtr.update(delete_status = True)
+		buyerPurchasingStatePtr.update(delete_status = True, updated_at = timezone.now())
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
@@ -208,7 +209,7 @@ def delete_buyer_buys_from(request, parameters):
 		return customResponse(400, error_code=6,  error_details="Invalid id for buyer buys_from sent")
 
 	try:
-		buyerBuysFromPtr.update(delete_status = True)
+		buyerBuysFromPtr.update(delete_status = True, updated_at = timezone.now())
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()

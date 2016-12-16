@@ -5,6 +5,7 @@ from ...models.buyer import *
 from ...serializers.buyer import *
 import logging
 log = logging.getLogger("django")
+from django.utils import timezone
 
 def post_new_buyer_registration(request, parameters):
 	try:
@@ -24,8 +25,8 @@ def post_new_buyer_registration(request, parameters):
 
 	## Invalidate all registrations with same email or mobile number
 
-	BuyerRegistration.objects.filter(email=buyer_registration["email"]).update(is_active=False)
-	BuyerRegistration.objects.filter(mobile_number=buyer_registration["mobile_number"]).update(is_active=False)
+	BuyerRegistration.objects.filter(email=buyer_registration["email"]).update(is_active=False, updated_at = timezone.now())
+	BuyerRegistration.objects.filter(mobile_number=buyer_registration["mobile_number"]).update(is_active=False, updated_at = timezone.now())
 
 	try:
 		newBuyerRegistration = BuyerRegistration()

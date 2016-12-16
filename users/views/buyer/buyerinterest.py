@@ -8,6 +8,7 @@ from address.models.state import State
 from ...serializers.buyer import *
 from ...models.businessType import *
 from django.core.paginator import Paginator
+from django.utils import timezone
 
 import logging
 log = logging.getLogger("django")
@@ -90,7 +91,7 @@ def post_new_buyer_interest(request, parameters):
 
 		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
 
-		BuyerProducts.objects.filter(id__in=intersectingProducts[1]).update(buyer_interest=newBuyerInterest,delete_status=False)
+		BuyerProducts.objects.filter(id__in=intersectingProducts[1]).update(buyer_interest=newBuyerInterest,delete_status=False, updated_at = timezone.now())
 
 	except Exception as e:
 		log.critical(e)
@@ -154,9 +155,9 @@ def update_buyer_interest(request, parameters):
 
 		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
 
-		BuyerProducts.objects.filter(id__in=intersectingProducts[1]).update(buyer_interest=buyerInterestPtr,delete_status=False)
+		BuyerProducts.objects.filter(id__in=intersectingProducts[1]).update(buyer_interest=buyerInterestPtr,delete_status=False, updated_at = timezone.now())
 
-		BuyerProducts.objects.filter(id__in=intersectingProducts[2],responded=0).update(delete_status=True, buyer_interest_id=None)
+		BuyerProducts.objects.filter(id__in=intersectingProducts[2],responded=0).update(delete_status=True, buyer_interest_id=None, updated_at = timezone.now())
 
 	except Exception as e:
 		log.critical(e)

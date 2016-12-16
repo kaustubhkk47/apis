@@ -98,7 +98,7 @@ def post_new_order_shipment(request):
 		newOrderShipment.product_count = len(allOrderItems)
 		newOrderShipment.save()
 
-		allOrderItems.update(current_status=8, order_shipment_id=newOrderShipment.id)
+		allOrderItems.update(current_status=8, order_shipment_id=newOrderShipment.id, updated_at =timezone.now())
 
 		OrderItemPtr = OrderItem.objects.filter(suborder_id= subOrderPtr.id, current_status__in=[0,1,2])
 

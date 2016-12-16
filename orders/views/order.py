@@ -201,10 +201,12 @@ def update_order(request,parameters={}):
 	try:
 		orderPtr.order_status = 1
 		orderPtr.save()
+
+		nowTime = timezone.now()
 		
-		OrderItem.objects.filter(suborder__order_id = orderPtr.id, current_status=0).update(current_status=1)
+		OrderItem.objects.filter(suborder__order_id = orderPtr.id, current_status=0).update(current_status=1, updated_at = nowTime)
 		allSubOrders = SubOrder.objects.filter(order_id = orderPtr.id,suborder_status=0)
-		allSubOrders.update(suborder_status=1)
+		allSubOrders.update(suborder_status=1, updated_at=nowTime)
 
 		buyerPtr = orderPtr.buyer
 		#buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))
@@ -256,9 +258,9 @@ def cancel_order(request,parameters={}):
 		orderPtr.cancellation_time = nowDateTime
 		orderPtr.save()
 
-		OrderItem.objects.filter(suborder__order_id = orderPtr.id).update(current_status=4, cancellation_time=nowDateTime)
+		OrderItem.objects.filter(suborder__order_id = orderPtr.id).update(current_status=4, cancellation_time=nowDateTime, updated_at = nowDateTime)
 		allSubOrders = SubOrder.objects.filter(order_id = orderPtr.id)
-		allSubOrders.update(suborder_status=-1, cancellation_time=nowDateTime)
+		allSubOrders.update(suborder_status=-1, cancellation_time=nowDateTime, updated_at = nowDateTime)
 
 		buyerPtr = orderPtr.buyer
 		#buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyerPtr.id))

@@ -197,6 +197,7 @@ def checkout_new_order(checkoutPtr, parameters):
 
 		subCarts = SubCart.objects.filter(cart=cartPtr, product_count__gt=0, status=0)
 
+		nowTime = timezone.now()
 
 		for subCartPtr in subCarts:
 			newSubOrder = SubOrder(order=newOrder)
@@ -210,7 +211,7 @@ def checkout_new_order(checkoutPtr, parameters):
 				newOrderItem.populateDataFromCartItem(cartItemPtr)
 				newOrderItem.save()
 
-			cartItems.update(status=2)
+			cartItems.update(status=2,updated_at = nowTime)
 
 		newBuyerPayment = BuyerPayment(order = newOrder)
 		newBuyerPayment.populateFromCheckout(checkoutPtr, cartPtr)
@@ -219,7 +220,7 @@ def checkout_new_order(checkoutPtr, parameters):
 		cartPtr.status = 1
 		cartPtr.save()
 
-		subCarts.update(status = 1)
+		subCarts.update(status = 1, updated_at = nowTime)
 	
 		sendOrderMail(newOrder)
 		return serializeOrder(newOrder)

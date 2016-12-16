@@ -111,7 +111,7 @@ def cancel_suborder(request):
 		subOrderPtr.cancellation_time = nowDateTime
 		subOrderPtr.save()
 
-		OrderItem.objects.filter(suborder_id = subOrderPtr.id).update(current_status=4, cancellation_time=nowDateTime)
+		OrderItem.objects.filter(suborder_id = subOrderPtr.id).update(current_status=4, cancellation_time=nowDateTime, updated_at = timezone.now())
 
 		isOrderCancelled = 1
 

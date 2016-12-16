@@ -8,6 +8,7 @@ from address.models.state import State
 from ...serializers.buyer import *
 from ...models.businessType import *
 from django.core.paginator import Paginator
+from django.utils import timezone
 
 import logging
 log = logging.getLogger("django")
@@ -163,7 +164,7 @@ def post_new_buyer_product(request, parameters):
 		
 		BuyerProducts.objects.bulk_create(buyerProductsToCreate,batch_size=4000)
 
-		BuyerProducts.objects.filter(id__in=buyerProductsToUpdate).update(is_active=True,delete_status=False)
+		BuyerProducts.objects.filter(id__in=buyerProductsToUpdate).update(is_active=True,delete_status=False, updated_at = timezone.now())
 
 	except Exception as e:
 		log.critical(e)
@@ -289,9 +290,9 @@ def update_buyer_product(request, parameters):
 					if not "has_swiped" in buyer_product_populator:
 						buyer_product_populator["has_swiped"] = 0
 					if buyer_product_populator["response_code"] == 3:
-						BuyerProductResponsePtr.update(response_code=1, has_swiped=buyer_product_populator["has_swiped"])
+						BuyerProductResponsePtr.update(response_code=1, has_swiped=buyer_product_populator["has_swiped"],  updated_at = timezone.now())
 					elif buyer_product_populator["response_code"] == 4:
-						BuyerProductResponsePtr.update(response_code=2, has_swiped=buyer_product_populator["has_swiped"])
+						BuyerProductResponsePtr.update(response_code=2, has_swiped=buyer_product_populator["has_swiped"], updated_at = timezone.now())
 				except Exception as e:
 					pass
 
@@ -327,7 +328,7 @@ def update_buyer_product_whatsapp(request, parameters):
 
 	try:
 		
-		buyerProductPtr.update(shared_on_whatsapp=True)
+		buyerProductPtr.update(shared_on_whatsapp=True,  updated_at = timezone.now())
 
 	except Exception as e:
 		log.critical(e)
@@ -446,13 +447,13 @@ def master_update_buyer_product(request):
 		log.critical("master_update_buyer_product 6 reached")
 
 		for row in middleSet:
-			BuyerProducts.objects.filter(id__in=row[1]).update(buyer_interest_id=row[0],delete_status=False)
+			BuyerProducts.objects.filter(id__in=row[1]).update(buyer_interest_id=row[0],delete_status=False,  updated_at = timezone.now())
 		del(middleSet)
 		log.critical("master_update_buyer_product 7 reached")
-		BuyerProducts.objects.filter(id__in=rightSet).update(delete_status=True, buyer_interest_id=None)
+		BuyerProducts.objects.filter(id__in=rightSet).update(delete_status=True, buyer_interest_id=None, updated_at = timezone.now())
 		del(rightSet)
 		log.critical("master_update_buyer_product 8 reached")
-		filterProducts(productParameters).update(new_in_product_matrix=False)
+		filterProducts(productParameters).update(new_in_product_matrix=False, updated_at = timezone.now())
 		log.critical("master_update_buyer_product 9 reached")
 
 	except Exception as e:

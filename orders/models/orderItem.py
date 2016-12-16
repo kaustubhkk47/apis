@@ -6,6 +6,7 @@ from catalog.models.productLot import *
 #from .subOrder import SubOrder
 #from .orderShipment import OrderShipment
 #from .payments import SellerPayment
+from django.utils import timezone
 
 from catalog.models.product import Product
 
@@ -119,7 +120,7 @@ def validateOrderItemStatus(status, current_status):
 
 def update_order_item_status(orderShipmentID, status):
 
-	orderItemQuerySet = OrderItem.objects.filter(order_shipment_id =orderShipmentID).update(current_status = status)
+	orderItemQuerySet = OrderItem.objects.filter(order_shipment_id =orderShipmentID).update(current_status = status, updated_at = timezone.now())
 
 def filterOrderItem(orderItemParameters):
 	orderItems = OrderItem.objects.all().select_related('product')
