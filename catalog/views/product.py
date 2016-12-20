@@ -30,7 +30,7 @@ def get_product_details(request, parameters = {}):
 		else:
 			# Might have to change in case consumer website is made
 			parameters["product_verification"] = True
-			parameters["product_show_online"] = True
+			#parameters["product_show_online"] = True
 		
 		products = filterProducts(parameters)
 

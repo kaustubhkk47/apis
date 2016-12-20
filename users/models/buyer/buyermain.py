@@ -21,7 +21,7 @@ class Buyer(models.Model):
 
 	store_slug = models.TextField(blank=True)
 	store_url = models.TextField(blank=True)
-	store_global_discount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null = True)
+	store_global_margin = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null = True)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -185,8 +185,8 @@ def validateBuyerData(buyer, oldbuyer, is_new):
 			buyer["whatsapp_number"] = oldbuyer.whatsapp_number
 	if not "whatsapp_sharing_active" in buyer or not validate_bool(buyer["whatsapp_sharing_active"]):
 		buyer["whatsapp_sharing_active"] = oldbuyer.whatsapp_sharing_active
-	if not "store_global_discount" in buyer or not validate_percent(buyer["store_global_discount"]):
-		buyer["store_global_discount"] = oldbuyer.store_global_discount
+	if not "store_global_margin" in buyer or not validate_percent(buyer["store_global_margin"], False):
+		buyer["store_global_margin"] = oldbuyer.store_global_margin
 
 	if is_new == 1 and flag == 1:
 		return False
@@ -244,7 +244,7 @@ def populateBuyer(buyerPtr, buyer):
 	buyerPtr.gender = buyer["gender"]
 	buyerPtr.save()
 	buyerPtr.store_url = "{}-{}".format(buyerPtr.store_slug,buyerPtr.id)
-	buyerPtr.store_global_discount = buyer["store_global_discount"]
+	buyerPtr.store_global_margin = Decimal(buyer["store_global_margin"])
 	buyerPtr.save()
 	buyerPtr.whatsapp_contact_name = str(buyerPtr.id) + " Wholdus " + buyerPtr.name
 

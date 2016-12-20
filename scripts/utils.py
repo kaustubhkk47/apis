@@ -131,12 +131,12 @@ def validate_number(x):
 		return False
 	return True
 
-def validate_percent(x):
+def validate_percent(x, limitHundred=True):
 	try:
 		x = float(x)
 	except Exception, e:
 		return False
-	if 0 <= x <= 100:
+	if limitHundred and 0 <= x <= 100:
 		return True
 	else:
 		return False

@@ -83,7 +83,7 @@ class BuyerProductResponse(models.Model):
 	#0: Tinder, 1 : category_page, 2 : product_page, 3 : shortlist, 4 : homepage, 
 	responded_from = models.IntegerField(default=0)
 
-	store_discount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null = True,default = None)
+	store_margin = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null = True,default = None)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -98,9 +98,9 @@ class BuyerProductResponse(models.Model):
 
 	def validateBuyerProductResponseData(self, buyer_product_response):
 		flag = 0
-		if not "store_discount" in buyer_product_response or not validate_percent(buyer_product_response["store_discount"]):
+		if not "store_margin" in buyer_product_response or not validate_percent(buyer_product_response["store_margin"], False):
 			flag = 1
-			buyer_product_response["store_discount"] = self.store_discount
+			buyer_product_response["store_margin"] = self.store_margin
 
 		if flag == 1:
 			return False
@@ -108,7 +108,7 @@ class BuyerProductResponse(models.Model):
 		return True
 
 	def populateBuyerProductResponse(self, buyer_product_response):
-		self.store_discount = Decimal(buyer_product_response["store_discount"])
+		self.store_margin = Decimal(buyer_product_response["store_margin"])
 
 class BuyerProductResponseAdmin(admin.ModelAdmin):
 	search_fields = ["buyer_id", "buyer__name", "buyer__company_name", "buyer__mobile_number"]
@@ -227,6 +227,10 @@ def validateBuyerProductData(buyer_product, old_buyer_product, is_new, buyer_pro
 		return False
 
 	if "responded" in buyer_product and validate_integer(buyer_product["responded"]):
+
+		if "store_margin" in buyer_product and validate_percent(Decimal(buyer_product["store_margin"]),False):
+			buyer_product_populator["store_margin"] = buyer_product["store_margin"]
+			
 		if int(buyer_product["responded"]) == 1:
 			buyer_product_populator["responded"] = 1
 			if old_buyer_product.responded == 2:
@@ -269,6 +273,8 @@ def populateBuyerProductResponse(buyerProductResponsePtr,buyerProductResponse):
 		buyerProductResponsePtr.has_swiped = int(buyerProductResponse["has_swiped"])
 	if "responded_from" in buyerProductResponse:
 		buyerProductResponsePtr.responded_from = int(buyerProductResponse["responded_from"])
+	if "store_margin" in buyerProductResponse:
+		buyerProductResponsePtr.store_margin = Decimal(buyerProductResponse["store_margin"])
 
 def filterBuyerSharedProductID(parameters = {}):
 
@@ -284,7 +290,7 @@ def filterBuyerSharedProductID(parameters = {}):
 
 def filterBuyerProducts(parameters = {}):
 
-	buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
+	buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True)
 
 	if "buyerProductsArr" in parameters:
 		buyerProducts = buyerProducts.filter(id__in=parameters["buyerProductsArr"])

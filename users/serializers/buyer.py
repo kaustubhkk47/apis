@@ -28,7 +28,7 @@ def serialize_buyer(buyer_entry, parameters = {}):
 	buyer["updated_at"] = buyer_entry.updated_at
 	buyer["buyer_panel_url"] = str(buyer_entry.id) + "-" + str(int(time.mktime(buyer_entry.created_at.timetuple())))
 	buyer["store_url"] = buyer_entry.store_url
-	buyer["store_global_discount"] = buyer_entry.store_global_discount
+	buyer["store_global_margin"] = buyer_entry.store_global_margin
 	
 	if "buyer_details_details" in parameters and parameters["buyer_details_details"] == 1 and hasattr(buyer_entry,'buyerdetails'):
 		buyer_details = {}
@@ -283,9 +283,10 @@ def serialize_buyer_product_response(buyer_product_entry, parameters = {}):
 	buyer_product["buyerproductID"] = buyer_product_entry.buyer_product_id
 	buyer_product["response_code"] = buyer_product_entry.response_code
 	buyer_product["has_swiped"] = buyer_product_entry.has_swiped
+	buyer_product["responded_from"] = buyer_product_entry.responded_from
 	buyer_product["created_at"] = buyer_product_entry.created_at
 	buyer_product["updated_at"] = buyer_product_entry.updated_at
-	buyer_product["store_discount"] = buyer_product_entry.store_discount
+	buyer_product["store_margin"] = buyer_product_entry.store_margin
 	
 	buyer_product["product"] = serialize_product(buyer_product_entry.product, parameters)
 

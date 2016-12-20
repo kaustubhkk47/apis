@@ -35,6 +35,7 @@ def get_buyer_product_details(request, parameters = {}):
 	try:
 		parameters["buyer_product_delete_status"] = False
 		parameters["buyer_interest_active"] = True
+		parameters["responded"] = 0
 		buyerProducts = filterBuyerProducts(parameters)
 
 		paginator = Paginator(buyerProducts, parameters["itemsPerPage"])
