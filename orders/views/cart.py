@@ -122,40 +122,41 @@ def post_new_cart_item(request, parameters):
 		return customResponse(400, error_code=6, error_details= "Zero lots sent for new cart item")
 
 	try:
-		initialPrices = cartItemPtr.getPrices()
-		cartItemPtr.populateCartItemData(cartitem)
-		finalPrices =  cartItemPtr.getPrices()
+		if not cartItemPtr.lots ==  int(cartitem["lots"]):
+			initialPrices = cartItemPtr.getPrices()
+			cartItemPtr.populateCartItemData(cartitem)
+			finalPrices =  cartItemPtr.getPrices()
 		
-		cartPtr.populateCartData(initialPrices, finalPrices)
-		subCartPtr.populateSubCartData(initialPrices, finalPrices)
+			cartPtr.populateCartData(initialPrices, finalPrices)
+			subCartPtr.populateSubCartData(initialPrices, finalPrices)
 
-		if subCartPtr.shipping_charge < 175:
-			extra_shipping_charge = (175-subCartPtr.shipping_charge)
-			cartPtr.shipping_charge += extra_shipping_charge
-			cartPtr.final_price += extra_shipping_charge
-			subCartPtr.shipping_charge += extra_shipping_charge
-			subCartPtr.final_price += extra_shipping_charge
+			if subCartPtr.shipping_charge < 175:
+				extra_shipping_charge = (175-subCartPtr.shipping_charge)
+				cartPtr.shipping_charge += extra_shipping_charge
+				cartPtr.final_price += extra_shipping_charge
+				subCartPtr.shipping_charge += extra_shipping_charge
+				subCartPtr.final_price += extra_shipping_charge
 
-		cartPtr.save()
-		
-		subCartPtr.cart = cartPtr
-		subCartPtr.save()
-
-		cartItemPtr.subcart = subCartPtr
-		cartItemPtr.save()
-
-		if not CartItem.objects.filter(subcart=subCartPtr, status=0).exists():
-			extra_shipping_charge = subCartPtr.shipping_charge
-			cartPtr.shipping_charge -= extra_shipping_charge
-			cartPtr.final_price -= extra_shipping_charge
-			subCartPtr.shipping_charge -= extra_shipping_charge
-			subCartPtr.final_price -= extra_shipping_charge
 			cartPtr.save()
+		
+			subCartPtr.cart = cartPtr
 			subCartPtr.save()
 
-		cartItemHistoryPtr = CartItemHistory()
-		cartItemHistoryPtr.populateCartItemHistoryData(cartItemPtr)
-		cartItemHistoryPtr.save()
+			cartItemPtr.subcart = subCartPtr
+			cartItemPtr.save()
+
+			if not CartItem.objects.filter(subcart=subCartPtr, status=0).exists():
+				extra_shipping_charge = subCartPtr.shipping_charge
+				cartPtr.shipping_charge -= extra_shipping_charge
+				cartPtr.final_price -= extra_shipping_charge
+				subCartPtr.shipping_charge -= extra_shipping_charge
+				subCartPtr.final_price -= extra_shipping_charge
+				cartPtr.save()
+				subCartPtr.save()
+
+			cartItemHistoryPtr = CartItemHistory()
+			cartItemHistoryPtr.populateCartItemHistoryData(cartItemPtr)
+			cartItemHistoryPtr.save()
 
 	except Exception as e:
 		log.critical(e)
