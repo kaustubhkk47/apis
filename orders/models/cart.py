@@ -33,8 +33,8 @@ class Cart(models.Model):
 		self.product_count +=  finalPrices["product_count"] - initialPrices["product_count"]
 		self.retail_price +=  finalPrices["retail_price"] - initialPrices["retail_price"]
 		self.calculated_price +=  finalPrices["calculated_price"] - initialPrices["calculated_price"]
-		self.shipping_charge +=  finalPrices["shipping_charge"] - initialPrices["shipping_charge"]
-		self.final_price +=  finalPrices["final_price"] - initialPrices["final_price"]
+		self.shipping_charge +=  finalPrices["shipping_charge"] - initialPrices["shipping_charge"] + finalPrices["extra_shipping_charge"] - initialPrices["extra_shipping_charge"]
+		self.final_price +=  finalPrices["final_price"] - initialPrices["final_price"]+ finalPrices["extra_shipping_charge"] - initialPrices["extra_shipping_charge"]
 
 	def setCODPaymentMethod(self, CODextracost):
 		self.cod_charge = Decimal(CODextracost*float(self.calculated_price))
@@ -71,6 +71,7 @@ class SubCart(models.Model):
 	calculated_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 	
 	shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+	extra_shipping_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 	cod_charge = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 	final_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
@@ -91,8 +92,14 @@ class SubCart(models.Model):
 		self.product_count +=  finalPrices["product_count"] - initialPrices["product_count"]
 		self.retail_price +=  finalPrices["retail_price"] - initialPrices["retail_price"]
 		self.calculated_price +=  finalPrices["calculated_price"] - initialPrices["calculated_price"]
-		self.shipping_charge +=  finalPrices["shipping_charge"] - initialPrices["shipping_charge"]
-		self.final_price +=  finalPrices["final_price"] - initialPrices["final_price"]
+		self.shipping_charge +=  finalPrices["shipping_charge"] - initialPrices["shipping_charge"] - self.extra_shipping_charge
+		self.final_price +=  finalPrices["final_price"] - initialPrices["final_price"] - self.extra_shipping_charge
+		if self.shipping_charge < 175 and self.product_count>0:
+			self.extra_shipping_charge = (175-self.shipping_charge)
+			self.shipping_charge += self.extra_shipping_charge
+			self.final_price += self.extra_shipping_charge
+		else:
+			self.extra_shipping_charge = 0
 
 	def setCODPaymentMethod(self, CODextracost):
 		self.cod_charge = Decimal(CODextracost*float(self.calculated_price))
@@ -140,7 +147,8 @@ class CartItem(models.Model):
 	def __unicode__(self):
 		return "{} - {} - {}".format(str(self.buyer), str(self.product), self.pieces)
 
-	def validateCartItemData(self, cartitem):
+	@staticmethod
+	def validateCartItemData(cartitem):
 		if not "lots" in cartitem or not validate_integer(cartitem["lots"]):
 			return False
 		if not "added_from" in cartitem or not validate_integer(cartitem["added_from"]):
@@ -262,7 +270,7 @@ def filterCartItem(parameters):
 
 def filterCarts(parameters):
 
-	carts = Cart.objects.filter(status=0)
+	carts = Cart.objects.filter(status=0, pieces__gt=0)
 
 	if "buyersArr" in parameters:
 		carts = carts.filter(buyer_id__in=parameters["buyersArr"])
@@ -271,6 +279,6 @@ def filterCarts(parameters):
 
 def filterSubCarts(parameters):
 
-	subcarts = SubCart.objects.filter(status=0)
+	subcarts = SubCart.objects.filter(status=0, pieces__gt=0)
 
 	return subcarts

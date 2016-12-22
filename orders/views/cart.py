@@ -73,6 +73,9 @@ def post_new_cart_item(request, parameters):
 	if not "productID" in cartitem or not validate_integer(cartitem["productID"]):
 		return customResponse(400, error_code=5, error_details= "Product id not sent")
 
+	if not CartItem.validateCartItemData(cartitem):
+		return customResponse(400, error_code=5, error_details= " Invalid data for cart item sent")
+
 	productParameters = {}
 	productParameters["product_show_online"] = True
 	productParameters["product_verification"] = True
@@ -115,8 +118,7 @@ def post_new_cart_item(request, parameters):
 				isCartItemNew = 0
 				cartItemPtr = cartItemPtr[0]
 
-	if not cartItemPtr.validateCartItemData(cartitem):
-		return customResponse(400, error_code=5, error_details= " Invalid data for cart item sent")
+	
 
 	if isCartItemNew == 1 and int(cartitem["lots"]) == 0:
 		return customResponse(400, error_code=6, error_details= "Zero lots sent for new cart item")
@@ -127,15 +129,11 @@ def post_new_cart_item(request, parameters):
 			cartItemPtr.populateCartItemData(cartitem)
 			finalPrices =  cartItemPtr.getPrices()
 		
-			cartPtr.populateCartData(initialPrices, finalPrices)
+			initialPrices["extra_shipping_charge"] = subCartPtr.extra_shipping_charge
 			subCartPtr.populateSubCartData(initialPrices, finalPrices)
+			finalPrices["extra_shipping_charge"] = subCartPtr.extra_shipping_charge
 
-			if subCartPtr.shipping_charge < 175:
-				extra_shipping_charge = (175-subCartPtr.shipping_charge)
-				cartPtr.shipping_charge += extra_shipping_charge
-				cartPtr.final_price += extra_shipping_charge
-				subCartPtr.shipping_charge += extra_shipping_charge
-				subCartPtr.final_price += extra_shipping_charge
+			cartPtr.populateCartData(initialPrices, finalPrices)
 
 			cartPtr.save()
 		
@@ -144,15 +142,6 @@ def post_new_cart_item(request, parameters):
 
 			cartItemPtr.subcart = subCartPtr
 			cartItemPtr.save()
-
-			if not CartItem.objects.filter(subcart=subCartPtr, status=0).exists():
-				extra_shipping_charge = subCartPtr.shipping_charge
-				cartPtr.shipping_charge -= extra_shipping_charge
-				cartPtr.final_price -= extra_shipping_charge
-				subCartPtr.shipping_charge -= extra_shipping_charge
-				subCartPtr.final_price -= extra_shipping_charge
-				cartPtr.save()
-				subCartPtr.save()
 
 			cartItemHistoryPtr = CartItemHistory()
 			cartItemHistoryPtr.populateCartItemHistoryData(cartItemPtr)
@@ -164,7 +153,7 @@ def post_new_cart_item(request, parameters):
 		return customResponse(500, error_code = 1)
 	else:
 		closeDBConnection()
-		return customResponse(200, {"carts": serializeCart(cartItemPtr.subcart.cart, parameters)})
+		return customResponse(200, {"carts": parseCart(filterCarts(parameters),parameters)})
 
 
 
