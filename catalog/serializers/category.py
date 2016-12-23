@@ -5,6 +5,7 @@ def serialize_categories(categoriesItem, parameters = {}):
 	category["name"]= categoriesItem.name
 	category["display_name"]= categoriesItem.display_name
 	category["slug"]= categoriesItem.slug
+	category["image_url"]= categoriesItem.image_url
 	category["created_at"]= categoriesItem.created_at
 	category["updated_at"]= categoriesItem.updated_at
 	category["categoryID"]= categoriesItem.id

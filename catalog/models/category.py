@@ -11,6 +11,8 @@ class Category(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	image_url = models.TextField(blank=True)
+
 	priority = models.PositiveIntegerField(default=0)
 
 	delete_status = models.BooleanField(default=False)
