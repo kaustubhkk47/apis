@@ -54,11 +54,11 @@ def get_cart_item_details(request, parameters):
 def post_new_cart_item(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
-		cartitem = convert_keys_to_string(json.loads(requestbody))
+		cartitemDict = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
 		return customResponse(400, error_code=4)
 
-	if not len(cartitem):
+	if not len(cartitemDict):
 		return customResponse(400, error_code=5)
 
 	buyerID = 0
@@ -70,82 +70,55 @@ def post_new_cart_item(request, parameters):
 	except Exception as e:
 		return customResponse(400, error_code=6, error_details= "Invalid buyer id sent")
 
-	if not "productID" in cartitem or not validate_integer(cartitem["productID"]):
-		return customResponse(400, error_code=5, error_details= "Product id not sent")
+	if not "products" in cartitemDict:
+		cartitemDict["products"] = [cartitemDict.copy()]
 
-	if not CartItem.validateCartItemData(cartitem):
+	cartProducts = cartitemDict["products"]
+
+	productsHash = {}
+	productIDarr = []
+
+	if not CartItem.validateCartItemData(cartProducts, productsHash, productIDarr):
 		return customResponse(400, error_code=5, error_details= " Invalid data for cart item sent")
 
 	productParameters = {}
 	productParameters["product_show_online"] = True
 	productParameters["product_verification"] = True
-	productParameters["productsArr"] = [int(cartitem["productID"])]
-	productPtr = filterProducts(productParameters)
+	productParameters["productsArr"] = productIDarr
+	allProducts = filterProducts(productParameters)
 
-	if len(productPtr) == 0:
+	if len(allProducts) == 0:
 		return customResponse(400, error_code=6, error_details= " Invalid product id sent")
 
-	productPtr = productPtr[0]
-
-	isCartNew = 1
-	isSubCartNew = 1
-	isCartItemNew = 1
-
-	cartPtr = Cart.objects.filter(buyer_id=buyerID, status = 0)
-
-	if len(cartPtr) == 0:
-		cartPtr = Cart(buyer_id = buyerID)
-		subCartPtr = SubCart(seller_id =productPtr.seller_id)
-		cartItemPtr = CartItem(buyer_id = buyerID, product = productPtr)
-	else:
-		isCartNew = 0
-		cartPtr = cartPtr[0]
-
-		subCartPtr = SubCart.objects.filter(cart=cartPtr, seller_id = productPtr.seller_id)
-
-		if len(subCartPtr) == 0:
-			subCartPtr = SubCart(seller_id=productPtr.seller_id)
-			cartItemPtr = CartItem(buyer_id = buyerID, product = productPtr)
-		else:
-			isSubCartNew = 0
-			subCartPtr = subCartPtr[0]
-
-			cartItemPtr = CartItem.objects.filter(buyer_id=buyerID, product = productPtr, status = 0)
-
-			if len(cartItemPtr) == 0:
-				cartItemPtr = CartItem(buyer_id = buyerID, product = productPtr)
-			else:
-				isCartItemNew = 0
-				cartItemPtr = cartItemPtr[0]
-
+	cartPtr, cartCreated = Cart.objects.get_or_create(buyer_id=buyerID, status = 0)
 	
-
-	if isCartItemNew == 1 and int(cartitem["lots"]) == 0:
-		return customResponse(400, error_code=6, error_details= "Zero lots sent for new cart item")
-
 	try:
-		if not cartItemPtr.lots ==  int(cartitem["lots"]):
-			initialPrices = cartItemPtr.getPrices()
-			cartItemPtr.populateCartItemData(cartitem)
-			finalPrices =  cartItemPtr.getPrices()
-		
-			initialPrices["extra_shipping_charge"] = subCartPtr.extra_shipping_charge
-			subCartPtr.populateSubCartData(initialPrices, finalPrices)
-			finalPrices["extra_shipping_charge"] = subCartPtr.extra_shipping_charge
+		for productPtr in allProducts:
+			
+			cartitem = cartProducts[productsHash[productPtr.id]]
+			subCartPtr, cartItemCreated = SubCart.objects.get_or_create(cart_id=cartPtr.id, seller_id = productPtr.seller_id, status = 0)
+			cartItemPtr , cartItemCreated= CartItem.objects.get_or_create(subcart_id = subCartPtr.id, buyer_id=buyerID, product = productPtr, status = 0)
 
-			cartPtr.populateCartData(initialPrices, finalPrices)
+			if not cartItemPtr.lots ==  int(cartitem["lots"]):
+				initialPrices = cartItemPtr.getPrices()
+				cartItemPtr.populateCartItemData(cartitem)
+				finalPrices =  cartItemPtr.getPrices()
 
-			cartPtr.save()
-		
-			subCartPtr.cart = cartPtr
-			subCartPtr.save()
+				initialPrices["extra_shipping_charge"] = subCartPtr.extra_shipping_charge
+				subCartPtr.populateSubCartData(initialPrices, finalPrices)
+				finalPrices["extra_shipping_charge"] = subCartPtr.extra_shipping_charge
 
-			cartItemPtr.subcart = subCartPtr
-			cartItemPtr.save()
+				cartPtr.populateCartData(initialPrices, finalPrices)	
 
-			cartItemHistoryPtr = CartItemHistory()
-			cartItemHistoryPtr.populateCartItemHistoryData(cartItemPtr)
-			cartItemHistoryPtr.save()
+				subCartPtr.save()
+
+				cartItemPtr.save()
+
+				cartItemHistoryPtr = CartItemHistory()
+				cartItemHistoryPtr.populateCartItemHistoryData(cartItemPtr)
+				cartItemHistoryPtr.save()
+
+		cartPtr.save()
 
 	except Exception as e:
 		log.critical(e)

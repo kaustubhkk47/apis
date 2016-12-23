@@ -148,11 +148,22 @@ class CartItem(models.Model):
 		return "{} - {} - {}".format(str(self.buyer), str(self.product), self.pieces)
 
 	@staticmethod
-	def validateCartItemData(cartitem):
-		if not "lots" in cartitem or not validate_integer(cartitem["lots"]):
-			return False
-		if not "added_from" in cartitem or not validate_integer(cartitem["added_from"]):
-			cartitem["added_from"] = 0
+	def validateCartItemData(cartProducts, productsHash, productIDarr):
+
+		for cartitem in cartProducts:
+			if not "productID" in cartitem or not validate_integer(cartitem["productID"]):
+				return False
+
+			productID = int(cartitem["productID"])
+
+			if not "lots" in cartitem or not validate_integer(cartitem["lots"]):
+				return False
+			if not "added_from" in cartitem or not validate_integer(cartitem["added_from"]):
+				cartitem["added_from"] = 0
+
+			productsHash[productID] = len(productsHash)
+			productIDarr.append(productID)
+
 		return True
 
 	def populateCartItemData(self, cartitem):
