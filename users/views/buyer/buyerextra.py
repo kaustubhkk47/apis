@@ -31,6 +31,22 @@ def get_buyer_purchasing_state_details(request,parameters = {}):
 		log.critical(e)
 		return customResponse(500)
 
+def get_buyer_store_url_exists_details(request, parameters):
+	try:
+		store_url = request.GET.get("store_url_exists", "")
+		if store_url == None or len(store_url) < 6:
+			return customResponse(400, error_code=6, error_details=  "Invalid url sent")
+		store_url_exists = Buyer.objects.filter(store_url = store_url).exists()
+		response = {
+			"store_url_exists" : store_url_exists
+		}
+		closeDBConnection()
+		return customResponse(200, response)
+	except Exception as e:
+		log.critical(e)
+		return customResponse(500)
+
+
 def get_buyer_buys_from_details(request,parameters = {}):
 	try:
 		buyerBuysFrom = filterBuyerBuysFrom(parameters)
@@ -167,6 +183,41 @@ def post_new_buyer_panel_tracking(request, parameters):
 	else:
 		closeDBConnection()
 		return customResponse(200, {"buyer_product_tracking":"successfully added"})
+
+def update_buyer_store_url(request, parameters):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse(400, error_code=4)
+
+	buyer["buyerID"] = parameters["buyersArr"][0]
+
+	buyerPtr = Buyer.objects.filter(id=int(buyer["buyerID"]), delete_status=False)
+
+	if not buyerPtr.exists():
+		return customResponse(400, error_code=6, error_details= "Invalid id for buyer sent")
+
+	buyerPtr = buyerPtr[0]
+
+	if not buyerPtr.validateBuyerStoreUrlData(buyer):
+		return customResponse(400, error_code=5, error_details= "Invalid data sent")
+
+	if Buyer.objects.exclude(id=int(buyer["buyerID"])).filter(store_url = buyer["store_url"]).exists():
+		return customResponse(400, error_code=6, error_details= "Store url already exists")
+
+	try:
+		buyerPtr.store_url = buyer["store_url"]
+		buyerPtr.store_active = int(buyer["store_active"])
+		buyerPtr.save()
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse(500, error_code = 1)
+	else:
+		closeDBConnection()
+		return customResponse(200, {"buyer_store_url":"successfully updated"})
 
 def delete_buyer_purchasing_state(request, parameters):
 	try:

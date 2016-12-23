@@ -21,6 +21,7 @@ class Buyer(models.Model):
 
 	store_slug = models.TextField(blank=True)
 	store_url = models.TextField(blank=True)
+	store_active = models.BooleanField(default=False)
 	store_global_margin = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null = True)
 
 	created_at = models.DateTimeField(auto_now_add=True)
@@ -47,6 +48,14 @@ class Buyer(models.Model):
 			return BuyerAddressHistory.objects.filter(buyer=self).latest('created_at')
 		except Exception, e:
 			return None
+
+	@staticmethod
+	def validateBuyerStoreUrlData(data):
+		if not "store_url" in data or data["store_url"] == None or len(data["store_url"]) < 6:
+			return False
+		if not "store_active" in data or not validate_bool(data["store_active"]):
+			return False
+		return True
 
 class BuyerAddress(models.Model):
 	buyer = models.ForeignKey('users.Buyer')
@@ -243,7 +252,7 @@ def populateBuyer(buyerPtr, buyer):
 	buyerPtr.whatsapp_sharing_active = int(buyer["whatsapp_sharing_active"])
 	buyerPtr.gender = buyer["gender"]
 	buyerPtr.save()
-	buyerPtr.store_url = "{}-{}".format(buyerPtr.store_slug,buyerPtr.id)
+	#buyerPtr.store_url = "{}-{}".format(buyerPtr.store_slug,buyerPtr.id)
 	buyerPtr.store_global_margin = Decimal(buyer["store_global_margin"])
 	buyerPtr.save()
 	buyerPtr.whatsapp_contact_name = str(buyerPtr.id) + " Wholdus " + buyerPtr.name

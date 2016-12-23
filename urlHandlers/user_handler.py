@@ -114,6 +114,27 @@ def buyer_store_lead_details(request, version = "0"):
 
 	return customResponse(404, error_code = 7)
 
+@csrf_exempt
+def buyer_store_url_details(request, version = "0"):
+
+	version = getApiVersion(request)
+
+	parameters = populateBuyerParameters(request, {}, version)
+
+	if request.method == "GET":
+
+		if parameters["isBuyer"] == 0:
+			return customResponse(403, error_code = 8)
+
+		return buyer.get_buyer_store_url_exists_details(request,parameters)
+	elif request.method == "PUT":
+
+		if parameters["isBuyer"] == 0:
+			return customResponse(403, error_code = 8)
+		return buyer.update_buyer_store_url(request,parameters)
+
+	return customResponse(404, error_code = 7)
+
 def populateBuyerStoreParameters(request, parameters = {}, version = "0"):
 
 	parameters = populateBuyerProductParameters(request, parameters, version)
@@ -516,7 +537,7 @@ def populateBuyerIDParameters(request, parameters = {}, version = "0"):
 
 	storeUrl = request.GET.get("store_url", "")
 	try:
-		buyerPtr = Buyer.objects.get(store_url=storeUrl, delete_status=False)
+		buyerPtr = Buyer.objects.get(store_url=storeUrl, delete_status=False, store_active=True)
 	except Exception as e:
 		pass
 	else:

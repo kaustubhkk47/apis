@@ -78,6 +78,7 @@ urlpatterns += [
 	url(r'^users/buyer/buyersharedproductid/$', user_handler.buyer_shared_product_id_details),
 	url(r'^users/buyer/buyerpanel/instructionstracking/$', user_handler.buyer_panel_tracking_details),
 	url(r'^users/buyer/store/lead/$', user_handler.buyer_store_lead_details),
+	url(r'^users/buyer/store/url/$', user_handler.buyer_store_url_details),
 ]
 
 urlpatterns += [
