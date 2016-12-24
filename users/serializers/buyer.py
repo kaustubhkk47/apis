@@ -270,7 +270,14 @@ def serialize_buyer_product(buyer_product_entry, parameters = {}):
 	buyer_product["created_at"] = buyer_product_entry.created_at
 	buyer_product["updated_at"] = buyer_product_entry.updated_at
 	
-	buyer_product["product"] = serialize_product(buyer_product_entry.product, parameters)
+	if "product_details" in parameters and parameters["product_details"] == 1:
+		buyer_product["product"] = serialize_product(buyer_product_entry.product, parameters)
+	else:
+		product = {}
+		product["productID"] = buyer_product_entry.product.id
+		product["display_name"] = buyer_product_entry.product.display_name
+		product["min_price_per_unit"] = buyer_product_entry.product.min_price_per_unit
+		buyer_product["product"] = product
 
 	return buyer_product
 
@@ -288,7 +295,14 @@ def serialize_buyer_product_response(buyer_product_entry, parameters = {}):
 	buyer_product["updated_at"] = buyer_product_entry.updated_at
 	buyer_product["store_margin"] = buyer_product_entry.store_margin
 	
-	buyer_product["product"] = serialize_product(buyer_product_entry.product, parameters)
+	if "product_details" in parameters and parameters["product_details"] == 1:
+		buyer_product["product"] = serialize_product(buyer_product_entry.product, parameters)
+	else:
+		product = {}
+		product["productID"] = buyer_product_entry.product.id
+		product["display_name"] = buyer_product_entry.product.display_name
+		product["min_price_per_unit"] = buyer_product_entry.product.min_price_per_unit
+		buyer_product["product"] = product
 
 	return buyer_product
 

@@ -223,10 +223,12 @@ def validateBuyerProductData(buyer_product, old_buyer_product, is_new, buyer_pro
 			buyer_product_populator["is_active"] = int(buyer_product["is_active"])
 			return True
 
-	if old_buyer_product.is_active == 0:
-		return False
+	#if old_buyer_product.is_active == 0:
+	#	return False
 
 	if "responded" in buyer_product and validate_integer(buyer_product["responded"]):
+
+		buyer_product_populator["is_active"] = 1
 
 		if "store_margin" in buyer_product and validate_percent(Decimal(buyer_product["store_margin"]),False):
 			buyer_product_populator["store_margin"] = buyer_product["store_margin"]
@@ -235,14 +237,14 @@ def validateBuyerProductData(buyer_product, old_buyer_product, is_new, buyer_pro
 			buyer_product_populator["responded"] = 1
 			if old_buyer_product.responded == 2:
 				buyer_product_populator["response_code"] = 3
-			elif old_buyer_product.responded == 0:
+			elif old_buyer_product.responded == 0 or old_buyer_product.responded == 1:
 				buyer_product_populator["response_code"] = 1
 			else:
 				return False
 			return True
 		elif int(buyer_product["responded"]) == 2:
 			buyer_product_populator["responded"] = 2
-			if  old_buyer_product.responded == 0:
+			if  old_buyer_product.responded == 0 or old_buyer_product.responded == 2:
 				buyer_product_populator["response_code"] = 2
 			elif old_buyer_product.responded == 1:
 				buyer_product_populator["response_code"] = 4
@@ -290,7 +292,7 @@ def filterBuyerSharedProductID(parameters = {}):
 
 def filterBuyerProducts(parameters = {}):
 
-	buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True)
+	buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True).order_by('-product_id')
 
 	if "buyerProductsArr" in parameters:
 		buyerProducts = buyerProducts.filter(id__in=parameters["buyerProductsArr"])

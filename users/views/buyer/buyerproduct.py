@@ -281,9 +281,9 @@ def update_buyer_product(request, parameters):
 			newBuyerProductResponseHistory.save()
 
 			if buyer_product_populator["response_code"] == 1 or  buyer_product_populator["response_code"] == 2:
-				newBuyerProductResponse = BuyerProductResponse(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id,buyer_product_id=buyerProductPtr.id)
-				populateBuyerProductResponse(newBuyerProductResponse, buyer_product_populator)
-				newBuyerProductResponse.save()
+				BuyerProductResponsePtr = BuyerProductResponse(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id,buyer_product_id=buyerProductPtr.id)
+				populateBuyerProductResponse(BuyerProductResponsePtr, buyer_product_populator)
+				BuyerProductResponsePtr.save()
 			else: 
 				try:
 					BuyerProductResponsePtr = BuyerProductResponse.objects.filter(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id)
@@ -302,7 +302,7 @@ def update_buyer_product(request, parameters):
 		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		return customResponse(200, {"buyer_products" : serialize_buyer_product(buyerProductPtr)})
+		return customResponse(200, {"buyer_product_response" : serialize_buyer_product_response(BuyerProductResponsePtr)})
 
 def update_buyer_product_whatsapp(request, parameters):
 	try:
