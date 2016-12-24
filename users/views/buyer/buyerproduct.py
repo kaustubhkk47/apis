@@ -280,21 +280,21 @@ def update_buyer_product(request, parameters):
 			populateBuyerProductResponseHistory(newBuyerProductResponseHistory,buyer_product_populator)
 			newBuyerProductResponseHistory.save()
 
-			if buyer_product_populator["response_code"] == 1 or  buyer_product_populator["response_code"] == 2:
+			BuyerProductResponsePtr = BuyerProductResponse.objects.filter(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id)
+
+			if len(BuyerProductResponsePtr) == 0:
 				BuyerProductResponsePtr = BuyerProductResponse(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id,buyer_product_id=buyerProductPtr.id)
-				populateBuyerProductResponse(BuyerProductResponsePtr, buyer_product_populator)
-				BuyerProductResponsePtr.save()
-			else: 
-				try:
-					BuyerProductResponsePtr = BuyerProductResponse.objects.filter(buyer_id=buyerProductPtr.buyer_id,product_id=buyerProductPtr.product_id)
-					if not "has_swiped" in buyer_product_populator:
-						buyer_product_populator["has_swiped"] = 0
-					if buyer_product_populator["response_code"] == 3:
-						BuyerProductResponsePtr.update(response_code=1, has_swiped=buyer_product_populator["has_swiped"],  updated_at = timezone.now())
-					elif buyer_product_populator["response_code"] == 4:
-						BuyerProductResponsePtr.update(response_code=2, has_swiped=buyer_product_populator["has_swiped"], updated_at = timezone.now())
-				except Exception as e:
-					pass
+			else:
+				BuyerProductResponsePtr = BuyerProductResponsePtr[0]
+
+			if not "has_swiped" in buyer_product_populator:
+				buyer_product_populator["has_swiped"] = 0
+			if buyer_product_populator["response_code"] == 3:
+				buyer_product_populator["response_code"] = 1
+			elif buyer_product_populator["response_code"] == 4:
+				buyer_product_populator["response_code"] = 2
+			populateBuyerProductResponse(BuyerProductResponsePtr, buyer_product_populator)
+			BuyerProductResponsePtr.save()
 
 	except Exception as e:
 		log.critical(e)
