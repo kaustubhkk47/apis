@@ -335,7 +335,7 @@ def populateProductDetailsData(productDetailsPtr, productdetails):
 	productDetailsPtr.sample_price = Decimal(productdetails["sample_price"])
 
 def filterProducts(parameters = {}):
-	products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related('seller', 'productdetails', 'category').order_by('-id')
+	products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related('seller', 'productdetails', 'category')
 
 	if "categoriesArr" in parameters:
 		products = products.filter(category_id__in=parameters["categoriesArr"])
@@ -362,6 +362,19 @@ def filterProducts(parameters = {}):
 	
 	if "product_show_online" in parameters:
 		products = products.filter(show_online=parameters["product_show_online"])
+
+	if "product_order_by" in parameters:
+		print "here " + parameters["product_order_by"]
+		if parameters["product_order_by"] == "latest":
+			products = products.order_by('-id')
+		elif parameters["product_order_by"] == "price_ascending":
+			products = products.order_by('min_price_per_unit', '-id')
+		elif parameters["product_order_by"] == "price_descending":
+			products = products.order_by('-min_price_per_unit', '-id')
+		else :
+			products = products.order_by('-id')
+	else:
+		products = products.order_by('-id')
 
 	"""
 	if "seller_show_online" in parameters:

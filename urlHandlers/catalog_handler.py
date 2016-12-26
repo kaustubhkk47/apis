@@ -176,6 +176,11 @@ def populateProductParameters(request, parameters = {}, version = "0"):
 		parameters["min_price_per_unit"] = float(min_price_per_unit)
 		parameters["max_price_per_unit"] = float(max_price_per_unit)
 
+	productOrderBy = request.GET.get("product_order_by", "")
+	if productOrderBy != "" and productOrderBy != None:
+		parameters["product_order_by"] = productOrderBy
+
+
 	parameters = populateAllUserIDParameters(request, parameters, version)
 
 	parameters = populateProductDetailsParameters(request, parameters, version)
