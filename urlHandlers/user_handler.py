@@ -503,21 +503,16 @@ def buyer_address_details(request, version = "0"):
 
 	version = getApiVersion(request)
 
-	buyerParameters = populateBuyerParameters(request, {}, version )
-	"""
+	parameters = populateBuyerParameters(request, {}, version )
+	
 	if request.method == "POST":
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.post_new_buyer(request)
+		return buyer.post_new_buyer_address(request, parameters)
 	elif request.method == "PUT":
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.update_buyer(request)
-	elif request.method == "DELETE":
-		if buyerParameters["isBuyer"] == 0 and buyerParameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
-		return buyer.delete_buyer(request)
-	"""
+		return buyer.update_buyer_address(request, parameters)
 
 	return customResponse(404, error_code = 7)
 

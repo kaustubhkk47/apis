@@ -86,7 +86,7 @@ class BuyerAddress(models.Model):
 		verbose_name_plural = "Buyer Addresses"
 
 	def __unicode__(self):
-		return str(self.buyer)
+		return  str(self.id) + " - " + str(self.buyer)
 
 class BuyerAddressHistory(models.Model):
 	buyer = models.ForeignKey('users.Buyer')
@@ -219,26 +219,37 @@ def validateBuyerDetailsData(buyerdetails, oldbuyerdetails, is_new):
 	if not "purchase_duration" in buyerdetails or not validate_integer(buyerdetails["purchase_duration"]):
 		buyerdetails["purchase_duration"] = oldbuyerdetails.purchase_duration
 
-def validateBuyerAddressData(buyeraddress, oldbuyeraddress):
+def validateBuyerAddressData(buyeraddress, oldbuyeraddress, is_new = False):
+
+	flag = 0
 
 	if not "address" in buyeraddress or buyeraddress["address"]==None:
 		buyeraddress["address"] = oldbuyeraddress.address_line
+		flag =1
 	if not "landmark" in buyeraddress or buyeraddress["landmark"]==None:
 		buyeraddress["landmark"] = oldbuyeraddress.landmark
 	if not "city" in buyeraddress or buyeraddress["city"]==None:
 		buyeraddress["city"] = oldbuyeraddress.city_name
+		flag =1
 	if not "state" in buyeraddress or buyeraddress["state"]==None:
 		buyeraddress["state"] = oldbuyeraddress.state_name
+		flag =1
 	if not "country" in buyeraddress or buyeraddress["country"]==None:
 		buyeraddress["country"] = oldbuyeraddress.country_name
 	if not "contact_number" in buyeraddress or buyeraddress["contact_number"]==None:
 		buyeraddress["contact_number"] = oldbuyeraddress.contact_number
 	if not "pincode" in buyeraddress or buyeraddress["pincode"]==None or not validate_pincode(buyeraddress["pincode"]):
 		buyeraddress["pincode"] = oldbuyeraddress.pincode_number
+		flag = 1
 	if not "alias" in buyeraddress or buyeraddress["alias"]==None:
 		buyeraddress["alias"] = oldbuyeraddress.alias
 	if not "client_id" in buyeraddress or buyeraddress["client_id"]==None:
 		buyeraddress["client_id"] = oldbuyeraddress.client_id
+
+	if is_new == 1 and flag == 1:
+		return False
+
+	return True
 
 def populateBuyer(buyerPtr, buyer):
 	buyerPtr.name = buyer["name"]

@@ -94,8 +94,10 @@ def post_new_buyer(request):
 		
 		buyeraddress = buyer["address"]
 		newAddress = BuyerAddress(buyer=newBuyer)
-		newAddress.priority = 0
 		populateBuyerAddress(newAddress, buyeraddress)
+		newAddress.priority = 0
+		if newAddress.alias == "":
+			newAddress.alias = "Store"
 
 		buyerdetails = buyer["details"]
 		newBuyerDetails = BuyerDetails(buyer = newBuyer)
@@ -120,6 +122,45 @@ def post_new_buyer(request):
 	else:
 		closeDBConnection()
 		return customResponse(200, {"buyer" : serialize_buyer(newBuyer)})
+
+def post_new_buyer_address(request, parameters):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_address = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse(400, error_code=4)
+
+	if parameters["isBuyer"] == 1:
+		buyer_address["buyerID"] = parameters["buyersArr"][0]
+	elif not "buyerID" in buyer_address or not validate_integer(buyer_address["buyerID"]):
+		return customResponse(400, error_code=5,  error_details= "Id for buyer not sent")
+
+	if not len(buyer_address) or not validateBuyerAddressData(buyer_address, BuyerAddress(), 1):
+		return customResponse(400, error_code=5, error_details=  "Invalid data for buyer address sent")
+
+	try:
+		addressPresent = False
+		if "client_id" in buyer_address and str(buyer_address["client_id"]) != "" and len(str(buyer_address["client_id"])) > 6:
+			newAddress = BuyerAddress.objects.filter(buyer_id=int(buyer_address["buyerID"]), client_id=str(buyer_address["client_id"]))
+			if len(newAddress) != 0:
+				addressPresent = True
+				newAddress = newAddress[0]
+		if not addressPresent:
+			newAddress = BuyerAddress(buyer_id=int(buyer_address["buyerID"]))
+		populateBuyerAddress(newAddress, buyer_address)
+		newAddress.save()
+
+		newBuyerAddressHistory = BuyerAddressHistory()
+		newBuyerAddressHistory.populateFromBuyerAddress(newAddress)
+		newBuyerAddressHistory.save()
+		 
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse(500, error_code = 1)
+	else:
+		closeDBConnection()
+		return customResponse(200, {"address" : serialize_buyer_address(newAddress)})
 
 def update_buyer(request, parameters = {}):
 	try:
@@ -212,6 +253,50 @@ def update_buyer(request, parameters = {}):
 	else:
 		closeDBConnection()
 		return customResponse(200, {"buyer": serialize_buyer(buyerPtr, parameters)})
+
+def update_buyer_address(request, parameters):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_address = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse(400, error_code=4)
+
+	if parameters["isBuyer"] == 1:
+		buyer_address["buyerID"] = parameters["buyersArr"][0]
+	elif not "buyerID" in buyer_address or not validate_integer(buyer_address["buyerID"]):
+		return customResponse(400, error_code=5,  error_details= "Id for buyer not sent")
+
+	if not len(buyer_address):
+		return customResponse(400, error_code=5, error_details=  "Invalid data for buyer address sent")
+
+	if not "addressID" in buyer_address or not validate_integer(buyer_address["addressID"]):
+		return customResponse(400, error_code=5, error_details=  "Address Id for buyer not sent")
+
+	buyerAddressPtr = BuyerAddress.objects.filter(buyer_id=int(buyer_address["buyerID"]), id =int(buyer_address["addressID"]))
+
+	if len(buyerAddressPtr) == 0:
+		return customResponse(400, error_code=6, error_details=  "Invalid Address Id for buyer sent")
+
+	buyerAddressPtr = buyerAddressPtr[0]
+
+	validateBuyerAddressData(buyer_address, BuyerAddress(), 0)
+
+	try:
+		
+		populateBuyerAddress(buyerAddressPtr, buyer_address)
+		buyerAddressPtr.save()
+
+		newBuyerAddressHistory = BuyerAddressHistory()
+		newBuyerAddressHistory.populateFromBuyerAddress(buyerAddressPtr)
+		newBuyerAddressHistory.save()
+		 
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse(500, error_code = 1)
+	else:
+		closeDBConnection()
+		return customResponse(200, {"address" : serialize_buyer_address(buyerAddressPtr)})
 
 def delete_buyer(request, parameters):
 	try:

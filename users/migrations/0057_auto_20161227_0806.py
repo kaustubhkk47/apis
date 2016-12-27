@@ -15,9 +15,11 @@ def edit_store_urls(apps, schema_editor):
 	storeNameArr = []
 	for buyerAddress in buyersAddresses:
 		buyerAddress.priority = 0
+		buyerAddress.alias = "Store"
 		buyerAddress.save()
 	for buyerAddress in buyersAddressHistories:
 		buyerAddress.priority = 0
+		buyerAddress.alias = "Store"
 		buyerAddress.save()
 
 
