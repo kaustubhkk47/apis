@@ -43,9 +43,12 @@ class Buyer(models.Model):
 	def __unicode__(self):
 		return "{} - {} - {}".format(self.id,self.name,self.mobile_number)
 
-	def latest_buyer_address_history(self):
-		try:
-			return BuyerAddressHistory.objects.filter(buyer=self).latest('created_at')
+	def latest_buyer_address_history(self, addressID = None):
+		try:	
+			if addressID == None:
+				return BuyerAddressHistory.objects.filter(buyer=self, priority = 0).latest('created_at')
+			else:
+				return BuyerAddressHistory.objects.filter(buyer=self, buyeraddress_id = addressID).latest('created_at')
 		except Exception, e:
 			return None
 
@@ -77,6 +80,7 @@ class BuyerAddress(models.Model):
 	updated_at = models.DateTimeField(auto_now=True)
 
 	class Meta:
+		ordering = ["priority"]
 		default_related_name = "buyeraddress"
 		verbose_name="Buyer Address"
 		verbose_name_plural = "Buyer Addresses"

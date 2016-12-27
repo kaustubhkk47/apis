@@ -94,6 +94,7 @@ def post_new_buyer(request):
 		
 		buyeraddress = buyer["address"]
 		newAddress = BuyerAddress(buyer=newBuyer)
+		newAddress.priority = 0
 		populateBuyerAddress(newAddress, buyeraddress)
 
 		buyerdetails = buyer["details"]

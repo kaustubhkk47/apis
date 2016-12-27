@@ -12,7 +12,7 @@ from orders.models.orderItem import OrderItem
 from orders.models.payments import BuyerPayment
 from orders.models.checkout import Checkout, filterCheckouts
 
-from users.models.buyer import Buyer
+from users.models.buyer import Buyer, BuyerAddress
 
 from orders.serializers.order import serializeOrder
 from orders.serializers.checkout import serializeCheckout, parseCheckout
@@ -159,7 +159,9 @@ def update_checkout_details(request, parameters):
 		nowTime = timezone.now()
 		status = int(checkout["status"])
 		if status == 1:
-			checkoutPtr.buyer_address_history = buyerPtr.latest_buyer_address_history()
+			if not BuyerAddress.objects.filter(id=int(checkout["addressID"])).exists():
+				return customResponse(400, error_code=6,  error_details= "Invalid address ID sent")
+			checkoutPtr.buyer_address_history = buyerPtr.latest_buyer_address_history(int(checkout["addressID"]))
 			checkoutPtr.address_given_time = nowTime
 		elif status == 2:
 			checkoutPtr.summary_confirmed_time = nowTime

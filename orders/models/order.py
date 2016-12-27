@@ -100,7 +100,10 @@ def populateOrderData(orderPtr, order):
 	orderPtr.remarks = order["remarks"]
 	orderPtr.order_status = 1
 	orderPtr.save()
-	orderPtr.buyer_address_history = orderPtr.buyer.latest_buyer_address_history()
+	if "addressID" in order and validate_integer(order["addressID"]) and BuyerAddress.objects.filter(id=int(order["addressID"])).exists():
+		orderPtr.buyer_address_history = orderPtr.buyer.latest_buyer_address_history(int(order["addressID"]))
+	else:
+		orderPtr.buyer_address_history = orderPtr.buyer.latest_buyer_address_history()
 	orderPtr.display_number = "1" +"%06d" %(orderPtr.id,)
 
 def filterOrder(orderParameters):
