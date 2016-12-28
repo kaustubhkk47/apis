@@ -82,6 +82,10 @@ urlpatterns += [
 ]
 
 urlpatterns += [
+	url(r'^users/buyer/firebase/token/$', user_handler.buyer_firebase_token_details),
+]
+
+urlpatterns += [
 	url(r'^users/seller/$', user_handler.seller_details),
 	url(r'^users/seller/login/$', user_handler.seller_login)
 ]

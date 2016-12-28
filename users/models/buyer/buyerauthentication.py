@@ -118,6 +118,31 @@ class BuyerForgotPasswordTokenAdmin(admin.ModelAdmin):
 	def created_at_ist(self, obj):
 		return time_in_ist(obj.created_at)
 
+class BuyerFireBaseToken(models.Model):
+	buyer = models.ForeignKey('users.Buyer', null = True, blank = True)
+
+	instance_id = models.CharField(max_length=255, blank=True, null = True)
+	token = models.CharField(max_length=255, blank=True, null = True)
+
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name="Buyer FireBase Token"
+		verbose_name_plural = "Buyer FireBase Tokens"
+
+	def __unicode__(self):
+		return "{}".format(self.buyer)
+
+	@staticmethod
+	def validateBuyerFireBaseTokenData(data):
+		if not "instance_id" in data or data["instance_id"] == None or data["instance_id"] == "":
+			return False
+		if not "token" in data or data["token"] == None or data["token"] == "":
+			return False
+		return True
+
+
 def validateBuyerAccessToken(accessToken):
 
 	tokenPayload = get_token_payload(accessToken, "buyerID")

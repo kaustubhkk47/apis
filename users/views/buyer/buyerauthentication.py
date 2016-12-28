@@ -304,3 +304,31 @@ def post_buyer_forgot_password_verify(request, parameters):
 		response_body["buyer"] = serialize_buyer(buyerPtr, parameters)
 
 		return customResponse(200, response_body)
+
+def put_buyer_firebase_token_details(request, parameters):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse(400, error_code=4)
+
+	if not len(buyer) or not BuyerFireBaseToken.validateBuyerFireBaseTokenData(buyer):
+		return customResponse(400, error_code=5,  error_details= "Invalid data sent in request")
+	try:
+		buyerID = parameters["buyersArr"][0]
+	except Exception as e:
+		buyerID = None
+
+	try:
+
+		buyerFireBaseTokenPtr, created = BuyerFireBaseToken.objects.get_or_create( instance_id = buyer["instance_id"])
+		buyerFireBaseTokenPtr.buyer_id = buyerID
+		buyerFireBaseTokenPtr.token = buyer["token"]
+		buyerFireBaseTokenPtr.save()
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse(500, error_code = 1)
+	else:
+		return customResponse(200, {"token":"token successfully created"})

@@ -87,6 +87,19 @@ def buyer_panel_tracking_details(request, version = "0"):
 
 	return customResponse(404, error_code = 7)
 
+
+@csrf_exempt
+def buyer_firebase_token_details(request, version = "0"):
+
+	version = getApiVersion(request)
+
+	parameters = populateBuyerParameters(request, {}, version)
+
+	if request.method == "PUT":
+		return buyer.put_buyer_firebase_token_details(request, parameters)
+
+	return customResponse(404, error_code = 7)
+
 @csrf_exempt
 def buyer_store_lead_details(request, version = "0"):
 
