@@ -9,6 +9,9 @@ import random
 
 from general.models.smssent import send_sms
 
+import requests
+import settings
+
 class BuyerRefreshToken(models.Model):
 
 	buyer = models.ForeignKey('users.Buyer')
@@ -142,6 +145,20 @@ class BuyerFireBaseToken(models.Model):
 			return False
 		return True
 
+	def sendWelcomeNotification(self):
+		if self.buyer_id != None:
+			return
+		url = " https://fcm.googleapis.com/fcm/send"
+
+		headers = {}
+		headers["Authorization"] = settings.FIREBASE_SERVER_KEY
+		headers["Content-Type"] = "application/json"
+
+		payload = {}
+		payload["to"]  = self.token
+		payload["data"] = {}
+
+		response = requests.post(url, headers=headers, data = payload)
 
 def validateBuyerAccessToken(accessToken):
 
