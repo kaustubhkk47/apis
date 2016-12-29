@@ -113,7 +113,7 @@ def create_checkout_details(request, parameters):
 		return customResponse(500, error_code = 1)
 	else:
 		closeDBConnection()
-		return customResponse(200, {"checkout": serializeCheckout(newCheckout)})
+		return customResponse(200, {"checkout": serializeCheckout(newCheckout, parameters)})
 
 def update_checkout_details(request, parameters):
 	try:
@@ -182,7 +182,7 @@ def update_checkout_details(request, parameters):
 		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		body = {"checkout": serializeCheckout(checkoutPtr)}
+		body = {"checkout": serializeCheckout(checkoutPtr, parameters)}
 		if status ==3:
 			body["order"] = orderBody
 		return customResponse(200, body)
@@ -225,7 +225,7 @@ def checkout_new_order(checkoutPtr, parameters):
 		subCarts.update(status = 1, updated_at = nowTime)
 	
 		sendOrderMail(newOrder)
-		return serializeOrder(newOrder)
+		return serializeOrder(newOrder, parameters)
 	except Exception as e:
 		log.critical(e)
 		return {}

@@ -220,6 +220,8 @@ def populateCheckoutParameters(request, parameters = {}, version = "0"):
 
 	parameters = populateAllUserIDParameters(request, parameters, version)
 
+	parameters = populateOrderDetailsParameters(request, parameters, version)
+
 	return parameters
 
 def populateCartParameters(request, parameters = {}, version = "0"):

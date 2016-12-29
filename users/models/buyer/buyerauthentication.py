@@ -156,7 +156,12 @@ class BuyerFireBaseToken(models.Model):
 
 		payload = {}
 		payload["to"]  = self.token
-		payload["data"] = {}
+		payload["notification"] = {
+			"title": some_title_here,
+ 			"body": some_body,
+ 			"icon": icon_url,
+ 		}
+
 
 		response = requests.post(url, headers=headers, data = payload)
 
