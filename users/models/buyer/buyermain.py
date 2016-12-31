@@ -268,7 +268,7 @@ def populateBuyer(buyerPtr, buyer):
 	buyerPtr.gender = buyer["gender"]
 	buyerPtr.save()
 	#buyerPtr.store_url = "{}-{}".format(buyerPtr.store_slug,buyerPtr.id)
-	if validate_percent(buyer["store_global_margin"], false):
+	if validate_percent(buyer["store_global_margin"], False):
 		buyerPtr.store_global_margin = Decimal(buyer["store_global_margin"])
 		buyerPtr.save()
 	buyerPtr.whatsapp_contact_name = str(buyerPtr.id) + " Wholdus " + buyerPtr.name
