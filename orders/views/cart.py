@@ -96,8 +96,8 @@ def post_new_cart_item(request, parameters):
 		for productPtr in allProducts:
 			
 			cartitem = cartProducts[productsHash[productPtr.id]]
-			subCartPtr, cartItemCreated = SubCart.objects.get_or_create(cart_id=cartPtr.id, seller_id = productPtr.seller_id, status = 0)
-			cartItemPtr , cartItemCreated= CartItem.objects.get_or_create(subcart_id = subCartPtr.id, buyer_id=buyerID, product = productPtr, status = 0)
+			subCartPtr, cartItemCreated = SubCart.objects.get_or_create(cart_id=cartPtr.id, seller_id = productPtr.seller_id)
+			cartItemPtr , cartItemCreated= CartItem.objects.get_or_create(subcart_id = subCartPtr.id, buyer_id=buyerID, product = productPtr)
 
 			if not cartItemPtr.lots ==  int(cartitem["lots"]):
 				initialPrices = cartItemPtr.getPrices()

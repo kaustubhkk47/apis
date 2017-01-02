@@ -206,7 +206,7 @@ def checkout_new_order(checkoutPtr, parameters):
 			newSubOrder.populateDataFromSubCart(subCartPtr)
 			newSubOrder.save()
 
-			cartItems = CartItem.objects.filter(subcart=subCartPtr, status=0)
+			cartItems = CartItem.objects.filter(subcart=subCartPtr, status=0, pieces__gt=0)
 
 			for cartItemPtr in cartItems:
 				newOrderItem = OrderItem(suborder=newSubOrder)

@@ -168,8 +168,6 @@ class CartItem(models.Model):
 
 	def populateCartItemData(self, cartitem):
 		self.lots = int(cartitem["lots"])
-		if self.lots == 0:
-			self.status = 1
 		self.lot_size = self.product.lot_size
 		self.pieces = self.lots*self.lot_size
 		self.retail_price_per_piece = self.product.price_per_unit
@@ -263,7 +261,7 @@ class CartItemHistory(models.Model):
 
 def filterCartItem(parameters):
 
-	cartItems = CartItem.objects.filter(subcart__status=0, status=0).select_related('product')
+	cartItems = CartItem.objects.filter(subcart__status=0, status=0, pieces__gt=0).select_related('product')
 
 	if "cartItemsArr" in parameters:
 		cartItems = cartItems.filter(id__in=parameters["cartItemsArr"])
