@@ -125,6 +125,8 @@ def post_buyer_registration_verify(request, parameters):
 		buyeraddress = buyer["address"]
 		newAddress = BuyerAddress(buyer=newBuyer)
 		populateBuyerAddress(newAddress, buyeraddress)
+		newAddress.priority = 0
+		newAddress.alias = "Store"
 
 		buyerdetails = buyer["details"]
 		newBuyerDetails = BuyerDetails(buyer = newBuyer)

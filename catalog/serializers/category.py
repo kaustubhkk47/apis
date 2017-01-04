@@ -1,5 +1,7 @@
 from users.models.seller import filterSellerCategory
 from users.serializers.seller import parse_seller_category
+from users.models.buyer import filterBuyerInterest
+
 def serialize_categories(categoriesItem, parameters = {}):
 	category = {}
 	category["name"]= categoriesItem.name
@@ -17,6 +19,16 @@ def serialize_categories(categoriesItem, parameters = {}):
 		sellerCategoryPtr = filterSellerCategory(parameters)
 		sellerCategoryPtr = sellerCategoryPtr.filter(category_id=categoriesItem.id)
 		category["seller_categories"] = parse_seller_category(sellerCategoryPtr, parameters)
+
+	if "isBuyer" in parameters and parameters["isBuyer"] == 1:
+
+		buyerInterestPtr = filterBuyerInterest(parameters)
+		buyerInterestPtr = buyerInterestPtr.filter(category_id=categoriesItem.id)
+
+		if len(buyerInterestPtr) > 0:
+			buyerInterestPtr = buyerInterestPtr[0]
+			from users.serializers.buyer import serialize_buyer_interest
+			category["buyer_interest"] = serialize_buyer_interest(buyerInterestPtr, parameters)
 	
 	return category
 

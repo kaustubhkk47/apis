@@ -62,36 +62,22 @@ def post_new_buyer_interest(request, parameters):
 
 	BuyerInterestPtr = BuyerInterest.objects.filter(buyer_id=int(buyer_interest["buyerID"]),category_id=int(buyer_interest["categoryID"]))
 
-	if BuyerInterestPtr.exists():
-		return customResponse(400, error_code=6, error_details= "Buyer interest for category already exists")
+	buyerInterestExists = False
+	if len(BuyerInterestPtr) != 0:
+		buyerInterestExists = True
+		newBuyerInterest = BuyerInterestPtr[0]
 
-	if not validateBuyerInterestData(buyer_interest, BuyerInterest(), 1):
-		return customResponse(400, error_code=5, error_details= "Invalid data for buyer interest sent")
+	
 
-	try:
-		newBuyerInterest = BuyerInterest(buyer_id=int(buyer_interest["buyerID"]),category_id = int(buyer_interest["categoryID"]))
-		populateBuyerInterest(newBuyerInterest, buyer_interest)
-		newBuyerInterest.save()
-
-		newBuyerInterestHistory = BuyerInterestHistory(buyer_interest=newBuyerInterest)
-		populateBuyerInterest(newBuyerInterestHistory, buyer_interest)
-		newBuyerInterestHistory.save()
-
-		productPtr = filterBuyerInterestProducts(newBuyerInterest)
-
-		buyerProductPtr = BuyerProducts.objects.filter(buyer_id = int(buyer_interest["buyerID"]))
-
-		intersectingProducts = getIntersectingProducts(productPtr, buyerProductPtr)
-
-		buyerProductsToCreate = []
-
-		for product_id in intersectingProducts[0]:
-			buyerProduct = BuyerProducts(buyer_id=int(buyer_interest["buyerID"]), product_id=product_id, buyer_interest=newBuyerInterest)
-			buyerProductsToCreate.append(buyerProduct)
-
-		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
-
-		BuyerProducts.objects.filter(id__in=intersectingProducts[1]).update(buyer_interest=newBuyerInterest,delete_status=False, updated_at = timezone.now())
+	try:	
+		if not buyerInterestExists:
+			if not validateBuyerInterestData(buyer_interest, BuyerInterest(), 1):
+				return customResponse(400, error_code=5, error_details= "Invalid data for buyer interest sent")
+			newBuyerInterest = create_new_buyer_interest_data(buyer_interest)
+		else:
+			if not validateBuyerInterestData(buyer_interest, newBuyerInterest, 0):
+				return customResponse(400, error_code=5,  error_details= "Invalid data for buyer interest sent")
+			update_buyer_interest_data(newBuyerInterest, buyer_interest)
 
 	except Exception as e:
 		log.critical(e)
@@ -100,6 +86,33 @@ def post_new_buyer_interest(request, parameters):
 	else:
 		closeDBConnection()
 		return customResponse(200, {"buyer_interest" : serialize_buyer_interest(newBuyerInterest)})
+
+def create_new_buyer_interest_data(buyer_interest):
+	newBuyerInterest = BuyerInterest(buyer_id=int(buyer_interest["buyerID"]),category_id = int(buyer_interest["categoryID"]))
+	populateBuyerInterest(newBuyerInterest, buyer_interest)
+	newBuyerInterest.save()
+
+	newBuyerInterestHistory = BuyerInterestHistory(buyer_interest=newBuyerInterest)
+	populateBuyerInterest(newBuyerInterestHistory, buyer_interest)
+	newBuyerInterestHistory.save()
+
+	productPtr = filterBuyerInterestProducts(newBuyerInterest)
+
+	buyerProductPtr = BuyerProducts.objects.filter(buyer_id = int(buyer_interest["buyerID"]))
+
+	intersectingProducts = getIntersectingProducts(productPtr, buyerProductPtr)
+
+	buyerProductsToCreate = []
+
+	for product_id in intersectingProducts[0]:
+		buyerProduct = BuyerProducts(buyer_id=int(buyer_interest["buyerID"]), product_id=product_id, buyer_interest=newBuyerInterest)
+		buyerProductsToCreate.append(buyerProduct)
+
+	BuyerProducts.objects.bulk_create(buyerProductsToCreate)
+
+	BuyerProducts.objects.filter(id__in=intersectingProducts[1]).update(buyer_interest=newBuyerInterest,delete_status=False, updated_at = timezone.now())
+
+	return newBuyerInterest
 
 def update_buyer_interest(request, parameters):
 	try:
@@ -124,40 +137,8 @@ def update_buyer_interest(request, parameters):
 	if not validateBuyerInterestData(buyer_interest, buyerInterestPtr, 0):
 		return customResponse(400, error_code=5,  error_details= "Invalid data for buyer interest sent")
 
-	buyerProductPtr = BuyerProducts.objects.filter(buyer_interest_id = buyerInterestPtr.id)
-
-	forceEvaluation = len(buyerProductPtr)
-
-	buyerAllProductPtr = BuyerProducts.objects.filter(buyer_id = buyerInterestPtr.buyer_id)
-
-	forceEvaluation = len(buyerAllProductPtr)
-
 	try:
-		
-		populateBuyerInterest(buyerInterestPtr, buyer_interest)
-		buyerInterestPtr.save()
-
-		newBuyerInterestHistory = BuyerInterestHistory(buyer_interest=buyerInterestPtr)
-		populateBuyerInterest(newBuyerInterestHistory, buyer_interest)
-		newBuyerInterestHistory.save()
-
-		productPtr = filterBuyerInterestProducts(buyerInterestPtr)
-
-		intersectingProducts = getIntersectingProducts(productPtr, buyerProductPtr)
-
-		intersectingProductsAll = getIntersectingProducts(productPtr, buyerAllProductPtr)
-
-		buyerProductsToCreate = []
-
-		for product_id in intersectingProductsAll[0]:
-			buyerProduct = BuyerProducts(buyer_id=buyerInterestPtr.buyer_id, product_id=product_id, buyer_interest=buyerInterestPtr)
-			buyerProductsToCreate.append(buyerProduct)
-
-		BuyerProducts.objects.bulk_create(buyerProductsToCreate)
-
-		BuyerProducts.objects.filter(id__in=intersectingProducts[1]).update(buyer_interest=buyerInterestPtr,delete_status=False, updated_at = timezone.now())
-
-		BuyerProducts.objects.filter(id__in=intersectingProducts[2],responded=0).update(delete_status=True, buyer_interest_id=None, updated_at = timezone.now())
+		update_buyer_interest_data(buyerInterestPtr, buyer_interest)
 
 	except Exception as e:
 		log.critical(e)
@@ -165,7 +146,40 @@ def update_buyer_interest(request, parameters):
 		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		return customResponse(200, {"buyer" : serialize_buyer_interest(buyerInterestPtr)})
+		return customResponse(200, {"buyer_interest" : serialize_buyer_interest(buyerInterestPtr)})
+
+def update_buyer_interest_data(buyerInterestPtr, buyer_interest):
+	buyerProductPtr = BuyerProducts.objects.filter(buyer_interest_id = buyerInterestPtr.id)
+
+	forceEvaluation = len(buyerProductPtr)
+
+	buyerAllProductPtr = BuyerProducts.objects.filter(buyer_id = buyerInterestPtr.buyer_id)
+
+	forceEvaluation = len(buyerAllProductPtr)
+	populateBuyerInterest(buyerInterestPtr, buyer_interest)
+	buyerInterestPtr.save()
+
+	newBuyerInterestHistory = BuyerInterestHistory(buyer_interest=buyerInterestPtr)
+	populateBuyerInterest(newBuyerInterestHistory, buyer_interest)
+	newBuyerInterestHistory.save()
+
+	productPtr = filterBuyerInterestProducts(buyerInterestPtr)
+
+	intersectingProducts = getIntersectingProducts(productPtr, buyerProductPtr)
+
+	intersectingProductsAll = getIntersectingProducts(productPtr, buyerAllProductPtr)
+
+	buyerProductsToCreate = []
+
+	for product_id in intersectingProductsAll[0]:
+		buyerProduct = BuyerProducts(buyer_id=buyerInterestPtr.buyer_id, product_id=product_id, buyer_interest=buyerInterestPtr)
+		buyerProductsToCreate.append(buyerProduct)
+
+	BuyerProducts.objects.bulk_create(buyerProductsToCreate)
+
+	BuyerProducts.objects.filter(id__in=intersectingProducts[1]).update(buyer_interest=buyerInterestPtr,delete_status=False, updated_at = timezone.now())
+
+	BuyerProducts.objects.filter(id__in=intersectingProducts[2],responded=0).update(delete_status=True, buyer_interest_id=None, updated_at = timezone.now())
 
 def delete_buyer_interest(request, parameters):
 	try:

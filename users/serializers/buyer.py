@@ -225,6 +225,7 @@ def serialize_buyer_interest(buyer_interest_entry, parameters = {}):
 	buyer_interest = {}
 
 	buyer_interest["buyerinterestID"] = buyer_interest_entry.id
+	buyer_interest["categoryID"] = buyer_interest_entry.category_id
 	buyer_interest["scale"] = buyer_interest_entry.scale
 	buyer_interest["price_filter_applied"] = buyer_interest_entry.price_filter_applied
 	buyer_interest["min_price_per_unit"] = buyer_interest_entry.min_price_per_unit
@@ -235,7 +236,8 @@ def serialize_buyer_interest(buyer_interest_entry, parameters = {}):
 	buyer_interest["created_at"] = buyer_interest_entry.created_at
 	buyer_interest["updated_at"] = buyer_interest_entry.updated_at
 
-	buyer_interest["category"] = serialize_categories(buyer_interest_entry.category)
+	if not ("category_details_details" in parameters and parameters["category_details_details"] == 1):
+		buyer_interest["category"] = serialize_categories(buyer_interest_entry.category)
 
 	return buyer_interest
 

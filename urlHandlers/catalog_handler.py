@@ -61,6 +61,8 @@ def populateCategorytDetailsParameters(request, parameters = {}, version = "0"):
 	else:
 		parameters["seller_category_details"] = defaultValue
 
+	parameters["category_details_details"] = 1
+
 	return parameters
 
 
