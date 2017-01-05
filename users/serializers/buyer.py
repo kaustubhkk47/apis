@@ -232,7 +232,7 @@ def serialize_buyer_interest(buyer_interest_entry, parameters = {}):
 	buyer_interest["max_price_per_unit"] = buyer_interest_entry.max_price_per_unit
 	buyer_interest["fabric_filter_text"] = buyer_interest_entry.fabric_filter_text
 	buyer_interest["productid_filter_text"] = buyer_interest_entry.productid_filter_text
-	buyer_interest["is_active"] = buyer_interest_entry.is_active
+	buyer_interest["is_active"] = bool(buyer_interest_entry.is_active)
 	buyer_interest["created_at"] = buyer_interest_entry.created_at
 	buyer_interest["updated_at"] = buyer_interest_entry.updated_at
 

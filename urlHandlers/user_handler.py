@@ -520,11 +520,11 @@ def buyer_address_details(request, version = "0"):
 	
 	if request.method == "POST":
 		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return buyer.post_new_buyer_address(request, parameters)
 	elif request.method == "PUT":
 		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		return buyer.update_buyer_address(request, parameters)
 
 	return customResponse(404, error_code = 7)
