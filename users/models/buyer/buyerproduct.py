@@ -223,8 +223,8 @@ def validateBuyerProductData(buyer_product, old_buyer_product, is_new, buyer_pro
 			buyer_product_populator["is_active"] = int(buyer_product["is_active"])
 			#return True
 
-	if old_buyer_product.is_active == 0:
-		return False
+	#if old_buyer_product.is_active == 0:
+	#	return False
 
 	if "responded" in buyer_product and validate_integer(buyer_product["responded"]):
 
