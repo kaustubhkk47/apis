@@ -12,6 +12,9 @@ from general.models.smssent import send_sms
 import requests
 import settings
 
+import logging
+log = logging.getLogger("django")
+
 class BuyerRefreshToken(models.Model):
 
 	buyer = models.ForeignKey('users.Buyer')
@@ -148,22 +151,67 @@ class BuyerFireBaseToken(models.Model):
 	def sendWelcomeNotification(self):
 		if self.buyer_id != None:
 			return
-		url = " https://fcm.googleapis.com/fcm/send"
-
-		headers = {}
-		headers["Authorization"] = settings.FIREBASE_SERVER_KEY
-		headers["Content-Type"] = "application/json"
-
-		payload = {}
-		payload["to"]  = self.token
-		payload["notification"] = {
-			"title": some_title_here,
- 			"body": some_body,
- 			"icon": icon_url,
- 		}
+		notification = {}
+		notification["title"] = ""
+		notification["body"] = "" 
+		sendNotification(self, )
 
 
-		response = requests.post(url, headers=headers, data = payload)
+
+def sendNotification(buyerFireBaseTokenPtr, notification = {}, data = {}):
+
+	if data == {} and notification == {}:
+		return
+
+	url = "https://fcm.googleapis.com/fcm/send"
+
+	headers = {}
+	headers["Authorization"] = "key=" + settings.FIREBASE_SERVER_KEY
+	headers["Content-Type"] = "application/json"
+
+	payload = {}
+
+	if data != {}:
+		payload["data"] = data
+
+	if notification != {}:
+		payload["notification"] = notification
+
+	if type(buyerFireBaseTokenPtr) == BuyerFireBaseToken:
+		payload["to"] = buyerFireBaseTokenPtr.token
+	else:
+		registrationIDs = []
+		for buyerFireBaseToken in buyerFireBaseTokenPtr:
+			registrationIDs.append(buyerFireBaseToken.token)
+
+		payload["registration_ids"] = registrationIDs
+
+	response = requests.post(url, headers=headers, data = json.dumps(payload))
+
+	if response.status_code == 200:
+		try:
+			responseJson = response.json()
+		except Exception as e:
+			log.warn(e)
+		else:
+			results = responseJson["results"]
+
+			for i in range(0, len(results)):
+				result = results[i]
+
+				if "error" in result:
+					errorMessage = result["error"]
+
+					if errorMessage == "InvalidRegistration" or errorMessage == "NotRegistered":
+						buyerFireBaseTokenPtr[i].delete()
+
+				if "registration_id" in result:
+					buyerFireBaseTokenPtr[i].token = result["registration_id"]
+					buyerFireBaseTokenPtr[i].save()
+	elif response.status_code == 401:
+		log.critical("Firebase server key authentication failure error 400")
+	elif response.status_code == 400:
+		log.critical("Firebase malformed json for data {} and notification {}".format(data, notification))
 
 def validateBuyerAccessToken(accessToken):
 
