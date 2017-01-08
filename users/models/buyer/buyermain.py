@@ -5,6 +5,7 @@ from decimal import Decimal
 import jwt as JsonWebToken
 import settings
 from address.models.pincode import Pincode
+from .buyerauthentication import BuyerFireBaseToken
 from django.template.defaultfilters import slugify
 
 class Buyer(models.Model):
@@ -59,6 +60,9 @@ class Buyer(models.Model):
 		if not "store_active" in data or not validate_bool(data["store_active"]):
 			return False
 		return True
+
+	def get_firebase_tokens(self):
+		return BuyerFireBaseToken.objects.filter(buyer_id = self.id)
 
 class BuyerAddress(models.Model):
 	buyer = models.ForeignKey('users.Buyer')

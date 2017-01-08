@@ -10,6 +10,7 @@ from catalog.models.productLot import getCalculatedPricePerPiece
 from .orderItem import OrderItem, OrderItemNonCompletionStatus
 from .subOrder import SubOrder, populateSellerMailDict
 from users.serializers.buyer import serialize_buyer_address
+from users.models.buyer import sendNotification
 
 from decimal import Decimal
 import math
@@ -73,6 +74,15 @@ class Order(models.Model):
 		if current_status == 0 and (status == 1):
 			return True
 		return False
+
+	def sendNewOrderNotification(self):
+		notification = {}
+		notification["title"] = "Order Successfully Placed"
+		notification["body"] = "We'll contact you soon for confirmation :)"
+		data = {}
+		data["activity"] = "OrderDetails"
+		data["orderID"] = str(self.id)
+		sendNotification(self.buyer.get_firebase_tokens(), notification = notification, data = data)
 
 
 class OrderAdmin(admin.ModelAdmin):
