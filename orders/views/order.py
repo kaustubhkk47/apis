@@ -158,6 +158,7 @@ def post_new_order(request, parameters={}):
 			OrderItem.objects.bulk_create(orderItemstoCreate)
 		
 		sendOrderMail(newOrder)
+		newOrder.sendOrderNotification("Wholdus: Order placed", "Order ID : " + newOrder.display_number)
 		subOrders = SubOrder.objects.filter(order_id = newOrder.id)
 		buyerAddressPtr = newOrder.buyer_address_history
 		for SubOrderPtr in subOrders:
@@ -216,6 +217,7 @@ def update_order(request,parameters={}):
 
 		buyer_subject = "Order Confirmed with order ID {}".format(orderPtr.display_number)
 		sendOrderMail(orderPtr, buyer_subject)
+		orderPtr.sendOrderNotification("Order No {} Confirmed".format(newOrder.display_number), "Order will be shipped shortly")
 		allSubOrders = SubOrder.objects.filter(order_id = orderPtr.id,suborder_status=1)
 		for subOrderPtr in allSubOrders: 
 			seller_mail_dict = populateSellerMailDict(subOrderPtr, buyerPtr, buyerAddressPtr)

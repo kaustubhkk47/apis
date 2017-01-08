@@ -75,10 +75,10 @@ class Order(models.Model):
 			return True
 		return False
 
-	def sendNewOrderNotification(self):
+	def sendOrderNotification(self, title, body):
 		notification = {}
-		notification["title"] = "Order Successfully Placed"
-		notification["body"] = "We'll contact you soon for confirmation :)"
+		notification["title"] = title
+		notification["body"] = body
 		data = {}
 		data["activity"] = "OrderDetails"
 		data["orderID"] = str(self.id)
