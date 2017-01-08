@@ -20,9 +20,6 @@ class Order(models.Model):
 	cart = models.ForeignKey('orders.Cart', null=True, blank=True)
 	buyer_address_history = models.ForeignKey('users.BuyerAddressHistory', null=True, blank=True)
 
-	# 0 - Admin 1 - Customer
-	placed_by = models.IntegerField(default=0)
-
 	pieces = models.PositiveIntegerField(default=1)
 	product_count = models.PositiveIntegerField(default=1)
 	retail_price = models.DecimalField(max_digits=10, decimal_places=2,default=0)
@@ -38,6 +35,7 @@ class Order(models.Model):
 	display_number = models.CharField(max_length=20, blank=True)
 
 	remarks = models.TextField(blank=True)
+	placed_by = models.CharField(max_length=100)
 	
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -66,7 +64,7 @@ class Order(models.Model):
 		self.cod_charge = cartPtr.cod_charge
 		self.final_price = cartPtr.final_price
 		self.order_status = 0
-		self.placed_by = 1
+		self.placed_by = "buyer"
 		self.save()
 		self.display_number = "1" +"%06d" %(self.id,)
 

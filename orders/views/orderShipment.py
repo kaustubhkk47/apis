@@ -114,7 +114,7 @@ def post_new_order_shipment(request):
 		else:
 			subOrderPtr.order.order_status = 3
 
-		if subOrderPtr.order.placed_by == 0:
+		if subOrderPtr.order.placed_by == "buyer":
 			subOrderPtr.cod_charge += newOrderShipment.cod_charge
 			subOrderPtr.shipping_charge += newOrderShipment.shipping_charge
 			subOrderPtr.final_price += (newOrderShipment.cod_charge + newOrderShipment.shipping_charge)

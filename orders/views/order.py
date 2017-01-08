@@ -139,6 +139,7 @@ def post_new_order(request, parameters={}):
 	try:
 		newOrder = Order(buyer=buyerPtr)
 		populateOrderData(newOrder, orderData)
+		newOrder.placed_by = "Admin : Id = " + str(parameters["internalusersArr"][0])
 		newOrder.save()
 		
 		for subOrder in subOrders:

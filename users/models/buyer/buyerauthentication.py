@@ -171,11 +171,13 @@ def sendNotification(buyerFireBaseTokenPtr, notification = {}, data = {}):
 
 	payload = {}
 
+	if notification != {}:
+		data["has_notification"] = "true"
+		data["notification_title"] = notification["title"]
+		data["notification_body"] = notification["body"]
+
 	if data != {}:
 		payload["data"] = data
-
-	if notification != {}:
-		payload["notification"] = notification
 
 	if type(buyerFireBaseTokenPtr) == BuyerFireBaseToken:
 		payload["to"] = buyerFireBaseTokenPtr.token

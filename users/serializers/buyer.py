@@ -269,7 +269,7 @@ def serialize_buyer_product(buyer_product_entry, parameters = {}):
 	buyer_product["buyerID"] = buyer_product_entry.buyer_id
 	if hasattr(buyer_product_entry,"buyer_interest"):
 		buyer_product["buyerinterestID"] = buyer_product_entry.buyer_interest_id
-	buyer_product["is_active"] = buyer_product_entry.is_active
+	buyer_product["is_active"] = bool(buyer_product_entry.is_active)
 	buyer_product["responded"] = buyer_product_entry.responded
 	buyer_product["created_at"] = buyer_product_entry.created_at
 	buyer_product["updated_at"] = buyer_product_entry.updated_at
@@ -293,7 +293,7 @@ def serialize_buyer_product_response(buyer_product_entry, parameters = {}):
 	buyer_product["buyerID"] = buyer_product_entry.buyer_id
 	buyer_product["buyerproductID"] = buyer_product_entry.buyer_product_id
 	buyer_product["response_code"] = buyer_product_entry.response_code
-	buyer_product["has_swiped"] = buyer_product_entry.has_swiped
+	buyer_product["has_swiped"] = int(buyer_product_entry.has_swiped)
 	buyer_product["responded_from"] = buyer_product_entry.responded_from
 	buyer_product["created_at"] = buyer_product_entry.created_at
 	buyer_product["updated_at"] = buyer_product_entry.updated_at
