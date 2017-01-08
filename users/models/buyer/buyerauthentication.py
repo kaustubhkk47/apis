@@ -152,11 +152,9 @@ class BuyerFireBaseToken(models.Model):
 		if self.buyer_id != None:
 			return
 		notification = {}
-		notification["title"] = ""
-		notification["body"] = "" 
-		sendNotification(self, )
-
-
+		notification["title"] = "Welcome to Wholdus"
+		notification["body"] = "5% cashback on first order. Only for 48 hrs!" 
+		sendNotification(self, notification = notification)
 
 def sendNotification(buyerFireBaseTokenPtr, notification = {}, data = {}):
 

@@ -331,5 +331,5 @@ def put_buyer_firebase_token_details(request, parameters):
 		closeDBConnection()
 		return customResponse(500, error_code = 1)
 	else:
-		#buyerFireBaseTokenPtr.sendWelcomeNotification()
+		buyerFireBaseTokenPtr.sendWelcomeNotification()
 		return customResponse(200, {"token":"token successfully created"})
