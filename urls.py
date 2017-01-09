@@ -123,6 +123,10 @@ urlpatterns += [
 	url(r'^general/sentsms/deliveryreport/$', general_handler.delivery_report_details)
 ]
 
+urlpatterns += [
+	url(r'^general/faqs/$', general_handler.faq_details)
+]
+
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 """

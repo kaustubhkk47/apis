@@ -4,6 +4,8 @@ from django.contrib import admin
 
 from .models.alexastats import *
 from .models.smssent import *
+from .models.faqs import *
 
 admin.site.register(AlexaStats, AlexaStatsAdmin)
 admin.site.register(SMSSent, SMSSentAdmin)
+admin.site.register(FAQEntry)
