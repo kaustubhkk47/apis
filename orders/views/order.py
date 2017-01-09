@@ -158,7 +158,7 @@ def post_new_order(request, parameters={}):
 			OrderItem.objects.bulk_create(orderItemstoCreate)
 		
 		sendOrderMail(newOrder)
-		newOrder.sendOrderNotification("Wholdus: Order placed", "Order ID : " + newOrder.display_number)
+		newOrder.sendOrderNotification("Wholdus Order confirmed", "Order ID : " + newOrder.display_number)
 		subOrders = SubOrder.objects.filter(order_id = newOrder.id)
 		buyerAddressPtr = newOrder.buyer_address_history
 		for SubOrderPtr in subOrders:

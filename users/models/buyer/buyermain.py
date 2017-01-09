@@ -62,7 +62,7 @@ class Buyer(models.Model):
 		return True
 
 	def get_firebase_tokens(self):
-		return BuyerFireBaseToken.objects.filter(buyer_id = self.id)
+		return BuyerFireBaseToken.objects.filter(buyer_id = self.id, delete_status=False)
 
 class BuyerAddress(models.Model):
 	buyer = models.ForeignKey('users.Buyer')

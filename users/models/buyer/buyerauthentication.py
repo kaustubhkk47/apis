@@ -133,6 +133,8 @@ class BuyerFireBaseToken(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	delete_status = models.BooleanField(default=False)
+
 	class Meta:
 		verbose_name="Buyer FireBase Token"
 		verbose_name_plural = "Buyer FireBase Tokens"
@@ -147,14 +149,6 @@ class BuyerFireBaseToken(models.Model):
 		if not "token" in data or data["token"] == None or data["token"] == "":
 			return False
 		return True
-
-	def sendWelcomeNotification(self):
-		if self.buyer_id != None:
-			return
-		notification = {}
-		notification["title"] = "Welcome to Wholdus"
-		notification["body"] = "5% cashback on first order. Only for 48 hrs!" 
-		sendNotification(self, notification = notification)
 
 def sendNotification(buyerFireBaseTokenPtr, notification = {}, data = {}):
 
@@ -180,6 +174,8 @@ def sendNotification(buyerFireBaseTokenPtr, notification = {}, data = {}):
 	if type(buyerFireBaseTokenPtr) == BuyerFireBaseToken:
 		payload["to"] = buyerFireBaseTokenPtr.token
 	else:
+		if len(buyerFireBaseTokenPtr) == 0:
+			return
 		registrationIDs = []
 		for buyerFireBaseToken in buyerFireBaseTokenPtr:
 			registrationIDs.append(buyerFireBaseToken.token)
@@ -203,7 +199,8 @@ def sendNotification(buyerFireBaseTokenPtr, notification = {}, data = {}):
 					errorMessage = result["error"]
 
 					if errorMessage == "InvalidRegistration" or errorMessage == "NotRegistered":
-						buyerFireBaseTokenPtr[i].delete()
+						buyerFireBaseTokenPtr[i].delete_status = True
+						buyerFireBaseTokenPtr[i].save()
 
 				if "registration_id" in result:
 					buyerFireBaseTokenPtr[i].token = result["registration_id"]
@@ -211,7 +208,7 @@ def sendNotification(buyerFireBaseTokenPtr, notification = {}, data = {}):
 	elif response.status_code == 401:
 		log.critical("Firebase server key authentication failure error 400")
 	elif response.status_code == 400:
-		log.critical("Firebase malformed json for data {} and notification {}".format(data, notification))
+		log.critical("Firebase malformed json for data {}".format(data))
 
 def validateBuyerAccessToken(accessToken):
 

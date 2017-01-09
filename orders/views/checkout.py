@@ -225,7 +225,7 @@ def checkout_new_order(checkoutPtr, parameters):
 		subCarts.update(status = 1, updated_at = nowTime)
 	
 		sendOrderMail(newOrder)
-		newOrder.sendOrderNotification("Order Successfully Placed", "We'll contact you soon for confirmation :)")
+		
 		return serializeOrder(newOrder, parameters)
 	except Exception as e:
 		log.critical(e)

@@ -5,3 +5,4 @@ from .buyerextra import *
 from .buyerstore import *
 from .buyerregistration import *
 from .buyerauthentication import *
+from .notifications import *
