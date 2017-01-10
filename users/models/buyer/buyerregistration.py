@@ -68,7 +68,7 @@ def validateBuyerRegistrationData(buyer):
 	if not "mobile_number" in buyer or not validate_mobile_number(buyer["mobile_number"]):
 		return False
 	if not "email" in buyer or buyer["email"]==None or not validate_email(buyer["email"]):
-		return False
+		buyer["email"] = ""
 
 	return True
 

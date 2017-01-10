@@ -17,15 +17,15 @@ def post_new_buyer_registration(request, parameters):
 	if not len(buyer_registration) or not validateBuyerRegistrationData(buyer_registration):
 		return customResponse(400, error_code=5, error_details=  "Invalid data for buyer registration sent")
 
-	if buyerEmailExists(buyer_registration["email"]):
+	if buyer_registration["email"] != "" and buyerEmailExists(buyer_registration["email"]):
 		return customResponse(400, error_code=6, error_details=  "buyer email already exists")
 
 	if buyerMobileNumberExists(buyer_registration["mobile_number"]):
 		return customResponse(400, error_code=6, error_details= "buyer phone number already exists")
 
 	## Invalidate all registrations with same email or mobile number
-
-	BuyerRegistration.objects.filter(email=buyer_registration["email"]).update(is_active=False, updated_at = timezone.now())
+	if buyer_registration["email"] != "":
+		BuyerRegistration.objects.filter(email=buyer_registration["email"]).update(is_active=False, updated_at = timezone.now())
 	BuyerRegistration.objects.filter(mobile_number=buyer_registration["mobile_number"]).update(is_active=False, updated_at = timezone.now())
 
 	try:
