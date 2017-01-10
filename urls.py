@@ -124,7 +124,10 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-	url(r'^general/faqs/$', general_handler.faq_details)
+	url(r'^general/faqs/$', general_handler.faq_details),
+	url(r'^general/privacypolicy/$', general_handler.privacy_policy_details),
+	url(r'^general/aboutus/$', general_handler.about_us_details),
+	url(r'^general/termsandconditions/$', general_handler.terms_and_conditions_details),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

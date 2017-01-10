@@ -26,3 +26,30 @@ def faq_details(request, version = "0"):
 		return faqs.get_faq_details(request)
 
 	return customResponse(404, error_code = 7)
+
+@csrf_exempt
+def privacy_policy_details(request, version = "0"):
+
+	if request.method == "GET":
+	
+		return faqs.get_privacy_policy_details(request)
+
+	return customResponse(404, error_code = 7)
+
+@csrf_exempt
+def about_us_details(request, version = "0"):
+
+	if request.method == "GET":
+	
+		return faqs.get_about_us_details(request)
+
+	return customResponse(404, error_code = 7)
+
+@csrf_exempt
+def terms_and_conditions_details(request, version = "0"):
+
+	if request.method == "GET":
+	
+		return faqs.get_terms_and_conditions_details(request)
+
+	return customResponse(404, error_code = 7)
