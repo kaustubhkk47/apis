@@ -54,7 +54,7 @@ def send_sms(message_text, mobile_number, user_type, sms_purpose):
 
 	data = {}
 	data["apiKey"] = apiKey
-	data["sender"] = "TXTLCL"
+	data["sender"] = "WHOLDS"
 	
 	data["message"] = message_text
 
