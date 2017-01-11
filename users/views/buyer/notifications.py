@@ -28,4 +28,6 @@ def send_filled_cart_notification():
 		notification = {}
 		notification["title"] = "Wholdus"
 		notification["body"] = "Difficulty in placing order? Call us for help"
-		sendNotification(cartObj.buyer.get_firebase_tokens(),notification = notification)
+		data = {}
+		data["activity"] = "Help"
+		sendNotification(cartObj.buyer.get_firebase_tokens(),notification = notification, data = data)
