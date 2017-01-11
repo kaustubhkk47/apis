@@ -120,6 +120,7 @@ def post_buyer_registration_verify(request, parameters):
 
 		populateBuyer(newBuyer, buyer)
 		newBuyer.password = buyer["password"]
+		newBuyer.mobile_verification = 1
 		newBuyer.save()
 		
 		buyeraddress = buyer["address"]

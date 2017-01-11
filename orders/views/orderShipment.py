@@ -191,6 +191,7 @@ def update_order_shipment(request):
 			update_order_item_status(orderShipmentPtr.id, 9)
 			orderPtr = orderShipmentPtr.suborder.order
 			orderPtr.sendOrderNotification("Order No {} Shipped".format(order.display_number), "Track it from my orders tab")
+			orderPtr.sendOrderSMS("has been dispated. Track the order from the My Orders tab in your Wholdus app")
 		elif status == 5:
 			orderShipmentPtr.tpl_stuck_in_transit_time = timezone.now()
 			update_order_item_status(orderShipmentPtr.id, 10)
@@ -201,6 +202,7 @@ def update_order_shipment(request):
 			update_suborder_completion_status(orderShipmentPtr.suborder)
 			orderPtr = orderShipmentPtr.suborder.order
 			orderPtr.sendOrderNotification("Order No {} Delivered".format(order.display_number), "We were happy to serve you :)")
+			orderPtr.sendOrderSMS("has been successfully delivered. We were happy to serve you :)")
 		elif status == 7:
 			orderShipmentPtr.rto_in_transit_time = timezone.now()
 			if "rto_remarks" in orderShipment and not orderShipment["rto_remarks"]==None:

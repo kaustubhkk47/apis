@@ -5,6 +5,8 @@ from scripts.utils import create_email, link_to_foreign_key, validate_integer, v
 
 from users.models.buyer import Buyer, BuyerAddress
 
+from general.models.smssent import send_sms
+
 from catalog.models.product import Product
 from catalog.models.productLot import getCalculatedPricePerPiece
 from .orderItem import OrderItem, OrderItemNonCompletionStatus
@@ -84,6 +86,17 @@ class Order(models.Model):
 		data["orderID"] = str(self.id)
 		sendNotification(self.buyer.get_firebase_tokens(), notification = notification, data = data)
 
+	def sendOrderSMS(self, body):
+		buyer = self.buyer
+		message_text = "Hi"
+		if buyer.name != "":
+			message_text += " " + buyer.name
+		elif buyer.company_name != "":
+			message_text += " " +  buyer.company_name
+
+		message_text += ", your order " + self.display_number + " "
+		message_text += body
+		send_sms(message_text, buyer.mobile_number, "buyer", "Order notification")
 
 class OrderAdmin(admin.ModelAdmin):
 	search_fields = ["buyer__name", "display_number", "buyer__company_name", "buyer__mobile_number"]
