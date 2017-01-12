@@ -22,12 +22,12 @@ def send_filled_cart_notification():
 
 	cartPtr = filterCarts({})
 	nowTime = timezone.now()
-	cartPtr.filter(updated_at__gt=nowTime -  timedelta(hours=1, minutes=30), updated_at__lt=nowTime -  timedelta(minutes=30))
+	cartPtr = cartPtr.filter(updated_at__gt=nowTime -  timedelta(hours=1, minutes=30), updated_at__lt=nowTime -  timedelta(minutes=30))
 
 	for cartObj in cartPtr:
 		notification = {}
 		notification["title"] = "Wholdus"
-		notification["body"] = "Difficulty in placing order? Call us for help"
+		notification["body"] = "Difficulty in placing order? Chat for help"
 		data = {}
 		data["activity"] = "Help"
 		sendNotification(cartObj.buyer.get_firebase_tokens(),notification = notification, data = data)
