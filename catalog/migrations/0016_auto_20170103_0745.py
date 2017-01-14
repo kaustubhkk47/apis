@@ -13,7 +13,7 @@ def delete_to_show_online(apps, schema_editor):
 
 	for product in products:
 		product.delete_status = 0
-		product.show_online = 1
+		product.show_online = 0
 		product.save()
 
 	categories = Category.objects.filter(delete_status=1)

@@ -125,6 +125,17 @@ def post_new_cart_item(request, parameters):
 		closeDBConnection()
 		return customResponse(500, error_code = 1)
 	else:
+
+		mail_template_file = "extras/cart_addition.html"
+		mail_dict = {}
+		mail_dict["buyerID"] = buyerID
+		mail_dict["cart"] = serializeCart(cartPtr)
+		mail_dict["cartProducts"] = cartProducts
+		subject = "New cart item addition for buyer ID " + str(buyerID)
+		from_email = "Wholdus Info <info@wholdus.com>"
+		to = ["manish@wholdus.com","kushagra@wholdus.com"]
+		create_email(mail_template_file,mail_dict,subject,from_email,to)
+
 		closeDBConnection()
 		return customResponse(200, {"carts": parseCart(filterCarts(parameters),parameters)})
 

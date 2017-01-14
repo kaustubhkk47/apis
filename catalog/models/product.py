@@ -364,7 +364,6 @@ def filterProducts(parameters = {}):
 		products = products.filter(show_online=parameters["product_show_online"])
 
 	if "product_order_by" in parameters:
-		print "here " + parameters["product_order_by"]
 		if parameters["product_order_by"] == "latest":
 			products = products.order_by('-id')
 		elif parameters["product_order_by"] == "price_ascending":
