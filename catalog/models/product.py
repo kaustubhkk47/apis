@@ -50,6 +50,9 @@ class Product(models.Model):
 	delete_status = models.BooleanField(default=False)
 	is_catalog = models.BooleanField(default=False)
 
+	product_likes = models.IntegerField(default=0)
+	product_dislikes = models.IntegerField(default=0)
+
 	def get_absolute_url(self):
 		return r"{}/{}-{}/{}-{}".format(settings.BASE_URL, self.category.slug,self.category.id,self.slug,self.id)
 
