@@ -52,6 +52,7 @@ class Product(models.Model):
 
 	product_likes = models.IntegerField(default=0)
 	product_dislikes = models.IntegerField(default=0)
+	product_score = models.DecimalField(max_digits=10, decimal_places=4, default=50)
 
 	def get_absolute_url(self):
 		return r"{}/{}-{}/{}-{}".format(settings.BASE_URL, self.category.slug,self.category.id,self.slug,self.id)

@@ -46,6 +46,7 @@ def serialize_product(productsItem, parameters = {}):
 	product["display_name"] = productsItem.display_name
 	product["is_catalog"] = productsItem.is_catalog
 	product["delete_status"] = productsItem.delete_status
+	product["product_score"] = productsItem.product_score
 	product["absolute_path"] = productsItem.get_absolute_url()
 	product["margin"] = '{0:.1f}'.format((float(productsItem.price_per_unit) - float(productsItem.min_price_per_unit))/float(productsItem.price_per_unit)*100)
 	product["url"] = productsItem.category.slug + "-" + str(productsItem.category.id) + "/" + productsItem.slug+ "-" + str(productsItem.id)

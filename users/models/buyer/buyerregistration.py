@@ -14,6 +14,7 @@ class BuyerRegistration(models.Model):
 	email = models.EmailField(max_length=255, blank=True, null = True)
 	mobile_number = models.CharField(max_length=11, blank=False)
 	password = models.CharField(max_length=255, blank=True)
+	name = models.CharField(max_length=200, blank=True)
 
 	otp_number = models.CharField(max_length=10, blank=True)
 	messages_sent = models.IntegerField(default=0)
@@ -35,6 +36,7 @@ class BuyerRegistration(models.Model):
 		self.email = buyer["email"]
 		self.mobile_number = buyer["mobile_number"]
 		self.password = buyer["password"]
+		self.name = buyer["name"]
 		self.otp_number = "{0:06d}".format(random.randint(0, 999999))
 
 	def sendVerificationSMS(self):
@@ -50,6 +52,7 @@ class BuyerRegistration(models.Model):
 		buyer["email"] = self.email
 		buyer["mobile_number"] = self.mobile_number
 		buyer["password"] = self.password
+		buyer["name"] = self.name
 		buyer["whatsapp_number"] = self.mobile_number
 		buyer["mobile_verification"] = 1
 		buyer["email_verification"] = 1
@@ -69,6 +72,8 @@ def validateBuyerRegistrationData(buyer):
 		return False
 	if not "email" in buyer or buyer["email"]==None or not validate_email(buyer["email"]):
 		buyer["email"] = ""
+	if not "name" in buyer or buyer["name"]==None:
+		buyer["name"] = ""
 
 	return True
 
