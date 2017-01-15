@@ -445,7 +445,7 @@ def populateBuyerProductParameters(request, parameters = {}, version = "0"):
 	if productID != "":
 		parameters["productsArr"] = getArrFromString(productID)
 
-	parameters = getPaginationParameters(request, parameters, 1, version)
+	parameters = getPaginationParameters(request, parameters, 10, version)
 
 	from .catalog_handler import populateProductDetailsParameters
 

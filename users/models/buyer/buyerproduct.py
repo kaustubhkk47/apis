@@ -292,7 +292,7 @@ def filterBuyerSharedProductID(parameters = {}):
 
 def filterBuyerProducts(parameters = {}):
 
-	buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True).order_by('-product_id')
+	buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True).order_by('-product__product_score')
 
 	if "buyerProductsArr" in parameters:
 		buyerProducts = buyerProducts.filter(id__in=parameters["buyerProductsArr"])
@@ -340,7 +340,7 @@ def filterBuyerProducts(parameters = {}):
 
 def filterBuyerProductResponse(parameters = {}):
 
-	buyerProductResponse = BuyerProductResponse.objects.filter(buyer__delete_status=False,product__delete_status=False, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
+	buyerProductResponse = BuyerProductResponse.objects.filter(buyer__delete_status=False,product__delete_status=False, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False).order_by('-product__product_score')
 
 	if "buyersArr" in parameters:
 		buyerProductResponse = buyerProductResponse.filter(buyer_id__in=parameters["buyersArr"])
