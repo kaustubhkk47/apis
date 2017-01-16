@@ -1,6 +1,7 @@
 from django.db import connection
 from django.utils import timezone
 from catalog.models.product import Product
+from django.db.models import Sum
 
 def update_product_likes_dislikes():
  	cursor = connection.cursor()
@@ -12,7 +13,10 @@ def update_scores():
 	cursor = connection.cursor()
  	startTime = "'" + Product.objects.earliest('created_at').created_at.strftime("%Y-%m-%d %H:%M:%S") + "'"
  	nowTime = "'" + timezone.now().strftime("%Y-%m-%d %H:%M:%S") + "'"
- 	cursor.execute("UPDATE catalog_product SET product_score = (DATEDIFF(created_at," +startTime +  ")/DATEDIFF("+ nowTime +", " + startTime+" )*30 + ((product_likes + 20)/(product_likes + product_dislikes + 40))*70)")
+ 	summary = Product.objects.aggregate(total_likes = Sum('product_likes'), total_dislikes=Sum('product_dislikes'))
+ 	avgRating = (float(summary["total_likes"]))/(summary["total_likes"] + summary["total_dislikes"])
+ 	threshold = 50
+ 	cursor.execute("UPDATE catalog_product SET product_score = (DATEDIFF(created_at," +startTime +  ")/DATEDIFF("+ nowTime +", " + startTime+" )*30 + ((product_likes + "+str(threshold*avgRating)+")/(product_likes + product_dislikes + "+ str(threshold) +"))*70)")
  	cursor.close()
 
  	
