@@ -195,7 +195,7 @@ def validateBuyerData(buyer, oldbuyer, is_new):
 		buyer["email_verification"] = oldbuyer.email_verification
 	if not "gender" in buyer or buyer["gender"]:
 		buyer["gender"] = oldbuyer.gender
-	if not "whatsapp_number" in buyer or buyer["whatsapp_number"]:
+	if not "whatsapp_number" in buyer or buyer["whatsapp_number"]==None:
 		if oldbuyer.whatsapp_number==None or oldbuyer.whatsapp_number=="":
 			buyer["whatsapp_number"] = buyer["mobile_number"]
 		else:
