@@ -201,7 +201,7 @@ def update_buyer(request, parameters = {}):
 				validateBuyerDetailsData(buyerdetails, buyerPtr.buyerdetails, 0)
 				populateBuyerDetails(buyerPtr.buyerdetails, buyerdetails)
 				if "buyertypeID" in buyer["details"] and validate_integer(buyer["details"]["buyertypeID"]):
-					businessTypePtr = BusinessType.objects.filter(id=int(buyer["details"]["buyertypeID"]), can_be_buyer=True)
+					businessTypePtr = BusinessType.objects.filter(id=int(buyer["details"]["buyertypeID"]))
 					if len(businessTypePtr) > 0:
 						businessTypePtr = businessTypePtr[0]
 						buyerPtr.buyerdetails.buyer_type = businessTypePtr
