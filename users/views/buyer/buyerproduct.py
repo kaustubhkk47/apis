@@ -61,7 +61,6 @@ def get_buyer_product_details(request, parameters = {}):
 
 def get_buyer_product_response_details(request, parameters = {}):
 	try:
-		
 		buyerProductResponse = filterBuyerProductResponse(parameters)
 
 		paginator = Paginator(buyerProductResponse, parameters["itemsPerPage"])

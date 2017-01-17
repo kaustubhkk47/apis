@@ -102,7 +102,7 @@ def post_new_buyer(request):
 		buyerdetails = buyer["details"]
 		newBuyerDetails = BuyerDetails(buyer = newBuyer)
 		if "buyertypeID" in buyer["details"] and validate_integer(buyer["details"]["buyertypeID"]):
-			businessTypePtr = BusinessType.objects.filter(id=int(buyer["details"]["buyertypeID"]), can_be_buyer=True)
+			businessTypePtr = BusinessType.objects.filter(id=int(buyer["details"]["buyertypeID"]))
 			if len(businessTypePtr) > 0:
 				businessTypePtr = businessTypePtr[0]
 				newBuyerDetails.buyer_type = businessTypePtr

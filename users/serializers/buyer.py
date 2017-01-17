@@ -18,7 +18,10 @@ def serialize_buyer(buyer_entry, parameters = {}):
 	buyer["company_name"] = buyer_entry.company_name
 	buyer["mobile_number"] = buyer_entry.mobile_number
 	buyer["whatsapp_number"] = buyer_entry.whatsapp_number
-	buyer["email"] = buyer_entry.email
+	if  buyer_entry.email == None:
+		buyer["email"] = ""
+	else:
+		buyer["email"] = buyer_entry.email
 	buyer["alternate_phone_number"] = buyer_entry.alternate_phone_number
 	buyer["mobile_verification"] = buyer_entry.mobile_verification
 	buyer["email_verification"] = buyer_entry.email_verification

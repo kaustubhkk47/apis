@@ -292,7 +292,7 @@ def filterBuyerSharedProductID(parameters = {}):
 
 def filterBuyerProducts(parameters = {}):
 
-	buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True).order_by('-product__product_score')
+	buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True)
 
 	if "buyerProductsArr" in parameters:
 		buyerProducts = buyerProducts.filter(id__in=parameters["buyerProductsArr"])
@@ -333,25 +333,67 @@ def filterBuyerProducts(parameters = {}):
 			productIds = []
 		buyerProducts = buyerProducts.filter(product_id__in=productIds)
 
-	if "productsArr" in parameters:
-		buyerProducts = buyerProducts.filter(product_id__in=parameters["productsArr"])
+	buyerProducts = applyProductFilters(buyerProducts, parameters)
 
 	return buyerProducts
 
 def filterBuyerProductResponse(parameters = {}):
 
-	buyerProductResponse = BuyerProductResponse.objects.filter(buyer__delete_status=False,product__delete_status=False, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False).order_by('-product__product_score')
+	buyerProductResponse = BuyerProductResponse.objects.filter(buyer__delete_status=False,product__delete_status=False, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
 
 	if "buyersArr" in parameters:
 		buyerProductResponse = buyerProductResponse.filter(buyer_id__in=parameters["buyersArr"])
 
-	if "productsArr" in parameters:
-		buyerProductResponse = buyerProductResponse.filter(product_id__in=parameters["productsArr"])
+	buyerProductResponse = applyProductFilters(buyerProductResponse, parameters)
 
 	if "responded" in parameters:
 		buyerProductResponse = buyerProductResponse.filter(response_code= parameters["responded"])
 
 	return buyerProductResponse
+
+def applyProductFilters(modelPtr, parameters):
+
+	if "productsArr" in parameters:
+		modelPtr = modelPtr.filter(product_id__in=parameters["productsArr"])
+
+	if "categoriesArr" in parameters:
+		modelPtr = modelPtr.filter(product__category_id__in=parameters["categoriesArr"])
+
+	if "sellersArr" in parameters:
+		modelPtr = modelPtr.filter(product__seller_id__in=parameters["sellersArr"])
+
+	if "fabricArr" in parameters:
+		query = reduce(operator.or_, (Q(product__productdetails__fabric_gsm__icontains = item) for item in parameters["fabricArr"]))
+		modelPtr = modelPtr.filter(query)
+
+	if "colourArr" in parameters:
+		query = reduce(operator.or_, (Q(product__productdetails__colours__icontains = item) for item in parameters["colourArr"]))
+		modelPtr = modelPtr.filter(query)
+
+	if "price_filter_applied" in parameters:
+		modelPtr = modelPtr.filter(product__min_price_per_unit__range=(parameters["min_price_per_unit"],parameters["max_price_per_unit"]))
+
+	if "product_verification" in parameters:
+		modelPtr = modelPtr.filter(product__verification=parameters["product_verification"])
+	
+	if "product_show_online" in parameters:
+		modelPtr = modelPtr.filter(product__show_online=parameters["product_show_online"])
+
+	if "product_order_by" in parameters:
+		if parameters["product_order_by"] == "latest":
+			modelPtr = modelPtr.order_by('-product_id')
+		elif parameters["product_order_by"] == "price_ascending":
+			modelPtr = modelPtr.order_by('product__min_price_per_unit', '-product_id')
+		elif parameters["product_order_by"] == "price_descending":
+			modelPtr = modelPtr.order_by('-product__min_price_per_unit', '-product_id')
+		else :
+			modelPtr = modelPtr.order_by('-product__product_score')
+	else:
+		modelPtr = modelPtr.order_by('-product__product_score')
+
+	return modelPtr
+
+
 
 def filterBuyerInterestProducts(BuyerInterestPtr, parameters = {}):
 

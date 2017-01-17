@@ -144,6 +144,19 @@ def product_catalog(request, version = "0"):
 
 def populateProductParameters(request, parameters = {}, version = "0"):
 
+	print parameters
+	parameters = getPaginationParameters(request, parameters, 10)
+
+	parameters = populateProductFilterParameters(request, parameters, version)
+
+	parameters = populateAllUserIDParameters(request, parameters, version)
+
+	parameters = populateProductDetailsParameters(request, parameters, version)
+
+	return parameters
+
+def populateProductFilterParameters(request, parameters = {}, version = "0"):
+
 	productID = request.GET.get("productID", "")
 	categoryID = request.GET.get("categoryID", "")
 	fabric = request.GET.get("fabric", "")
@@ -153,7 +166,6 @@ def populateProductParameters(request, parameters = {}, version = "0"):
 	productShowOnline = request.GET.get("product_show_online", "")
 	productVerification = request.GET.get("product_verification", "")
 
-	parameters = getPaginationParameters(request, parameters, 10)
 
 	if productID != "" and productID != None:
 		parameters["productsArr"] = getArrFromString(productID)
@@ -182,12 +194,8 @@ def populateProductParameters(request, parameters = {}, version = "0"):
 	if productOrderBy != "" and productOrderBy != None:
 		parameters["product_order_by"] = productOrderBy
 
-
-	parameters = populateAllUserIDParameters(request, parameters, version)
-
-	parameters = populateProductDetailsParameters(request, parameters, version)
-
 	return parameters
+
 
 def populateProductDetailsParameters(request, parameters = {}, version = "0"):
 
