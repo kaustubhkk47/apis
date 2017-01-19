@@ -55,6 +55,9 @@ def post_new_order(request, parameters={}):
 	if len(buyerPtr) == 0:
 		return customResponse(400, error_code=6, error_details = "Invalid id for buyer sent")
 
+	if not "addressID" in order or not validate_integer(order["addressID"]) or not BuyerAddress.objects.filter(id=int(order["addressID"])).exists():
+		return customResponse(400, error_code=6, error_details = "Invalid id for buyer address sent")
+
 	buyerPtr = buyerPtr[0]
 
 	if not "products" in order or order["products"]==None:

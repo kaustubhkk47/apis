@@ -17,7 +17,7 @@
 			{% endif %}
 			</b>
 			</p>
-			{% if not buyer_address.pincodeID %}
+			{% if buyer_address.address|length > 0 %}
 			<p>
 				<b>Address: </b>
 

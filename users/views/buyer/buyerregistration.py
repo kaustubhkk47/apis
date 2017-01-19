@@ -104,9 +104,6 @@ def post_buyer_registration_verify(request, parameters):
 
 	buyerRegistrationPtr.fillBuyerData(buyer)
 
-	buyer["address"] = {}
-	validateBuyerAddressData(buyer["address"], BuyerAddress())
-
 	buyer["details"] = {}
 	validateBuyerDetailsData(buyer["details"], BuyerDetails(), 1)
 
@@ -123,22 +120,11 @@ def post_buyer_registration_verify(request, parameters):
 		newBuyer.mobile_verification = 1
 		newBuyer.save()
 		
-		buyeraddress = buyer["address"]
-		newAddress = BuyerAddress(buyer=newBuyer)
-		populateBuyerAddress(newAddress, buyeraddress)
-		newAddress.priority = 0
-		newAddress.alias = "Store"
-
 		buyerdetails = buyer["details"]
 		newBuyerDetails = BuyerDetails(buyer = newBuyer)
 		populateBuyerDetails(newBuyerDetails, buyerdetails)
 		
 		newBuyerDetails.save()
-		newAddress.save()
-
-		newBuyerAddressHistory = BuyerAddressHistory()
-		newBuyerAddressHistory.populateFromBuyerAddress(newAddress)
-		newBuyerAddressHistory.save()
 
 		newBuyerRefreshToken = BuyerRefreshToken()
 		newBuyerRefreshToken.populateFromBuyer(newBuyer)

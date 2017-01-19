@@ -147,6 +147,8 @@ def post_new_buyer_address(request, parameters):
 				newAddress = newAddress[0]
 		if not addressPresent:
 			newAddress = BuyerAddress(buyer_id=int(buyer_address["buyerID"]))
+			if not BuyerAddress.objects.filter(buyer_id=int(buyer_address["buyerID"])).exists():
+				newAddress.priority = 0
 		populateBuyerAddress(newAddress, buyer_address)
 		newAddress.save()
 
@@ -219,17 +221,14 @@ def update_buyer(request, parameters = {}):
 		if "address" in buyer and buyer["address"]!=None:
 			addressSent = 1
 			buyeraddress = buyer["address"]
-			if not "addressID" in buyeraddress or not buyeraddress["addressID"] or not validate_integer(buyeraddress["addressID"]):
+			if not "addressID" in buyeraddress or not validate_integer(buyeraddress["addressID"]):
 				return customResponse(400, error_code=5,  error_details="Address id not sent")
-			buyerAddressPtr = BuyerAddress.objects.filter(id = int(buyeraddress["addressID"]))
+			buyerAddressPtr = BuyerAddress.objects.filter(id = int(buyeraddress["addressID"]), buyer_id=buyerPtr.id)
 
 			if len(buyerAddressPtr) == 0:
 				return customResponse(400, error_code=6,  error_details="Invalid address id sent")
 
 			buyerAddressPtr = buyerAddressPtr[0]
-
-			if(buyerAddressPtr.buyer_id != buyerPtr.id):
-				return customResponse(400, error_code=6,  error_details= "Address id for incorrect buyer sent")
 				
 			validateBuyerAddressData(buyeraddress, buyerAddressPtr)
 			populateBuyerAddress(buyerAddressPtr, buyeraddress)
