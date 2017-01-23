@@ -33,7 +33,7 @@ def serialize_categories(categoriesItem, parameters = {}):
 
 	if "category_product_details" in parameters and parameters["category_product_details"] == 1:
 		productPtr = filterProducts(parameters)
-		productPtr = productPtr.filter(category_id=categoriesItem.id)[0:10]
+		productPtr = productPtr.filter(category_id=categoriesItem.id)[0:12]
 		from .product import multiple_products_parser
 		category["products"] = multiple_products_parser(productPtr, parameters)
 
