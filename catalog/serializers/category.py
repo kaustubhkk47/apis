@@ -32,6 +32,8 @@ def serialize_categories(categoriesItem, parameters = {}):
 			category["buyer_interest"] = serialize_buyer_interest(buyerInterestPtr, parameters)
 
 	if "category_product_details" in parameters and parameters["category_product_details"] == 1:
+		parameters["product_show_online"] = 1
+		parameters["product_verification"] = 1
 		productPtr = filterProducts(parameters)
 		productPtr = productPtr.filter(category_id=categoriesItem.id)[0:12]
 		from .product import multiple_products_parser
