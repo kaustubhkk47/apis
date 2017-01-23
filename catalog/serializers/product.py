@@ -59,7 +59,7 @@ def serialize_product(productsItem, parameters = {}):
 		seller["name"] =productsItem.seller.name
 		product["seller"] = seller
 
-	if "category_details" in parameters and parameters["category_details"] == 1:
+	if "category_details" in parameters and parameters["category_details"] == 1 and not "category_product_details" in parameters:
 		product["category"] = serialize_categories(productsItem.category, parameters)
 	else:
 		category = {}

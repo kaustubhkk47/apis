@@ -61,6 +61,11 @@ def populateCategorytDetailsParameters(request, parameters = {}, version = "0"):
 	else:
 		parameters["seller_category_details"] = defaultValue
 
+	categoryProductDetails = request.GET.get("category_product_details", None)
+	if validate_bool(categoryProductDetails):
+		parameters["category_product_details"] = int(categoryProductDetails)
+		parameters = populateProductDetailsParameters(request, parameters, version)
+
 	parameters["category_details_details"] = 1
 
 	return parameters

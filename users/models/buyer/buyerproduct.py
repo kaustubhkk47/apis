@@ -334,6 +334,7 @@ def filterBuyerProducts(parameters = {}):
 		buyerProducts = buyerProducts.filter(product_id__in=productIds)
 
 	buyerProducts = applyProductFilters(buyerProducts, parameters)
+	buyerProducts = applyProductSorting(buyerProducts, parameters)
 
 	return buyerProducts
 
@@ -344,10 +345,11 @@ def filterBuyerProductResponse(parameters = {}):
 	if "buyersArr" in parameters:
 		buyerProductResponse = buyerProductResponse.filter(buyer_id__in=parameters["buyersArr"])
 
-	buyerProductResponse = applyProductFilters(buyerProductResponse, parameters)
-
 	if "responded" in parameters:
 		buyerProductResponse = buyerProductResponse.filter(response_code= parameters["responded"])
+
+	buyerProductResponse = applyProductFilters(buyerProductResponse, parameters)
+	buyerProductResponse = applyProductSorting(buyerProductResponse, parameters, "-updated_at")
 
 	return buyerProductResponse
 
@@ -379,6 +381,13 @@ def applyProductFilters(modelPtr, parameters):
 	if "product_show_online" in parameters:
 		modelPtr = modelPtr.filter(product__show_online=parameters["product_show_online"])
 
+	return modelPtr
+
+def applyProductSorting(modelPtr, parameters, default_sorting=None):
+
+	if default_sorting == None:
+		default_sorting = '-product__product_score'
+
 	if "product_order_by" in parameters:
 		if parameters["product_order_by"] == "latest":
 			modelPtr = modelPtr.order_by('-product_id')
@@ -387,9 +396,9 @@ def applyProductFilters(modelPtr, parameters):
 		elif parameters["product_order_by"] == "price_descending":
 			modelPtr = modelPtr.order_by('-product__min_price_per_unit', '-product_id')
 		else :
-			modelPtr = modelPtr.order_by('-product__product_score')
+			modelPtr = modelPtr.order_by(default_sorting)
 	else:
-		modelPtr = modelPtr.order_by('-product__product_score')
+		modelPtr = modelPtr.order_by(default_sorting)
 
 	return modelPtr
 
