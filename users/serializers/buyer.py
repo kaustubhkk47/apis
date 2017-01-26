@@ -4,6 +4,10 @@ from catalog.serializers.product import serialize_product
 from address.serializers.state import serialize_state
 from .businesstype import serialize_business_type
 import time
+import jwt as JsonWebToken
+import settings
+from scripts.utils import getTimeStamp
+
 def serialize_buyer(buyer_entry, parameters = {}):
 
 	buyer = {}
@@ -14,7 +18,10 @@ def serialize_buyer(buyer_entry, parameters = {}):
 	buyer["company_name"] = buyer_entry.company_name
 	buyer["mobile_number"] = buyer_entry.mobile_number
 	buyer["whatsapp_number"] = buyer_entry.whatsapp_number
-	buyer["email"] = buyer_entry.email
+	if  buyer_entry.email == None:
+		buyer["email"] = ""
+	else:
+		buyer["email"] = buyer_entry.email
 	buyer["alternate_phone_number"] = buyer_entry.alternate_phone_number
 	buyer["mobile_verification"] = buyer_entry.mobile_verification
 	buyer["email_verification"] = buyer_entry.email_verification
@@ -24,7 +31,7 @@ def serialize_buyer(buyer_entry, parameters = {}):
 	buyer["updated_at"] = buyer_entry.updated_at
 	buyer["buyer_panel_url"] = str(buyer_entry.id) + "-" + str(int(time.mktime(buyer_entry.created_at.timetuple())))
 	buyer["store_url"] = buyer_entry.store_url
-	buyer["store_global_discount"] = buyer_entry.store_global_discount
+	buyer["store_global_margin"] = buyer_entry.store_global_margin
 	
 	if "buyer_details_details" in parameters and parameters["buyer_details_details"] == 1 and hasattr(buyer_entry,'buyerdetails'):
 		buyer_details = {}
@@ -36,13 +43,15 @@ def serialize_buyer(buyer_entry, parameters = {}):
 		buyer_details["purchase_duration"] = buyer_entry.buyerdetails.purchase_duration
 		if hasattr(buyer_entry.buyerdetails, "buyer_type") and buyer_entry.buyerdetails.buyer_type != None:
 			buyer_details["buyer_type"] = serialize_business_type(buyer_entry.buyerdetails.buyer_type)
+		else:
+			buyer_details["buyer_type"] = {}
 
 		buyer["details"] = buyer_details
 
 	if "buyer_interest_details" in parameters and parameters["buyer_interest_details"] == 1:
-	   buyerInterestQuerySet = filterBuyerInterest(parameters)
-	   buyerInterestQuerySet = buyerInterestQuerySet.filter(buyer_id = buyer_entry.id)
-	   buyer["buyer_interests"] = parse_buyer_interest(buyerInterestQuerySet,parameters)
+		buyerInterestQuerySet = filterBuyerInterest(parameters)
+		buyerInterestQuerySet = buyerInterestQuerySet.filter(buyer_id = buyer_entry.id)
+		buyer["buyer_interests"] = parse_buyer_interest(buyerInterestQuerySet,parameters)
 
 	if "buyer_product_details" in parameters and parameters["buyer_product_details"] == 1:
 		tempParameters = parameters.copy()
@@ -75,6 +84,70 @@ def serialize_buyer(buyer_entry, parameters = {}):
 
 	return buyer
 
+def serialize_buyer_registration(buyer_registration_entry, parameters = {}):
+
+	buyer_registration = {}
+
+	tokenPayload = {
+		"exp": buyer_registration_entry.getExpiryTimeStamp(),
+		"iat": getTimeStamp(buyer_registration_entry.created_at),
+		"sub":"buyer registration",
+		"jti": buyer_registration_entry.id
+	}
+
+	encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
+	
+	buyer_registration["registration_token"] = encoded
+
+	return buyer_registration
+
+def serialize_buyer_refresh_token(buyer_refresh_token_entry, parameters = {}):
+
+	tokenPayload = {
+		"exp": buyer_refresh_token_entry.getExpiryTimeStamp(),
+		"iat": getTimeStamp(buyer_refresh_token_entry.created_at),
+		"sub":"buyer refresh token",
+		"jti": buyer_refresh_token_entry.id,
+		"user":"buyer",
+		"buyerID":buyer_refresh_token_entry.buyer_id,
+	}
+
+	encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
+
+	return encoded
+
+def serialize_buyer_forgot_password_token(buyer_forgot_password_token_entry, parameters = {}):
+
+	buyer_forgot_password = {}
+
+	tokenPayload = {
+		"exp": buyer_forgot_password_token_entry.getExpiryTimeStamp(),
+		"iat": getTimeStamp(buyer_forgot_password_token_entry.created_at),
+		"sub":"buyer forgot password",
+		"jti": buyer_forgot_password_token_entry.id,
+		"user":"buyer",
+	}
+
+	encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
+
+	buyer_forgot_password["forgot_password_token"] = encoded
+
+	return buyer_forgot_password
+
+def serialize_buyer_access_token(buyer_access_token_entry, parameters = {}):
+
+	tokenPayload = {
+		"exp": buyer_access_token_entry.getExpiryTimeStamp(),
+		"iat": getTimeStamp(buyer_access_token_entry.created_at),
+		"sub":"buyer access token",
+		"jti": buyer_access_token_entry.id,
+		"buyerID":buyer_access_token_entry.buyer_id,
+		"user":"buyer"
+	}
+
+	encoded = JsonWebToken.encode(tokenPayload, settings.SECRET_KEY, algorithm='HS256')
+
+	return encoded
 
 def parse_buyer_address(buyer_addresses_queryset, parameters = {}):
 
@@ -90,6 +163,7 @@ def parse_buyer_address(buyer_addresses_queryset, parameters = {}):
 def serialize_buyer_address(buyer_address, parameters = {}):
 	buyer_address_entry = {
 		"addressID" : buyer_address.id,
+		"buyerID" : buyer_address.buyer_id,
 		"address" : buyer_address.address_line,
 		"landmark" : buyer_address.landmark,
 		"city" : buyer_address.city_name,
@@ -98,7 +172,11 @@ def serialize_buyer_address(buyer_address, parameters = {}):
 		"contact_number" : buyer_address.contact_number,
 		"pincode" : buyer_address.pincode_number,
 		"priority" : buyer_address.priority,
-		"pincodeID":buyer_address.pincode_id
+		"pincodeID":buyer_address.pincode_id,
+		"alias":buyer_address.alias,
+		"client_id":buyer_address.client_id,
+		"created_at":buyer_address.created_at,
+		"updated_at":buyer_address.updated_at
 	}
 	return buyer_address_entry
 
@@ -150,17 +228,19 @@ def serialize_buyer_interest(buyer_interest_entry, parameters = {}):
 	buyer_interest = {}
 
 	buyer_interest["buyerinterestID"] = buyer_interest_entry.id
+	buyer_interest["categoryID"] = buyer_interest_entry.category_id
 	buyer_interest["scale"] = buyer_interest_entry.scale
 	buyer_interest["price_filter_applied"] = buyer_interest_entry.price_filter_applied
 	buyer_interest["min_price_per_unit"] = buyer_interest_entry.min_price_per_unit
 	buyer_interest["max_price_per_unit"] = buyer_interest_entry.max_price_per_unit
 	buyer_interest["fabric_filter_text"] = buyer_interest_entry.fabric_filter_text
 	buyer_interest["productid_filter_text"] = buyer_interest_entry.productid_filter_text
-	buyer_interest["is_active"] = buyer_interest_entry.is_active
+	buyer_interest["is_active"] = bool(buyer_interest_entry.is_active)
 	buyer_interest["created_at"] = buyer_interest_entry.created_at
 	buyer_interest["updated_at"] = buyer_interest_entry.updated_at
 
-	buyer_interest["category"] = serialize_categories(buyer_interest_entry.category)
+	if not ("category_details_details" in parameters and parameters["category_details_details"] == 1):
+		buyer_interest["category"] = serialize_categories(buyer_interest_entry.category)
 
 	return buyer_interest
 
@@ -192,12 +272,19 @@ def serialize_buyer_product(buyer_product_entry, parameters = {}):
 	buyer_product["buyerID"] = buyer_product_entry.buyer_id
 	if hasattr(buyer_product_entry,"buyer_interest"):
 		buyer_product["buyerinterestID"] = buyer_product_entry.buyer_interest_id
-	buyer_product["is_active"] = buyer_product_entry.is_active
+	buyer_product["is_active"] = bool(buyer_product_entry.is_active)
 	buyer_product["responded"] = buyer_product_entry.responded
 	buyer_product["created_at"] = buyer_product_entry.created_at
 	buyer_product["updated_at"] = buyer_product_entry.updated_at
 	
-	buyer_product["product"] = serialize_product(buyer_product_entry.product, parameters)
+	if "product_details" in parameters and parameters["product_details"] == 1:
+		buyer_product["product"] = serialize_product(buyer_product_entry.product, parameters)
+	else:
+		product = {}
+		product["productID"] = buyer_product_entry.product.id
+		product["display_name"] = buyer_product_entry.product.display_name
+		product["min_price_per_unit"] = buyer_product_entry.product.min_price_per_unit
+		buyer_product["product"] = product
 
 	return buyer_product
 
@@ -209,12 +296,20 @@ def serialize_buyer_product_response(buyer_product_entry, parameters = {}):
 	buyer_product["buyerID"] = buyer_product_entry.buyer_id
 	buyer_product["buyerproductID"] = buyer_product_entry.buyer_product_id
 	buyer_product["response_code"] = buyer_product_entry.response_code
-	buyer_product["has_swiped"] = buyer_product_entry.has_swiped
+	buyer_product["has_swiped"] = int(buyer_product_entry.has_swiped)
+	buyer_product["responded_from"] = buyer_product_entry.responded_from
 	buyer_product["created_at"] = buyer_product_entry.created_at
 	buyer_product["updated_at"] = buyer_product_entry.updated_at
-	buyer_product["store_discount"] = buyer_product_entry.store_discount
+	buyer_product["store_margin"] = buyer_product_entry.store_margin
 	
-	buyer_product["product"] = serialize_product(buyer_product_entry.product, parameters)
+	if "product_details" in parameters and parameters["product_details"] == 1:
+		buyer_product["product"] = serialize_product(buyer_product_entry.product, parameters)
+	else:
+		product = {}
+		product["productID"] = buyer_product_entry.product.id
+		product["display_name"] = buyer_product_entry.product.display_name
+		product["min_price_per_unit"] = buyer_product_entry.product.min_price_per_unit
+		buyer_product["product"] = product
 
 	return buyer_product
 

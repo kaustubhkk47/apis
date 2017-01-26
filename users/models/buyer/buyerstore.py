@@ -101,13 +101,16 @@ class BuyerStoreLead(models.Model):
 
 		mail_dict = {}
 		mail_dict["buyer"] = serialize_buyer(buyerPtr)
-		mail_dict["buyer_address"] = serialize_buyer_address(buyerPtr.latest_buyer_address_history())
+		buyerAddressHistory = buyerPtr.latest_buyer_address_history()
+		if buyerAddressHistory != None:
+			mail_dict["buyer_address"] = serialize_buyer_address(buyerAddressHistory)
 
 		productParameters = {}
 		productParameters["product_image_details"] = 1
 		mail_dict["buyer_store_lead"] = serialize_buyer_store_lead(self, productParameters)
 
 		bcc = ["manish@wholdus.com","kushagra@wholdus.com"]
+		#bcc = []
 
 		create_email(mail_template_file, mail_dict, subject, from_email, to_email, bcc = bcc)
 

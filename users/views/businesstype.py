@@ -16,7 +16,7 @@ def get_business_type_details(request,parameters = {}):
 		}
 		closeDBConnection()
 
-		return customResponse("2XX", response)
+		return customResponse(200, response)
 	except Exception as e:
 		log.critical(e)
-		return customResponse("4XX", {"error": "Invalid request"})
+		return customResponse(500, error_code=0)

@@ -56,6 +56,15 @@ urlpatterns += [
 urlpatterns += [
 	url(r'^users/buyer/$', user_handler.buyer_details),
 	url(r'^users/buyer/login/$', user_handler.buyer_login),
+	url(r'^users/buyer/logout/$', user_handler.buyer_logout),
+	url(r'^users/buyer/changepassword/$', user_handler.buyer_change_password),
+	url(r'^users/buyer/forgotpassword/$', user_handler.buyer_forgot_password),
+	url(r'^users/buyer/forgotpassword/resend_sms/$', user_handler.buyer_forgot_password_resend_sms),
+	url(r'^users/buyer/forgotpassword/verify/$', user_handler.buyer_forgot_password_verify),
+	url(r'^users/buyer/renew_token/$', user_handler.buyer_renew_access_token),
+	url(r'^users/buyer/register/$', user_handler.buyer_registration),
+	url(r'^users/buyer/register/resend_sms/$', user_handler.buyer_registration_resend_sms),
+	url(r'^users/buyer/register/verify/$', user_handler.buyer_registration_verify),
 	url(r'^users/buyer/accesstoken/$', user_handler.buyer_access_token_details),
 	url(r'^users/buyer/address/$', user_handler.buyer_address_details),
 	url(r'^users/buyer/purchasingstate/$', user_handler.buyer_purchasing_state_details),
@@ -69,6 +78,11 @@ urlpatterns += [
 	url(r'^users/buyer/buyersharedproductid/$', user_handler.buyer_shared_product_id_details),
 	url(r'^users/buyer/buyerpanel/instructionstracking/$', user_handler.buyer_panel_tracking_details),
 	url(r'^users/buyer/store/lead/$', user_handler.buyer_store_lead_details),
+	url(r'^users/buyer/store/url/$', user_handler.buyer_store_url_details),
+]
+
+urlpatterns += [
+	url(r'^users/buyer/firebase/token/$', user_handler.buyer_firebase_token_details),
 ]
 
 urlpatterns += [
@@ -107,6 +121,13 @@ urlpatterns += [
 
 urlpatterns += [
 	url(r'^general/sentsms/deliveryreport/$', general_handler.delivery_report_details)
+]
+
+urlpatterns += [
+	url(r'^general/faqs/$', general_handler.faq_details),
+	url(r'^general/privacypolicy/$', general_handler.privacy_policy_details),
+	url(r'^general/aboutus/$', general_handler.about_us_details),
+	url(r'^general/termsandconditions/$', general_handler.terms_and_conditions_details),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

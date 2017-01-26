@@ -45,7 +45,7 @@ def serializeOrderItem(orderItemEntry, parameters = {}):
 		orderItem["product"] = serialize_product(orderItemEntry.product, parameters)
 	else:
 		product = {}
-		product["id"] = orderItemEntry.product.id
+		product["productID"] = orderItemEntry.product.id
 		product["display_name"] = orderItemEntry.product.display_name
 		product["min_price_per_unit"] = orderItemEntry.product.min_price_per_unit
 		orderItem["product"] = product

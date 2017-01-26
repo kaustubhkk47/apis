@@ -20,7 +20,7 @@ def get_cart_details(request, parameters):
 		except Exception as e:
 			pageItems = []
 
-		statusCode = "2XX"
+		statusCode = 200
 
 		body = parseCart(pageItems,parameters)
 		response = {"carts": body}
@@ -28,146 +28,116 @@ def get_cart_details(request, parameters):
 
 	except Exception as e:
 		log.critical(e)
-		statusCode = "4XX"
-		response = {"error": "Invalid request"}
+		statusCode = 500
+		response = {}
 
 	closeDBConnection()
-	return customResponse(statusCode, response)
+	return customResponse(statusCode, response, error_code=0)
 
 def get_cart_item_details(request, parameters):
 	try:
 
 		cartItems = filterCartItem(parameters)
 
-		statusCode = "2XX"
-
 		body = parseCartItem(cartItems,parameters)
-		statusCode = "2XX"
+		statusCode = 200
 		response = {"cart_items": body}
 
 	except Exception as e:
 		log.critical(e)
-		statusCode = "4XX"
-		response = {"error": "Invalid request"}
+		statusCode = 500
+		response = {}
 
 	closeDBConnection()
-	return customResponse(statusCode, response)
+	return customResponse(statusCode, response, error_code=0)
 
 def post_new_cart_item(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
-		cartitem = convert_keys_to_string(json.loads(requestbody))
+		cartitemDict = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
-	if not len(cartitem):
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+	if not len(cartitemDict):
+		return customResponse(400, error_code=5)
 
 	buyerID = 0
 
 	try:
 		if not filterBuyer(parameters).exists():
-			return customResponse("4XX", {"error": "Invalid buyer id sent"})
+			return customResponse(400, error_code=6, error_details=  "Invalid buyer id sent")
 		buyerID = parameters["buyersArr"][0]
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid buyer id sent"})
+		return customResponse(400, error_code=6, error_details= "Invalid buyer id sent")
 
-	if not "productID" in cartitem or not validate_integer(cartitem["productID"]):
-		return customResponse("4XX", {"error": "Product id not properly sent"})
+	if not "products" in cartitemDict:
+		cartitemDict["products"] = [cartitemDict.copy()]
+
+	cartProducts = cartitemDict["products"]
+
+	productsHash = {}
+	productIDarr = []
+
+	if not CartItem.validateCartItemData(cartProducts, productsHash, productIDarr):
+		return customResponse(400, error_code=5, error_details= " Invalid data for cart item sent")
 
 	productParameters = {}
 	productParameters["product_show_online"] = True
-	productParameters["seller_show_online"] = True
 	productParameters["product_verification"] = True
-	productParameters["product_verification"] = True
-	productParameters["productsArr"] = [int(cartitem["productID"])]
-	productPtr = filterProducts(productParameters)
+	productParameters["productsArr"] = productIDarr
+	allProducts = filterProducts(productParameters)
 
-	if len(productPtr) == 0:
-		return customResponse("4XX", {"error": " Invalid product id sent"})
+	if len(allProducts) == 0:
+		return customResponse(400, error_code=6, error_details= " Invalid product id sent")
 
-	productPtr = productPtr[0]
-
-	isCartNew = 1
-	isSubCartNew = 1
-	isCartItemNew = 1
-
-	cartPtr = Cart.objects.filter(buyer_id=buyerID, status = 0)
-
-	if len(cartPtr) == 0:
-		cartPtr = Cart(buyer_id = buyerID)
-		subCartPtr = SubCart(seller_id =productPtr.seller_id)
-		cartItemPtr = CartItem(buyer_id = buyerID, product = productPtr)
-	else:
-		isCartNew = 0
-		cartPtr = cartPtr[0]
-
-		subCartPtr = SubCart.objects.filter(cart=cartPtr, seller_id = productPtr.seller_id)
-
-		if len(subCartPtr) == 0:
-			subCartPtr = SubCart(seller_id=productPtr.seller_id)
-			cartItemPtr = CartItem(buyer_id = buyerID, product = productPtr)
-		else:
-			isSubCartNew = 0
-			subCartPtr = subCartPtr[0]
-
-			cartItemPtr = CartItem.objects.filter(buyer_id=buyerID, product = productPtr, status = 0)
-
-			if len(cartItemPtr) == 0:
-				cartItemPtr = CartItem(buyer_id = buyerID, product = productPtr)
-			else:
-				isCartItemNew = 0
-				cartItemPtr = cartItemPtr[0]
-
-	if not cartItemPtr.validateCartItemData(cartitem):
-		return customResponse("4XX", {"error": " Invalid data for cart item sent"})
-
-	if isCartItemNew == 1 and int(cartitem["lots"]) == 0:
-		return customResponse("4XX", {"error": "Zero lots sent for new cart item"})
-
+	cartPtr, cartCreated = Cart.objects.get_or_create(buyer_id=buyerID, status = 0)
+	
 	try:
-		initialPrices = cartItemPtr.getPrices()
-		cartItemPtr.populateCartItemData(cartitem)
-		finalPrices =  cartItemPtr.getPrices()
-		
-		cartPtr.populateCartData(initialPrices, finalPrices)
-		subCartPtr.populateSubCartData(initialPrices, finalPrices)
+		for productPtr in allProducts:
+			
+			cartitem = cartProducts[productsHash[productPtr.id]]
+			subCartPtr, cartItemCreated = SubCart.objects.get_or_create(cart_id=cartPtr.id, seller_id = productPtr.seller_id)
+			cartItemPtr , cartItemCreated= CartItem.objects.get_or_create(subcart_id = subCartPtr.id, buyer_id=buyerID, product = productPtr)
 
-		if subCartPtr.shipping_charge < 175:
-			extra_shipping_charge = (175-subCartPtr.shipping_charge)
-			cartPtr.shipping_charge += extra_shipping_charge
-			cartPtr.final_price += extra_shipping_charge
-			subCartPtr.shipping_charge += extra_shipping_charge
-			subCartPtr.final_price += extra_shipping_charge
+			if not cartItemPtr.lots ==  int(cartitem["lots"]):
+				initialPrices = cartItemPtr.getPrices()
+				cartItemPtr.populateCartItemData(cartitem)
+				finalPrices =  cartItemPtr.getPrices()
+
+				initialPrices["extra_shipping_charge"] = subCartPtr.extra_shipping_charge
+				subCartPtr.populateSubCartData(initialPrices, finalPrices)
+				finalPrices["extra_shipping_charge"] = subCartPtr.extra_shipping_charge
+
+				cartPtr.populateCartData(initialPrices, finalPrices)	
+
+				subCartPtr.save()
+
+				cartItemPtr.save()
+
+				cartItemHistoryPtr = CartItemHistory()
+				cartItemHistoryPtr.populateCartItemHistoryData(cartItemPtr)
+				cartItemHistoryPtr.save()
 
 		cartPtr.save()
-		
-		subCartPtr.cart = cartPtr
-		subCartPtr.save()
-
-		cartItemPtr.subcart = subCartPtr
-		cartItemPtr.save()
-
-		if not CartItem.objects.filter(subcart=subCartPtr, status=0).exists():
-			extra_shipping_charge = subCartPtr.shipping_charge
-			cartPtr.shipping_charge -= extra_shipping_charge
-			cartPtr.final_price -= extra_shipping_charge
-			subCartPtr.shipping_charge -= extra_shipping_charge
-			subCartPtr.final_price -= extra_shipping_charge
-			cartPtr.save()
-			subCartPtr.save()
-
-		cartItemHistoryPtr = CartItemHistory()
-		cartItemHistoryPtr.populateCartItemHistoryData(cartItemPtr)
-		cartItemHistoryPtr.save()
 
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "could not update"})
+		return customResponse(500, error_code = 1)
 	else:
+
+		mail_template_file = "extras/cart_addition.html"
+		mail_dict = {}
+		mail_dict["buyerID"] = buyerID
+		mail_dict["cart"] = serializeCart(cartPtr)
+		mail_dict["cartProducts"] = cartProducts
+		subject = "New cart item addition for buyer ID " + str(buyerID)
+		from_email = "Wholdus Info <info@wholdus.com>"
+		to = ["manish@wholdus.com","kushagra@wholdus.com"]
+		create_email(mail_template_file,mail_dict,subject,from_email,to)
+
 		closeDBConnection()
-		return customResponse("2XX", {"carts": serializeCart(cartItemPtr.subcart.cart, parameters)})
+		return customResponse(200, {"carts": parseCart(filterCarts(parameters),parameters)})
 
 
 

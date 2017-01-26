@@ -20,7 +20,7 @@ def get_user_details(request):
 			"sellers" : parse_seller(sellers)
 		}
 
-		return customResponse("2XX", {"users": response})
+		return customResponse(200, {"users": response})
 	except Exception as e:
 		log.critical(e)
-		return customResponse("4XX", {"error": "Invalid request"})
+		return customResponse(500)

@@ -29,7 +29,8 @@ class Checkout(models.Model):
 	def validateCheckoutData(self, checkout):
 		status = int(checkout["status"])
 		if self.status == 0 and status == 1:
-			return True
+			if "addressID" in checkout and validate_integer(checkout["addressID"]):
+				return True
 		elif self.status == 1 and status == 2:
 			return True
 		elif self.status == 2 and status ==3:

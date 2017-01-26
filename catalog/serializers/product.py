@@ -46,6 +46,7 @@ def serialize_product(productsItem, parameters = {}):
 	product["display_name"] = productsItem.display_name
 	product["is_catalog"] = productsItem.is_catalog
 	product["delete_status"] = productsItem.delete_status
+	product["product_score"] = productsItem.product_score
 	product["absolute_path"] = productsItem.get_absolute_url()
 	product["margin"] = '{0:.1f}'.format((float(productsItem.price_per_unit) - float(productsItem.min_price_per_unit))/float(productsItem.price_per_unit)*100)
 	product["url"] = productsItem.category.slug + "-" + str(productsItem.category.id) + "/" + productsItem.slug+ "-" + str(productsItem.id)
@@ -58,7 +59,7 @@ def serialize_product(productsItem, parameters = {}):
 		seller["name"] =productsItem.seller.name
 		product["seller"] = seller
 
-	if "category_details" in parameters and parameters["category_details"] == 1:
+	if "category_details" in parameters and parameters["category_details"] == 1 and not "category_product_details" in parameters:
 		product["category"] = serialize_categories(productsItem.category, parameters)
 	else:
 		category = {}
@@ -123,28 +124,28 @@ def serialize_product(productsItem, parameters = {}):
 
 		buyerstore = {}
 
-		buyerstore["buyer_store_discounted_price"] = None
-		buyerstore["buyer_store_discount"] = None
+		buyerstore["buyer_store_price"] = None
+		buyerstore["buyer_store_margin"] = None
 
 		buyerProductResponsePtr = filterBuyerProductResponse(parameters)
 		buyerProductResponsePtr = buyerProductResponsePtr.filter(product_id = productsItem.id)
 		flag = 0
 		if not len(buyerProductResponsePtr) == 0:
 			buyerProductResponsePtr = buyerProductResponsePtr[0]
-			if buyerProductResponsePtr.store_discount != None and buyerProductResponsePtr.store_discount != 0:
-				discount_factor =  1 - buyerProductResponsePtr.store_discount/100
-				buyerstore["buyer_store_discounted_price"] = productsItem.price_per_unit*discount_factor
-				buyerstore["buyer_store_discount"] = buyerProductResponsePtr.store_discount
+			if buyerProductResponsePtr.store_margin != None and buyerProductResponsePtr.store_margin != 0:
+				margin_factor =  buyerProductResponsePtr.store_margin/100 + 1
+				buyerstore["buyer_store_price"] = productsItem.min_price_per_unit*margin_factor
+				buyerstore["buyer_store_margin"] = buyerProductResponsePtr.store_margin
 				flag = 1
 
 		if flag == 0:
 			buyerPtr = Buyer.objects.filter(id=parameters["buyersArr"][0])
 			if len(buyerPtr) > 0:
 				buyerPtr = buyerPtr[0]
-				if buyerPtr.store_global_discount != None and buyerPtr.store_global_discount != 0:
-					discount_factor =  1 - buyerPtr.store_global_discount/100
-					buyerstore["buyer_store_discounted_price"] = productsItem.price_per_unit*discount_factor
-					buyerstore["buyer_store_discount"] = buyerPtr.store_global_discount
+				if buyerPtr.store_global_margin != None and buyerPtr.store_global_margin != 0:
+					margin_factor = buyerPtr.store_global_margin/100 + 1
+					buyerstore["buyer_store_price"] = productsItem.min_price_per_unit*margin_factor
+					buyerstore["buyer_store_margin"] = buyerPtr.store_global_margin
 
 		product["buyerstore"] = buyerstore
 

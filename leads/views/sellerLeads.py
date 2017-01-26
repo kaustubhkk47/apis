@@ -19,13 +19,13 @@ def get_seller_leads(request, sellerLeadParameters):
 			
 		closeDBConnection()
 		body = parseSellerLeads(sellerLeads)
-		statusCode = "2XX"
+		statusCode = 200
 		response = {"seller_leads": body}
 	except Exception, e:
 		log.critical(e)
-		statusCode = "4XX"
-		response = {"error": "Invalid request"}
-	return customResponse(statusCode, response)
+		statusCode = 500
+		response = {}
+	return customResponse(statusCode, response, error_code=0)
 	
 
 def post_new_seller_lead(request):
@@ -33,10 +33,10 @@ def post_new_seller_lead(request):
 		requestbody = request.body.decode("utf-8")
 		sellerLead = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(sellerLead) or not validateSellerLeadData(sellerLead, SellerLeads(), 1):
-		return customResponse("4XX", {"error": "Invalid data for seller lead sent"})
+		return customResponse(400, error_code=5, error_details= "Invalid data for seller lead sent")
 
 	try:
 		newSellerLead = SellerLeads()
@@ -47,30 +47,30 @@ def post_new_seller_lead(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "unable to create entry in db"})
+		return customResponse(500, error_code = 1)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"seller_lead" : serialize_seller_lead(newSellerLead)})
+		return customResponse(200, {"seller_lead" : serialize_seller_lead(newSellerLead)})
 
 def update_seller_lead(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		sellerLead = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(sellerLead) or not "sellerleadID" in sellerLead or not validate_integer(sellerLead["sellerleadID"]):
-		return customResponse("4XX", {"error": "Id for seller lead not sent"})
+		return customResponse(400, error_code=5,  error_details= "Id for seller lead not sent")
 
 	sellerLeadPtr = SellerLeads.objects.filter(id=int(sellerLead["sellerleadID"]))
 
 	if len(sellerLeadPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid id for seller lead sent"})
+		return customResponse(400, error_code=6, error_details = "Invalid id for seller lead sent")
 
 	sellerLeadPtr = sellerLeadPtr[0]
 
 	if not validateSellerLeadData(sellerLead, sellerLeadPtr, 0):
-		return customResponse("4XX", {"error": "Invalid data for seller lead sent"})
+		return customResponse(400, error_code=5, error_details="Invalid data for seller lead sent")
 
 	try:
 		populateSellerLead(sellerLeadPtr, sellerLead)
@@ -79,7 +79,7 @@ def update_seller_lead(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "unable to update seller lead"})
+		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"seller_lead" : serialize_seller_lead(sellerLeadPtr)})
+		return customResponse(200, {"seller_lead" : serialize_seller_lead(sellerLeadPtr)})

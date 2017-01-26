@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html >
+	<head>
+	</head>
+	<body style="max-width: 600px;font-family:sans-serif; border:solid #DEDEDE 1px;">
+
+	<p>Buyer with ID {{buyerID}} has added products to cart. Products added are </p>
+	{%for cartProduct in cartProducts%}
+	<p>Product Id = {{cartProduct.productID}} and lots = {{cartProduct.lots}} </p>
+	{% endfor %}
+	<p>Buyer cart now has {{cart.pieces}} pieces, {{cart.product_count}} different products, {{cart.final_price}} as total cart value.</p>
+
+	</body>
+</html>

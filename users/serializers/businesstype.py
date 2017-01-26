@@ -16,7 +16,5 @@ def serialize_business_type(business_type_entry, parameters = {}):
 	business_type["businesstypeID"] = business_type_entry.id
 	business_type["business_type"] = business_type_entry.business_type
 	business_type["description"] = business_type_entry.description
-	business_type["created_at"] = business_type_entry.created_at
-	business_type["updated_at"] = business_type_entry.updated_at
 
 	return business_type

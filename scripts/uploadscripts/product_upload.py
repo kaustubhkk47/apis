@@ -78,24 +78,21 @@ def send_products_data(wb):
 
 		elif not (productData == {} or productData == "{}"):
 			response = requests.post(productURL, data = productData)
-			if response.status_code == requests.codes.ok:
-				try:
-					jsonText = json.loads(response.text)
 
-					if jsonText["statusCode"] != "2XX":
-						post_feedback(wb, row, jsonText["body"]["error"])
-						print jsonText["body"]["error"]
-						success = 0
-					else:
-						moveImages(jsonText, row, wb)
-						post_feedback(wb, row, "Success",jsonText["body"]["product"]["productID"])
-						print "Success"
-				except Exception as e:
-					print e
-					post_feedback(wb, row, e)
+			try:
+				jsonText = json.loads(response.text)
+
+				if response.status_code == requests.codes.ok:
+					moveImages(jsonText, row, wb)
+					post_feedback(wb, row, "Success",jsonText["product"]["productID"])
+					print "Success"
+					
+				else:
+					post_feedback(wb, row, jsonText["error"])
+					print jsonText["error"]
 					success = 0
-			else:
-				post_feedback(wb, row, "Error response from server")
+			except Exception as e:
+				post_feedback(wb, row, "Error " + e)
 				success = 0
 
 		row += 1
@@ -115,21 +112,19 @@ def send_modified_product_prices(wb):
 
 		if not (productData == {} or productData == "{}"):
 			response = requests.put(productURL, data = productData)
-			if response.status_code == requests.codes.ok:
-				try:
-					jsonText = json.loads(response.text)
 
-					if jsonText["statusCode"] != "2XX":
-						post_feedback(wb, row, jsonText["body"]["error"])
-						print jsonText["body"]["error"]
-					else:
-						post_feedback(wb, row, "Success",jsonText["body"]["product"]["productID"])
-						print "Success"
-				except Exception as e:
-					print e
-					post_feedback(wb, row, e)
-			else:
-				post_feedback(wb, row, "Error response from server")
+			try:
+				jsonText = json.loads(response.text)
+
+				if response.status_code == requests.codes.ok:
+					post_feedback(wb, row, "Success",jsonText["product"]["productID"])
+					print "Success"
+					
+				else:
+					post_feedback(wb, row, jsonText["error"])
+					print jsonText["error"]
+			except Exception as e:
+				post_feedback(wb, row, "Error " + e)
 
 		row += 1
 
@@ -137,7 +132,7 @@ def send_modified_product_prices(wb):
 
 def moveImages(jsonText, row, wb):
 	imgNo = 1
-	body = jsonText["body"]["product"]["image"]
+	body = jsonText["product"]["image"]
 	image_path = toString(body["image_path"])
 	image_name = toString(body["image_name"])
 	image_numbers = toString(body["image_numbers"])
