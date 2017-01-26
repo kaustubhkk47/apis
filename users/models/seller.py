@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib import admin
-from scripts.utils import validate_date, validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, link_to_foreign_key
+from scripts.utils import validate_date, validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, link_to_foreign_key, create_email
 
 from address.models.pincode import Pincode
 from .businessType import BusinessType
@@ -364,6 +364,9 @@ def filterSeller(sellerParameters):
 
 	if "sellersArr" in sellerParameters:
 		sellers = sellers.filter(id__in=sellerParameters["sellersArr"])
+
+	if "seller_show_online" in sellerParameters:
+		sellers = sellers.filter(show_online=sellerParameters["seller_show_online"])
 
 	return sellers
 

@@ -65,6 +65,7 @@ def parseSubCart(subcartQuerySet, parameters = {}):
 def serializeSubCart(subcartEntry, parameters = {}):
 	subcart = {}
 	subcart["subcartID"] = subcartEntry.id
+	subcart["cartID"] = subcartEntry.cart_id
 
 	subcart["pieces"] = subcartEntry.pieces
 	subcart["product_count"] = subcartEntry.product_count

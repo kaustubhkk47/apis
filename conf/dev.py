@@ -29,7 +29,7 @@ LOGGING = {
             'formatter':'simple'
         },
         'file_critical': {
-            'level': 'CRITICAL',
+            'level': 'ERROR',
             'class': 'logging.FileHandler',
             'filename': CRITICAL_LOG_FILE_PATH,
             'formatter':'simple'

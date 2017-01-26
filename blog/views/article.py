@@ -23,36 +23,36 @@ def get_article_details(request, parameters):
 			pageItems = []
 
 		body = parseArticles(pageItems,parameters)
-		statusCode = "2XX"
+		statusCode = 200
 		response = {"articles": body}
 
 		responsePaginationParameters(response, paginator, parameters)
 
 	except Exception as e:
 		log.critical(e)
-		statusCode = "4XX"
-		response = {"error": "Invalid article"}
+		statusCode = 500
+		response = {}
 
 	closeDBConnection()
-	return customResponse(statusCode, response)
+	return customResponse(statusCode, response, error_code=0)
 
 def post_new_article(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		article = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(article) or not validateArticleData(article, Article(), 1):
-		return customResponse("4XX", {"error": "Invalid data for article sent"})
+		return customResponse(400, error_code=5, error_details= "Invalid data for article sent")
 
 	if not "internaluserID" in article or not validate_integer(article["internaluserID"]):
-		return customResponse("4XX", {"error": "ID for author not sent"})
+		return customResponse(400, error_code=5, error_details= "ID for author not sent")
 
 	internalUserPtr = InternalUser.objects.filter(id=int(article["internaluserID"]))
 
 	if not internalUserPtr.exists():
-		return customResponse("4XX", {"error": "Invalid ID for author sent"})
+		return customResponse(400, error_code=6, error_details = "Invalid ID for author sent")
 
 	article["slug"] = slugify(article["title"])
 
@@ -64,10 +64,10 @@ def post_new_article(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "unable to create entry in db"})
+		return customResponse(500, error_code = 1)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"article" : serializeArticle(newArticle)})
+		return customResponse(200, {"article" : serializeArticle(newArticle)})
 
 def upload_article_file(request):
 	try:
@@ -75,15 +75,15 @@ def upload_article_file(request):
 		article = convert_keys_to_string(json.loads(requestbody))
 		print article
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(article) or not "articleID" in article or not validate_integer(article["articleID"]):
-		return customResponse("4XX", {"error": "Id for article not sent"})
+		return customResponse(400, error_code=5,  error_details= "Id for article not sent")
 
 	articlePtr = Article.objects.filter(id=int(article["articleID"]))
 
 	if len(articlePtr) == 0:
-		return customResponse("4XX", {"error": "Invalid ID for article sent"})
+		return customResponse(400, error_code=6, error_details =  "Invalid ID for article sent")
 
 	articlePtr = articlePtr[0]
 
@@ -96,35 +96,35 @@ def upload_article_file(request):
 			save_file_from_request(request, outputDirectory, outputFileName)
 			articlePtr.save()
 		else:
-			return customResponse("4XX", {"error": "No files sent in request"})
+			return customResponse(400, error_code=5,  error_details= "No files sent in request")
 
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "could not save"})
+		return customResponse(500, error_code = 2, error_details =  "Could not save file")
 	else:
 		closeDBConnection()
-		return customResponse("2XX",  {"success" : "file uploaded"})
+		return customResponse(200,  {"success" : "file uploaded"})
 
 def update_article(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		article = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(article) or not "articleID" in article or not validate_integer(article["articleID"]):
-		return customResponse("4XX", {"error": "Id for article not sent"})
+		return customResponse(400, error_code=5,  error_details= "Id for article not sent")
 
 	articlePtr = Article.objects.filter(id=int(article["articleID"]))
 
 	if len(articlePtr)==0:
-		return customResponse("4XX", {"error": "Invalid ID for article sent"})
+		return customResponse(400, error_code=6, error_details =  "Invalid ID for article sent")
 
 	articlePtr = articlePtr[0]
 
 	if not validateArticleData(article, articlePtr,0):
-		return customResponse("4XX", {"error": "Invalid data for article sent"})
+		return customResponse(400, error_code=5, error_details= "Invalid data for article sent")
 
 	article["slug"] = slugify(article["title"])
 
@@ -134,25 +134,25 @@ def update_article(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "could not update"})
+		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		return customResponse("2XX",  {"article" : serializeArticle(articlePtr)})
+		return customResponse(200,  {"article" : serializeArticle(articlePtr)})
 
 def delete_article(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		article = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(article) or not "articleID" in article or not validate_integer(article["articleID"]):
-		return customResponse("4XX", {"error": "Id for article not sent"})
+		return customResponse(400, error_code=5,  error_details= "Id for article not sent")
 
 	articlePtr = Article.objects.filter(id=int(article["articleID"]))
 
 	if len(articlePtr)==0:
-		return customResponse("4XX", {"error": "Invalid ID for article sent"})
+		return customResponse(400, error_code=6, error_details =  "Invalid ID for article sent")
 
 	articlePtr = articlePtr[0]
 
@@ -162,7 +162,7 @@ def delete_article(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "could not update"})
+		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		return customResponse("2XX",  {"body" : "article deleted"})
+		return customResponse(200,  {"body" : "article deleted"})
