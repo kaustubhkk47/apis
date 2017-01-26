@@ -11,15 +11,15 @@ log = logging.getLogger("django")
 
 from django.utils import timezone
 
-def get_seller_details(request,sellerParameters):
+def get_seller_details(request,parameters):
 	try:
 		if "isSeller" in parameters and parameters["isSeller"] == 1:
 			parameters["seller_show_online"] = 1
 			
-		sellers = filterSeller(sellerParameters)
+		sellers = filterSeller(parameters)
 
 		response = {
-			"sellers" : parse_seller(sellers, sellerParameters)
+			"sellers" : parse_seller(sellers, parameters)
 		}
 
 		closeDBConnection()
