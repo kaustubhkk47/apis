@@ -8,7 +8,7 @@ from .logistics_handler import populateLogisticsParameters
 @csrf_exempt
 def state_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateAddressParameters(request, {}, version)
 
@@ -16,7 +16,7 @@ def state_details(request, version = "0"):
 
 		return state.get_state_details(request,parameters)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 
 def populateAddressParameters(request, parameters = {}, version = "0"):
@@ -26,10 +26,10 @@ def populateAddressParameters(request, parameters = {}, version = "0"):
 @csrf_exempt
 def pincode_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	if request.method == "GET":
 
 		return state.get_state_details(request,parameters)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)

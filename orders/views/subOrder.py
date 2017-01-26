@@ -23,42 +23,42 @@ def get_suborder_details(request,parameters):
 			pageItems = []
 
 		body = parseSubOrders(pageItems,parameters)
-		statusCode = "2XX"
+		statusCode = 200
 		response = {"sub_orders": body}
 		responsePaginationParameters(response,paginator, parameters)
 
 	except Exception as e:
 		log.critical(e)
-		statusCode = "4XX"
-		response = {"error": "Invalid request"}
+		statusCode = 500
+		response = {}
 
 	closeDBConnection()
-	return customResponse(statusCode, response)
+	return customResponse(statusCode, response, error_code=0)
 
 def update_suborder(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		subOrder = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(subOrder) or not "suborderID" in subOrder or not validate_integer(subOrder["suborderID"]):
-		return customResponse("4XX", {"error": "Id for suborder not sent"})
+		return customResponse(400, error_code=5,  error_details= "Id for suborder not sent")
 
 	if not "status" in subOrder or not validate_integer(subOrder["status"]):
-		return customResponse("4XX", {"error": "Current status not sent"})
+		return customResponse(400, error_code=5,  error_details= "Current status not sent")
 
 	status = int(subOrder["status"])
 
 	subOrderPtr = SubOrder.objects.filter(id=int(subOrder["suborderID"]))
 
 	if len(subOrderPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid id for sub order sent"})
+		return customResponse(400, error_code=6,  error_details="Invalid id for sub order sent")
 
 	subOrderPtr = subOrderPtr[0]
 
 	if not validateSubOrderStatus(status,subOrderPtr.suborder_status):
-		return customResponse("4XX", {"error": "Improper status sent"})
+		return customResponse(400, error_code=6,  error_details="Improper status sent")
 
 	try:
 
@@ -76,25 +76,25 @@ def update_suborder(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "could not update"})
+		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"order": "order updated"})
+		return customResponse(200, {"order": "order updated"})
 
 def cancel_suborder(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		subOrder = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(subOrder) or not "suborderID" in subOrder or not validate_integer(subOrder["suborderID"]):
-		return customResponse("4XX", {"error": "Id for suborder not sent"})
+		return customResponse(400, error_code=5,  error_details="Id for suborder not sent")
 
 	subOrderPtr = SubOrder.objects.filter(id=int(subOrder["suborderID"])).select_related('order')
 
 	if len(subOrderPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid id for suborder sent"})
+		return customResponse(400, error_code=6,  error_details="Invalid id for suborder sent")
 
 	subOrderPtr = subOrderPtr[0]
 
@@ -102,7 +102,7 @@ def cancel_suborder(request):
 		subOrder["cancellation_remarks"] = ""
 
 	if subOrderPtr.suborder_status == -1:
-		return customResponse("4XX", {"error": "Already cancelled"})
+		return customResponse(400, error_code=6,  error_details="Already cancelled")
 
 	try:
 		nowDateTime = timezone.now()
@@ -111,7 +111,7 @@ def cancel_suborder(request):
 		subOrderPtr.cancellation_time = nowDateTime
 		subOrderPtr.save()
 
-		OrderItem.objects.filter(suborder_id = subOrderPtr.id).update(current_status=4, cancellation_time=nowDateTime)
+		OrderItem.objects.filter(suborder_id = subOrderPtr.id).update(current_status=4, cancellation_time=nowDateTime, updated_at = nowDateTime)
 
 		isOrderCancelled = 1
 
@@ -137,7 +137,7 @@ def cancel_suborder(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "could not update"})
+		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"order": "order updated"})
+		return customResponse(200, {"order": "order updated"})

@@ -18,25 +18,25 @@ def get_buyer_leads(request, buyerLeadParameters):
 		if "statusArr" in buyerLeadParameters:
 			buyerLeads = buyerLeads.filter(status__in=buyerLeadParameters["statusArr"])
 		body = parseBuyerLeads(buyerLeads)
-		statusCode = "2XX"
+		statusCode = 200
 		response = {"buyer_leads": body}
 	except Exception, e:
 		log.critical(e)
-		statusCode = "4XX"
-		response = {"error": "Invalid request"}
+		statusCode = 500
+		response = {}
 
 	closeDBConnection()
-	return customResponse(statusCode, response)
+	return customResponse(statusCode, response, error_code=0)
 
 def post_new_buyer_lead(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		buyerLead = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(buyerLead) or not validateBuyerLeadData(buyerLead, BuyerLeads(), 1):
-		return customResponse("4XX", {"error": "Invalid data for buyer lead sent"})
+		return customResponse(400, error_code=5, error_details= "Invalid data for buyerLead sent")
 
 	try:
 		newBuyerLead = BuyerLeads()
@@ -47,7 +47,7 @@ def post_new_buyer_lead(request):
 			productPtr = Product.objects.filter(id=int(buyerLead["productID"]))
 
 			if len(productPtr) == 0:
-				return customResponse("4XX", {"error": "invalid product id sent"})
+				return customResponse(400, error_code=6, error_details =  "invalid product id sent")
 
 			productPtr = productPtr[0]
 				
@@ -57,7 +57,7 @@ def post_new_buyer_lead(request):
 			categoryPtr = Category.objects.filter(id=int(buyerLead["categoryID"]))
 
 			if not categoryPtr.exists():
-				return customResponse("4XX", {"error": "invalid category id sent"})
+				return customResponse(400, error_code=6, error_details = "invalid category id sent")
 				
 			newBuyerLead.category_id = int(buyerLead["categoryID"])
 
@@ -65,7 +65,7 @@ def post_new_buyer_lead(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "unable to create entry in db"})
+		return customResponse(500, error_code = 1)
 	else:
 		
 
@@ -92,27 +92,27 @@ def post_new_buyer_lead(request):
 
 		closeDBConnection()
 
-		return customResponse("2XX", {"buyer_lead" : serialize_buyer_lead(newBuyerLead)})
+		return customResponse(200, {"buyer_lead" : serialize_buyer_lead(newBuyerLead)})
 
 def update_buyer_lead(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		buyerLead = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(buyerLead) or not "buyerleadID" in buyerLead or not validate_integer(buyerLead["buyerleadID"]):
-		return customResponse("4XX", {"error": "Id for buyer lead not sent"})
+		return customResponse(400, error_code=5,  error_details= "Id for buyer lead not sent")
 
 	buyerLeadPtr = BuyerLeads.objects.filter(id=int(buyerLead["buyerleadID"]))
 
 	if len(buyerLeadPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid id for buyer lead sent"})
+		return customResponse(400, error_code=6, error_details = "Invalid id for buyer lead sent")
 
 	buyerLeadPtr = buyerLeadPtr[0]
 
 	if not validateBuyerLeadData(buyerLead, buyerLeadPtr, 0):
-		return customResponse("4XX", {"error": "Invalid data for buyer lead sent"})
+		return customResponse(400, error_code=5, error_details= "Invalid data for buyerLead sent")
 
 	try:
 		populateBuyerLead(buyerLeadPtr, buyerLead)
@@ -121,7 +121,7 @@ def update_buyer_lead(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "unable to update buyer lead"})
+		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"buyer_lead" : serialize_buyer_lead(buyerLeadPtr)})
+		return customResponse(200, {"buyer_lead" : serialize_buyer_lead(buyerLeadPtr)})

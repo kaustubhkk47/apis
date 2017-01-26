@@ -83,7 +83,7 @@ class BuyerProductResponse(models.Model):
 	#0: Tinder, 1 : category_page, 2 : product_page, 3 : shortlist, 4 : homepage, 
 	responded_from = models.IntegerField(default=0)
 
-	store_discount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null = True,default = None)
+	store_margin = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null = True,default = None)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -98,9 +98,9 @@ class BuyerProductResponse(models.Model):
 
 	def validateBuyerProductResponseData(self, buyer_product_response):
 		flag = 0
-		if not "store_discount" in buyer_product_response or not validate_percent(buyer_product_response["store_discount"]):
+		if not "store_margin" in buyer_product_response or not validate_percent(buyer_product_response["store_margin"], False):
 			flag = 1
-			buyer_product_response["store_discount"] = self.store_discount
+			buyer_product_response["store_margin"] = self.store_margin
 
 		if flag == 1:
 			return False
@@ -108,7 +108,7 @@ class BuyerProductResponse(models.Model):
 		return True
 
 	def populateBuyerProductResponse(self, buyer_product_response):
-		self.store_discount = Decimal(buyer_product_response["store_discount"])
+		self.store_margin = Decimal(buyer_product_response["store_margin"])
 
 class BuyerProductResponseAdmin(admin.ModelAdmin):
 	search_fields = ["buyer_id", "buyer__name", "buyer__company_name", "buyer__mobile_number"]
@@ -221,24 +221,30 @@ def validateBuyerProductData(buyer_product, old_buyer_product, is_new, buyer_pro
 	if "is_active" in buyer_product and validate_bool(buyer_product["is_active"]):
 		if int(buyer_product["is_active"]) != int(old_buyer_product.is_active) and old_buyer_product.responded == 0:
 			buyer_product_populator["is_active"] = int(buyer_product["is_active"])
-			return True
+			#return True
 
-	if old_buyer_product.is_active == 0:
-		return False
+	#if old_buyer_product.is_active == 0:
+	#	return False
 
 	if "responded" in buyer_product and validate_integer(buyer_product["responded"]):
+
+		buyer_product_populator["is_active"] = 1
+
+		if "store_margin" in buyer_product and validate_percent(Decimal(buyer_product["store_margin"]),False):
+			buyer_product_populator["store_margin"] = buyer_product["store_margin"]
+			
 		if int(buyer_product["responded"]) == 1:
 			buyer_product_populator["responded"] = 1
 			if old_buyer_product.responded == 2:
 				buyer_product_populator["response_code"] = 3
-			elif old_buyer_product.responded == 0:
+			elif old_buyer_product.responded == 0 or old_buyer_product.responded == 1:
 				buyer_product_populator["response_code"] = 1
 			else:
 				return False
 			return True
 		elif int(buyer_product["responded"]) == 2:
 			buyer_product_populator["responded"] = 2
-			if  old_buyer_product.responded == 0:
+			if  old_buyer_product.responded == 0 or old_buyer_product.responded == 2:
 				buyer_product_populator["response_code"] = 2
 			elif old_buyer_product.responded == 1:
 				buyer_product_populator["response_code"] = 4
@@ -269,6 +275,8 @@ def populateBuyerProductResponse(buyerProductResponsePtr,buyerProductResponse):
 		buyerProductResponsePtr.has_swiped = int(buyerProductResponse["has_swiped"])
 	if "responded_from" in buyerProductResponse:
 		buyerProductResponsePtr.responded_from = int(buyerProductResponse["responded_from"])
+	if "store_margin" in buyerProductResponse:
+		buyerProductResponsePtr.store_margin = Decimal(buyerProductResponse["store_margin"])
 
 def filterBuyerSharedProductID(parameters = {}):
 
@@ -284,7 +292,7 @@ def filterBuyerSharedProductID(parameters = {}):
 
 def filterBuyerProducts(parameters = {}):
 
-	buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False)
+	buyerProducts = BuyerProducts.objects.filter(buyer__delete_status=False,product__delete_status=False, product__show_online=True, product__verification=True)
 
 	if "buyerProductsArr" in parameters:
 		buyerProducts = buyerProducts.filter(id__in=parameters["buyerProductsArr"])
@@ -325,8 +333,8 @@ def filterBuyerProducts(parameters = {}):
 			productIds = []
 		buyerProducts = buyerProducts.filter(product_id__in=productIds)
 
-	if "productsArr" in parameters:
-		buyerProducts = buyerProducts.filter(product_id__in=parameters["productsArr"])
+	buyerProducts = applyProductFilters(buyerProducts, parameters)
+	buyerProducts = applyProductSorting(buyerProducts, parameters)
 
 	return buyerProducts
 
@@ -337,19 +345,69 @@ def filterBuyerProductResponse(parameters = {}):
 	if "buyersArr" in parameters:
 		buyerProductResponse = buyerProductResponse.filter(buyer_id__in=parameters["buyersArr"])
 
-	if "productsArr" in parameters:
-		buyerProductResponse = buyerProductResponse.filter(product_id__in=parameters["productsArr"])
-
 	if "responded" in parameters:
 		buyerProductResponse = buyerProductResponse.filter(response_code= parameters["responded"])
 
+	buyerProductResponse = applyProductFilters(buyerProductResponse, parameters)
+	buyerProductResponse = applyProductSorting(buyerProductResponse, parameters, "-updated_at")
+
 	return buyerProductResponse
+
+def applyProductFilters(modelPtr, parameters):
+
+	if "productsArr" in parameters:
+		modelPtr = modelPtr.filter(product_id__in=parameters["productsArr"])
+
+	if "categoriesArr" in parameters:
+		modelPtr = modelPtr.filter(product__category_id__in=parameters["categoriesArr"])
+
+	if "sellersArr" in parameters:
+		modelPtr = modelPtr.filter(product__seller_id__in=parameters["sellersArr"])
+
+	if "fabricArr" in parameters:
+		query = reduce(operator.or_, (Q(product__productdetails__fabric_gsm__icontains = item) for item in parameters["fabricArr"]))
+		modelPtr = modelPtr.filter(query)
+
+	if "colourArr" in parameters:
+		query = reduce(operator.or_, (Q(product__productdetails__colours__icontains = item) for item in parameters["colourArr"]))
+		modelPtr = modelPtr.filter(query)
+
+	if "price_filter_applied" in parameters:
+		modelPtr = modelPtr.filter(product__min_price_per_unit__range=(parameters["min_price_per_unit"],parameters["max_price_per_unit"]))
+
+	if "product_verification" in parameters:
+		modelPtr = modelPtr.filter(product__verification=parameters["product_verification"])
+	
+	if "product_show_online" in parameters:
+		modelPtr = modelPtr.filter(product__show_online=parameters["product_show_online"])
+
+	return modelPtr
+
+def applyProductSorting(modelPtr, parameters, default_sorting=None):
+
+	if default_sorting == None:
+		default_sorting = '-product__product_score'
+
+	if "product_order_by" in parameters:
+		if parameters["product_order_by"] == "latest":
+			modelPtr = modelPtr.order_by('-product_id')
+		elif parameters["product_order_by"] == "price_ascending":
+			modelPtr = modelPtr.order_by('product__min_price_per_unit', '-product_id')
+		elif parameters["product_order_by"] == "price_descending":
+			modelPtr = modelPtr.order_by('-product__min_price_per_unit', '-product_id')
+		else :
+			modelPtr = modelPtr.order_by(default_sorting)
+	else:
+		modelPtr = modelPtr.order_by(default_sorting)
+
+	return modelPtr
+
+
 
 def filterBuyerInterestProducts(BuyerInterestPtr, parameters = {}):
 
 	parameters["product_verification"] = True
 	parameters["product_show_online"] = True
-	parameters["seller_show_online"] = True
 
 	if BuyerInterestPtr.price_filter_applied == True:
 		parameters["price_filter_applied"] = True

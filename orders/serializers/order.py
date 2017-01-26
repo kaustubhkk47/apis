@@ -9,6 +9,7 @@ def serializeOrder(orderEntry, parameters = {}):
 	order = {}
 	order["orderID"]=orderEntry.id	
 	order["product_count"]=orderEntry.product_count
+	order["pieces"]=orderEntry.pieces
 	order["retail_price"]='{0:.0f}'.format(float(orderEntry.retail_price))
 	order["calculated_price"]='{0:.0f}'.format(float(orderEntry.calculated_price))
 	order["edited_price"]='{0:.0f}'.format(float(orderEntry.edited_price))

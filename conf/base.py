@@ -144,3 +144,7 @@ if not os.path.exists(WARN_LOG_FILE_PATH):
 
 BASE_URL = "http://www.wholdus.com"
 API_BASE_URL = "http://api.wholdus.com"
+
+FIREBASE_SERVER_KEY = "AAAAj2tB9Ww:APA91bHMrANi-OmVjpKc99nzjSoh3tfgHwHrS8liPAyTn6yAlqmnOuFYkAOX4lTlG03uBnO9_k7BHdk1ir1gbsBiX4arxGpj-Dca1SNGAh4SFrSj61Yu6BkmU6FTF-9e5XA8xCcDlMPWSbR-XMlrcVFrbNAw7jHpEg"
+
+FIREBASE_SERVER_ID = "615979808108"

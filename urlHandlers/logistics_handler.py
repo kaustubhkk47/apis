@@ -8,18 +8,18 @@ from .user_handler import populateAllUserIDParameters
 @csrf_exempt
 def pincode_serviceability_details(request, version = "0"):
 
-	version = getApiVersion(request.META["HTTP_ACCEPT"])
+	version = getApiVersion(request)
 
 	parameters = populateLogisticsParameters(request, {}, version)
 
 	if request.method == "GET":
 
 		if parameters["isSeller"] == 0 and parameters["isInternalUser"] == 0 and parameters["isBuyer"] == 0:
-			return customResponse("4XX", {"error": "Authentication failure"})
+			return customResponse(403, error_code = 8)
 		
 		return pincodeserviceability.get_pincode_serviceability_details(request,parameters)
 
-	return customResponse("4XX", {"error": "Invalid request"})
+	return customResponse(404, error_code = 7)
 
 
 def populateLogisticsParameters(request, parameters = {}, version = "0"):

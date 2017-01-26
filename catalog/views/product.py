@@ -18,10 +18,19 @@ log = logging.getLogger("django")
 
 def get_product_details(request, parameters = {}):
 	try:
-		if "isSeller" in parameters and "isInternalUser" in parameters and parameters["isSeller"]==0 and parameters["isInternalUser"]==0:
+
+		if "isBuyer" in parameters and parameters["isBuyer"] == 1:
 			parameters["product_verification"] = True
-			parameters["product_show_online"] = True
-			parameters["seller_show_online"] = True
+		elif "isBuyerStore" in parameters and parameters["isBuyerStore"] ==1:
+			parameters["product_verification"] = True
+		elif "isSeller" in parameters and parameters["isSeller"] == 1:
+			pass
+		elif "isInternalUser" in parameters and parameters["isInternalUser"] == 1:
+			pass
+		else:
+			# Might have to change in case consumer website is made
+			parameters["product_verification"] = True
+			#parameters["product_show_online"] = True
 		
 		products = filterProducts(parameters)
 
@@ -37,50 +46,51 @@ def get_product_details(request, parameters = {}):
 
 		responsePaginationParameters(response, paginator, parameters)
 			
-		statusCode = "2XX"
+		statusCode = 200
 	except Exception as e:
 		log.critical(e)
-		statusCode = "4XX"
-		response = {"error": "Invalid product"}
+		statusCode = 500
+		response = {}
 
 	closeDBConnection()
-	return customResponse(statusCode, response)
+	return customResponse(statusCode, response,error_code=0)
 
 def get_product_colour_details(request, parameters = {}):
 	try:
 		productColours = filterProductColourType(parameters)
 
-		statusCode = "2XX"
+		statusCode = 200
 		body = {"product_colour_types": parseProductColourType(productColours)}
 
 	except Exception as e:
 		log.critical(e)
-		statusCode = "4XX"
-		body = {"error": "Invalid product colour"}
+		statusCode = 500
+		body = {}
 		
 	closeDBConnection()
-	return customResponse(statusCode, body)
+	return customResponse(statusCode, body,error_code=0)
 
 def get_product_fabric_details(request, parameters = {}):
 	try:
 		productFabrics = filterProductFabricType(parameters)
 
-		statusCode = "2XX"
+		statusCode = 200
 		body = {"product_fabric_types": parseProductFabricType(productFabrics)}
 
 	except Exception as e:
 		log.critical(e)
-		statusCode = "4XX"
-		body = {"error": "Invalid product fabric"}
+		statusCode = 500
+		body = {}
 		
 	closeDBConnection()
-	return customResponse(statusCode, body)
+	return customResponse(statusCode, body, error_code=0)
 
 def get_product_file(request, productParameters):
 	
 	try:
+		parameters["product_show_online"] = True
+		parameters["product_verification"] = True
 		products = filterProducts(productParameters)
-		products = products.filter(verification=True,show_online=True,seller__show_online=True)
 
 		products = products.values_list('id',flat=True)
 
@@ -92,17 +102,18 @@ def get_product_file(request, productParameters):
 
 	except Exception as e:
 		log.critical(e)
-		statusCode = "4XX"
-		body = {"error": "Invalid product"}
+		statusCode = 500
+		body = {}
 
 		closeDBConnection()
-		return customResponse(statusCode, body)
+		return customResponse(statusCode, body,  error_code=0)
 
 def get_product_catalog(request, productParameters):
 	
 	try:
+		parameters["product_show_online"] = True
+		parameters["product_verification"] = True
 		products = filterProducts(productParameters)
-		products = products.filter(verification=True,show_online=True,seller__show_online=True)
 
 		products = {"products":multiple_products_parser(products, productParameters)}
 
@@ -112,35 +123,35 @@ def get_product_catalog(request, productParameters):
 
 	except Exception as e:
 		log.critical(e)
-		statusCode = "4XX"
-		body = {"error": "Invalid product"}
+		statusCode = 500
+		body = {}
 
 		closeDBConnection()
-		return customResponse(statusCode, body)
+		return customResponse(statusCode, body, error_code=0)
 
 def post_new_product(request, parameters = {}):
 	try:
 		requestbody = request.body.decode("utf-8")
 		product = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(product) or not validateProductData(product, Product(), 1):
-		return customResponse("4XX", {"error": "Invalid data for product sent"})
+		return customResponse(400, error_code=5, error_details= "Invalid data for product sent")
 
 	if not "sellerID" in product or not validate_integer(product["sellerID"]):
-		return customResponse("4XX", {"error": "Seller id for product not sent"})
+		return customResponse(400, error_code=5, error_details="Seller id for product not sent")
 
 	sellerPtr = Seller.objects.filter(id=int(product["sellerID"]), delete_status=False)
 	if not sellerPtr.exists():
-		return customResponse("4XX", {"error": "Invalid id for seller sent"})
+		return customResponse(400, error_code=6, error_details = "Invalid id for seller sent")
 
 	if not "categoryID" in product or not validate_integer(product["categoryID"]):
-		return customResponse("4XX", {"error": "Category id for product not sent"})
+		return customResponse(400, error_code=5, error_details= "Category id for product not sent")
 
 	categoryPtr = Category.objects.filter(id=int(product["categoryID"]))
 	if not categoryPtr.exists():
-		return customResponse("4XX", {"error": "Invalid id for category sent"})
+		return customResponse(400, error_code=6, error_details = "Invalid id for category sent")
 
 	sellerCategoryPtr = SellerCategory.objects.filter(category_id=int(product["categoryID"]), seller_id=int(product["sellerID"]))
 
@@ -152,7 +163,7 @@ def post_new_product(request, parameters = {}):
 			pass
 
 	if not "product_lot" in product or not product["product_lot"] or not validateProductLotData(product["product_lot"]):
-		return customResponse("4XX", {"error": "Product lots for product not properly sent"})
+		return customResponse(400, error_code=5, error_details="Product lots for product not properly sent")
 
 	if not "details" in product or not product["details"]:
 		product["details"] = {}
@@ -184,25 +195,25 @@ def post_new_product(request, parameters = {}):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "unable to create entry in db"})
+		return customResponse(500, error_code = 1)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"product": serialize_product(newProduct, parameters)})
+		return customResponse(200, {"product": serialize_product(newProduct, parameters)})
 
 def update_product(request, parameters = {}):
 	try:
 		requestbody = request.body.decode("utf-8")
 		product = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(product) or not "productID" in product or not validate_integer(product["productID"]):
-		return customResponse("4XX", {"error": "Id for product not sent"})
+		return customResponse(400, error_code=5, error_details= "Id for product not sent")
 
 	productPtr = Product.objects.filter(id=int(product["productID"])).select_related('productdetails')
 
 	if len(productPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid id for product sent"})
+		return customResponse(400, error_code=6, error_details ="Invalid id for product sent")
 
 	productPtr = productPtr[0]
 
@@ -211,7 +222,7 @@ def update_product(request, parameters = {}):
 	productlotSent = 0
 
 	if not validateProductData(product, productPtr, 0):
-		return customResponse("4XX", {"error": "Invalid data for product sent"})
+		return customResponse(400, error_code=5, error_details= "Invalid data for product sent")
 
 	product["slug"] = slugify(product["name"])
 
@@ -234,7 +245,7 @@ def update_product(request, parameters = {}):
 		if "product_lot" in product and product["product_lot"]:
 			productlotSent = 1
 			if not validateProductLotData(product["product_lot"]):
-				return customResponse("4XX", {"error": "Product lots for product not properly sent"})
+				return customResponse(400, error_code=5, error_details="Product lots for product not properly sent")
 
 			productLots = product["product_lot"]
 
@@ -255,25 +266,25 @@ def update_product(request, parameters = {}):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "could not update"})
+		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"product": serialize_product(productPtr , parameters)})
+		return customResponse(200, {"product": serialize_product(productPtr , parameters)})
 
 def delete_product(request):
 	try:
 		requestbody = request.body.decode("utf-8")
 		product = convert_keys_to_string(json.loads(requestbody))
 	except Exception as e:
-		return customResponse("4XX", {"error": "Invalid data sent in request"})
+		return customResponse(400, error_code=4)
 
 	if not len(product) or not "productID" in product or not validate_integer(product["productID"]):
-		return customResponse("4XX", {"error": "Id for product not sent"})
+		return customResponse(400, error_code=5,  error_details= "Id for product not sent")
 
 	productPtr = Product.objects.filter(id=int(product["productID"]), delete_status=False)
 
 	if len(productPtr) == 0:
-		return customResponse("4XX", {"error": "Invalid id for product sent"})
+		return customResponse(400, error_code=6, error_details = "Invalid id for product sent")
 
 	productPtr = productPtr[0]
 
@@ -283,7 +294,7 @@ def delete_product(request):
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
-		return customResponse("4XX", {"error": "could not delete"})
+		return customResponse(500, error_code = 3)
 	else:
 		closeDBConnection()
-		return customResponse("2XX", {"product": "product deleted"})
+		return customResponse(200, {"product": "product deleted"})

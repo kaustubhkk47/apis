@@ -50,6 +50,10 @@ class Product(models.Model):
 	delete_status = models.BooleanField(default=False)
 	is_catalog = models.BooleanField(default=False)
 
+	product_likes = models.IntegerField(default=0)
+	product_dislikes = models.IntegerField(default=0)
+	product_score = models.DecimalField(max_digits=10, decimal_places=4, default=50, db_index=True)
+
 	def get_absolute_url(self):
 		return r"{}/{}-{}/{}-{}".format(settings.BASE_URL, self.category.slug,self.category.id,self.slug,self.id)
 
@@ -218,7 +222,13 @@ def validateProductData(product, oldproduct, is_new):
 		product["is_catalog"] = oldproduct.is_catalog
 	if not "delete_status" in product or not validate_bool(product["delete_status"]):
 		product["delete_status"] = oldproduct.delete_status
-		
+	
+	if not float(product["min_price_per_unit"]) > 0 or not float(product["price_per_lot"]) > 0 or not float(product["price_per_unit"]) > 0:
+		return False
+
+	if not float(product["price_per_unit"]) >= float(product["min_price_per_unit"]) or not  float(product["price_per_lot"]) >= float(product["price_per_unit"]) :
+		return False
+
 	if is_new == 1 and flag == 1:
 		return False
 
@@ -329,7 +339,7 @@ def populateProductDetailsData(productDetailsPtr, productdetails):
 	productDetailsPtr.sample_price = Decimal(productdetails["sample_price"])
 
 def filterProducts(parameters = {}):
-	products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related('seller', 'productdetails', 'category').order_by('-id')
+	products = Product.objects.filter(delete_status=False, seller__delete_status=False, category__delete_status=False).select_related('seller', 'productdetails', 'category')
 
 	if "categoriesArr" in parameters:
 		products = products.filter(category_id__in=parameters["categoriesArr"])
@@ -353,12 +363,29 @@ def filterProducts(parameters = {}):
 
 	if "product_verification" in parameters:
 		products = products.filter(verification=parameters["product_verification"])
-
+	
 	if "product_show_online" in parameters:
 		products = products.filter(show_online=parameters["product_show_online"])
 
+	if "product_order_by" in parameters:
+		if parameters["product_order_by"] == "latest":
+			products = products.order_by('-id')
+		elif parameters["product_order_by"] == "price_ascending":
+			products = products.order_by('min_price_per_unit', '-id')
+		elif parameters["product_order_by"] == "price_descending":
+			products = products.order_by('-min_price_per_unit', '-id')
+		else :
+			products = products.order_by('-product_score')
+	else:
+		products = products.order_by('-product_score')
+
+	"""
 	if "seller_show_online" in parameters:
 		products = products.filter(seller__show_online=parameters["seller_show_online"])
+
+	if "category_show_online" in parameters:
+		products = products.filter(category__show_online=parameters["category_show_online"])
+	"""
 
 	if "product_new_in_product_matrix" in parameters:
 		products = products.filter(new_in_product_matrix=parameters["product_new_in_product_matrix"])

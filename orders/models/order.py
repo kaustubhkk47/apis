@@ -5,11 +5,14 @@ from scripts.utils import create_email, link_to_foreign_key, validate_integer, v
 
 from users.models.buyer import Buyer, BuyerAddress
 
+from general.models.smssent import send_sms
+
 from catalog.models.product import Product
 from catalog.models.productLot import getCalculatedPricePerPiece
 from .orderItem import OrderItem, OrderItemNonCompletionStatus
 from .subOrder import SubOrder, populateSellerMailDict
 from users.serializers.buyer import serialize_buyer_address
+from users.models.buyer import sendNotification
 
 from decimal import Decimal
 import math
@@ -19,9 +22,6 @@ class Order(models.Model):
 	buyer = models.ForeignKey('users.Buyer')
 	cart = models.ForeignKey('orders.Cart', null=True, blank=True)
 	buyer_address_history = models.ForeignKey('users.BuyerAddressHistory', null=True, blank=True)
-
-	# 0 - Admin 1 - Customer
-	placed_by = models.IntegerField(default=0)
 
 	pieces = models.PositiveIntegerField(default=1)
 	product_count = models.PositiveIntegerField(default=1)
@@ -38,6 +38,7 @@ class Order(models.Model):
 	display_number = models.CharField(max_length=20, blank=True)
 
 	remarks = models.TextField(blank=True)
+	placed_by = models.CharField(max_length=100)
 	
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
@@ -66,7 +67,7 @@ class Order(models.Model):
 		self.cod_charge = cartPtr.cod_charge
 		self.final_price = cartPtr.final_price
 		self.order_status = 0
-		self.placed_by = 1
+		self.placed_by = "buyer"
 		self.save()
 		self.display_number = "1" +"%06d" %(self.id,)
 
@@ -76,6 +77,26 @@ class Order(models.Model):
 			return True
 		return False
 
+	def sendOrderNotification(self, title, body):
+		notification = {}
+		notification["title"] = title
+		notification["body"] = body
+		data = {}
+		data["activity"] = "OrderDetails"
+		data["orderID"] = str(self.id)
+		sendNotification(self.buyer.get_firebase_tokens(), notification = notification, data = data)
+
+	def sendOrderSMS(self, body):
+		buyer = self.buyer
+		message_text = "Hi"
+		if buyer.name != "":
+			message_text += " " + buyer.name
+		elif buyer.company_name != "":
+			message_text += " " +  buyer.company_name
+
+		message_text += ", your order " + self.display_number + " "
+		message_text += body
+		send_sms(message_text, buyer.mobile_number, "buyer", "Order notification")
 
 class OrderAdmin(admin.ModelAdmin):
 	search_fields = ["buyer__name", "display_number", "buyer__company_name", "buyer__mobile_number"]
@@ -100,7 +121,7 @@ def populateOrderData(orderPtr, order):
 	orderPtr.remarks = order["remarks"]
 	orderPtr.order_status = 1
 	orderPtr.save()
-	orderPtr.buyer_address_history = orderPtr.buyer.latest_buyer_address_history()
+	orderPtr.buyer_address_history = orderPtr.buyer.latest_buyer_address_history(int(order["addressID"]))
 	orderPtr.display_number = "1" +"%06d" %(orderPtr.id,)
 
 def filterOrder(orderParameters):
