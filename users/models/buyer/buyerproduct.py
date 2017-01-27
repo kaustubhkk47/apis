@@ -3,7 +3,8 @@ from django.contrib import admin
 from scripts.utils import *
 from decimal import Decimal
 import operator
-from django.db.models import Q
+from django.db.models import Q, F, Value, CharField
+from django.db.models.functions import Concat
 
 from catalog.models.product import Product, filterProducts
 
@@ -370,6 +371,12 @@ def applyProductFilters(modelPtr, parameters):
 
 	if "colourArr" in parameters:
 		query = reduce(operator.or_, (Q(product__productdetails__colours__icontains = item) for item in parameters["colourArr"]))
+		modelPtr = modelPtr.filter(query)
+
+	if "sizesArr" in parameters:
+		modelPtr = modelPtr.annotate(size_check=Concat(Value(','), 'product__productdetails__sizes', Value(','), output_field=CharField()),)
+		parameters["sizesArr"] = ["," + item + "," for item in parameters["sizesArr"]]
+		query = reduce(operator.or_, (Q(size_check__icontains = item) for item in parameters["sizesArr"]))
 		modelPtr = modelPtr.filter(query)
 
 	if "price_filter_applied" in parameters:
