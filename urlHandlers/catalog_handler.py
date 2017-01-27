@@ -166,6 +166,7 @@ def populateProductFilterParameters(request, parameters = {}, version = "0"):
 	categoryID = request.GET.get("categoryID", "")
 	fabric = request.GET.get("fabric", "")
 	colour = request.GET.get("colour", "")
+	sizes = request.GET.get("sizes", "")
 	min_price_per_unit = request.GET.get("min_price_per_unit", "")
 	max_price_per_unit = request.GET.get("max_price_per_unit", "")
 	productShowOnline = request.GET.get("product_show_online", "")
@@ -183,6 +184,9 @@ def populateProductFilterParameters(request, parameters = {}, version = "0"):
 
 	if colour != "" and colour != None:
 		parameters["colourArr"] = getStrArrFromString(colour)
+
+	if sizes != "" and sizes != None:
+		parameters["sizesArr"] = getStrArrFromString(sizes)
 
 	if productShowOnline != "" and validate_bool(productShowOnline):
 		parameters["product_show_online"] = int(productShowOnline)

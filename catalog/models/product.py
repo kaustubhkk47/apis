@@ -11,7 +11,8 @@ import math
 from scripts.utils import validate_integer, validate_number, validate_bool, arrToFilename, link_to_foreign_key
 
 import operator
-from django.db.models import Q
+from django.db.models import Q, F, Value, CharField
+from django.db.models.functions import Concat
 
 import settings
 import ast
@@ -323,7 +324,7 @@ def populateProductDetailsData(productDetailsPtr, productdetails):
 	productDetailsPtr.length = productdetails["length"]
 	productDetailsPtr.work_decoration_type = productdetails["work_decoration_type"]
 	productDetailsPtr.colours = productdetails["colours"]
-	productDetailsPtr.sizes = productdetails["sizes"]
+	productDetailsPtr.sizes = productdetails["sizes"].replace(" ", "")
 	productDetailsPtr.special_feature = productdetails["special_feature"]
 	productDetailsPtr.manufactured_country = productdetails["manufactured_country"]
 	productDetailsPtr.warranty = productdetails["warranty"]
@@ -356,6 +357,12 @@ def filterProducts(parameters = {}):
 
 	if "colourArr" in parameters:
 		query = reduce(operator.or_, (Q(productdetails__colours__icontains = item) for item in parameters["colourArr"]))
+		products = products.filter(query)
+
+	if "sizesArr" in parameters:
+		products = products.annotate(size_check=Concat(Value(','), 'productdetails__sizes', Value(','), output_field=CharField()),)
+		parameters["sizesArr"] = ["," + item + "," for item in parameters["sizesArr"]]
+		query = reduce(operator.or_, (Q(size_check__icontains = item) for item in parameters["sizesArr"]))
 		products = products.filter(query)
 
 	if "price_filter_applied" in parameters:
