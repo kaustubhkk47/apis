@@ -49,7 +49,7 @@ def deploy_prod_server():
 	run("cd " + PROD_APP_DIR + " && python manage.py migrate")
 	run("echo 'Wholdus_prod@0987' | sudo -S service apache2 restart")
 
-def deploy_prod_server():
+def deploy_test_server():
 	run("cd " + TEST_APP_DIR + " && git checkout .")
 	run("cd " + TEST_APP_DIR + " && git pull origin develop")
 	run("cd " + TEST_APP_DIR + " && python manage.py migrate")
