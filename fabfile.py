@@ -2,7 +2,7 @@ from fabric.api import *
 from fabtools import service
  
 # Define sets of servers as roles
-TEST_APP_DIR = "/home/probzip/webapps/wholdus_api_test_app/"
+TEST_APP_DIR = "/home/kaustubh/webapps/wholdus-apis/apis/"
 PROD_APP_DIR = "/home/aditya/webapps/wholdus-apis/apis/"
 SERVER_USER = "aditya@52.187.33.84"
  
@@ -32,6 +32,7 @@ def deploy(message):
 	message = "'" + message + "'"
 	push_to_master(message)
 	deploy_prod_server()
+	deploy_test_server()
 
 def push_to_master(message):
 	local("git add --all")
@@ -40,9 +41,15 @@ def push_to_master(message):
 	local("git merge develop --no-edit")
 	local("git push origin master")
 	local("git checkout develop")
+	local("git push origin develop")
 
 def deploy_prod_server():
 	run("cd " + PROD_APP_DIR + " && git checkout .")
 	run("cd " + PROD_APP_DIR + " && git pull kaustubh master")
 	run("cd " + PROD_APP_DIR + " && python manage.py migrate")
 	run("echo 'Wholdus_prod@0987' | sudo -S service apache2 restart")
+
+def deploy_prod_server():
+	run("cd " + TEST_APP_DIR + " && git checkout .")
+	run("cd " + TEST_APP_DIR + " && git pull origin develop")
+	run("cd " + TEST_APP_DIR + " && python manage.py migrate")
