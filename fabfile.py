@@ -25,20 +25,16 @@ def restart_server():
 def run_local_test():
 	local("python manage.py test --settings=test_settings")
 
-def deploy(message):
-	#run_local_test()
-	message = "'" + message + "'"
-	push_to_master(message)
-	deploy_prod_server()
-	deploy_test_server()
-
-def push_to_master(message):
-	local("git add --all")
-	local("git commit -m " + message)
+def push_to_master():
 	local("git checkout master")
 	local("git merge develop --no-edit")
 	local("git push origin master")
 	local("git checkout develop")
+
+def push_to_develop(message):
+	message = "'" + message + "'"
+	local("git add --all")
+	local("git commit -m " + message)
 	local("git push origin develop")
 
 def deploy_prod_server():
