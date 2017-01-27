@@ -5,6 +5,7 @@ from django.db.models import Sum
 from users.models.buyer import Buyer
 
 def update_product_likes_dislikes():
+	Product.objects.all().update(product_likes=0, product_dislikes=0)
  	cursor = connection.cursor()
  	nowTime = "'" + timezone.now().strftime("%Y-%m-%d %H:%M:%S") + "'"
  	testBuyers = Buyer.objects.filter(test_buyer=1).values_list('id', flat=True)
