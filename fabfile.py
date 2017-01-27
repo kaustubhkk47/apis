@@ -7,9 +7,7 @@ PROD_APP_DIR = "/home/aditya/webapps/wholdus-apis/apis/"
 SERVER_USER = "aditya@52.187.33.84"
  
 # Set the user to use for ssh
-env.user = "aditya"
-env.password = "Wholdus_prod@0987"
-env.hosts = ["52.187.33.84"]
+
 #env.always_use_pty = False
  
 # Restrict the function to the 'web' role
@@ -44,12 +42,18 @@ def push_to_master(message):
 	local("git push origin develop")
 
 def deploy_prod_server():
+	env.user = "aditya"
+	env.password = "Wholdus_prod@0987"
+	env.hosts = ["52.187.33.84"]
 	run("cd " + PROD_APP_DIR + " && git checkout .")
 	run("cd " + PROD_APP_DIR + " && git pull kaustubh master")
 	run("cd " + PROD_APP_DIR + " && python manage.py migrate")
 	run("echo 'Wholdus_prod@0987' | sudo -S service apache2 restart")
 
 def deploy_test_server():
+	env.user = "kaustubh"
+	env.password = "Wholdus_test@0987"
+	env.hosts = ["13.76.211.119"]
 	run("cd " + TEST_APP_DIR + " && git checkout .")
 	run("cd " + TEST_APP_DIR + " && git pull origin develop")
 	run("cd " + TEST_APP_DIR + " && python manage.py migrate")
