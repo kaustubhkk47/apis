@@ -158,13 +158,13 @@ class BuyerDetails(models.Model):
 		verbose_name_plural = "Buyer Details"
 
 	def __unicode__(self):
-		return str(self.buyer)
+		return str(self.buyer_type)
 
 class BuyerDetailsInline(admin.StackedInline):
 	model = BuyerDetails
 
 class BuyerAdmin(admin.ModelAdmin):
-	list_display = ["id", "name", "company_name", "mobile_number", "email"]
+	list_display = ["id", "name", "company_name", "mobile_number", "email", "buyerdetails"]
 	list_filter = ["mobile_verification", "email_verification", "whatsapp_sharing_active", "delete_status", "test_buyer"]
 	search_fields = ["name", "company_name", "mobile_number", "email"]
 	list_display_links = ["name"]
