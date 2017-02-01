@@ -197,7 +197,7 @@ CartItemStatus = {
 
 class CartItemAdmin(admin.ModelAdmin):
 	search_fields = ["buyer_id", "buyer__name", "product_id","product__name"]
-	list_display = ["id", "link_to_buyer", "link_to_product", "final_price", "pieces", "added_from"]
+	list_display = ["id", "link_to_buyer", "link_to_product", "final_price", "pieces", "added_from", "created_at_ist"]
 
 	list_display_links = ["id","link_to_buyer","link_to_product"]
 
@@ -212,6 +212,9 @@ class CartItemAdmin(admin.ModelAdmin):
 		return link_to_foreign_key(obj, "product")
 	link_to_product.short_description = "Product"
 	link_to_product.allow_tags=True
+
+	def created_at_ist(self, obj):
+		return time_in_ist(obj.created_at)
 
 class CartItemHistory(models.Model):
 
