@@ -7,6 +7,7 @@
 	<p>Buyer with ID {{buyerID}} has added products to cart. Products added are </p>
 	{%for cartProduct in cartProducts%}
 	<p>Product Id = {{cartProduct.productID}} and lots = {{cartProduct.lots}} </p>
+	<p>http://www.wholdus.com/a/{{cartProduct.productID}}</p>
 	{% endfor %}
 	<p>Buyer cart now has {{cart.pieces}} pieces, {{cart.product_count}} different products, {{cart.final_price}} as total cart value.</p>
 
