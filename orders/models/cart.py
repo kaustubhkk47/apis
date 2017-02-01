@@ -197,7 +197,7 @@ CartItemStatus = {
 
 class CartItemAdmin(admin.ModelAdmin):
 	search_fields = ["buyer_id", "buyer__name", "product_id","product__name"]
-	list_display = ["id", "link_to_buyer", "link_to_product", "final_price", "pieces"]
+	list_display = ["id", "link_to_buyer", "link_to_product", "final_price", "pieces", "added_from"]
 
 	list_display_links = ["id","link_to_buyer","link_to_product"]
 
