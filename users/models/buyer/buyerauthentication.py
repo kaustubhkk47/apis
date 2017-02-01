@@ -119,7 +119,7 @@ class BuyerForgotPasswordToken(models.Model):
 
 class BuyerForgotPasswordTokenAdmin(admin.ModelAdmin):
 
-	list_display = ["id", "mobile_number", "created_at_ist"]
+	list_display = ["id", "mobile_number", "created_at_ist", "is_active", "verification_attempts"]
 
 	def created_at_ist(self, obj):
 		return time_in_ist(obj.created_at)
@@ -149,6 +149,13 @@ class BuyerFireBaseToken(models.Model):
 		if not "token" in data or data["token"] == None or data["token"] == "":
 			return False
 		return True
+
+class BuyerFireBaseTokenAdmin(admin.ModelAdmin):
+
+	list_display = ["id", "buyer", "created_at_ist", "delete_status", "token"]
+
+	def created_at_ist(self, obj):
+		return time_in_ist(obj.created_at)
 
 def sendNotification(buyerFireBaseTokenPtr, notification = {}, data = {}):
 
