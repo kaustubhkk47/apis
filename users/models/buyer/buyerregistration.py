@@ -59,7 +59,7 @@ class BuyerRegistration(models.Model):
 
 class BuyerRegistrationAdmin(admin.ModelAdmin):
 
-	list_display = ["id", "email", "mobile_number", "created_at_ist"]
+	list_display = ["id", "name", "mobile_number", "created_at_ist", "is_active", "verification_attempts"]
 
 	def created_at_ist(self, obj):
 		return time_in_ist(obj.created_at)
