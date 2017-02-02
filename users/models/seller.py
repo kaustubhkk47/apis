@@ -248,6 +248,8 @@ def validateSellerData(seller, oldseller, isnew):
 		seller["seller_conditions"] = oldseller.seller_conditions
 	if not "show_online" in seller or not validate_bool(seller["show_online"]):
 		seller["show_online"] = oldseller.show_online
+	else:
+		seller["show_online_changed"] = True
 	if not "concerned_person" in seller or seller["concerned_person"]==None:
 		seller["concerned_person"] = oldseller.concerned_person
 	if not "concerned_person_number" in seller or seller["concerned_person_number"]==None:
