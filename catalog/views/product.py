@@ -35,8 +35,7 @@ def get_product_details(request, parameters = {}):
 		products = filterProducts(parameters)
 
 		
-
-		
+		response = {}
 		paginator = Paginator(products, parameters["itemsPerPage"])
 
 		try:
