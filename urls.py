@@ -27,6 +27,7 @@ urlpatterns = [
 urlpatterns += [
 	url(r'^category/$', catalog_handler.categories_details),
 	url(r'^products/$', catalog_handler.product_details),
+	url(r'^products/offlinedeleted/$', catalog_handler.offline_deleted_product_details),
 	url(r'^products/colour_type/$', catalog_handler.product_colour_details),
 	url(r'^products/fabric_type/$', catalog_handler.product_fabric_details),
 	url(r'^products/generatefile/$', catalog_handler.product_file),

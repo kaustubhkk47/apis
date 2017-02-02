@@ -71,9 +71,8 @@ def send_sms(message_text, mobile_number, user_type, sms_purpose):
 	newSMSSent.save()
 
 	if not settings.CURRENT_ENVIRONMENT == 'prod':
-		#data["test"] = True
-		#newSMSSent.test_sms = 1
-		pass
+		data["test"] = True
+		newSMSSent.test_sms = 1
 
 	data["receipt_url"] = deliveryBaseUrl
 	data["custom"] = newSMSSent.id

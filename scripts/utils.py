@@ -49,6 +49,10 @@ def customResponse(statusCode, body={}, error_code = 0, error_details=""):
 				"details":error_details}
 			}
 
+	meta = {}
+	meta["timestamp"] = timezone.now()
+	body["meta"] = meta
+
 	response = JsonResponse(body, safe=False)
 	response.status_code = statusCode
 

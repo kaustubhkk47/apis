@@ -34,6 +34,9 @@ def get_product_details(request, parameters = {}):
 		
 		products = filterProducts(parameters)
 
+		
+
+		
 		paginator = Paginator(products, parameters["itemsPerPage"])
 
 		try:
@@ -42,11 +45,31 @@ def get_product_details(request, parameters = {}):
 			pageProducts = []
 
 		body = multiple_products_parser(pageProducts, parameters)
-		response = {"products": body,"total_products":paginator.count}
+		response["products"] = body
+		response["total_products"] = paginator.count
 
 		responsePaginationParameters(response, paginator, parameters)
 			
 		statusCode = 200
+	except Exception as e:
+		log.critical(e)
+		statusCode = 500
+		response = {}
+
+	closeDBConnection()
+	return customResponse(statusCode, response,error_code=0)
+
+def get_deleted_offline_products(request, parameters = {}):
+	try:
+		response = {}
+		if not "product_updated_at" in parameters:
+			parameters["product_updated_at"] = "2016-01-01T00:00:00.000Z"
+
+		response["offline_products"] = ",".join(map(str,Product.objects.filter(updated_at__gte=parameters["product_updated_at"],show_online=0).values_list('id',flat=True)))
+		response["deleted_products"] = ",".join(map(str,Product.objects.filter(updated_at__gte=parameters["product_updated_at"],delete_status=1).values_list('id',flat=True)))
+
+		statusCode = 200
+
 	except Exception as e:
 		log.critical(e)
 		statusCode = 500

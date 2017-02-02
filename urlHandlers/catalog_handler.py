@@ -94,6 +94,16 @@ def product_details(request, version = "0"):
 	return customResponse(404, error_code = 7)
 
 @csrf_exempt
+def offline_deleted_product_details(request, version = "0"):
+	version = getApiVersion(request)
+	parameters = populateProductParameters(request, {}, version)
+
+	if request.method == "GET":
+		return product.get_deleted_offline_products(request,parameters)
+
+	return customResponse(404, error_code = 7)
+
+@csrf_exempt
 def product_colour_details(request, version = "0"):
 
 	version = getApiVersion(request)
@@ -163,37 +173,35 @@ def populateProductParameters(request, parameters = {}, version = "0"):
 def populateProductFilterParameters(request, parameters = {}, version = "0"):
 
 	productID = request.GET.get("productID", "")
-	categoryID = request.GET.get("categoryID", "")
-	fabric = request.GET.get("fabric", "")
-	colour = request.GET.get("colour", "")
-	sizes = request.GET.get("sizes", "")
-	min_price_per_unit = request.GET.get("min_price_per_unit", "")
-	max_price_per_unit = request.GET.get("max_price_per_unit", "")
-	productShowOnline = request.GET.get("product_show_online", "")
-	productVerification = request.GET.get("product_verification", "")
-
-
 	if productID != "" and productID != None:
 		parameters["productsArr"] = getArrFromString(productID)
 
+	categoryID = request.GET.get("categoryID", "")
 	if categoryID != "" and categoryID != None:
 		parameters["categoriesArr"] = getArrFromString(categoryID)
 
+	fabric = request.GET.get("fabric", "")
 	if fabric != "" and fabric != None:
 		parameters["fabricArr"] = getStrArrFromString(fabric)
 
+	colour = request.GET.get("colour", "")
 	if colour != "" and colour != None:
 		parameters["colourArr"] = getStrArrFromString(colour)
 
+	sizes = request.GET.get("sizes", "")
 	if sizes != "" and sizes != None:
 		parameters["sizesArr"] = getStrArrFromString(sizes)
 
+	productShowOnline = request.GET.get("product_show_online", "")
 	if productShowOnline != "" and validate_bool(productShowOnline):
 		parameters["product_show_online"] = int(productShowOnline)
 
+	productVerification = request.GET.get("product_verification", "")
 	if productVerification != "" and validate_bool(productVerification):
 		parameters["product_verification"] = int(productVerification)
 
+	min_price_per_unit = request.GET.get("min_price_per_unit", "")
+	max_price_per_unit = request.GET.get("max_price_per_unit", "")
 	if validate_number(min_price_per_unit) and validate_number(max_price_per_unit) and float(min_price_per_unit) >= 0 and float(max_price_per_unit) > float(min_price_per_unit):
 		parameters["price_filter_applied"] = True
 		parameters["min_price_per_unit"] = float(min_price_per_unit)
@@ -202,6 +210,10 @@ def populateProductFilterParameters(request, parameters = {}, version = "0"):
 	productOrderBy = request.GET.get("product_order_by", "")
 	if productOrderBy != "" and productOrderBy != None:
 		parameters["product_order_by"] = productOrderBy
+
+	productUpdatedAt = request.GET.get("product_updated_at", "")
+	if productUpdatedAt != "" and productUpdatedAt != None:
+		parameters["product_updated_at"] = productUpdatedAt
 
 	return parameters
 
