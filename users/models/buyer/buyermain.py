@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib import admin
-from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString, link_to_foreign_key, validate_percent
+from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString, link_to_foreign_key, validate_percent, time_in_ist
 from decimal import Decimal
 import jwt as JsonWebToken
 import settings
@@ -164,11 +164,14 @@ class BuyerDetailsInline(admin.StackedInline):
 	model = BuyerDetails
 
 class BuyerAdmin(admin.ModelAdmin):
-	list_display = ["id", "name", "company_name", "mobile_number", "email", "buyerdetails"]
+	list_display = ["id", "name", "company_name", "mobile_number", "email", "buyerdetails", "created_at_ist"]
 	list_filter = ["mobile_verification", "email_verification", "whatsapp_sharing_active", "delete_status", "test_buyer"]
-	search_fields = ["name", "company_name", "mobile_number", "email"]
+	search_fields = ["id", "name", "company_name", "mobile_number", "email"]
 	list_display_links = ["name"]
 	inlines = [BuyerDetailsInline,]
+
+	def created_at_ist(self, obj):
+		return time_in_ist(obj.created_at)
 
 
 def validateBuyerData(buyer, oldbuyer, is_new):

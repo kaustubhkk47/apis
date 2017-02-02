@@ -55,7 +55,20 @@ CartStatusValues = [0,1]
 
 class CartAdmin(admin.ModelAdmin):
 
-	list_display = ["id", "buyer", "created_at_ist"]
+	search_fields = ["buyer__id", "buyer__mobile_number", "buyer__name"]
+
+	list_display = ["id", "link_to_buyer", "created_at_ist", "status", "product_count", "pieces","calculated_price", "shipping_charge", "final_price"]
+
+	list_display_links = ["id","link_to_buyer"]
+
+	list_filter = ["status"]
+
+	date_hierarchy = "updated_at"
+
+	def link_to_buyer(self, obj):
+		return link_to_foreign_key(obj, "buyer")
+	link_to_buyer.short_description = "Buyer"
+	link_to_buyer.allow_tags=True
 
 	def created_at_ist(self, obj):
 		return time_in_ist(obj.created_at)
@@ -112,6 +125,19 @@ SubCartStatus = {
 }
 
 SubCartStatusValues = [0,1]
+
+class SubCartAdmin(admin.ModelAdmin):
+
+	search_fields = ["cart__buyer__id", "cart__buyer__mobile_number", "cart__buyer__name", "seller__id", "seller__name"]
+
+	list_display = ["id", "cart", "created_at_ist", "status", "product_count", "pieces","calculated_price", "shipping_charge", "final_price"]
+
+	list_filter = ["status", "seller"]
+
+	date_hierarchy = "updated_at"
+
+	def created_at_ist(self, obj):
+		return time_in_ist(obj.created_at)
 
 class CartItem(models.Model):
 
@@ -196,12 +222,14 @@ CartItemStatus = {
 }
 
 class CartItemAdmin(admin.ModelAdmin):
-	search_fields = ["buyer_id", "buyer__name", "product_id","product__name"]
-	list_display = ["id", "link_to_buyer", "link_to_product", "final_price", "pieces", "added_from", "created_at_ist"]
+	search_fields = ["buyer__id", "buyer__name", "buyer__mobile_number", "product__id","product__name"]
+	list_display = ["id", "link_to_buyer", "link_to_product", "lots", "pieces", "final_price", "created_at_ist"]
 
 	list_display_links = ["id","link_to_buyer","link_to_product"]
 
 	list_filter = ["status"]
+
+	date_hierarchy = "updated_at"
 
 	def link_to_buyer(self, obj):
 		return link_to_foreign_key(obj, "buyer")

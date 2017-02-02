@@ -59,7 +59,13 @@ class BuyerRegistration(models.Model):
 
 class BuyerRegistrationAdmin(admin.ModelAdmin):
 
+	search_fields = ["mobile_number", "name"]
+
 	list_display = ["id", "name", "mobile_number", "created_at_ist", "is_active", "verification_attempts"]
+
+	list_filter = ["is_active"]
+
+	date_hierarchy = "updated_at"
 
 	def created_at_ist(self, obj):
 		return time_in_ist(obj.created_at)

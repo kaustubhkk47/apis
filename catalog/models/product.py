@@ -164,12 +164,14 @@ class ProductDetailsInline(admin.StackedInline):
 	model = ProductDetails
 
 class ProductAdmin(admin.ModelAdmin):
-	search_fields = ["name", "category__name", "seller__name"]
+	search_fields = ["id", "name", "category__name", "seller__name"]
 	list_display = ["id", "name", "link_to_seller", "link_to_category", "link_to_productdetails"]
 
 	list_display_links = ["name","link_to_seller", "link_to_category"]
 
-	list_filter = ["category", "seller", "verification", "show_online", "delete_status"]
+	list_filter = ["verification", "show_online", "delete_status","category", "seller"]
+
+	date_hierarchy = "created_at"
 
 	def link_to_seller(self, obj):
 		return link_to_foreign_key(obj, "seller")

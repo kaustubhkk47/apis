@@ -39,6 +39,8 @@ class  SMSSent(models.Model):
 		return "{} - {}".format(self.id,self.mobile_number)
 
 class SMSSentAdmin(admin.ModelAdmin):
+
+	search_fields = ["mobile_number"]
 	list_display = ["id","mobile_number", "user_type", "sms_purpose", "created_at_ist", "delivered"]
 
 	list_filter = ["user_type", "sms_purpose", "delivered"]

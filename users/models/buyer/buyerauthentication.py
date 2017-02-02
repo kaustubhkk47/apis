@@ -152,7 +152,13 @@ class BuyerFireBaseToken(models.Model):
 
 class BuyerFireBaseTokenAdmin(admin.ModelAdmin):
 
+	search_fields = ["buyer__id", "buyer__name", "buyer__company_name", "buyer__mobile_number"]
+
 	list_display = ["id", "buyer", "created_at_ist", "delete_status", "token"]
+
+	list_filter = ["delete_status"]
+
+	date_hierarchy = "updated_at"
 
 	def created_at_ist(self, obj):
 		return time_in_ist(obj.created_at)

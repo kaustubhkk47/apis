@@ -112,12 +112,14 @@ class BuyerProductResponse(models.Model):
 		self.store_margin = Decimal(buyer_product_response["store_margin"])
 
 class BuyerProductResponseAdmin(admin.ModelAdmin):
-	search_fields = ["buyer_id", "buyer__name", "buyer__company_name", "buyer__mobile_number"]
+	search_fields = ["buyer__id", "buyer__name", "buyer__company_name", "buyer__mobile_number"]
 	list_display = ["id", "link_to_buyer", "link_to_product", "response_code","has_swiped", "created_at_ist"]
 
 	list_display_links = ["id","link_to_buyer", "link_to_product"]
 
 	list_filter = ["response_code", "buyer"]
+
+	date_hierarchy = "updated_at"
 
 	def created_at_ist(self, obj):
 		return time_in_ist(obj.created_at)
@@ -156,7 +158,7 @@ class BuyerProductLanding(models.Model):
 		return "{}".format(self.id)
 
 class BuyerProductLandingAdmin(admin.ModelAdmin):
-	search_fields = ["buyer_id", "buyer__name", "buyer__company_name", "buyer__mobile_number"]
+	search_fields = ["buyer__id", "buyer__name", "buyer__company_name", "buyer__mobile_number"]
 	list_display = ["id", "link_to_buyer", "link_to_product", "created_at_ist", "source"]
 
 	list_display_links = ["id","link_to_buyer", "link_to_product"]
