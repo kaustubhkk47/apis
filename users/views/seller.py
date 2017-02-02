@@ -201,7 +201,7 @@ def update_seller(request):
 			populateSellerBankDetailsData(sellerBankDetailsPtr,sellerbankdetails)
 
 		sellerPtr.save()
-		if "show_online_changed" in seller and seller["show_online_changed"] = True:
+		if "show_online_changed" in seller and seller["show_online_changed"] == True:
 			Product.objects.filter(seller_id = sellerPtr.id).update(show_online=seller["show_online"], updated_at=timezone.now())
 		if detailsSent == 1 and detailsPresent == 1:
 			sellerPtr.sellerdetails.save()
