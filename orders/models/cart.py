@@ -197,7 +197,7 @@ class CartItem(models.Model):
 		self.lot_size = self.product.lot_size
 		self.pieces = self.lots*self.lot_size
 		self.retail_price_per_piece = self.product.price_per_unit
-		self.calculated_price_per_piece = self.product.getCalculatedPricePerPiece(self.lots)
+		self.calculated_price_per_piece = self.product.min_price_per_unit
 		self.final_price = self.pieces*self.calculated_price_per_piece
 		self.added_from = int(cartitem["added_from"])
 		self.shipping_charge = Decimal(self.product.getShippingPerPiece()*self.pieces)

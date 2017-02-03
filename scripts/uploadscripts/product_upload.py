@@ -9,7 +9,7 @@ import time
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-productURL = "http://api.wholdus.com/products/"
+productURL = "http://api.wholdus.com/products/?access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZCI6ImZlM3NvNC4xIiwidXNlciI6ImludGVybmFsdXNlciIsImludGVybmFsdXNlcklEIjoyfQ.FTV-D0BixMGGUj8CpvxkotWuGvdY-mHTBwJBiKAj6j8"
 redFill = openpyxl.styles.PatternFill(start_color='FA5858',end_color='FA5858',fill_type='solid')
 greenFill = openpyxl.styles.PatternFill(start_color='00FF40',end_color='00FF40',fill_type='solid')
 
