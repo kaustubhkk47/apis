@@ -22,12 +22,12 @@ for imageSize in allImageSizes:
 allSizePaths[0] = ""
 fileFormatExtensions = [".jpg", ".jpeg",".png"]
 
-inputFileName = "./ProductDataSheet.xlsx"
-outputFileName = "./ProductDataSheetf.xlsx"
+inputFileName = "./indo_upload.xlsx"
+outputFileName = "./indo_uploadf.xlsx"
 
 startRow = 5
 
-imageQualityPercent = 80
+imageQualityPercent = 75
 
 def upload_products():
 	wb = read_file()
@@ -92,7 +92,8 @@ def send_products_data(wb):
 					print jsonText["error"]
 					success = 0
 			except Exception as e:
-				post_feedback(wb, row, "Error " + e)
+				print e
+				post_feedback(wb, row, "Error " + str(e))
 				success = 0
 
 		row += 1
@@ -112,19 +113,21 @@ def send_modified_product_prices(wb):
 
 		if not (productData == {} or productData == "{}"):
 			response = requests.put(productURL, data = productData)
+			if response.status_code == requests.codes.ok:
+				try:
+					jsonText = json.loads(response.text)
 
-			try:
-				jsonText = json.loads(response.text)
-
-				if response.status_code == requests.codes.ok:
-					post_feedback(wb, row, "Success",jsonText["product"]["productID"])
-					print "Success"
-					
-				else:
-					post_feedback(wb, row, jsonText["error"])
-					print jsonText["error"]
-			except Exception as e:
-				post_feedback(wb, row, "Error " + e)
+					if jsonText["statusCode"] != "2XX":
+						post_feedback(wb, row, jsonText["body"]["error"])
+						print jsonText["body"]["error"]
+					else:
+						post_feedback(wb, row, "Success",jsonText["body"]["product"]["productID"])
+						print "Success"
+				except Exception as e:
+					print e
+					post_feedback(wb, row, e)
+			else:
+				post_feedback(wb, row, "Error response from server")
 
 		row += 1
 
@@ -228,13 +231,11 @@ def fill_product_data(wb , i):
 		productDetails["special_feature"] = toString(wb.worksheets[1]["P"+toString(i)].value)
 		productDetails["packaging_details"] = toString(wb.worksheets[1]["Q"+toString(i)].value)
 		productDetails["availability"] = toString(wb.worksheets[1]["R"+toString(i)].value)
-
 		productDetails["weight_per_unit"] = parseFloat(wb.worksheets[2]["F"+toString(i)].value)
 		productDetails["dispatched_in"] = toString(wb.worksheets[1]["S"+toString(i)].value)
 		productDetails["sample_type"] = toString(wb.worksheets[2]["J"+toString(i)].value)
 		productDetails["sample_description"] = toString(wb.worksheets[2]["K"+toString(i)].value)
 		productDetails["sample_price"] = parseFloat(wb.worksheets[2]["L"+toString(i)].value)
-		productDetails["lot_description"] = toString(wb.worksheets[2]["I"+toString(i)].value)
 
 		productDetails["manufactured_country"] = "India"
 		productDetails["manufactured_city"] = toString(wb.worksheets[0]["C7"].value)
@@ -248,7 +249,6 @@ def fill_product_data(wb , i):
 		print e
 		print "Data was incorrect"
 		post_feedback(wb, i, "Data was incorrect")
-
 	return productData
 
 def get_categoryID(value, wb):
@@ -277,7 +277,9 @@ def countImages(row):
 		for extension in fileFormatExtensions:
 			imageFileName = toString(row) + "-" + toString(imgNo) + extension
 			imagePath = os.path.join(imageDirectory,imageFileName)
+			print imagePath
 			if os.path.isfile(imagePath):
+				print "yes"
 				check = 1
 		if(check == 0):
 			break

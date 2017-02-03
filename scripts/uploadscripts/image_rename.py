@@ -4,8 +4,8 @@ import string
 import re
 import shutil
 
-inputFileName = "./ProductDataSheet.xlsx"
-outputFileName = "./ProductDataSheetf.xlsx"
+inputFileName = "./indo_upload.xlsx"
+outputFileName = "./indo_uploadff.xlsx"
 
 inputFolderName = "./OriginalImages/"
 outputFolderName = "./images/"
@@ -146,7 +146,7 @@ def moveImagesInsideFolders(imageDir,wb,row):
 		print "Success"
 
 def getAllFiles(imageDir):
-	return [f for f in os.listdir(imageDir) if os.path.isfile(os.path.join(imageDir, f))]
+	return [f for f in os.listdir(imageDir) if os.path.isfile(os.path.join(imageDir, f)) and os.path.splitext(f)[1] in [".jpg", ".png", ".jpeg"]]
 
 def toString(x):
 	if (isinstance(x, unicode)):

@@ -173,6 +173,24 @@ class ProductAdmin(admin.ModelAdmin):
 
 	date_hierarchy = "created_at"
 
+	actions = ["make_products_offline", "verify_products"]
+
+	def make_products_offline(self, request, queryset):
+		rows_updated = queryset.update(show_online=0)
+		if rows_updated == 1:
+			message_bit = "1 product was"
+		else:
+			message_bit = "%s products were" % rows_updated
+		self.message_user(request, "%s marked as offline." % message_bit)
+
+	def verify_products(self, request, queryset):
+		rows_updated = queryset.update(show_online=1, verification=1)
+		if rows_updated == 1:
+			message_bit = "1 product was"
+		else:
+			message_bit = "%s products were" % rows_updated
+		self.message_user(request, "%s successfully verified." % message_bit)
+
 	def link_to_seller(self, obj):
 		return link_to_foreign_key(obj, "seller")
 	link_to_seller.short_description = "Seller"
