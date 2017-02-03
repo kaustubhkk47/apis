@@ -221,7 +221,7 @@ def update_order(request,parameters={}):
 
 		buyer_subject = "Order Confirmed with order ID {}".format(orderPtr.display_number)
 		sendOrderMail(orderPtr, buyer_subject)
-		orderPtr.sendOrderNotification("Order No {} Confirmed".format(newOrder.display_number), "Order will be shipped shortly")
+		orderPtr.sendOrderNotification("Order No {} Confirmed".format(orderPtr.display_number), "Order will be shipped shortly")
 		orderPtr.sendOrderSMS("has been confirmed and will be shipped shortly")
 		allSubOrders = SubOrder.objects.filter(order_id = orderPtr.id,suborder_status=1)
 		for subOrderPtr in allSubOrders: 
