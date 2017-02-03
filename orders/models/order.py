@@ -189,16 +189,22 @@ OrderPaymentStatus = {
 def sendOrderMail(OrderPtr, buyer_subject = ""):
 	from_email = "Wholdus Info <info@wholdus.com>"
 	buyerPtr = OrderPtr.buyer
+	buyer_mail_template_file = "buyer/new_order.html"
+	if buyer_subject == "":
+		buyer_subject = "New order placed with order ID " + OrderPtr.display_number
+	buyer_mail_dict = populateBuyerMailDict(OrderPtr, buyerPtr)
 
 	if buyerPtr.email != None and buyerPtr.email != "":
-		buyer_mail_template_file = "buyer/new_order.html"
-		if buyer_subject == "":
-			buyer_subject = "New order placed with order ID " + OrderPtr.display_number
+		
 		buyer_to = [buyerPtr.email]
-		buyer_bcc = ["aditya.rana@wholdus.com", "kushagra@wholdus.com"]
-		buyer_mail_dict = populateBuyerMailDict(OrderPtr, buyerPtr)
-
+		buyer_bcc = ["manish@wholdus.com", "kushagra@wholdus.com"]
+		
 		create_email(buyer_mail_template_file,buyer_mail_dict,buyer_subject,from_email,buyer_to,bcc=buyer_bcc)
+	else:
+		buyer_to = ["manish@wholdus.com", "kushagra@wholdus.com"]
+		create_email(buyer_mail_template_file,buyer_mail_dict,buyer_subject,from_email,buyer_to)
+
+
 
 def populateBuyerMailDict(OrderPtr, buyerPtr):
 	buyer_mail_dict = {}
