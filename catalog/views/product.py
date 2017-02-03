@@ -158,7 +158,14 @@ def post_new_product(request, parameters = {}):
 	except Exception as e:
 		return customResponse(400, error_code=4)
 
-	if not len(product) or not validateProductData(product, Product(), 1):
+	if not len(product):
+		return customResponse(400, error_code=5, error_details= "No data for product sent")
+
+	if not "product_lot" in product or not product["product_lot"] or not validateProductLotData(product["product_lot"]):
+		return customResponse(400, error_code=5, error_details="Product lots for product not properly sent")
+	product["min_price_per_unit"] = parseMinPricePerUnit(product["product_lot"])
+
+	if not validateProductData(product, Product(), 1):
 		return customResponse(400, error_code=5, error_details= "Invalid data for product sent")
 
 	if not "sellerID" in product or not validate_integer(product["sellerID"]):
@@ -184,8 +191,7 @@ def post_new_product(request, parameters = {}):
 		except Exception as e:
 			pass
 
-	if not "product_lot" in product or not product["product_lot"] or not validateProductLotData(product["product_lot"]):
-		return customResponse(400, error_code=5, error_details="Product lots for product not properly sent")
+	
 
 	if not "details" in product or not product["details"]:
 		product["details"] = {}
@@ -193,7 +199,6 @@ def post_new_product(request, parameters = {}):
 	validateProductDetailsData(product["details"], ProductDetails())
 
 	product["slug"] = slugify(product["name"])
-	product["min_price_per_unit"] = parseMinPricePerUnit(product["product_lot"])
 	product["display_name"] = product["details"]["brand"] + " " +product["name"] + " " + product["details"]["seller_catalog_number"]
 
 	try:
