@@ -407,7 +407,7 @@ def buyer_product_master_update(request,version = "0"):
 
 	version = getApiVersion(request)
 
-	parameters = populateInternalUserIDParameters(request, parameters, version)
+	parameters = populateInternalUserIDParameters(request, {}, version)
 
 	if request.method == "POST":
 		if parameters["isInternalUser"] == 0:
