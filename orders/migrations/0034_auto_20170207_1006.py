@@ -31,9 +31,11 @@ def correct_shipping_charges(apps, schema_editor):
 
 			subcart.extra_shipping_charge = extraShippingCharge
 			subcart.shipping_charge = subCartShippingCharge
+			subcart.final_price = subcart.shipping_charge + subcart.calculated_price
 			subcart.save()
 			cartShippingCharge += subCartShippingCharge
 		cart.shipping_charge = cartShippingCharge
+		cart.final_price = cart.shipping_charge + cart.calculated_price
 		cart.save()
 
 class Migration(migrations.Migration):
