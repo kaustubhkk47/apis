@@ -59,6 +59,7 @@ class OrderItem(models.Model):
 		self.edited_price_per_piece = cartItemPtr.calculated_price_per_piece
 		self.final_price = cartItemPtr.final_price
 		self.current_status = 0
+		self.remarks = cartItemPtr.remarks
 
 class OrderItemAdmin(admin.ModelAdmin):
 	search_fields = ["suborder__display_number", "product__name"]

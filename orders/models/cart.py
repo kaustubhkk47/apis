@@ -21,6 +21,8 @@ class Cart(models.Model):
 
 	status = models.IntegerField(default=0)
 
+	remarks = models.TextField(blank=True)
+
 	class Meta:
 		verbose_name="Cart"
 		verbose_name_plural = "Cart"
@@ -93,6 +95,8 @@ class SubCart(models.Model):
 
 	status = models.IntegerField(default=0)
 
+	remarks = models.TextField(blank=True)
+
 	class Meta:
 		verbose_name="Sub Cart"
 		verbose_name_plural = "Sub Cart"
@@ -161,6 +165,8 @@ class CartItem(models.Model):
 
 	status = models.IntegerField(default=0)
 
+	remarks = models.TextField(blank=True)
+
 	#added_from values
 	#0 : category_page, 1 : product_page, 2 : shortlist, 3 : homepage
 	added_from = models.IntegerField(default=0)
@@ -187,6 +193,8 @@ class CartItem(models.Model):
 				return False
 			if not "added_from" in cartitem or not validate_integer(cartitem["added_from"]):
 				cartitem["added_from"] = 0
+			if not "remarks" in cartitem or cartitem["remarks"]  == None:
+				cartitem["remarks"] = ""
 
 			productsHash[productID] = len(productsHash)
 			productIDarr.append(productID)
@@ -202,6 +210,7 @@ class CartItem(models.Model):
 		self.final_price = self.pieces*self.calculated_price_per_piece
 		self.added_from = int(cartitem["added_from"])
 		self.shipping_charge = Decimal(self.product.getShippingPerPiece()*self.pieces)
+		self.remarks = cartitem["remarks"]
 
 	def getPrices(self):
 		initialPrices = {}

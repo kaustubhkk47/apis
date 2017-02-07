@@ -41,6 +41,8 @@ class SubOrder(models.Model):
 	cancellation_remarks = models.TextField(blank=True)
 	cancellation_time = models.DateTimeField(null=True, blank=True)
 
+	remarks = models.TextField(blank=True)
+
 	class Meta:
 		ordering = ["-id"]
 		default_related_name = "suborder"
@@ -62,6 +64,7 @@ class SubOrder(models.Model):
 		self.cod_charge = subCartPtr.cod_charge
 		self.final_price = subCartPtr.final_price
 		self.suborder_status = 0
+		self.remarks = subCartPtr.remarks
 		self.save()
 		self.seller_address_history = self.seller.latest_seller_address_history()
 		self.display_number = "%04d" %(self.seller_id,) + "-" + "1" + "%06d" %(self.order_id,)

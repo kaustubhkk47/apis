@@ -67,6 +67,7 @@ class Order(models.Model):
 		self.cod_charge = cartPtr.cod_charge
 		self.final_price = cartPtr.final_price
 		self.order_status = 0
+		self.remarks = cartPtr.remarks
 		self.placed_by = "buyer"
 		self.save()
 		self.display_number = "1" +"%06d" %(self.id,)

@@ -33,6 +33,7 @@ def serializeCart(cartEntry, parameters = {}):
 	cart["calculated_price"] = cartEntry.calculated_price
 	cart["shipping_charge"] = cartEntry.shipping_charge
 	cart["final_price"] = cartEntry.final_price
+	cart["remarks"] = cartEntry.remarks
 
 	cart["created_at"] = cartEntry.created_at
 	cart["updated_at"] = cartEntry.updated_at
@@ -77,6 +78,8 @@ def serializeSubCart(subcartEntry, parameters = {}):
 	subcart["created_at"] = subcartEntry.created_at
 	subcart["updated_at"] = subcartEntry.updated_at
 
+	subcart["remarks"] = subcartEntry.remarks
+
 	if "seller_details" in parameters and parameters["seller_details"] == 1:
 		subcart["seller"]=serialize_seller(subcartEntry.seller, parameters)
 	else:
@@ -109,6 +112,8 @@ def serializeCartItem(cartItemEntry, parameters = {}):
 	cartItem["created_at"] = cartItemEntry.created_at
 	cartItem["updated_at"] = cartItemEntry.updated_at
 	cartItem["status"] = cartItemEntry.status
+
+	cartItem["remarks"] = cartItemEntry.remarks
 	
 	if "product_details" in parameters and parameters["product_details"] == 1:
 		cartItem["product"] = serialize_product(cartItemEntry.product, parameters)

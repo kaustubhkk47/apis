@@ -117,6 +117,9 @@ def post_new_cart_item(request, parameters):
 				cartItemHistoryPtr = CartItemHistory()
 				cartItemHistoryPtr.populateCartItemHistoryData(cartItemPtr)
 				cartItemHistoryPtr.save()
+			else:
+				cartItemPtr.remarks = cartitem["remarks"]
+				cartItemPtr.save()
 
 		cartPtr.save()
 
