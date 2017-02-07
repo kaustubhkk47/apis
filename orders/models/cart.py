@@ -107,8 +107,9 @@ class SubCart(models.Model):
 		self.calculated_price +=  finalPrices["calculated_price"] - initialPrices["calculated_price"]
 		self.shipping_charge +=  finalPrices["shipping_charge"] - initialPrices["shipping_charge"] - self.extra_shipping_charge
 		self.final_price +=  finalPrices["final_price"] - initialPrices["final_price"] - self.extra_shipping_charge
-		if self.shipping_charge < 175 and self.product_count>0:
-			self.extra_shipping_charge = (175-self.shipping_charge)
+		minShippingCharge = 75
+		if self.shipping_charge < minShippingCharge and self.product_count>0:
+			self.extra_shipping_charge = (minShippingCharge - self.shipping_charge)
 			self.shipping_charge += self.extra_shipping_charge
 			self.final_price += self.extra_shipping_charge
 		else:
