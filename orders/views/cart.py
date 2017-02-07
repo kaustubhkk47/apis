@@ -117,9 +117,10 @@ def post_new_cart_item(request, parameters):
 				cartItemHistoryPtr = CartItemHistory()
 				cartItemHistoryPtr.populateCartItemHistoryData(cartItemPtr)
 				cartItemHistoryPtr.save()
-			else:
+			elif not int(cartitem["lots"]) == 0:
 				cartItemPtr.remarks = cartitem["remarks"]
 				cartItemPtr.save()
+				subCartPtr.save()
 
 		cartPtr.save()
 
