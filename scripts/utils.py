@@ -340,6 +340,8 @@ def responsePaginationParameters(response, paginator, parameters):
 
 def link_to_foreign_key(obj, fk_name):
 	fk_instance = getattr(obj, fk_name)
+	if fk_instance == None:
+		return None
 	app_label = fk_instance._meta.app_label.lower()
 	model_name = fk_instance._meta.model_name.lower()
 	link=urlresolvers.reverse("admin:{}_{}_change".format(app_label, model_name), args=[fk_instance.id])

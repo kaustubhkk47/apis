@@ -92,6 +92,21 @@ class BuyerAddress(models.Model):
 	def __unicode__(self):
 		return  str(self.id) + " - " + str(self.buyer)
 
+class BuyerAddressAdmin(admin.ModelAdmin):
+	list_display = ["id", "link_to_buyer", "link_to_pincode","pincode_number", "address_line", "city_name", "state_name"]
+	search_fields = ["buyer__id", "buyer__name", "buyer__company_name", "buyer__mobile_number"]
+	list_display_links = ["id", "link_to_buyer", "link_to_pincode"]
+
+	def link_to_buyer(self, obj):
+		return link_to_foreign_key(obj, "buyer")
+	link_to_buyer.short_description = "Buyer"
+	link_to_buyer.allow_tags=True
+
+	def link_to_pincode(self, obj):
+		return link_to_foreign_key(obj, "pincode")
+	link_to_pincode.short_description = "Pincode"
+	link_to_pincode.allow_tags=True
+
 class BuyerAddressHistory(models.Model):
 	buyer = models.ForeignKey('users.Buyer')
 	buyeraddress = models.ForeignKey('users.BuyerAddress', blank=True,null=True)

@@ -6,7 +6,7 @@ from .models.internalUser import *
 from .models.businessType import *
 
 admin.site.register(Buyer, BuyerAdmin)
-admin.site.register(BuyerAddress)
+admin.site.register(BuyerAddress, BuyerAddressAdmin)
 admin.site.register(BuyerAddressHistory)
 admin.site.register(BuyerDetails)
 admin.site.register(BuyerInterest, BuyerInterestAdmin)
