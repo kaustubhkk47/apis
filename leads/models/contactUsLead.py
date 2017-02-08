@@ -26,7 +26,7 @@ class ContactUsLead(models.Model):
 
 class ContactUsLeadAdmin(admin.ModelAdmin):
 
-	list_display = ["id", "mobile_number", "email", "remarks", "created_at_ist"]
+	list_display = ["id", "mobile_number", "email", "status", "remarks", "created_at_ist"]
 	list_filter = ["status"]
 
 	list_display_links = ["id", "mobile_number"]

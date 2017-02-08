@@ -25,7 +25,7 @@ class SellerLeads(models.Model):
 
 class SellerLeadsAdmin(admin.ModelAdmin):
 
-	list_display = ["id", "mobile_number", "company_name", "email", "created_at_ist"]
+	list_display = ["id", "mobile_number", "company_name", "email", "status", "created_at_ist"]
 	list_filter = ["status"]
 
 	list_display_links = ["id", "mobile_number"]

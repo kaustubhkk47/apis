@@ -33,7 +33,7 @@ class BuyerLeads(models.Model):
 
 class BuyerLeadsAdmin(admin.ModelAdmin):
 
-	list_display = ["id", "mobile_number", "name", "email", "comments", "signup", "created_at_ist"]
+	list_display = ["id", "mobile_number", "name", "email", "status", "comments", "signup", "created_at_ist"]
 	list_filter = ["status"]
 
 	list_display_links = ["id", "mobile_number"]
