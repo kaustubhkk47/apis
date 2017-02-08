@@ -379,6 +379,22 @@ def buyer_product_response_details(request, version = "0"):
 	return customResponse(404, error_code = 7)
 
 @csrf_exempt
+def buyer_product_response_count_details(request, version = "0"):
+
+	version = getApiVersion(request)
+
+	parameters = populateBuyerIDParameters(request, {}, version)
+
+	if request.method == "GET":
+
+		if parameters["isBuyer"] == 0 and parameters["isBuyerStore"] == 0:
+			return customResponse(403, error_code = 8)
+
+		return buyer.get_buyer_product_response_count_details(request,parameters)
+
+	return customResponse(404, error_code = 7)
+
+@csrf_exempt
 def buyer_product_whatsapp_details(request, version = "0"):
 
 	version = getApiVersion(request)

@@ -84,6 +84,27 @@ def get_buyer_product_response_details(request, parameters = {}):
 	closeDBConnection()
 	return customResponse(statusCode, response)
 
+def get_buyer_product_response_count_details(request, parameters = {}):
+	try:
+		if not "buyersArr" in parameters:
+			return customResponse(400, error_code=5, error_details= "Id for buyer not sent")
+
+		buyerID = parameters["buyersArr"][0]
+
+		buyerProductResponseCount = BuyerProductResponse.objects.filter(product__delete_status=False, product__seller__delete_status=False, product__seller__show_online=True, product__category__delete_status=False, buyer_id=buyerID, response_code=1).count()
+
+		response = {"like_count":buyerProductResponseCount}
+
+		statusCode = 200
+
+	except Exception as e:
+		log.critical(e)
+		statusCode = 500
+		response = {}
+
+	closeDBConnection()
+	return customResponse(statusCode, response)
+
 def post_new_buyer_product(request, parameters):
 	try:
 		requestbody = request.body.decode("utf-8")
