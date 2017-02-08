@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib import admin
-from scripts.utils import validate_bool
+from scripts.utils import validate_bool, time_in_ist
 
 class SellerLeads(models.Model):
 
@@ -25,10 +25,23 @@ class SellerLeads(models.Model):
 
 class SellerLeadsAdmin(admin.ModelAdmin):
 
-	list_display = ["id", "mobile_number", "company_name", "email"]
+	list_display = ["id", "mobile_number", "company_name", "email", "created_at_ist"]
 	list_filter = ["status"]
 
 	list_display_links = ["id", "mobile_number"]
+
+	actions = ["resolve_leads"]
+
+	def resolve_leads(self, request, queryset):
+		rows_updated = queryset.update(status=1)
+		if rows_updated == 1:
+			message_bit = "1 lead was"
+		else:
+			message_bit = "%s leads were" % rows_updated
+		self.message_user(request, "%s marked as resolved." % message_bit)
+
+	def created_at_ist(self, obj):
+		return time_in_ist(obj.created_at)
 
 def validateSellerLeadData(sellerlead, oldsellerlead, is_new):
 

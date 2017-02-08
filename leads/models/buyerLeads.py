@@ -4,7 +4,7 @@ from django.contrib import admin
 from catalog.models.product import Product
 from catalog.models.category import Category
 
-from scripts.utils import validate_bool
+from scripts.utils import validate_bool, time_in_ist
 
 class BuyerLeads(models.Model):
 
@@ -33,10 +33,23 @@ class BuyerLeads(models.Model):
 
 class BuyerLeadsAdmin(admin.ModelAdmin):
 
-	list_display = ["id", "mobile_number", "name", "email"]
+	list_display = ["id", "mobile_number", "name", "email", "comments", "signup", "created_at_ist"]
 	list_filter = ["status"]
 
 	list_display_links = ["id", "mobile_number"]
+
+	actions = ["resolve_leads"]
+
+	def resolve_leads(self, request, queryset):
+		rows_updated = queryset.update(status=1)
+		if rows_updated == 1:
+			message_bit = "1 lead was"
+		else:
+			message_bit = "%s leads were" % rows_updated
+		self.message_user(request, "%s marked as resolved." % message_bit)
+
+	def created_at_ist(self, obj):
+		return time_in_ist(obj.created_at)
 
 def validateBuyerLeadData(buyerlead, oldbuyerlead, is_new):
 

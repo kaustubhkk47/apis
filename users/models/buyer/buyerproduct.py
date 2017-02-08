@@ -113,7 +113,7 @@ class BuyerProductResponse(models.Model):
 
 class BuyerProductResponseAdmin(admin.ModelAdmin):
 	search_fields = ["buyer__id", "buyer__name", "buyer__company_name", "buyer__mobile_number"]
-	list_display = ["id", "link_to_buyer", "link_to_product", "response_code","has_swiped", "created_at_ist"]
+	list_display = ["id", "link_to_buyer", "link_to_product", "response_code","has_swiped", "updated_at_ist"]
 
 	list_display_links = ["id","link_to_buyer", "link_to_product"]
 
@@ -121,8 +121,8 @@ class BuyerProductResponseAdmin(admin.ModelAdmin):
 
 	date_hierarchy = "updated_at"
 
-	def created_at_ist(self, obj):
-		return time_in_ist(obj.created_at)
+	def updated_at_ist(self, obj):
+		return time_in_ist(obj.updated_at)
 
 	def link_to_buyer(self, obj):
 		return link_to_foreign_key(obj, "buyer")
