@@ -246,7 +246,11 @@ def cancel_order(request,parameters={}):
 	if not len(order) or not "orderID" in order or not validate_integer(order["orderID"]):
 		return customResponse(400, error_code=5,  error_details="Id for order not sent")
 
-	orderPtr = Order.objects.filter(id=int(order["orderID"]))
+	if parameters["isBuyer"] == 1:
+		orderPtr = Order.objects.filter(id=int(order["orderID"]), buyer_id=parameters["buyersArr"][0])
+		order["cancellation_remarks"] = "Cancelled by buyer"
+	else:
+		orderPtr = Order.objects.filter(id=int(order["orderID"]))
 
 	if len(orderPtr) == 0:
 		return customResponse(400, error_code=6, error_details ="Invalid id for order sent")

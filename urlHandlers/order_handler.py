@@ -71,7 +71,7 @@ def order_details(request, version = "0"):
 			return customResponse(403, error_code = 8)
 		return order.update_order(request, parameters)
 	elif request.method == "DELETE":
-		if parameters["isInternalUser"] == 0:
+		if parameters["isBuyer"] == 0 and parameters["isInternalUser"] == 0:
 			return customResponse(403, error_code = 8)
 		return order.cancel_order(request, parameters)
 
