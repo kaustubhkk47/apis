@@ -3,6 +3,7 @@ from scripts.utils import customResponse
 
 from general.views import smssent
 from general.views import faqs
+from general.views import configuration
 
 @csrf_exempt
 def invalid_request_details(request):
@@ -51,5 +52,14 @@ def terms_and_conditions_details(request, version = "0"):
 	if request.method == "GET":
 	
 		return faqs.get_terms_and_conditions_details(request)
+
+	return customResponse(404, error_code = 7)
+
+@csrf_exempt
+def cart_min_value_details(request, version = "0"):
+
+	if request.method == "GET":
+	
+		return configuration.get_cart_min_value_details(request)
 
 	return customResponse(404, error_code = 7)
