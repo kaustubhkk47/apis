@@ -14,7 +14,7 @@ log = logging.getLogger("django")
 def get_categories_details(request, parameters):
 	try:
 		if "isBuyer" in parameters and parameters["isBuyer"] == 1:
-			parameters["category_show_online"] = 1
+			pass
 		elif "isBuyerStore" in parameters and parameters["isBuyerStore"] == 1:
 			parameters["category_show_online"] = 1
 		elif "isSeller" in parameters and parameters["isSeller"] == 1:
