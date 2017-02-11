@@ -59,7 +59,7 @@ class CartAdmin(admin.ModelAdmin):
 
 	search_fields = ["buyer__id", "buyer__mobile_number", "buyer__name"]
 
-	list_display = ["id", "link_to_buyer", "created_at_ist", "status", "product_count", "pieces","calculated_price", "shipping_charge", "final_price"]
+	list_display = ["id", "link_to_buyer", "updated_at_ist", "status", "product_count", "pieces","calculated_price", "shipping_charge", "final_price"]
 
 	list_display_links = ["id","link_to_buyer"]
 
@@ -72,8 +72,8 @@ class CartAdmin(admin.ModelAdmin):
 	link_to_buyer.short_description = "Buyer"
 	link_to_buyer.allow_tags=True
 
-	def created_at_ist(self, obj):
-		return time_in_ist(obj.created_at)
+	def updated_at_ist(self, obj):
+		return time_in_ist(obj.updated_at)
 
 class SubCart(models.Model):
 
@@ -135,14 +135,14 @@ class SubCartAdmin(admin.ModelAdmin):
 
 	search_fields = ["cart__buyer__id", "cart__buyer__mobile_number", "cart__buyer__name", "seller__id", "seller__name"]
 
-	list_display = ["id", "cart", "created_at_ist", "status", "product_count", "pieces","calculated_price", "shipping_charge", "final_price"]
+	list_display = ["id", "cart", "updated_at_ist", "status", "product_count", "pieces","calculated_price", "shipping_charge", "final_price"]
 
 	list_filter = ["status", "seller"]
 
 	date_hierarchy = "updated_at"
 
-	def created_at_ist(self, obj):
-		return time_in_ist(obj.created_at)
+	def updated_at_ist(self, obj):
+		return time_in_ist(obj.updated_at)
 
 class CartItem(models.Model):
 
@@ -233,7 +233,7 @@ CartItemStatus = {
 
 class CartItemAdmin(admin.ModelAdmin):
 	search_fields = ["buyer__id", "buyer__name", "buyer__mobile_number", "product__id","product__name"]
-	list_display = ["id", "link_to_buyer", "link_to_product", "lots", "pieces", "final_price", "created_at_ist"]
+	list_display = ["id", "link_to_buyer", "link_to_product", "lots", "pieces", "final_price", "remarks","updated_at_ist"]
 
 	list_display_links = ["id","link_to_buyer","link_to_product"]
 
@@ -251,8 +251,8 @@ class CartItemAdmin(admin.ModelAdmin):
 	link_to_product.short_description = "Product"
 	link_to_product.allow_tags=True
 
-	def created_at_ist(self, obj):
-		return time_in_ist(obj.created_at)
+	def updated_at_ist(self, obj):
+		return time_in_ist(obj.updated_at)
 
 class CartItemHistory(models.Model):
 
