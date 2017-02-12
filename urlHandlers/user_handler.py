@@ -148,6 +148,22 @@ def buyer_store_url_details(request, version = "0"):
 
 	return customResponse(404, error_code = 7)
 
+@csrf_exempt
+def buyer_contact_details(request, version = "0"):
+
+	version = getApiVersion(request)
+
+	parameters = populateBuyerParameters(request, {}, version)
+
+	if request.method == "POST":
+
+		if parameters["isBuyer"] == 0:
+			return customResponse(403, error_code = 8)
+
+		return buyer.post_new_buyer_contacts(request,parameters)
+
+	return customResponse(404, error_code = 7)
+
 def populateBuyerStoreParameters(request, parameters = {}, version = "0"):
 
 	parameters = populateBuyerProductParameters(request, parameters, version)

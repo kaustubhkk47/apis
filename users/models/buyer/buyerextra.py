@@ -1,6 +1,7 @@
 from django.db import models
 from scripts.utils import validate_mobile_number, validate_email, validate_bool, validate_pincode, validate_integer, validate_number, getStrArrFromString, getArrFromString
 from decimal import Decimal
+import random
 
 class BuyerPurchasingState(models.Model):
 
@@ -53,6 +54,33 @@ class BuyerPanelInstructionsTracking(models.Model):
 
 	def __unicode__(self):
 		return "{} - {}".format(str(self.buyer), self.page_closed)
+
+class BuyerContacts(models.Model):
+	buyer = models.ForeignKey('users.Buyer')
+
+	contact_name =  models.CharField(max_length=200, blank=True)
+	client_contact_id = models.IntegerField()
+	numbers = models.TextField(blank=True)
+	emails = models.TextField(blank=True)
+
+	class Meta:
+		verbose_name="Buyer Contacts Entry"
+		verbose_name_plural = "Buyer Contacts Entries"
+
+	def __unicode__(self):
+		return "{} - {}".format(str(self.buyer), self.contact_name)
+
+def validateBuyerContactsData(buyer_contacts):
+	for buyer_contact in buyer_contacts:
+		if not "contactID" in buyer_contact or not validate_integer(buyer_contact["contactID"]):
+			buyer_contact["contactID"] = random.randint(100000,10000000)
+		if not "mailArr" in buyer_contact or buyer_contact["mailArr"] == None:
+			buyer_contact["mailArr"] = ""
+		if not "numbersArr" in buyer_contact or buyer_contact["numbersArr"] == None:
+			buyer_contact["numbersArr"] = ""
+		if not "name" in buyer_contact or buyer_contact["name"] == None:
+			buyer_contact["name"] = ""
+		return True
 
 
 def filterBuyerPurchasingState(parameters = {}):

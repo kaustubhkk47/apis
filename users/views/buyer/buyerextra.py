@@ -268,3 +268,37 @@ def delete_buyer_buys_from(request, parameters):
 	else:
 		closeDBConnection()
 		return customResponse(200, {"buyer": "buyer buys_from deleted"})
+
+
+def post_new_buyer_contacts(request, parameters):
+	try:
+		requestbody = request.body.decode("utf-8")
+		buyer_contacts = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse(400, error_code=4)
+
+	if not len(buyer_contacts):
+		return customResponse(400, error_code=5, error_details=  "Invalid data sent in request")
+
+	buyerPtr = Buyer.objects.filter(id=parameters["buyersArr"][0], delete_status=False)
+
+	if not buyerPtr.exists():
+		return customResponse(400, error_code=6, error_details= "Invalid id for buyer sent")
+
+	if not validateBuyerContactsData(buyer_contacts["contacts"]):
+		return customResponse(400, error_code=5, error_details= "Contact Id not sent")
+	
+	try:
+		for buyer_contact in buyer_contacts["contacts"]:
+			buyerContactsPtr, created = BuyerContacts.objects.get_or_create(buyer_id = parameters["buyersArr"][0], client_contact_id = buyer_contact["contactID"])
+			buyerContactsPtr.emails = buyer_contact["mailArr"]
+			buyerContactsPtr.numbers = buyer_contact["numbersArr"]
+			buyerContactsPtr.contact_name = buyer_contact["name"]
+			buyerContactsPtr.save()
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse(500, error_code = 1)
+	else:
+		closeDBConnection()
+		return customResponse(200, {"success" : "contacts saved"})

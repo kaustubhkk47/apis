@@ -19,6 +19,7 @@ admin.site.register(BuyerBuysFrom)
 admin.site.register(BuyerPurchasingState)
 admin.site.register(BuyerProductLanding, BuyerProductLandingAdmin)
 admin.site.register(BuyerPanelInstructionsTracking)
+admin.site.register(BuyerContacts)
 
 admin.site.register(BuyerStoreLead, BuyerStoreLeadAdmin)
 
