@@ -291,8 +291,8 @@ def post_new_buyer_contacts(request, parameters):
 	try:
 		for buyer_contact in buyer_contacts["contacts"]:
 			buyerContactsPtr, created = BuyerContacts.objects.get_or_create(buyer_id = parameters["buyersArr"][0], client_contact_id = buyer_contact["contactID"])
-			buyerContactsPtr.emails = buyer_contact["mailArr"]
-			buyerContactsPtr.numbers = buyer_contact["numbersArr"]
+			buyerContactsPtr.emails = ','.join(map(str, buyer_contact["mailArr"] ))
+			buyerContactsPtr.numbers = ','.join(map(str, buyer_contact["numbersArr"] ))
 			buyerContactsPtr.contact_name = buyer_contact["name"]
 			buyerContactsPtr.save()
 	except Exception as e:
