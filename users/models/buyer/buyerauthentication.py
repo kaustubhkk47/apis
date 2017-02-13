@@ -112,7 +112,7 @@ class BuyerForgotPasswordToken(models.Model):
 		self.otp_number = "{0:06d}".format(random.randint(0, 999999))
 
 	def sendVerificationSMS(self):
-		message_text = "Use {} as OTP to change you password on Wholdus.com. Please don't share OTP with anyone".format(self.otp_number)
+		message_text = "Use {} as OTP to change your password on Wholdus.com. Please don't share OTP with anyone".format(self.otp_number)
 		send_sms(message_text, self.mobile_number, "buyer", "Forgot Password OTP")
 		self.messages_sent += 1
 		self.save()

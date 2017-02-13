@@ -14,6 +14,7 @@ import logging
 log = logging.getLogger("django")
 
 import time
+import uuid
 
 from pandas import DataFrame
 
@@ -287,10 +288,13 @@ def post_new_buyer_contacts(request, parameters):
 
 	if not validateBuyerContactsData(buyer_contacts["contacts"]):
 		return customResponse(400, error_code=5, error_details= "Contact Id not sent")
+
+	if not "firebase_token" in buyer_contacts or buyer_contacts["firebase_token"] == None:
+		buyer_contacts["firebase_token"] = str(uuid.uuid1())
 	
 	try:
 		for buyer_contact in buyer_contacts["contacts"]:
-			buyerContactsPtr, created = BuyerContacts.objects.get_or_create(buyer_id = parameters["buyersArr"][0], client_contact_id = buyer_contact["contactID"])
+			buyerContactsPtr, created = BuyerContacts.objects.get_or_create(buyer_id = parameters["buyersArr"][0], client_contact_id = buyer_contact["contactID"], firebase_token = buyer_contacts["firebase_token"])
 			buyerContactsPtr.emails = ','.join([x.encode('utf-8') for x in buyer_contact["mailArr"]])
 			buyerContactsPtr.numbers = ','.join([x.encode('utf-8') for x in buyer_contact["numbersArr"]])
 			buyerContactsPtr.contact_name = buyer_contact["name"]

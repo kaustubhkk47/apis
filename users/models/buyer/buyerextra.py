@@ -62,6 +62,7 @@ class BuyerContacts(models.Model):
 	client_contact_id = models.IntegerField()
 	numbers = models.TextField(blank=True)
 	emails = models.TextField(blank=True)
+	firebase_token = models.TextField(blank=True)
 
 	class Meta:
 		verbose_name="Buyer Contacts Entry"
