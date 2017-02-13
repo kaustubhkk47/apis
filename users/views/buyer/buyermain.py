@@ -114,7 +114,6 @@ def post_new_buyer(request):
 		newBuyerAddressHistory = BuyerAddressHistory()
 		newBuyerAddressHistory.populateFromBuyerAddress(newAddress)
 		newBuyerAddressHistory.save()
-		 
 	except Exception as e:
 		log.critical(e)
 		closeDBConnection()
