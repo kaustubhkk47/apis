@@ -138,6 +138,7 @@ def post_new_order(request, parameters={}):
 	orderData["edited_price"] = orderEditedPrice
 	orderData["remarks"] = orderRemarks
 	orderData["buyerID"] = int(order["buyerID"])
+	orderData["addressID"] = int(order["addressID"])
 
 	try:
 		newOrder = Order(buyer=buyerPtr)
