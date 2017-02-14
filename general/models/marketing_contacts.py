@@ -5,14 +5,14 @@ class MarketingContact(models.Model):
 
 	internal_user = models.ForeignKey('users.InternalUser', null=True, blank = True,on_delete=models.SET_NULL)
 
-	mobile_number = models.CharField(max_length=11, blank=False, db_index=True)
+	mobile_number = models.CharField(max_length=11, blank=True)
 	contact_name = models.CharField(max_length=100, blank=True)
 
 	sharing_link = models.CharField(max_length=100, blank=True)
 	sharing_link_clicks = models.IntegerField(default=0)
-	sharing_link_click_time = models.DateTimeField(null=True)
+	sharing_link_click_time = models.DateTimeField(null=True, blank=True)
 
-	message_sent_time = models.DateTimeField(null=True)
+	message_sent_time = models.DateTimeField(null=True, blank=True)
 	message_sent_count = models.IntegerField(default=0)
 
 	created_at = models.DateTimeField(auto_now_add=True)
