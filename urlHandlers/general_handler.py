@@ -1,5 +1,5 @@
 from django.views.decorators.csrf import csrf_exempt
-from scripts.utils import customResponse, getPaginationParameters, validate_bool
+from scripts.utils import customResponse, getPaginationParameters, validate_bool, getArrFromString
 
 from general.views import smssent
 from general.views import faqs
@@ -96,7 +96,12 @@ def populateMarketingContactsParameters(request, parameters = {}, version = "0")
 	else:
 		parameters["new_contacts"] = 1
 
+	marketingContactID = request.GET.get("marketingcontactID", "")
+	if marketingContactID != "" and marketingContactID != None:
+		parameters["marketingContactsArr"] = getArrFromString(marketingContactID)
+
 	return parameters
+
 @csrf_exempt
 def buyer_app_link_details(request, version="0"):
 

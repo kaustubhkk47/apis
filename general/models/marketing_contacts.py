@@ -38,7 +38,10 @@ def filterMarketingContacts(parameters):
 
 	if "new_contacts" in parameters and parameters["new_contacts"] == 1:
 		marketingContacts = marketingContacts.filter(internal_user_id = None)
-	else:
+	elif "new_contacts" in parameters and parameters["new_contacts"] == 0:
 		marketingContacts = marketingContacts.filter(internal_user_id = parameters["internalusersArr"][0])
+
+	if "marketingContactsArr" in parameters:
+		marketingContacts = marketingContacts.filter(id__in=parameters["marketingContactsArr"])
 
 	return marketingContacts

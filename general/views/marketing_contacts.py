@@ -7,6 +7,7 @@ from ..serializers.marketing_contacts import *
 
 from django.shortcuts import redirect
 from django.core.paginator import Paginator
+from django.db.models import F
 
 import logging
 log = logging.getLogger("django")
@@ -86,4 +87,37 @@ def redirect_to_buyer_app(request, parameters):
 	return redirect("https://play.google.com/store/apps/details?id=com.wholdus.www.wholdusbuyerapp", permanent=True)
 
 def update_marketing_contact(request, parameters):
-	pass
+	try:
+		requestbody = request.body.decode("utf-8")
+		contacts = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse(400, error_code=4)
+
+	if not len(contacts):
+		return customResponse(400, error_code=5, error_details= "Invalid data sent in request")
+
+	if not "marketingContactsArr" in parameters:
+		return customResponse(400, error_code=5, error_details="Marketing contact ids not sent")
+
+	try:
+		updated = False
+		parameters.pop("new_contacts")
+
+		if "message_sent" in contacts:
+			updated = True
+			filterMarketingContacts(parameters).update(message_sent_count=F('message_sent_count') + 1, message_sent_time = timezone.now())
+
+		if "assign_user" in contacts:
+			updated = True
+			filterMarketingContacts(parameters).update(internal_user_id = parameters["internalusersArr"][0])
+
+		if not updated:
+			return customResponse(400, error_code=5, error_details="Invalid data sent in request")
+
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse(500, error_code = 1)
+	else:
+		closeDBConnection()
+		return customResponse(200, {"success" : "successfully updated"})
