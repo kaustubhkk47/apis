@@ -6,6 +6,7 @@ from .models.alexastats import *
 from .models.smssent import *
 from .models.faqs import *
 from .models.configuration import *
+from .models.marketing_contacts import *
 
 admin.site.register(AlexaStats, AlexaStatsAdmin)
 
@@ -17,3 +18,5 @@ admin.site.register(AboutUs)
 admin.site.register(PrivacyPolicy)
 
 admin.site.register(CartMinValue)
+
+admin.site.register(MarketingContact)

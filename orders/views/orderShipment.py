@@ -127,10 +127,10 @@ def post_new_order_shipment(request):
 			if subOrderPtr.suborder_status == 4:
 				oldOrderShipments = OrderShipment.objects.filter(suborder_id= subOrderPtr.id).exclude(id=newOrderShipment.id)
 				oldOrderShipmentValues = oldOrderShipments.aggregate(Sum('cod_charge'),Sum('shipping_charge'))
-				oldShippingCharge = oldOrderShipmentValues["shipping_charge__sum"]
-				oldCODCharge = oldOrderShipmentValues["cod_charge__sum"]
-				newOrderShipment.cod_charge = subOrderPtr.cod_charge - oldShippingCharge
-				newOrderShipment.shipping_charge  = subOrderPtr.shipping_charge - oldShippingCharge
+				oldShippingCharge = oldOrderShipmentValues["shipping_charge__sum"] if oldOrderShipmentValues["shipping_charge__sum"] != None else 0
+				oldCODCharge = oldOrderShipmentValues["cod_charge__sum"] if oldOrderShipmentValues["cod_charge__sum"] != None else 0
+				newOrderShipment.cod_charge = subOrderPtr.cod_charge - oldCODCharge
+				newOrderShipment.shipping_charge = subOrderPtr.shipping_charge - oldShippingCharge
 			else:
 				currentOrderItems = OrderItem.objects.filter(order_shipment_id=newOrderShipment.id)
 				oldOrderItems = OrderItem.objects.filter(suborder_id= subOrderPtr.id)

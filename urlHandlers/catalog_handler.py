@@ -159,7 +159,6 @@ def product_catalog(request, version = "0"):
 
 def populateProductParameters(request, parameters = {}, version = "0"):
 
-	print parameters
 	parameters = getPaginationParameters(request, parameters, 10)
 
 	parameters = populateProductFilterParameters(request, parameters, version)

@@ -278,7 +278,7 @@ def post_new_buyer_contacts(request, parameters):
 	except Exception as e:
 		return customResponse(400, error_code=4)
 
-	if not len(buyer_contacts) or not "contacts" in buyer_contacts or not type(buyer_contacts["contacts"]) == type([]) or not len(buyer_contacts["contacts"]) > 0:
+	if not len(buyer_contacts) or not "contacts" in buyer_contacts or not isinstance(buyer_contacts["contacts"], list) or not len(buyer_contacts["contacts"]) > 0:
 		return customResponse(400, error_code=5, error_details=  "Invalid data sent in request")
 
 	buyerPtr = Buyer.objects.filter(id=parameters["buyersArr"][0], delete_status=False)

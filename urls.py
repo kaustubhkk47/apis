@@ -137,6 +137,11 @@ urlpatterns += [
 	url(r'^general/configuration/cartminvalue/$', general_handler.cart_min_value_details)
 ]
 
+urlpatterns += [
+	url(r'^general/marketingcontact/$', general_handler.marketing_contact_details),
+	url(r'^buyerapplink/$', general_handler.buyer_app_link_details)
+]
+
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 """

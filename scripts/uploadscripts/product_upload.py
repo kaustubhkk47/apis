@@ -233,6 +233,7 @@ def fill_product_data(wb , i):
 		productDetails["availability"] = toString(wb.worksheets[1]["R"+toString(i)].value)
 		productDetails["weight_per_unit"] = parseFloat(wb.worksheets[2]["F"+toString(i)].value)
 		productDetails["dispatched_in"] = toString(wb.worksheets[1]["S"+toString(i)].value)
+		productDetails["lot_description"] = toString(wb.worksheets[2]["I" + toString(i)].value)
 		productDetails["sample_type"] = toString(wb.worksheets[2]["J"+toString(i)].value)
 		productDetails["sample_description"] = toString(wb.worksheets[2]["K"+toString(i)].value)
 		productDetails["sample_price"] = parseFloat(wb.worksheets[2]["L"+toString(i)].value)

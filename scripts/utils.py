@@ -20,6 +20,9 @@ import io
 import requests
 from django.utils import dateformat, timezone
 
+import logging
+log = logging.getLogger("django")
+
 def closeDBConnection():
 	return
 	connection.close()
@@ -372,3 +375,20 @@ def getCurrentTimeStamp():
 
 def checkTokenTimeValidity(timeStampObj):
 	return getCurrentTimeStamp() < timeStampObj
+
+def getShortenedURL(url):
+	apiUrl = "https://www.googleapis.com/urlshortener/v1/url/?key=AIzaSyAirZkQBQrfc0Zcok4nnmttAHNikYngers"
+	headers = {}
+	headers["Content-Type"] = "application/json"
+	data = {"longUrl": url}
+	response = requests.post(apiUrl, headers=headers, data=json.dumps(data))
+	if response.status_code == 200:
+		try:
+			responseJson = response.json()
+		except Exception as e:
+			log.warn(e)
+			return None
+		else:
+			return str(responseJson["id"])
+	else:
+		return None

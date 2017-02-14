@@ -81,7 +81,7 @@ def validateBuyerContactsData(buyer_contacts):
 			buyer_contact["numbersArr"] = ""
 		if not "name" in buyer_contact or buyer_contact["name"] == None:
 			buyer_contact["name"] = ""
-		return True
+	return True
 
 
 def filterBuyerPurchasingState(parameters = {}):
