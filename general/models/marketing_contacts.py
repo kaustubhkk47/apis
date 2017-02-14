@@ -3,7 +3,7 @@ from django.db import models
 
 class MarketingContact(models.Model):
 
-	internal_user = models.ForeignKey('users.InternalUser', null=True, on_delete=models.SET_NULL)
+	internal_user = models.ForeignKey('users.InternalUser', null=True, blank = True,on_delete=models.SET_NULL)
 
 	mobile_number = models.CharField(max_length=11, blank=False, db_index=True)
 	contact_name = models.CharField(max_length=100, blank=True)

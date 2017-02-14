@@ -75,7 +75,7 @@ def post_new_marketing_contact(request, parameters):
 def redirect_to_buyer_app(request, parameters):
 	contactID = request.GET.get("contactID", "")
 
-	if contactID != "":
+	if contactID != "" and request.method == "GET":
 		marketingContactPtr = MarketingContact.objects.filter(id=contactID)
 		if len(marketingContactPtr) > 0:
 			marketingContactPtr = marketingContactPtr[0]
