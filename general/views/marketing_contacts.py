@@ -123,3 +123,20 @@ def update_marketing_contact(request, parameters):
 	else:
 		closeDBConnection()
 		return customResponse(200, {"success" : "successfully updated"})
+
+def remove_marketing_contact_user(request, parameters):
+	try:
+		requestbody = request.body.decode("utf-8")
+		contacts = convert_keys_to_string(json.loads(requestbody))
+	except Exception as e:
+		return customResponse(400, error_code=4)
+
+	try:
+		MarketingContact.objects.filter(internal_user_id=parameters["internalusersArr"][0]).update(internal_user_id=None)
+	except Exception as e:
+		log.critical(e)
+		closeDBConnection()
+		return customResponse(500, error_code = 1)
+	else:
+		closeDBConnection()
+		return customResponse(200, {"success" : "successfully removed"})

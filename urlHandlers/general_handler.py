@@ -83,6 +83,10 @@ def marketing_contact_details(request, version="0"):
 		if parameters["isInternalUser"] == 0:
 			return customResponse(403, error_code = 8)
 		return marketing_contacts.update_marketing_contact(request, parameters)
+	elif request.method == "DELETE":
+		if parameters["isInternalUser"] == 0:
+			return customResponse(403, error_code = 8)
+		return marketing_contacts.remove_marketing_contact_user(request, parameters)
 
 	return customResponse(404, error_code=7)
 
