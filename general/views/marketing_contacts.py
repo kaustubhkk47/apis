@@ -1,6 +1,7 @@
 from scripts.utils import *
 
 from django.utils import timezone
+import datetime
 
 from ..models.marketing_contacts import *
 from ..serializers.marketing_contacts import *
@@ -80,9 +81,10 @@ def redirect_to_buyer_app(request, parameters):
 		marketingContactPtr = MarketingContact.objects.filter(id=contactID)
 		if len(marketingContactPtr) > 0:
 			marketingContactPtr = marketingContactPtr[0]
-			marketingContactPtr.sharing_link_clicks += 1
-			marketingContactPtr.sharing_link_click_time = timezone.now()
-			marketingContactPtr.save()
+			if (timezone.now() - marketingContactPtr.created_at) > datetime.timedelta(minutes=5):
+				marketingContactPtr.sharing_link_clicks += 1
+				marketingContactPtr.sharing_link_click_time = timezone.now()
+				marketingContactPtr.save()
 
 	return redirect("https://play.google.com/store/apps/details?id=com.wholdus.www.wholdusbuyerapp", permanent=True)
 
