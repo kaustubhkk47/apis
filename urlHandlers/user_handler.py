@@ -944,11 +944,11 @@ def internaluser_login(request, version = "0"):
 			except Exception as e:
 				return customResponse(400, error_code=4)
 
-				if "email" not in requestbody or "password" not in requestbody:
-					return customResponse(400, error_code=5, error_details="Either email or password was empty")
+			if "email" not in requestbody or "password" not in requestbody:
+				return customResponse(400, error_code=5, error_details="Either email or password was empty")
 
-				email = requestbody["email"]
-				password = requestbody["password"]
+			email = requestbody["email"]
+			password = requestbody["password"]
 
 		if not email or not password:
 			return customResponse(400, error_code=5, error_details= "Either email or password was empty")
