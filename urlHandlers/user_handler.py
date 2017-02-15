@@ -938,6 +938,19 @@ def internaluser_login(request, version = "0"):
 		password = request.POST.get('password', '')
 
 		if not email or not password:
+			try:
+				requestbody = request.body.decode("utf-8")
+				requestbody = convert_keys_to_string(json.loads(requestbody))
+			except Exception as e:
+				return customResponse(400, error_code=4)
+
+				if "email" not in requestbody or "password" not in requestbody:
+					return customResponse(400, error_code=5, error_details="Either email or password was empty")
+
+				email = requestbody["email"]
+				password = requestbody["password"]
+
+		if not email or not password:
 			return customResponse(400, error_code=5, error_details= "Either email or password was empty")
 
 		# if check_token(request)
