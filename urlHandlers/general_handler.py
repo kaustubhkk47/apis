@@ -92,7 +92,7 @@ def populateMarketingContactsParameters(request, parameters = {}, version = "0")
 
 	newContacts = request.GET.get("new_contacts", "")
 	if newContacts != "" and validate_bool(newContacts):
-		parameters["new_contacts"] = newContacts
+		parameters["new_contacts"] = int(newContacts)
 	else:
 		parameters["new_contacts"] = 1
 
