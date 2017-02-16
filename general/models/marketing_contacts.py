@@ -1,11 +1,11 @@
 from django.db import models
-
+from users.models.buyer import Buyer
 
 class MarketingContact(models.Model):
 
 	internal_user = models.ForeignKey('users.InternalUser', null=True, blank = True,on_delete=models.SET_NULL)
 
-	mobile_number = models.CharField(max_length=11, blank=True)
+	mobile_number = models.CharField(max_length=11, blank=True, db_index=True)
 	contact_name = models.CharField(max_length=100, blank=True)
 
 	sharing_link = models.CharField(max_length=100, blank=True)
@@ -34,7 +34,9 @@ def validateMarketingContactData(contacts):
 
 def filterMarketingContacts(parameters):
 
-	marketingContacts = MarketingContact.objects.filter(message_sent_count=0)
+	registeredBuyerNumbers = Buyer.objects.all().values_list('mobile_number', flat = True)
+
+	marketingContacts = MarketingContact.objects.filter(message_sent_count=0).exclude(mobile_number__in=registeredBuyerNumbers)
 
 	if "new_contacts" in parameters and parameters["new_contacts"] == 1:
 		marketingContacts = marketingContacts.filter(internal_user_id = None)
