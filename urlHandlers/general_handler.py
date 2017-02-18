@@ -69,6 +69,14 @@ def cart_min_value_details(request, version = "0"):
 
 
 @csrf_exempt
+def cart_seller_min_pieces_details(request, version="0"):
+	if request.method == "GET":
+		return configuration.get_cart_seller_min_pieces_details(request)
+
+	return customResponse(404, error_code=7)
+
+
+@csrf_exempt
 def marketing_contact_details(request, version="0"):
 
 	parameters = populateMarketingContactsParameters(request, {}, version)

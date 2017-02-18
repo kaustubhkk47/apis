@@ -22,3 +22,23 @@ def get_cart_min_value_details(request):
 
 	closeDBConnection()
 	return customResponse(statusCode, response, error_code=0)
+
+
+def get_cart_seller_min_pieces_details(request):
+	try:
+		cartSellerMinPieces = CartSellerMinPieces.objects.all()
+
+		body = 5
+		if len(cartSellerMinPieces) != 0:
+			cartSellerMinPieces = cartSellerMinPieces[0]
+			body = cartSellerMinPieces.value
+
+		statusCode = 200
+		response = {"cart_seller_min_pieces": body}
+	except Exception as e:
+		log.critical(e)
+		statusCode = 500
+		response = {}
+
+	closeDBConnection()
+	return customResponse(statusCode, response, error_code=0)

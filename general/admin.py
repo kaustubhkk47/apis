@@ -18,5 +18,6 @@ admin.site.register(AboutUs)
 admin.site.register(PrivacyPolicy)
 
 admin.site.register(CartMinValue)
+admin.site.register(CartSellerMinPieces)
 
 admin.site.register(MarketingContact)

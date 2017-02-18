@@ -134,7 +134,8 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-	url(r'^general/configuration/cartminvalue/$', general_handler.cart_min_value_details)
+	url(r'^general/configuration/cartminvalue/$', general_handler.cart_min_value_details),
+	url(r'^general/configuration/cartsellerminpieces/$', general_handler.cart_seller_min_pieces_details)
 ]
 
 urlpatterns += [
