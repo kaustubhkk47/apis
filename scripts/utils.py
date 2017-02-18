@@ -193,7 +193,8 @@ def check_token_validity(access_token):
 		## log the exception into db
 		return {}
 	try:
-		tokenPayload = JsonWebToken.decode(access_token, settings.SECRET_KEY, algorithms=['HS256'])
+		options = {"verify_exp": False}
+		tokenPayload = JsonWebToken.decode(access_token, settings.SECRET_KEY, algorithms=['HS256'], options=options)
 	except Exception as ex:
 		return {}
 
