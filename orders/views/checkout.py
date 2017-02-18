@@ -17,6 +17,8 @@ from users.models.buyer import Buyer, BuyerAddress
 from orders.serializers.order import serializeOrder
 from orders.serializers.checkout import serializeCheckout, parseCheckout
 
+from logistics.models.serviceability import filterServiceablePincodes
+
 def get_payment_method(request, parameters):
 
 	try:
@@ -159,8 +161,16 @@ def update_checkout_details(request, parameters):
 		nowTime = timezone.now()
 		status = int(checkout["status"])
 		if status == 1:
-			if not BuyerAddress.objects.filter(id=int(checkout["addressID"])).exists():
+			buyerAddressPtr = BuyerAddress.objects.filter(id=int(checkout["addressID"]))
+			if len(buyerAddressPtr) == 0:
 				return customResponse(400, error_code=6,  error_details= "Invalid address ID sent")
+			buyerAddressPtr = buyerAddressPtr[0]
+			pincodeParameters = {}
+			pincodeParameters["pincodesArr"] = [buyerAddressPtr.pincode_number]
+			pincodeParameters["cod_available"] = True
+			pincodeParameters["regular_delivery_available"] = True
+			if not filterServiceablePincodes(pincodeParameters).exists():
+				return customResponse(400, error_code=6, error_details="Cannot deliver to pincode")
 			checkoutPtr.buyer_address_history = buyerPtr.latest_buyer_address_history(int(checkout["addressID"]))
 			checkoutPtr.address_given_time = nowTime
 		elif status == 2:

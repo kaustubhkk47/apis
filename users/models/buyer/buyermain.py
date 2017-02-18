@@ -318,6 +318,7 @@ def populateBuyerAddress(buyerAddressPtr, buyeraddress):
 		buyerAddressPtr.country_name = pincode.city.state.country.name
 
 	except Exception as e:
+		buyerAddressPtr.pincode_id = None
 		buyerAddressPtr.city_name = buyeraddress["city"]
 		buyerAddressPtr.state_name = buyeraddress["state"]
 		buyerAddressPtr.country_name = "India"
