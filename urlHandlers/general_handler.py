@@ -100,7 +100,7 @@ def marketing_contact_details(request, version="0"):
 
 def populateMarketingContactsParameters(request, parameters = {}, version = "0"):
 	parameters = populateInternalUserIDParameters(request, parameters, version)
-	parameters = getPaginationParameters(request, parameters, 50)
+	parameters = getPaginationParameters(request, parameters, 100)
 
 	newContacts = request.GET.get("new_contacts", "")
 	if newContacts != "" and validate_bool(newContacts):

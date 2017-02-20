@@ -20,4 +20,4 @@ admin.site.register(PrivacyPolicy)
 admin.site.register(CartMinValue)
 admin.site.register(CartSellerMinPieces)
 
-admin.site.register(MarketingContact)
+admin.site.register(MarketingContact, MarketingContactAdmin)

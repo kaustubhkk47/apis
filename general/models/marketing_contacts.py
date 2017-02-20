@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import admin
 from users.models.buyer import Buyer
 
 class MarketingContact(models.Model):
@@ -25,6 +26,10 @@ class MarketingContact(models.Model):
 	def __unicode__(self):
 		return "{} - {}".format(self.mobile_number,self.contact_name)
 
+class MarketingContactAdmin(admin.ModelAdmin):
+	list_display = ["id", "contact_name", "mobile_number", "internal_user", "message_sent_count"]
+	list_filter = ["message_sent_count", "internal_user"]
+	search_fields = ["id", "mobile_number", "contact_name"]
 
 def validateMarketingContactData(contacts):
 	for contact in contacts:
