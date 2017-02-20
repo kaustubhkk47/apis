@@ -63,7 +63,7 @@ def post_new_marketing_contact(request, parameters):
 					marketingContactPtr.sharing_link = shortenedURL
 				else:
 					marketingContactPtr.sharing_link = defaultPlayStoreLink
-				marketingContactPtr.contact_name = "Script Contact {}".format(marketingContactPtr.id)
+				marketingContactPtr.contact_name = "{} Script Contact".format(marketingContactPtr.id)
 				marketingContactPtr.save()
 
 	except Exception as e:
