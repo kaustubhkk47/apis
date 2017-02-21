@@ -166,7 +166,7 @@ def update_checkout_details(request, parameters):
 				return customResponse(400, error_code=6,  error_details= "Invalid address ID sent")
 			buyerAddressPtr = buyerAddressPtr[0]
 			pincodeParameters = {}
-			pincodeParameters["pincodesArr"] = [buyerAddressPtr.pincode_number]
+			pincodeParameters["pincodesCodesArr"] = [buyerAddressPtr.pincode_number]
 			pincodeParameters["cod_available"] = True
 			pincodeParameters["regular_delivery_available"] = True
 			if not filterServiceablePincodes(pincodeParameters).exists():
