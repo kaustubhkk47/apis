@@ -80,7 +80,7 @@ def post_new_order_shipment(request):
 
 		allOrderItems = OrderItem.objects.filter(id__in=sentOrderItems, current_status__in=[0,1,2], suborder_id=subOrderPtr.id)
 
-		if not len(allOrderItems) == len(orderItems):
+		if not len(allOrderItems) == len(orderShipment["order_items"]):
 			return customResponse(400, error_code=6, error_details ="Inappropriate order items in order shipment sent")
 
 	elif (int(orderShipment["all_items"]) == 1):
