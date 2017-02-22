@@ -78,7 +78,7 @@ def post_new_order_shipment(request):
 		if not validateOrderShipmentItemsData(orderShipment["order_items"], sentOrderItems):
 			return customResponse(400, error_code=6, error_details = "Inappropriate order items in order shipment sent")
 
-		allOrderItems = OrderItem.objects.filter(id__in=sentOrderItems, current_status__in=[0,1,2], suborder_id=subOrderID)
+		allOrderItems = OrderItem.objects.filter(id__in=sentOrderItems, current_status__in=[0,1,2], suborder_id=subOrderPtr.id)
 
 		if not len(allOrderItems) == len(orderItems):
 			return customResponse(400, error_code=6, error_details ="Inappropriate order items in order shipment sent")

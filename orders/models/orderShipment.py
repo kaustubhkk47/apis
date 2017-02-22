@@ -331,8 +331,10 @@ def populateOrderShipment(OrderShipmentPtr, orderShipment):
 	OrderShipmentPtr.rto_remarks = orderShipment["rto_remarks"]
 	if logistics_partner.id == 1:
 		OrderShipmentPtr.tracking_url = "https://www.fedex.com/apps/fedextrack/?action=track&trackingnumber="+orderShipment["waybill_number"]+"&cntry_code=in"
-	else:
+	elif logistics_partner.id == 2:
 		OrderShipmentPtr.tracking_url = "http://www.gati.com/gatitrck.jsp?dktNo={}".format(orderShipment["waybill_number"])
+	else:
+		OrderShipmentPtr.tracking_url = "https://track.delhivery.com/p/{}".format(orderShipment["waybill_number"])
 	OrderShipmentPtr.current_status = 3
 	OrderShipmentPtr.tpl_manifested_time = timezone.now()
 
