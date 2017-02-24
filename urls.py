@@ -140,6 +140,7 @@ urlpatterns += [
 
 urlpatterns += [
 	url(r'^general/marketingcontact/$', general_handler.marketing_contact_details),
+	url(r'^general/marketingemail/unsubscribe/$', general_handler.marketing_email_unsubscribe_details),
 	url(r'^buyerapplink/$', general_handler.buyer_app_link_details)
 ]
 

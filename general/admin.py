@@ -7,6 +7,7 @@ from .models.smssent import *
 from .models.faqs import *
 from .models.configuration import *
 from .models.marketing_contacts import *
+from .models.marketing_emails import *
 
 admin.site.register(AlexaStats, AlexaStatsAdmin)
 
@@ -21,3 +22,4 @@ admin.site.register(CartMinValue)
 admin.site.register(CartSellerMinPieces)
 
 admin.site.register(MarketingContact, MarketingContactAdmin)
+admin.site.register(MarketingEmail, MarketingEmailAdmin)

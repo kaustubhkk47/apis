@@ -5,6 +5,7 @@ from general.views import smssent
 from general.views import faqs
 from general.views import configuration
 from general.views import marketing_contacts
+from general.views import marketing_emails
 
 from .user_handler import populateInternalUserIDParameters
 
@@ -95,6 +96,16 @@ def marketing_contact_details(request, version="0"):
 		if parameters["isInternalUser"] == 0:
 			return customResponse(403, error_code = 8)
 		return marketing_contacts.remove_marketing_contact_user(request, parameters)
+
+	return customResponse(404, error_code=7)
+
+@csrf_exempt
+def marketing_email_unsubscribe_details(request, version="0"):
+
+	parameters = {}
+
+	if request.method == "GET":
+		return marketing_emails.unsubscribe_marketing_email(request, parameters)
 
 	return customResponse(404, error_code=7)
 
