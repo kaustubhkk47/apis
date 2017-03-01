@@ -19,6 +19,8 @@ class MarketingContact(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
+	delete_status = models.BooleanField(default=False)
+
 	class Meta:
 		verbose_name="Marketing Contact"
 		verbose_name_plural = "Marketing Contacts"
@@ -41,7 +43,7 @@ def filterMarketingContacts(parameters):
 
 	registeredBuyerNumbers = Buyer.objects.all().values_list('mobile_number', flat = True)
 
-	marketingContacts = MarketingContact.objects.filter(message_sent_count=0).exclude(mobile_number__in=registeredBuyerNumbers)
+	marketingContacts = MarketingContact.objects.filter(message_sent_count=0, delete_status=False).exclude(mobile_number__in=registeredBuyerNumbers)
 
 	if "new_contacts" in parameters and parameters["new_contacts"] == 1:
 		marketingContacts = marketingContacts.filter(internal_user_id = None)

@@ -37,7 +37,7 @@ def filterMarketingEmails(parameters):
 	return marketingEmails
 
 def sendMarketingEmails(marketingEmailPtr):
-	from_email = "Wholdus <info@wholdus.com>"
+	from_email = "Wholdus <mailer@wholdus.com>"
 	mail_template_file = "marketing/app_marketing.html"
 
 	for marketingEmail in marketingEmailPtr:
