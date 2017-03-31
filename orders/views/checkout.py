@@ -176,6 +176,7 @@ def update_checkout_details(request, parameters):
 		elif status == 2:
 			checkoutPtr.summary_confirmed_time = nowTime
 		elif status == 3:
+			return customResponse(400)
 			checkoutPtr.payment_done_time = nowTime
 			checkoutPtr.payment_method = int(checkout["payment_method"])
 			if checkoutPtr.payment_method == 0:
